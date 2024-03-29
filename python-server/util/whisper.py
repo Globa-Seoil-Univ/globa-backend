@@ -16,11 +16,11 @@ class STTResults:
 class WhisperManager:
     def __init__(self):
         model_size = "medium"
-        self.model = WhisperModel(model_size, device="cuda", compute_type="float16")
+        self.model = WhisperModel(model_size, device="cuda", compute_type="float32")
 
     def stt(self, path: str):
         segments, info = self.model.transcribe(
-            "./test3.m4a",
+            path,
             beam_size=5,
             language="ko",
             temperature=0,

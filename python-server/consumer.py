@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
             if msg.topic() == 'audio-analyze' and key == 'analyze' and is_json and is_enough_data:
                 # 1. STT 변환
-                # stt_results = stt(progressId=value["progressId"], recordId=value["recordId"], path=value["path"])
+                stt_results = stt(progressId=value["progressId"], recordId=value["recordId"], path=value["path"])
 
                 # 2-1. 중요 키워드 추출
                 # 2-2. 퀴즈 생성
