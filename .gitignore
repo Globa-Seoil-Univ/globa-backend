@@ -189,3 +189,10 @@ cython_debug/
 kafka-config.ini
 firebase.json
 ./python-server/downloads/
+
+### yml ###
+/Spring/Globa/src/main/resources/application.yml
+
+### properties ###
+/Spring/Globa/src/main/resources/application.properties
+
