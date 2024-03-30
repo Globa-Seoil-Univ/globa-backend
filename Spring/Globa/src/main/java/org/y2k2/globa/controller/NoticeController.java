@@ -6,11 +6,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.y2k2.globa.dto.NoticeDto;
-import org.y2k2.globa.dto.NoticeIntroDto;
+import org.y2k2.globa.dto.NoticeIntroResponseDto;
 import org.y2k2.globa.entity.NoticeEntity;
+import org.y2k2.globa.mapper.NoticeMapper;
 import org.y2k2.globa.service.NoticeService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -23,12 +24,19 @@ public class NoticeController {
     @GetMapping(PRE_FIX + "/intro")
     public ResponseEntity<?> getIntroNotices() {
         List<NoticeEntity> noticeEntities = noticeService.getIntroNotices();
-        return ResponseEntity.ok().body(NoticeIntroDto.fromArray(noticeEntities));
+        List<NoticeIntroResponseDto> introDtoList = new ArrayList<>();
+
+        for (NoticeEntity noticeEntity : noticeEntities) {
+            NoticeIntroResponseDto introDto = NoticeMapper.INSTANCE.toIntroResponseDto(noticeEntity);
+            introDtoList.add(introDto);
+        }
+
+        return ResponseEntity.ok().body(introDtoList);
     }
 
     @GetMapping(PRE_FIX + "/{noticeId}")
     public ResponseEntity<?> getNoticeDetail(@PathVariable("noticeId") Long noticeId) {
         NoticeEntity entity = noticeService.getNoticeDetail(noticeId);
-        return ResponseEntity.ok().body(NoticeDto.from(entity));
+        return ResponseEntity.ok().body(NoticeMapper.INSTANCE.toDetailResponseDto(entity));
     }
 }
