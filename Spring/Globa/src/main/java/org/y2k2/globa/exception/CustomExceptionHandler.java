@@ -3,6 +3,7 @@ package org.y2k2.globa.exception;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.http.*;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -10,8 +11,9 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.y2k2.globa.util.Const;
+import org.y2k2.globa.util.CustomTimestamp;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @RestControllerAdvice
 @ControllerAdvice
@@ -20,9 +22,10 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     private ObjectNode createErrorNode(Exception ex, int status) {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode errorNode = objectMapper.createObjectNode();
+
         errorNode.put("errorCode", status);
         errorNode.put("message",ex.getMessage());
-        errorNode.put("timestamp", new Date().getTime());
+        errorNode.put("timestamp", String.valueOf(new CustomTimestamp()));
 
         return errorNode;
     }
