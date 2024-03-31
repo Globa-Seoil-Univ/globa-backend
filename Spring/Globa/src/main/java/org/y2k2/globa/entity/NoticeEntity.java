@@ -18,7 +18,6 @@ public class NoticeEntity {
     @Column(name = "notice_id", columnDefinition = "INT UNSIGNED")
     private Long noticeId;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")

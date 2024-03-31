@@ -1,11 +1,9 @@
 package org.y2k2.globa.controller;
 
+import jdk.jfr.ContentType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.y2k2.globa.dto.NoticeIntroResponseDto;
 import org.y2k2.globa.entity.NoticeEntity;
 import org.y2k2.globa.mapper.NoticeMapper;

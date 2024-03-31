@@ -8,7 +8,6 @@ import org.y2k2.globa.entity.NoticeEntity;
 import java.util.List;
 
 public interface NoticeRepository extends JpaRepository<NoticeEntity, Long> {
-    @NonNull
     List<NoticeEntity> findByOrderByCreatedTimeDesc(Limit limit);
 
     NoticeEntity findByNoticeId(Long noticeId);
