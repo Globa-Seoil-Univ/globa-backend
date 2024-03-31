@@ -3,7 +3,7 @@ package org.y2k2.globa.exception;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.http.*;
-import org.springframework.lang.Nullable;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -12,8 +12,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.y2k2.globa.util.Const;
 import org.y2k2.globa.util.CustomTimestamp;
-
-import java.time.LocalDateTime;
 
 @RestControllerAdvice
 @ControllerAdvice
@@ -45,7 +43,6 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(createErrorNode(ex, HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
     }
 
-
     @ExceptionHandler(UpdateException.class)
     public ResponseEntity<Object> handleUpdateException(UpdateException ex) {
         return new ResponseEntity<>(createErrorNode(ex, HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
@@ -66,8 +63,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.FOLDER_NAME_DUPLICATED.value()), HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(AuthorizedException.class)
-    public ResponseEntity<Object> handleAuthorizedException(AuthorizedException ex) {
+    @ExceptionHandler(UnAuthorizedException.class)
+    public ResponseEntity<Object> handleAuthorizedException(UnAuthorizedException ex) {
         return new ResponseEntity<>(createErrorNode(ex, HttpStatus.UNAUTHORIZED.value()), HttpStatus.UNAUTHORIZED);
     }
 
@@ -86,7 +83,33 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(createErrorNode(ex, HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(FileUploadException.class)
+    public ResponseEntity<Object> handleFileUploadException(FileUploadException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.FAILED_FILE_UPLOAD.value()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<Object> handleInvalidTokenException(InvalidTokenException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.INVALID_TOKEN.value()), HttpStatus.UNAUTHORIZED);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode errorNode = objectMapper.createObjectNode();
+
+        errorNode.put("errorCode", status.value());
+        errorNode.put("message", ex.getBindingResult().getAllErrors().get(0).getDefaultMessage());
+        errorNode.put("timestamp", String.valueOf(new CustomTimestamp()));
+
+        return new ResponseEntity<>(errorNode, status);
+    }
+
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleException(Exception ex) {
+        return new ResponseEntity<>(createErrorNode(ex, HttpStatus.INTERNAL_SERVER_ERROR.value()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     // ErrorResponse 클래스 정의
 

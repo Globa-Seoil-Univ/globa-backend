@@ -8,6 +8,6 @@ import org.y2k2.globa.entity.UserEntity;
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
     Page<UserEntity> findAll(Pageable pageable);
 //    Page<RankingEntity> findRankingEntities (Pageable pageable);
-
+    UserEntity findByUserId(Long userId);
 }
 

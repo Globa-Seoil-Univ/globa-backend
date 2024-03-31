@@ -1,8 +1,11 @@
 package org.y2k2.globa.entity;
 
 import jakarta.persistence.*;
+
 import lombok.Getter;
 import lombok.Setter;
+
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -30,12 +33,19 @@ public class NoticeEntity {
     @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "thumbnail")
-    private String thumbnail;
+    @Column(name = "thumbnail_path", nullable = false)
+    private String thumbnailPath;
+
+    @Column(name = "thumbnail_size", nullable = false)
+    private Long thumbnailSize;
+
+    @Column(name = "thumbnail_type", nullable = false)
+    private String thumbnailType;
 
     @Column(name = "bg_color", nullable = false)
     private String bgColor;
 
-    @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @CreationTimestamp
+    @Column(name = "created_time")
     private LocalDateTime createdTime;
 }
