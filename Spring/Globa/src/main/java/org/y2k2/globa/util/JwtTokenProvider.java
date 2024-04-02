@@ -3,18 +3,15 @@ package org.y2k2.globa.util;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.netty.resolver.dns.DnsNameResolverTimeoutException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.y2k2.globa.dto.UserDTO;
+import org.y2k2.globa.exception.AccessTokenException;
+import org.y2k2.globa.exception.GlobalException;
+import org.y2k2.globa.exception.RefreshTokenException;
 
 import java.security.Key;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 
 @Slf4j
@@ -29,50 +26,91 @@ public class JwtTokenProvider {
 
     // Member 정보를 가지고 AccessToken, RefreshToken을 생성하는 메서드
     public JwtToken generateToken(Long userId) {
+        try {
+            long now = (new Date()).getTime();
 
-        long now = (new Date()).getTime();
+            // Access Token 생성
+            Date accessTokenExpiresIn = new Date(now + 1800000); // 86400000는 24시간, 1800000은 30분
 
-        // Access Token 생성
-        Date accessTokenExpiresIn = new Date(now + 86400000);
+            String accessToken = Jwts.builder()
+                    .setSubject(String.valueOf(userId))
+                    .setExpiration(accessTokenExpiresIn)
+                    .signWith(key, SignatureAlgorithm.HS256)
+                    .compact();
 
-        String accessToken = Jwts.builder()
-                .setSubject(String.valueOf(userId))
-                .setExpiration(accessTokenExpiresIn)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+            // Refresh Token 생성
+            String refreshToken = Jwts.builder()
+                    .setExpiration(new Date(now + 604800000)) //  604800000는 일주일
+                    .signWith(key, SignatureAlgorithm.HS256)
+                    .compact();
 
-        // Refresh Token 생성
-        String refreshToken = Jwts.builder()
-                .setExpiration(new Date(now + 86400000))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+            return JwtToken.builder()
+                    .grantType("Bearer")
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .build();
+        } catch ( DnsNameResolverTimeoutException e){
+            throw new GlobalException("Redis TimeOut !!!! ");
+        }
 
-        return JwtToken.builder()
-                .grantType("Bearer")
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
     }
 
-//    // Jwt 토큰을 복호화하여 토큰에 들어있는 정보를 꺼내는 메서드
-//    public Authentication getAuthentication(String accessToken) {
-//        // Jwt 토큰 복호화
-//        Claims claims = parseClaims(accessToken);
-//
-//        if (claims.get("auth") == null) {
-//            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
-//        }
-//
-//        // 클레임에서 권한 정보 가져오기
-//        Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get("auth").toString().split(","))
-//                .map(SimpleGrantedAuthority::new)
-//                .toList();
-//
-//        // UserDetails 객체를 만들어서 Authentication return
-//        // UserDetails: interface, User: UserDetails를 구현한 class
-//        UserDetails principal = new User(claims.getSubject(), "", authorities);
-//        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
-//    }
+    public Long getUserIdByAccessTokenWithoutCheck(String token){
+        try{
+            // Jwt 토큰 복호화
+            Claims claims = parseClaims(token);
+
+            return Long.valueOf(claims.getSubject());
+        } catch (ExpiredJwtException e) {
+            throw new AccessTokenException("Access Token Expired ! ");
+        } catch (SignatureException e ){
+            throw new org.y2k2.globa.exception.SignatureException("Not Matched Token");
+        }
+    }
+    public Date getExpiredTimeByAccessTokenWithoutCheck(String token){
+        try{
+            // Jwt 토큰 복호화
+            Claims claims = parseClaims(token);
+
+            return claims.getExpiration();
+        } catch (ExpiredJwtException e) {
+            throw new AccessTokenException("Access Token Expired ! ");
+        } catch (SignatureException e ){
+            throw new org.y2k2.globa.exception.SignatureException("Not Matched Token");
+        }
+    }
+
+    public Long getUserIdByAccessToken(String accessToken) {
+        try{
+            // Jwt 토큰 복호화
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(accessToken)
+                    .getBody();
+
+
+            return Long.valueOf(claims.getSubject());
+        } catch (ExpiredJwtException e) {
+            throw new AccessTokenException("Access Token Expired ! ");
+        } catch (SignatureException e ){
+            throw new org.y2k2.globa.exception.SignatureException("Not Matched Token");
+        }
+    }
+
+    public Date getExpirationDateFromToken(String token) {
+        try{
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token) // 지났는지 검사
+                    .getBody();
+
+            return claims.getExpiration();
+        } catch (ExpiredJwtException e) {
+            throw new RefreshTokenException("Refresh Token Expired ! ");
+        }
+    }
 
 
     // 토큰 정보를 검증하는 메서드
@@ -86,7 +124,7 @@ public class JwtTokenProvider {
         } catch (SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
         } catch (ExpiredJwtException e) {
-            log.info("Expired JWT Token", e);
+           throw new AccessTokenException("Access Token Expired ! ");
         } catch (UnsupportedJwtException e) {
             log.info("Unsupported JWT Token", e);
         } catch (IllegalArgumentException e) {
@@ -107,5 +145,6 @@ public class JwtTokenProvider {
             return e.getClaims();
         }
     }
+
 
 }

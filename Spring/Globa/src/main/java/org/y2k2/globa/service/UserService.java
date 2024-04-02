@@ -5,23 +5,175 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.y2k2.globa.dto.UserDTO;
+import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.UserEntity;
+import org.y2k2.globa.exception.AuthorizedException;
 import org.y2k2.globa.exception.BadRequestException;
+import org.y2k2.globa.exception.NotFoundException;
+import org.y2k2.globa.exception.RefreshTokenException;
 import org.y2k2.globa.repository.UserRepository;
+import org.y2k2.globa.util.JwtToken;
+import org.y2k2.globa.util.JwtTokenProvider;
+import org.y2k2.globa.util.JwtUtil;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
-    public final UserRepository userRepository;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtUtil jwtUtil;
+
+    public final UserRepository userRepository;;
+
+    public JwtToken reloadRefreshToken(String refreshToken, String accessToken){
+        try {
+            Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+            Date expiredTime = jwtTokenProvider.getExpiredTimeByAccessTokenWithoutCheck(accessToken);
+            String redisRefreshToken = jwtUtil.getRefreshToken(userId);
+
+            if(new Date().before(expiredTime)) {
+                jwtUtil.deleteValue(String.valueOf(userId));
+                throw new BadRequestException("우애우애우ㅐ우앵");
+            }
+
+            if (!redisRefreshToken.equals(refreshToken)) {
+                jwtUtil.deleteValue(String.valueOf(userId));
+                throw new BadRequestException("Not equal RefreshToken");
+            }
+
+            jwtTokenProvider.getExpirationDateFromToken(redisRefreshToken);
+
+
+            JwtToken jwtToken = jwtTokenProvider.generateToken(userId);
+
+            jwtUtil.insertRedisRefreshToken(userId, jwtToken.getRefreshToken());
+
+            return jwtToken;
+        }
+        catch(Exception e){
+            throw e;
+        }
+    }
+
+    public JwtToken postUser(RequestUserPostDTO requestUserPostDTO){
+
+        UserEntity postUserEntity = userRepository.findBySnsId(requestUserPostDTO.getSnsId());
+
+        if(postUserEntity == null) {
+            UserEntity userEntity = new UserEntity();
+            userEntity.setSnsKind(requestUserPostDTO.getSnsKind());
+            userEntity.setSnsId(requestUserPostDTO.getSnsId());
+            userEntity.setCode(generateRandomCode(6));
+            userEntity.setName(requestUserPostDTO.getName());
+            userEntity.setProfilePath(requestUserPostDTO.getProfile());
+            userEntity.setPrimaryNofi(requestUserPostDTO.getNotification());
+            userEntity.setShareNofi(requestUserPostDTO.getNotification());
+            userEntity.setUploadNofi(requestUserPostDTO.getNotification());
+            userEntity.setEventNofi(requestUserPostDTO.getNotification());
+            userEntity.setCreatedTime(LocalDateTime.now());
+            userEntity.setDeleted(false);
+
+            postUserEntity = userRepository.save(userEntity);
+        }
+
+        JwtToken jwtToken = jwtTokenProvider.generateToken(postUserEntity.getUserId());
+
+        jwtUtil.insertRedisRefreshToken(postUserEntity.getUserId(), jwtToken.getRefreshToken());
+
+
+        return jwtToken;
+
+    }
+
+    public ResponseUserDTO getUser(String accessToken){
+
+        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+
+        ResponseUserDTO responseUserDTO = new ResponseUserDTO();
+
+        responseUserDTO.setProfile(userEntity.getProfilePath());
+        responseUserDTO.setName(userEntity.getName());
+        responseUserDTO.setCode(userEntity.getCode());
+        responseUserDTO.setPublicFolderId(9999);
+
+        return responseUserDTO;
+
+    }
+
+    public ResponseUserSearchDto getUser(String accessToken, String code){
+
+        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+
+        UserEntity userEntity = userRepository.findOneByCode(code);
+
+        ResponseUserSearchDto responseUserSearchDto = new ResponseUserSearchDto();
+
+        responseUserSearchDto.setProfile(userEntity.getProfilePath());
+        responseUserSearchDto.setName(userEntity.getName());
+        responseUserSearchDto.setCode(userEntity.getCode());
+
+        return responseUserSearchDto;
+
+    }
+
+    public ResponseUserNotificationDto getNotification(String accessToken, Long pathUserId){
+
+        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+
+        if (!Objects.equals(userId, pathUserId)){
+            throw new AuthorizedException("Not Matched User ! owner : " + userId + ", request : " + pathUserId);
+        }
+
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+
+        ResponseUserNotificationDto responseUserNotificationDto = new ResponseUserNotificationDto();
+
+        responseUserNotificationDto.setUploadNofi(userEntity.getUploadNofi());
+        responseUserNotificationDto.setShareNofi(userEntity.getShareNofi());
+        responseUserNotificationDto.setEventNofi(userEntity.getEventNofi());
+
+        return responseUserNotificationDto;
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    public String generateRandomCode(int length){
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        Random random = new SecureRandom();
+
+        StringBuilder code = new StringBuilder();
+
+        for(int i = 0 ; i < length; ++i ){
+            int index = random.nextInt(characters.length());
+            code.append(characters.charAt(index));
+
+        }
+
+        return code.toString();
+    }
+
+
 
     public ObjectNode getRanking(int page, int count) {
         try {

@@ -20,10 +20,10 @@ public class UserDTO implements Serializable {
     private String snsId;
     private String code;
     private String name;
-    private String primaryNofi;
-    private String uploadNofi;
-    private String shareNofi;
-    private String eventNofi;
+    private Boolean primaryNofi;
+    private Boolean uploadNofi;
+    private Boolean shareNofi;
+    private Boolean eventNofi;
     private String profileSize;
     private String profileType;
     private String profilePath;
