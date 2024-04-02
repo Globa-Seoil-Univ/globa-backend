@@ -26,28 +26,23 @@ public class NoticeController {
 
     @GetMapping(PRE_FIX + "/intro")
     public ResponseEntity<?> getIntroNotices() {
-        List<NoticeEntity> noticeEntities = noticeService.getIntroNotices();
-        List<NoticeIntroResponseDto> introDtoList = new ArrayList<>();
-
-        for (NoticeEntity noticeEntity : noticeEntities) {
-            NoticeIntroResponseDto introDto = NoticeMapper.INSTANCE.toIntroResponseDto(noticeEntity);
-            introDtoList.add(introDto);
-        }
-
-        return ResponseEntity.ok().body(introDtoList);
+        // token 체크
+        return ResponseEntity.ok().body(noticeService.getIntroNotices());
     }
 
     @GetMapping(PRE_FIX + "/{noticeId}")
     public ResponseEntity<?> getNoticeDetail(@PathVariable("noticeId") Long noticeId) {
+        // token 체크
         if (noticeId == null) throw new BadRequestException("You must request notice id");
 
-        NoticeEntity entity = noticeService.getNoticeDetail(noticeId);
-        return ResponseEntity.ok().body(NoticeMapper.INSTANCE.toDetailResponseDto(entity));
+        return ResponseEntity.ok().body(noticeService.getNoticeDetail(noticeId));
     }
 
     @PostMapping(value = PRE_FIX, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> addNotice(@Valid @ModelAttribute final NoticeAddRequestDto dto) {
+        // token 체크
+
         Long noticeId = noticeService.addNotice(1L, dto);
-        return ResponseEntity.created(URI.create("/notice/" + noticeId)).build();
+        return ResponseEntity.created(URI.create(PRE_FIX + "/" + noticeId)).build();
     }
 }

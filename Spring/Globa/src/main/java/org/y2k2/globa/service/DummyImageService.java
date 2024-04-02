@@ -10,8 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.y2k2.globa.dto.DummyImageResponseDto;
 import org.y2k2.globa.entity.DummyImageEntity;
 import org.y2k2.globa.exception.FileUploadException;
+import org.y2k2.globa.mapper.DummyImageMapper;
 import org.y2k2.globa.repository.DummyImageRepository;
 
 import java.util.Date;
@@ -23,10 +25,10 @@ public class DummyImageService {
     private Bucket bucket;
     private final String dummyPath = "dummies";
 
-    public final DummyImageRepository dummyImageRepository;
+    private final DummyImageRepository dummyImageRepository;
 
     @Transactional
-    public DummyImageEntity addDummyImage(MultipartFile file) {
+    public DummyImageResponseDto addDummyImage(MultipartFile file) {
         long current = new Date().getTime();
         long size = file.getSize();
         String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());
@@ -42,7 +44,9 @@ public class DummyImageService {
             bucket.create(path, file.getBytes());
 
             DummyImageEntity entity = DummyImageEntity.create(path, size, mimeType);
-            return dummyImageRepository.save(entity);
+            DummyImageEntity savedEntity = dummyImageRepository.save(entity);
+
+            return DummyImageMapper.INSTANCE.toResponseDto(savedEntity);
         } catch (Exception e) {
             if (bucket.get(path) != null) {
                 bucket.get(path).delete();

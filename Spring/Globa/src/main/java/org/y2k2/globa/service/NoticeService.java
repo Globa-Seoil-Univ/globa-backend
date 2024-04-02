@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.y2k2.globa.dto.NoticeAddRequestDto;
+import org.y2k2.globa.dto.NoticeDetailResponseDto;
+import org.y2k2.globa.dto.NoticeIntroResponseDto;
 import org.y2k2.globa.entity.DummyImageEntity;
 import org.y2k2.globa.entity.NoticeEntity;
 import org.y2k2.globa.entity.NoticeImageEntity;
@@ -26,30 +28,35 @@ import org.y2k2.globa.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class NoticeService {
-    public final UserRepository userRepository;
-    public final NoticeRepository noticeRepostory;
-    public final NoticeImageRepository noticeImageRepository;
-    public final DummyImageRepository dummyImageRepository;
+    private final UserRepository userRepository;
+    private final NoticeRepository noticeRepostory;
+    private final NoticeImageRepository noticeImageRepository;
+    private final DummyImageRepository dummyImageRepository;
 
     @Autowired
     private Bucket bucket;
 
-    public List<NoticeEntity> getIntroNotices() {
-        return noticeRepostory.findByOrderByCreatedTimeDesc(Limit.of(3));
+    public List<NoticeIntroResponseDto> getIntroNotices() {
+        List<NoticeEntity> noticeEntities = noticeRepostory.findByOrderByCreatedTimeDesc(Limit.of(3));
+
+        return noticeEntities.stream()
+                .map(NoticeMapper.INSTANCE::toIntroResponseDto)
+                .collect(Collectors.toList());
     }
 
-    public NoticeEntity getNoticeDetail(Long noticeId) {
+    public NoticeDetailResponseDto getNoticeDetail(Long noticeId) {
         NoticeEntity noticeEntity = noticeRepostory.findByNoticeId(noticeId);
 
         if (noticeEntity == null) {
             throw new NotFoundException("Not found notice using noticeId : " + noticeId);
         }
 
-        return noticeEntity;
+        return NoticeMapper.INSTANCE.toDetailResponseDto(noticeEntity);
     }
 
     @Transactional
