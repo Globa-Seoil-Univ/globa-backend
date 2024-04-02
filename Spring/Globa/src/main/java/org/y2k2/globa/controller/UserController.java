@@ -8,10 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.y2k2.globa.dto.RequestUserPostDTO;
-import org.y2k2.globa.dto.ResponseUserDTO;
-import org.y2k2.globa.dto.ResponseUserNotificationDto;
-import org.y2k2.globa.dto.ResponseUserSearchDto;
+import org.y2k2.globa.dto.*;
 import org.y2k2.globa.exception.BadRequestException;
 import org.y2k2.globa.service.UserService;
 import org.y2k2.globa.util.JwtToken;
@@ -106,6 +103,20 @@ public class UserController {
             throw new BadRequestException("Required userId ! ");
 
         ResponseUserNotificationDto result = userService.getNotification(accessToken,userId);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping(PRE_FIX+"/{user_id}/analysis")
+    public ResponseEntity<?> getAnalysis(@RequestHeader(value = "Authorization", required = false) String accessToken,
+                                                 @PathVariable(value = "user_id", required = false) Long userId) {
+
+        if ( accessToken == null )
+            throw new BadRequestException("Required AccessToken ! ");
+        if ( userId == null )
+            throw new BadRequestException("Required userId ! ");
+
+        ResponseAnalysisDto result = userService.getAnalysis(accessToken,userId);
 
         return ResponseEntity.ok(result);
     }

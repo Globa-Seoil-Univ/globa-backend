@@ -5,17 +5,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.y2k2.globa.Projection.KeywordProjection;
+import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.dto.*;
+import org.y2k2.globa.entity.StudyEntity;
 import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.exception.AuthorizedException;
 import org.y2k2.globa.exception.BadRequestException;
-import org.y2k2.globa.exception.NotFoundException;
-import org.y2k2.globa.exception.RefreshTokenException;
+import org.y2k2.globa.repository.StudyRepository;
 import org.y2k2.globa.repository.UserRepository;
 import org.y2k2.globa.util.JwtToken;
 import org.y2k2.globa.util.JwtTokenProvider;
@@ -33,6 +34,7 @@ public class UserService {
     private final JwtUtil jwtUtil;
 
     public final UserRepository userRepository;;
+    public final StudyRepository studyRepository;
 
     public JwtToken reloadRefreshToken(String refreshToken, String accessToken){
         try {
@@ -145,6 +147,50 @@ public class UserService {
 
         return responseUserNotificationDto;
 
+    }
+
+    public ResponseAnalysisDto getAnalysis(String accessToken, Long pathUserId){
+
+        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+
+        if (!Objects.equals(userId, pathUserId)){
+            throw new AuthorizedException("Not Matched User ! owner : " + userId + ", request : " + pathUserId);
+        }
+
+        List<StudyEntity> studyEntities = studyRepository.findAllByUserUserId(userId);
+        List<QuizGradeProjection> quizGradeProjectionList = userRepository.findQuizGradeByUser(userId);
+        List<KeywordProjection> keywordProjectionList = userRepository.findKeywordByRecordId(1L);
+
+        ResponseAnalysisDto responseAnalysisDto = new ResponseAnalysisDto();
+        List<ResponseStudyTimesDto> studyTimes = new ArrayList<>();
+        List<ResponseQuizGradeDto> quizGrades = new ArrayList<>();
+        List<ResponseKeywordDto> keywords = new ArrayList<>();
+
+        for( StudyEntity studyEntitiy : studyEntities ){
+            ResponseStudyTimesDto responseStudyTimesDto = new ResponseStudyTimesDto();
+            responseStudyTimesDto.setStudyTime(studyEntitiy.getStudyTime());
+            responseStudyTimesDto.setCreatedTime(studyEntitiy.getCreatedTime());
+            studyTimes.add(responseStudyTimesDto);
+        }
+
+        for( QuizGradeProjection quizGradeProjection : quizGradeProjectionList ){
+            ResponseQuizGradeDto responseQuizGradeDto = new ResponseQuizGradeDto();
+            responseQuizGradeDto.setQuizGrade(quizGradeProjection.getQuizGrade());
+            responseQuizGradeDto.setCreatedTime(quizGradeProjection.getCreatedTime());
+            quizGrades.add(responseQuizGradeDto);
+        }
+
+        for( KeywordProjection keywordProjection : keywordProjectionList ){
+            ResponseKeywordDto responseKeywordDto = new ResponseKeywordDto();
+            responseKeywordDto.setWord(keywordProjection.getWord());
+            responseKeywordDto.setImportance(keywordProjection.getImportance());
+            keywords.add(responseKeywordDto);
+        }
+
+        responseAnalysisDto.setStudyTimes(studyTimes);
+        responseAnalysisDto.setQuizGrades(quizGrades);
+        responseAnalysisDto.setKeywords(keywords);
+        return responseAnalysisDto;
     }
 
 
