@@ -110,12 +110,24 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorNode, status);
     }
 
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleException(Exception ex) {
         return new ResponseEntity<>(createErrorNode(ex, HttpStatus.INTERNAL_SERVER_ERROR.value()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  
+    @ExceptionHandler(RefreshTokenException.class)
+    public ResponseEntity<Object> handleRefreshTokenException(RefreshTokenException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.EXPIRED_REFRESH_TOKEN.value()), HttpStatus.BAD_REQUEST);
+    }
 
+    @ExceptionHandler(AccessTokenException.class)
+    public ResponseEntity<Object> handleAccessTokenException(AccessTokenException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.EXPIRED_ACCESS_TOKEN.value()), HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(SignatureException.class)
+    public ResponseEntity<Object> handleSignatureException(SignatureException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.INVALID_TOKEN.value()), HttpStatus.BAD_REQUEST);
+    }
     // ErrorResponse 클래스 정의
 
 }
