@@ -6,18 +6,25 @@ import lombok.Getter;
 import lombok.Setter;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Entity(name = "dummyImage")
-@Table(name = "dummyImage")
-public class DummyImageEntity {
+@Entity(name = "noticeImage")
+@Table(name = "noticeImage")
+public class NoticeImageEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "image_id", columnDefinition = "INT UNSIGNED")
     private Long imageId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "notice_id", referencedColumnName = "notice_id")
+    private NoticeEntity notice;
 
     @Column(name = "image_path", nullable = false)
     private String imagePath;
@@ -32,9 +39,10 @@ public class DummyImageEntity {
     @Column(name = "created_time")
     private LocalDateTime createdTime;
 
-    public static DummyImageEntity create(String path, long size, String type) {
-        DummyImageEntity entity = new DummyImageEntity();
+    public static NoticeImageEntity create(NoticeEntity notice, String path, long size, String type) {
+        NoticeImageEntity entity = new NoticeImageEntity();
 
+        entity.setNotice(notice);
         entity.setImagePath(path);
         entity.setImageSize(size);
         entity.setImageType(type);

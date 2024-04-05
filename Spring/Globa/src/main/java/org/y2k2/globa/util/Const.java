@@ -12,6 +12,7 @@ public class Const {
         RECORD_NAME_DUPLICATED(40910,  HttpStatus.Series.CLIENT_ERROR, "Record Name Duplicated"),
         FOLDER_NAME_DUPLICATED(40920,  HttpStatus.Series.CLIENT_ERROR, "Folder Name Duplicated"),
         // ... 추가적인 에러 코드
+        FAILED_FILE_UPLOAD(50010, HttpStatus.Series.CLIENT_ERROR, "Failed to file upload to Firebase")
         ;
 
         private final int code;

@@ -17,17 +17,19 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     UserEntity findBySnsId(String snsId);
     UserEntity findOneByUserId(Long userId);
     UserEntity findOneByCode(String code);
+    UserEntity findByUserId(Long userId);
 
     Page<UserEntity> findAll(Pageable pageable);
 //    Page<RankingEntity> findRankingEntities (Pageable pageable);
-@Query(value = "SELECT " +
+    
+    @Query(value = "SELECT " +
         "(SUM(is_correct) / COUNT(is_correct)) * 100 AS quizGrade, " +
         "DATE(created_time) AS createdTime " +
         "FROM quiz_attempt " +
         "WHERE user_id = :userId " +
         "AND is_correct IS NOT NULL " +
         "GROUP BY DATE(created_time)", nativeQuery = true)
-List<QuizGradeProjection> findQuizGradeByUser(@Param("userId") Long userId);
+    List<QuizGradeProjection> findQuizGradeByUser(@Param("userId") Long userId);
 
     @Query(value = "SELECT word, importance " +
             "FROM keyword " +
@@ -35,6 +37,5 @@ List<QuizGradeProjection> findQuizGradeByUser(@Param("userId") Long userId);
             "ORDER BY importance DESC " +
             "LIMIT 10 ", nativeQuery = true)
     List<KeywordProjection> findKeywordByRecordId(@Param("recordId") Long recordId);
-
 }
 
