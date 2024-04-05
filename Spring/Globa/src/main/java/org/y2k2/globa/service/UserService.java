@@ -14,7 +14,7 @@ import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.StudyEntity;
 import org.y2k2.globa.entity.UserEntity;
-import org.y2k2.globa.exception.AuthorizedException;
+import org.y2k2.globa.exception.UnAuthorizedException;
 import org.y2k2.globa.exception.BadRequestException;
 import org.y2k2.globa.repository.StudyRepository;
 import org.y2k2.globa.repository.UserRepository;
@@ -134,7 +134,7 @@ public class UserService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
         if (!Objects.equals(userId, pathUserId)){
-            throw new AuthorizedException("Not Matched User ! owner : " + userId + ", request : " + pathUserId);
+            throw new UnAuthorizedException("Not Matched User ! owner : " + userId + ", request : " + pathUserId);
         }
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
@@ -154,7 +154,7 @@ public class UserService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
         if (!Objects.equals(userId, pathUserId)){
-            throw new AuthorizedException("Not Matched User ! owner : " + userId + ", request : " + pathUserId);
+            throw new UnAuthorizedException("Not Matched User ! owner : " + userId + ", request : " + pathUserId);
         }
 
         List<StudyEntity> studyEntities = studyRepository.findAllByUserUserId(userId);
