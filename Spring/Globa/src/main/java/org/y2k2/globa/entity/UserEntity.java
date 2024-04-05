@@ -3,6 +3,7 @@ package org.y2k2.globa.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 import org.y2k2.globa.dto.UserDTO;
 
 import java.time.LocalDateTime;
@@ -17,33 +18,52 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", columnDefinition = "INT UNSIGNED")
     private Long userId;
-    @Column(name = "sns_kind")
+
+    @Column(name = "sns_kind", nullable = false)
     private String snsKind;
-    @Column(name = "sns_id")
+
+    @Column(name = "sns_id", nullable = false)
     private String snsId;
-    @Column(name = "code")
+
+    @Column(name = "code", nullable = false)
     private String code;
-    @Column(name = "name")
+
+    @Column(name = "name", nullable = false)
     private String name;
+
     @Column(name = "primary_nofi")
-    private String primaryNofi;
+    @ColumnDefault("true")
+    private Boolean primaryNofi;
+
     @Column(name = "upload_nofi")
-    private String uploadNofi;
+    @ColumnDefault("true")
+    private Boolean uploadNofi;
+
     @Column(name = "share_nofi")
-    private String shareNofi;
+    @ColumnDefault("true")
+    private Boolean shareNofi;
+
     @Column(name = "event_nofi")
-    private String eventNofi;
+    @ColumnDefault("true")
+    private Boolean eventNofi;
+
     @Column(name = "profile_size")
     private String profileSize;
+
     @Column(name = "profile_type")
     private String profileType;
+
     @Column(name = "profile_path")
     private String profilePath;
+
     @Column(name = "deleted")
+    @ColumnDefault("false")
     private Boolean deleted;
+
     @Column(name = "deleted_time")
     private LocalDateTime deletedTime;
-    @Column(name = "created_time")
+
+    @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 
     public static UserEntity toUserEntity(UserDTO userDTO){
