@@ -21,17 +21,19 @@ public class FolderShareEntity {
     @Column(name = "share_id", columnDefinition = "INT UNSIGNED")
     private Long shareId;
 
-    @Column(name = "folder_id", columnDefinition = "INT UNSIGNED", nullable = false)
-    private Long folderId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "folder_id", referencedColumnName = "folder_id", nullable = false, columnDefinition = "INT UNSIGNED")
+    private FolderEntity folder;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "owner_id", referencedColumnName = "user_id", nullable = false)
+    @JoinColumn(name = "owner_id", referencedColumnName = "user_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private UserEntity ownerUser;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "target_id", referencedColumnName = "user_id", nullable = false)
+    @JoinColumn(name = "target_id", referencedColumnName = "user_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private UserEntity targetUser;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -56,10 +58,10 @@ public class FolderShareEntity {
         this.setInvitationStatus(String.valueOf(InvitationStatus.PENDING));
     }
 
-    public static FolderShareEntity create(Long folderId, UserEntity ownerUser, UserEntity targetUser, FolderRoleEntity folderRole) {
+    public static FolderShareEntity create(FolderEntity folder, UserEntity ownerUser, UserEntity targetUser, FolderRoleEntity folderRole) {
         FolderShareEntity entity = new FolderShareEntity();
 
-        entity.setFolderId(folderId);
+        entity.setFolder(folder);
         entity.setOwnerUser(ownerUser);
         entity.setTargetUser(targetUser);
         entity.setRoleId(folderRole);

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.dto.FolderShareUserDto;
 import org.y2k2.globa.dto.FolderShareUserResponseDto;
+import org.y2k2.globa.dto.InvitationStatus;
 import org.y2k2.globa.dto.Role;
 import org.y2k2.globa.entity.FolderEntity;
 import org.y2k2.globa.entity.FolderRoleEntity;
@@ -41,9 +42,9 @@ public class FolderShareService {
 
         if (folderEntity == null) throw new NotFoundException("Not found folder");
         if (!folderEntity.getUser().getUserId().equals(userId)) throw new ForbiddenException("You are not owned this folder");
-        
+
         Pageable pageable = PageRequest.of(page - 1, count);
-        Page<FolderShareEntity> folderShareEntityPage = folderShareRepository.findByFolderIdOrderByCreatedTimeAsc(pageable, folderId);
+        Page<FolderShareEntity> folderShareEntityPage = folderShareRepository.findByFolderOrderByCreatedTimeAsc(pageable, folderEntity);
 
         List<FolderShareEntity> shareEntities = folderShareEntityPage.getContent();
         Long total = folderShareEntityPage.getTotalElements();
@@ -58,23 +59,33 @@ public class FolderShareService {
     public void inviteShare(Long folderId, Long ownerId, Long targetId, Role role) {
         UserEntity ownerEntity = userRepository.findByUserId(ownerId);
         UserEntity targetEntity = userRepository.findByUserId(targetId);
-        checkValidation(folderId, ownerId, targetId, targetEntity);
+        if (ownerId.equals(targetId)) throw new BadRequestException("You can't invite yourself");
+        if (targetEntity == null) throw new BadRequestException("Not found target user");
+
+        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId);
+        if (folderEntity == null) throw new NotFoundException("Not found folder");
+        if (!folderEntity.getUser().getUserId().equals(ownerId)) throw new ForbiddenException("You aren't owned this folder");
 
         FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUser(targetEntity);
         if (folderShareEntity != null) throw new BadRequestException("This user has already been shared or sent a share request");
 
         FolderRoleEntity folderRoleEntity = convertRole(role);
-        FolderShareEntity entity = FolderShareEntity.create(folderId, ownerEntity, targetEntity, folderRoleEntity);
+        FolderShareEntity entity = FolderShareEntity.create(folderEntity, ownerEntity, targetEntity, folderRoleEntity);
         folderShareRepository.save(entity);
     }
 
     @Transactional
     public void editInviteShare(Long folderId, Long ownerId, Long targetId, Role role) {
         UserEntity targetEntity = userRepository.findByUserId(targetId);
-        checkValidation(folderId, ownerId, targetId, targetEntity);
+        if (targetEntity == null) throw new BadRequestException("Not found target user");
 
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByFolderIdAndTargetUser(folderId, targetEntity);
+        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId);
+        if (folderEntity == null) throw new NotFoundException("Not found folder");
+
+        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByFolderAndTargetUser(folderEntity, targetEntity);
         if (folderShareEntity == null) throw new NotFoundException("Not found folder share");
+
+        checkValidation(folderShareEntity.getFolder(), ownerId, targetId, targetEntity);
 
         FolderRoleEntity folderRoleEntity = convertRole(role);
         folderShareEntity.setRoleId(folderRoleEntity);
@@ -84,21 +95,48 @@ public class FolderShareService {
     @Transactional
     public void deleteInviteShare(Long folderId, Long ownerId, Long targetId) {
         UserEntity targetEntity = userRepository.findByUserId(targetId);
-        checkValidation(folderId, ownerId, targetId, targetEntity);
+        if (targetEntity == null) throw new BadRequestException("Not found target user");
 
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByFolderIdAndTargetUser(folderId, targetEntity);
+        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId);
+        if (folderEntity == null) throw new NotFoundException("Not found folder");
+
+        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByFolderAndTargetUser(folderEntity, targetEntity);
         if (folderShareEntity == null) throw new NotFoundException("Not found folder share");
+
+        checkValidation(folderShareEntity.getFolder(), ownerId, targetId, targetEntity);
 
         folderShareRepository.delete(folderShareEntity);
     }
 
-    private void checkValidation(Long folderId, Long ownerId, Long targetId, UserEntity targetEntity) {
-        if (ownerId.equals(targetId)) throw new BadRequestException("You can't invite yourself");
+    @Transactional
+    public void acceptShare(Long folderId, Long shareId, Long targetId) {
+        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByShareId(shareId);
+        checkValidation(folderShareEntity, folderId, targetId);
 
-        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId);
+        folderShareEntity.setInvitationStatus(String.valueOf(InvitationStatus.ACCEPT));
+        folderShareRepository.save(folderShareEntity);
+    }
+    @Transactional
+    public void refuseShare(Long folderId, Long shareId, Long targetId) {
+        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByShareId(shareId);
+        checkValidation(folderShareEntity, folderId, targetId);
+        folderShareRepository.delete(folderShareEntity);
+    }
+
+    private void checkValidation(FolderShareEntity folderShareEntity, Long folderId, Long targetId) {
+        if (folderShareEntity == null) throw new NotFoundException("Not found folderShare");
+        if (!folderShareEntity.getFolder().getFolderId().equals(folderId)) throw new ForbiddenException("Can't modify invitations in other folders");
+        if (folderShareEntity.getInvitationStatus().equals(String.valueOf(InvitationStatus.ACCEPT))) throw new BadRequestException("Already accept invitation");
+
+        UserEntity targetEntity = folderShareEntity.getTargetUser();
+        if (targetEntity == null) throw new BadRequestException("Not found target user");
+        if (!targetEntity.getUserId().equals(targetId)) throw new ForbiddenException("You can't change someone's invitation");
+    }
+
+    private void checkValidation(FolderEntity folderEntity, Long ownerId, Long targetId, UserEntity targetEntity) {
+        if (ownerId.equals(targetId)) throw new BadRequestException("You can't invite yourself");
         if (folderEntity == null) throw new NotFoundException("Not found folder");
         if (!folderEntity.getUser().getUserId().equals(ownerId)) throw new ForbiddenException("You aren't owned this folder");
-
         if (targetEntity == null) throw new BadRequestException("Not found target user");
     }
 

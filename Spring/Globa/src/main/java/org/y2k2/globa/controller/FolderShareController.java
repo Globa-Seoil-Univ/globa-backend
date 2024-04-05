@@ -67,6 +67,25 @@ public class FolderShareController {
             return ResponseEntity.noContent().build();
     }
 
+    @PostMapping(PRE_FIX + "/{shareId}")
+    public ResponseEntity<?> acceptShare(
+            @PathVariable(value = "folderId") Long folderId,
+            @PathVariable(value = "shareId") Long shareId) {
+        // token 체크
+        folderShareService.acceptShare(folderId, shareId, 4L);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping(PRE_FIX + "/{shareId}")
+    public ResponseEntity<?> refuseShare(
+            @PathVariable(value = "folderId") Long folderId,
+            @PathVariable(value = "shareId") Long shareId) {
+        // token 체크
+        folderShareService.refuseShare(folderId, shareId, 2L);
+        return ResponseEntity.noContent().build();
+    }
+
+
     private void checkRole(String role) {
         if (role.isEmpty()) throw new BadRequestException("You must be request role field");
         if (!role.toUpperCase().equals(Role.R.toString())
