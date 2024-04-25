@@ -1,21 +1,18 @@
 package org.y2k2.globa.controller;
 
 import jakarta.validation.Valid;
-import jdk.jfr.ContentType;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import org.y2k2.globa.dto.NoticeAddRequestDto;
-import org.y2k2.globa.dto.NoticeIntroResponseDto;
-import org.y2k2.globa.entity.NoticeEntity;
 import org.y2k2.globa.exception.BadRequestException;
-import org.y2k2.globa.mapper.NoticeMapper;
 import org.y2k2.globa.service.NoticeService;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @ResponseBody

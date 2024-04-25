@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity(name = "folderShare")
-@Table(name = "folderShare")
+@Table(name = "folder_share")
 public class FolderShareEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
