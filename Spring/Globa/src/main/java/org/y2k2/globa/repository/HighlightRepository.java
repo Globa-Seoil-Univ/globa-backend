@@ -6,5 +6,7 @@ import org.y2k2.globa.entity.SectionEntity;
 
 public interface HighlightRepository extends JpaRepository<HighlightEntity, Long> {
     // sectionId, startIndex, endIndex이 다 같은 거를 가져와라
-    HighlightEntity findBySectionAndStartIndexAndEndIndex(SectionEntity section, Long startIndex, Long endIndex);
+    HighlightEntity findBySectionAndStartIndexAndEndIndex(SectionEntity section, long startIndex, long endIndex);
+
+    HighlightEntity findByHighlightId(long highlightId);
 }

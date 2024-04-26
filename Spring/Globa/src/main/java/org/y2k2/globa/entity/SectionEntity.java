@@ -2,8 +2,10 @@ package org.y2k2.globa.entity;
 
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
+
 import lombok.Getter;
 import lombok.Setter;
+
 import org.hibernate.annotations.*;
 
 import java.time.LocalDateTime;
