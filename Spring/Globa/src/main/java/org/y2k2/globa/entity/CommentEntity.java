@@ -53,4 +53,15 @@ public class CommentEntity {
 
         return entity;
     }
+
+    public static CommentEntity createReply(UserEntity writer, HighlightEntity highlight, CommentEntity parent, String content) {
+        CommentEntity entity = new CommentEntity();
+
+        entity.setUser(writer);
+        entity.setHighlight(highlight);
+        entity.setParent(parent);
+        entity.setContent(content);
+
+        return entity;
+    }
 }

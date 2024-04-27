@@ -8,9 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import org.y2k2.globa.dto.RequestCommentDto;
+import org.y2k2.globa.dto.RequestCommentWithIdsDto;
 import org.y2k2.globa.dto.RequestFirstCommentDto;
 import org.y2k2.globa.service.CommentService;
-import org.y2k2.globa.service.CommentService.CommentRequest;
 
 import java.net.URI;
 
@@ -23,30 +23,46 @@ public class CommentController {
 
     @PostMapping(value = PRE_FIX + "/section/{sectionId}")
     public ResponseEntity<?> addFirstComment(
-            @PathVariable("folderId") Long folderId,
-            @PathVariable("recordId") Long recordId,
-            @PathVariable("sectionId") Long sectionId,
+            @PathVariable("folderId") long folderId,
+            @PathVariable("recordId") long recordId,
+            @PathVariable("sectionId") long sectionId,
             @Valid @RequestBody final RequestFirstCommentDto dto
     ) {
         // token 체크
 
-        CommentRequest request = new CommentRequest(1L, folderId, recordId, sectionId);
+        RequestCommentWithIdsDto request = new RequestCommentWithIdsDto(1L, folderId, recordId, sectionId);
         long highlightId = commentService.addFirstComment(request, dto);
         return ResponseEntity.created(URI.create("/folder/" + folderId + "/record/" + recordId + "/highlight/" + highlightId)).build();
     }
 
     @PostMapping(value = PRE_FIX + "/section/{sectionId}/highlight/{highlightId}/comment")
     public ResponseEntity<?> addComment(
-            @PathVariable("folderId") Long folderId,
-            @PathVariable("recordId") Long recordId,
-            @PathVariable("sectionId") Long sectionId,
-            @PathVariable("highlightId") Long highlightId,
+            @PathVariable("folderId") long folderId,
+            @PathVariable("recordId") long recordId,
+            @PathVariable("sectionId") long sectionId,
+            @PathVariable("highlightId") long highlightId,
             @Valid @RequestBody final RequestCommentDto dto
             ) {
         // token 체크
 
-        CommentRequest request = new CommentRequest(1L, folderId, recordId, sectionId);
-        commentService.addComment(request, highlightId, dto);
+        RequestCommentWithIdsDto request = new RequestCommentWithIdsDto(1L, folderId, recordId, sectionId, highlightId);
+        commentService.addComment(request, dto);
+        return ResponseEntity.created(URI.create("/folder/" + folderId + "/record/" + recordId + "/highlight/" + highlightId)).build();
+    }
+
+    @PostMapping(value = PRE_FIX + "/section/{sectionId}/highlight/{highlightId}/comment/{parentId}")
+    public ResponseEntity<?> addReply(
+            @PathVariable("folderId") long folderId,
+            @PathVariable("recordId") long recordId,
+            @PathVariable("sectionId") long sectionId,
+            @PathVariable("highlightId") long highlightId,
+            @PathVariable("parentId") long parentId,
+            @Valid @RequestBody final RequestCommentDto dto
+    ) {
+        // token 체크
+
+        RequestCommentWithIdsDto request = new RequestCommentWithIdsDto(1L, folderId, recordId, sectionId, highlightId, parentId);
+        commentService.addReply(request, dto);
         return ResponseEntity.created(URI.create("/folder/" + folderId + "/record/" + recordId + "/highlight/" + highlightId)).build();
     }
 }
