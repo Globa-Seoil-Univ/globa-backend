@@ -12,4 +12,5 @@ public class CommentDto {
     private UserIntroDto user;
     private String createdTime;
     private boolean hasReply;
+    private boolean deleted;
 }

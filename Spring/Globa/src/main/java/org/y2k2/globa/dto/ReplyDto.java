@@ -12,4 +12,5 @@ public class ReplyDto {
     private String content;
     private UserIntroDto user;
     private String createdTime;
+    private boolean deleted;
 }

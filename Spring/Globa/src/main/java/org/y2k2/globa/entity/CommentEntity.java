@@ -2,13 +2,11 @@ package org.y2k2.globa.entity;
 
 import jakarta.persistence.*;
 
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Formula;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.*;
 
 import java.time.LocalDateTime;
 
@@ -41,9 +39,16 @@ public class CommentEntity {
     @Column(name = "content", nullable = false)
     private String content;
 
+    @Column(name = "deleted")
+    @ColumnDefault("0")
+    private boolean deleted;
+
     @CreationTimestamp
     @Column(name = "created_time")
     private LocalDateTime createdTime;
+
+    @Column(name = "deleted_time")
+    private LocalDateTime deletedTime;
 
     @Formula(value = "(SELECT CASE WHEN EXISTS (SELECT 1 FROM comment c WHERE c.parent_id = ce1_0.comment_id) THEN true ELSE false END)")
     private boolean hasReply;
