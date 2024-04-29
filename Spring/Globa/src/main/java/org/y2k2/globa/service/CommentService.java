@@ -12,7 +12,9 @@ import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.*;
 import org.y2k2.globa.mapper.CommentMapper;
 import org.y2k2.globa.repository.*;
+import org.y2k2.globa.util.CustomTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,9 +91,7 @@ public class CommentService {
         UserEntity user = validateUser(request.getUserId());
         SectionEntity section = validateSection(request.getSectionId(), request.getRecordId(), request.getFolderId());
         validateFolderShare(section, user);
-
-        HighlightEntity highlight = highlightRepository.findByHighlightId(request.getHighlightId());
-        if (highlight == null) throw new NotFoundException("Not found highlight");
+        HighlightEntity highlight = validateHighlight(request.getHighlightId());
 
         CommentEntity comment = CommentEntity.create(user, highlight, dto.getContent());
         commentRepository.save(comment);
@@ -102,9 +102,7 @@ public class CommentService {
         UserEntity user = validateUser(request.getUserId());
         SectionEntity section = validateSection(request.getSectionId(), request.getRecordId(), request.getFolderId());
         validateFolderShare(section, user);
-
-        HighlightEntity highlight = highlightRepository.findByHighlightId(request.getHighlightId());
-        if (highlight == null) throw new NotFoundException("Not found highlight");
+        HighlightEntity highlight = validateHighlight(request.getHighlightId());
 
         CommentEntity parentComment = commentRepository.findByCommentId(request.getParentId());
         if (parentComment == null) throw new NotFoundException("Not found parent comment");
@@ -114,7 +112,36 @@ public class CommentService {
         commentRepository.save(comment);
     }
 
-    public UserEntity validateUser(long userId) {
+    public void updateComment(RequestCommentWithIdsDto request, long commentId, RequestCommentDto dto) {
+        UserEntity user = validateUser(request.getUserId());
+        SectionEntity section = validateSection(request.getSectionId(), request.getRecordId(), request.getFolderId());
+        validateFolderShare(section, user);
+        validateHighlight(request.getHighlightId());
+        CommentEntity comment = validateComment(commentId);
+
+        if (!user.getUserId().equals(comment.getUser().getUserId())) throw new ForbiddenException("You can't update comment of other user");
+
+        comment.setContent(dto.getContent());
+        commentRepository.save(comment);
+    }
+
+    @Transactional
+    public void deleteComment(RequestCommentWithIdsDto request, long commentId) {
+        UserEntity user = validateUser(request.getUserId());
+        SectionEntity section = validateSection(request.getSectionId(), request.getRecordId(), request.getFolderId());
+        validateFolderShare(section, user);
+        validateHighlight(request.getHighlightId());
+        CommentEntity comment = validateComment(commentId);
+        LocalDateTime now = new CustomTimestamp().getTimestamp();
+
+        if (!user.getUserId().equals(comment.getUser().getUserId())) throw new ForbiddenException("You can't delete comment of other user");
+
+        comment.setDeleted(true);
+        comment.setDeletedTime(now);
+        commentRepository.save(comment);
+    }
+
+    private UserEntity validateUser(long userId) {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new InvalidTokenException("Invalid Token");
 
@@ -130,8 +157,22 @@ public class CommentService {
         return section;
     }
 
-    public void validateFolderShare(SectionEntity section, UserEntity user) {
+    private void validateFolderShare(SectionEntity section, UserEntity user) {
         FolderShareEntity folderShare = folderShareRepository.findByFolderAndTargetUser(section.getRecord().getFolder(), user);
         if (folderShare == null) throw new ForbiddenException("You aren't authorized to post comments");
+    }
+
+    private HighlightEntity validateHighlight(long highlightId) {
+        HighlightEntity highlight = highlightRepository.findByHighlightId(highlightId);
+        if (highlight == null) throw new NotFoundException("Not found highlight");
+
+        return highlight;
+    }
+
+    private CommentEntity validateComment(long commentId) {
+        CommentEntity comment = commentRepository.findByCommentId(commentId);
+        if (comment == null) throw new NotFoundException("Not found comment");
+
+        return comment;
     }
 }

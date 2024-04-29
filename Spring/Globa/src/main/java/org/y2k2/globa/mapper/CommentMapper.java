@@ -31,14 +31,14 @@ public interface CommentMapper {
     @AfterMapping
     static void handleDeletedContent(@MappingTarget CommentDto dto, CommentEntity entity) {
         if (entity.getDeletedTime() != null) {
-            dto.setContent("");
+            dto.setContent("삭제된 댓글입니다");
         }
     }
 
     @AfterMapping
     static void handleDeletedContent(@MappingTarget ReplyDto dto, CommentEntity entity) {
         if (entity.getDeletedTime() != null) {
-            dto.setContent("");
+            dto.setContent("삭제된 댓글입니다");
         }
     }
 }

@@ -96,4 +96,35 @@ public class CommentController {
         commentService.addReply(request, dto);
         return ResponseEntity.created(URI.create("/folder/" + folderId + "/record/" + recordId + "/highlight/" + highlightId)).build();
     }
+
+    @PatchMapping(value = PRE_FIX + "/section/{sectionId}/highlight/{highlightId}/comment/{commentId}")
+    public ResponseEntity<?> updateComment(
+            @PathVariable("folderId") long folderId,
+            @PathVariable("recordId") long recordId,
+            @PathVariable("sectionId") long sectionId,
+            @PathVariable("highlightId") long highlightId,
+            @PathVariable("commentId") long commentId,
+            @Valid @RequestBody final RequestCommentDto dto
+    ) {
+        // token 체크
+
+        RequestCommentWithIdsDto requestCommentWithIdsDto = new RequestCommentWithIdsDto(1L, folderId, recordId, sectionId, highlightId);
+        commentService.updateComment(requestCommentWithIdsDto, commentId, dto);
+        return ResponseEntity.noContent().build();
+    }
+    @DeleteMapping(value = PRE_FIX + "/section/{sectionId}/highlight/{highlightId}/comment/{commentId}")
+    public ResponseEntity<?> deleteComment(
+            @PathVariable("folderId") long folderId,
+            @PathVariable("recordId") long recordId,
+            @PathVariable("sectionId") long sectionId,
+            @PathVariable("highlightId") long highlightId,
+            @PathVariable("commentId") long commentId
+    ) {
+        // token 체크
+
+        RequestCommentWithIdsDto requestCommentWithIdsDto = new RequestCommentWithIdsDto(1L, folderId, recordId, sectionId, highlightId);
+        commentService.deleteComment(requestCommentWithIdsDto, commentId);
+        return ResponseEntity.noContent().build();
+    }
+
 }
