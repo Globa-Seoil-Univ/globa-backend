@@ -34,7 +34,7 @@ public class InquiryEntity {
 
     @ColumnDefault("0")
     @Column(name = "is_solved")
-    private boolean isSolved;
+    private boolean solved;
 
     @CreationTimestamp
     @Column(name = "created_time")
