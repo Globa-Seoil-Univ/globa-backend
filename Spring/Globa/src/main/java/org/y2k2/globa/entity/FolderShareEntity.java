@@ -13,13 +13,13 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Entity(name = "folderShare")
+@Entity
 @Table(name = "folder_share")
 public class FolderShareEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "share_id", columnDefinition = "INT UNSIGNED")
-    private Long shareId;
+    private long shareId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
