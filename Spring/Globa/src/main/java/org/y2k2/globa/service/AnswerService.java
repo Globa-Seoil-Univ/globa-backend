@@ -3,20 +3,14 @@ package org.y2k2.globa.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.y2k2.globa.dto.RequestAnswerDto;
-import org.y2k2.globa.dto.UserRole;
-import org.y2k2.globa.entity.AnswerEntity;
-import org.y2k2.globa.entity.InquiryEntity;
-import org.y2k2.globa.entity.UserEntity;
-import org.y2k2.globa.entity.UserRoleEntity;
+import org.y2k2.globa.dto.*;
+import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.DuplicatedExcepiton;
 import org.y2k2.globa.exception.ForbiddenException;
 import org.y2k2.globa.exception.InvalidTokenException;
 import org.y2k2.globa.exception.NotFoundException;
-import org.y2k2.globa.repository.AnswerRepository;
-import org.y2k2.globa.repository.InquiryRepository;
-import org.y2k2.globa.repository.UserRepository;
-import org.y2k2.globa.repository.UserRoleRepository;
+import org.y2k2.globa.mapper.NotificationMapper;
+import org.y2k2.globa.repository.*;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +19,7 @@ public class AnswerService {
     private final InquiryRepository inquiryRepository;
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public void addAnswer(long userId, long inquiryId, RequestAnswerDto dto) {
@@ -40,6 +35,12 @@ public class AnswerService {
 
         inquiryRepository.save(inquiry);
         answerRepository.save(answer);
+
+        NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithInquiry(
+                new RequestNotificationWithInquiryDto(user, inquiry.getUser(), inquiry)
+        );
+        notification.setTypeId(NotificationTypeEnum.INQUIRY.getTypeId());
+        notificationRepository.save(notification);
     }
 
     @Transactional

@@ -9,6 +9,7 @@ import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.AnswerEntity;
 import org.y2k2.globa.entity.InquiryEntity;
 import org.y2k2.globa.entity.UserEntity;
+import org.y2k2.globa.exception.ForbiddenException;
 import org.y2k2.globa.exception.InvalidTokenException;
 import org.y2k2.globa.exception.NotFoundException;
 import org.y2k2.globa.mapper.InquiryMapper;
@@ -55,6 +56,7 @@ public class InquiryService {
 
         InquiryEntity inquiry = inquiryRepository.findByInquiryId(inquiryId);
         if (inquiry == null) throw new NotFoundException("Not found inquiry");
+        else if (!inquiry.getUser().getUserId().equals(userId)) throw new ForbiddenException("This inquiry isn't your own");
 
         AnswerEntity answer = null;
 

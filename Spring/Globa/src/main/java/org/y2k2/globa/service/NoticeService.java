@@ -9,21 +9,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import org.y2k2.globa.dto.NoticeAddRequestDto;
-import org.y2k2.globa.dto.NoticeDetailResponseDto;
-import org.y2k2.globa.dto.NoticeIntroResponseDto;
-import org.y2k2.globa.entity.DummyImageEntity;
-import org.y2k2.globa.entity.NoticeEntity;
-import org.y2k2.globa.entity.NoticeImageEntity;
-import org.y2k2.globa.entity.UserEntity;
+import org.y2k2.globa.dto.*;
+import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.FileUploadException;
 import org.y2k2.globa.exception.InvalidTokenException;
 import org.y2k2.globa.exception.NotFoundException;
 import org.y2k2.globa.mapper.NoticeMapper;
-import org.y2k2.globa.repository.DummyImageRepository;
-import org.y2k2.globa.repository.NoticeImageRepository;
-import org.y2k2.globa.repository.NoticeRepository;
-import org.y2k2.globa.repository.UserRepository;
+import org.y2k2.globa.mapper.NotificationMapper;
+import org.y2k2.globa.repository.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,15 +27,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class NoticeService {
     private final UserRepository userRepository;
-    private final NoticeRepository noticeRepostory;
+    private final NoticeRepository noticeRepository;
     private final NoticeImageRepository noticeImageRepository;
     private final DummyImageRepository dummyImageRepository;
+    private final NotificationRepository notificationRepository;
 
     @Autowired
     private Bucket bucket;
 
     public List<NoticeIntroResponseDto> getIntroNotices() {
-        List<NoticeEntity> noticeEntities = noticeRepostory.findByOrderByCreatedTimeDesc(Limit.of(3));
+        List<NoticeEntity> noticeEntities = noticeRepository.findByOrderByCreatedTimeDesc(Limit.of(3));
 
         return noticeEntities.stream()
                 .map(NoticeMapper.INSTANCE::toIntroResponseDto)
@@ -50,7 +44,7 @@ public class NoticeService {
     }
 
     public NoticeDetailResponseDto getNoticeDetail(Long noticeId) {
-        NoticeEntity noticeEntity = noticeRepostory.findByNoticeId(noticeId);
+        NoticeEntity noticeEntity = noticeRepository.findByNoticeId(noticeId);
 
         if (noticeEntity == null) {
             throw new NotFoundException("Not found notice using noticeId : " + noticeId);
@@ -72,9 +66,17 @@ public class NoticeService {
 
         try {
             uploadThumbnail(requestEntity, dto.getThumbnail());
-            NoticeEntity noticeEntity = noticeRepostory.save(requestEntity);
+            NoticeEntity noticeEntity = noticeRepository.save(requestEntity);
 
-            if (dto.getImageIds() == null) return noticeEntity.getNoticeId();
+            if (dto.getImageIds() == null) {
+                NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithNotice(
+                        new RequestNotificationWithNoticeDto(user, noticeEntity)
+                );
+                notification.setTypeId(NotificationTypeEnum.NOTICE.getTypeId());
+                notificationRepository.save(notification);
+
+                return noticeEntity.getNoticeId();
+            }
 
             List<DummyImageEntity> dummyImageEntities = dummyImageRepository.findByImageIdIn(dto.getImageIds());
             List<NoticeImageEntity> noticeImageEntities = new ArrayList<>();
@@ -94,6 +96,12 @@ public class NoticeService {
 
             dummyImageRepository.deleteAll(dummyImageEntities);
             noticeImageRepository.saveAll(noticeImageEntities);
+
+            NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithNotice(
+                    new RequestNotificationWithNoticeDto(user, noticeEntity)
+            );
+            notification.setTypeId(NotificationTypeEnum.NOTICE.getTypeId());
+            notificationRepository.save(notification);
 
             return noticeEntity.getNoticeId();
         } catch (Exception e) {

@@ -8,22 +8,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
-import org.y2k2.globa.dto.FolderShareUserDto;
-import org.y2k2.globa.dto.FolderShareUserResponseDto;
-import org.y2k2.globa.dto.InvitationStatus;
-import org.y2k2.globa.dto.Role;
-import org.y2k2.globa.entity.FolderEntity;
-import org.y2k2.globa.entity.FolderRoleEntity;
-import org.y2k2.globa.entity.FolderShareEntity;
-import org.y2k2.globa.entity.UserEntity;
+import org.y2k2.globa.dto.*;
+import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.BadRequestException;
 import org.y2k2.globa.exception.ForbiddenException;
 import org.y2k2.globa.exception.NotFoundException;
 import org.y2k2.globa.mapper.FolderShareMapper;
-import org.y2k2.globa.repository.FolderRepository;
-import org.y2k2.globa.repository.FolderRoleRepository;
-import org.y2k2.globa.repository.FolderShareRepository;
-import org.y2k2.globa.repository.UserRepository;
+import org.y2k2.globa.mapper.NotificationMapper;
+import org.y2k2.globa.repository.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +28,7 @@ public class FolderShareService {
     private final FolderRepository folderRepository;
     private final FolderRoleRepository folderRoleRepository;
     private final UserRepository userRepository;
+    private final NotificationRepository notificationRepository;
 
     public FolderShareUserResponseDto getShares(Long folderId, Long userId, int page, int count) {
         FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId);
@@ -71,7 +64,13 @@ public class FolderShareService {
 
         FolderRoleEntity folderRoleEntity = convertRole(role);
         FolderShareEntity entity = FolderShareEntity.create(folderEntity, ownerEntity, targetEntity, folderRoleEntity);
-        folderShareRepository.save(entity);
+        FolderShareEntity saveFolderShare = folderShareRepository.save(entity);
+
+        NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithInvitation(
+                new RequestNotificationWithInvitationDto(ownerEntity, targetEntity, folderEntity, saveFolderShare)
+        );
+        notification.setTypeId(NotificationTypeEnum.SHARE_FOLDER_INVITE.getTypeId());
+        notificationRepository.save(notification);
     }
 
     @Transactional
@@ -115,6 +114,12 @@ public class FolderShareService {
 
         folderShareEntity.setInvitationStatus(String.valueOf(InvitationStatus.ACCEPT));
         folderShareRepository.save(folderShareEntity);
+
+        NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareAddUser(
+                new RequestNotificationWithFolderShareAddUserDto(folderShareEntity.getTargetUser(), folderShareEntity.getFolder(), folderShareEntity)
+        );
+        notification.setTypeId(NotificationTypeEnum.SHARE_FOLDER_ADD_USER.getTypeId());
+        notificationRepository.save(notification);
     }
     @Transactional
     public void refuseShare(Long folderId, Long shareId, Long targetId) {

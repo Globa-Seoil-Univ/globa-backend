@@ -11,6 +11,7 @@ import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.*;
 import org.y2k2.globa.mapper.CommentMapper;
+import org.y2k2.globa.mapper.NotificationMapper;
 import org.y2k2.globa.repository.*;
 import org.y2k2.globa.util.CustomTimestamp;
 
@@ -26,6 +27,7 @@ public class CommentService {
     private final SectionRepository sectionRepository;
     private final UserRepository userRepository;
     private final HighlightRepository highlightRepository;
+    private final NotificationRepository notificationRepository;
 
     public ResponseCommentDto getComments(RequestCommentWithIdsDto request, int page, int count) {
         UserEntity user = validateUser(request.getUserId());
@@ -71,7 +73,7 @@ public class CommentService {
     public long addFirstComment(RequestCommentWithIdsDto request, RequestFirstCommentDto dto) {
         UserEntity user = validateUser(request.getUserId());
         SectionEntity section = validateSection(request.getSectionId(), request.getRecordId(), request.getFolderId());
-        validateFolderShare(section, user);
+        FolderShareEntity folderShare = validateFolderShare(section, user);
 
         // 같은 인덱스에 있는 곳에 댓글을 추가할라면 리턴 
         HighlightEntity highlight = highlightRepository.findBySectionAndStartIndexAndEndIndex(section, dto.getStartIdx(), dto.getEndIdx());
@@ -81,7 +83,13 @@ public class CommentService {
         HighlightEntity response = highlightRepository.save(createdHighlight);
 
         CommentEntity comment = CommentEntity.create(user, response, dto.getContent());
-        commentRepository.save(comment);
+        CommentEntity addedComment = commentRepository.save(comment);
+
+        NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareComment(
+                new RequestNotificationWithFolderShareCommentDto(user, folderShare.getFolder(), folderShare, section.getRecord(),  addedComment)
+        );
+        notification.setTypeId(NotificationTypeEnum.SHARE_FOLDER_ADD_COMMENT.getTypeId());
+        notificationRepository.save(notification);
 
         return response.getHighlightId();
     }
@@ -90,18 +98,24 @@ public class CommentService {
     public void addComment(RequestCommentWithIdsDto request, RequestCommentDto dto) {
         UserEntity user = validateUser(request.getUserId());
         SectionEntity section = validateSection(request.getSectionId(), request.getRecordId(), request.getFolderId());
-        validateFolderShare(section, user);
+        FolderShareEntity folderShare = validateFolderShare(section, user);
         HighlightEntity highlight = validateHighlight(request.getHighlightId());
 
         CommentEntity comment = CommentEntity.create(user, highlight, dto.getContent());
-        commentRepository.save(comment);
+        CommentEntity addedComment = commentRepository.save(comment);
+
+        NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareComment(
+                new RequestNotificationWithFolderShareCommentDto(user, folderShare.getFolder(), folderShare, section.getRecord(), addedComment)
+        );
+        notification.setTypeId(NotificationTypeEnum.SHARE_FOLDER_ADD_COMMENT.getTypeId());
+        notificationRepository.save(notification);
     }
 
     @Transactional
     public void addReply(RequestCommentWithIdsDto request, RequestCommentDto dto) {
         UserEntity user = validateUser(request.getUserId());
         SectionEntity section = validateSection(request.getSectionId(), request.getRecordId(), request.getFolderId());
-        validateFolderShare(section, user);
+        FolderShareEntity folderShare = validateFolderShare(section, user);
         HighlightEntity highlight = validateHighlight(request.getHighlightId());
 
         CommentEntity parentComment = commentRepository.findByCommentId(request.getParentId());
@@ -109,7 +123,13 @@ public class CommentService {
         else if (parentComment.getParent() != null) throw new BadRequestException("Parent id exists in the requested comment id");
 
         CommentEntity comment = CommentEntity.createReply(user, highlight, parentComment, dto.getContent());
-        commentRepository.save(comment);
+        CommentEntity addedComment = commentRepository.save(comment);
+
+        NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareComment(
+                new RequestNotificationWithFolderShareCommentDto(user, folderShare.getFolder(), folderShare, section.getRecord(), addedComment)
+        );
+        notification.setTypeId(NotificationTypeEnum.SHARE_FOLDER_ADD_COMMENT.getTypeId());
+        notificationRepository.save(notification);
     }
 
     public void updateComment(RequestCommentWithIdsDto request, long commentId, RequestCommentDto dto) {
@@ -157,9 +177,11 @@ public class CommentService {
         return section;
     }
 
-    private void validateFolderShare(SectionEntity section, UserEntity user) {
+    private FolderShareEntity validateFolderShare(SectionEntity section, UserEntity user) {
         FolderShareEntity folderShare = folderShareRepository.findByFolderAndTargetUser(section.getRecord().getFolder(), user);
         if (folderShare == null) throw new ForbiddenException("You aren't authorized to post comments");
+
+        return folderShare;
     }
 
     private HighlightEntity validateHighlight(long highlightId) {
