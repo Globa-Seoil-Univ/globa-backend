@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.FileUploadException;
+import org.y2k2.globa.exception.ForbiddenException;
 import org.y2k2.globa.exception.InvalidTokenException;
 import org.y2k2.globa.exception.NotFoundException;
 import org.y2k2.globa.mapper.NoticeMapper;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class NoticeService {
     private final UserRepository userRepository;
+    private final UserRoleRepository userRoleRepository;
     private final NoticeRepository noticeRepository;
     private final NoticeImageRepository noticeImageRepository;
     private final DummyImageRepository dummyImageRepository;
@@ -56,10 +58,14 @@ public class NoticeService {
     @Transactional
     public Long addNotice(Long userId, NoticeAddRequestDto dto) {
         UserEntity user = userRepository.findByUserId(userId);
-
         if (user == null) {
             throw new InvalidTokenException("Invalid Token");
         }
+
+        UserRoleEntity userRole = userRoleRepository.findByUser(user);
+        String roleName = userRole.getRoleId().getName();
+        boolean isAdminOrEditor = UserRole.ADMIN.getRoleName().equals(roleName) || UserRole.EDITOR.getRoleName().equals(roleName);
+        if (!isAdminOrEditor) throw new ForbiddenException("Only admin or editor can write answers");
 
         NoticeEntity requestEntity = NoticeMapper.INSTANCE.toEntity(dto);
         requestEntity.setUser(user);

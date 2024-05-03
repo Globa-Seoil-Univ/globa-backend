@@ -72,7 +72,7 @@ public class FolderShareController {
             @PathVariable(value = "folderId") Long folderId,
             @PathVariable(value = "shareId") Long shareId) {
         // token 체크
-        folderShareService.acceptShare(folderId, shareId, 4L);
+        folderShareService.acceptShare(folderId, shareId, 2L);
         return ResponseEntity.noContent().build();
     }
 

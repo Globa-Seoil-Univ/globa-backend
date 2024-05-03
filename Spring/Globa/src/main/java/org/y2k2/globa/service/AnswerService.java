@@ -1,6 +1,9 @@
 package org.y2k2.globa.service;
 
+import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.dto.*;
@@ -15,6 +18,8 @@ import org.y2k2.globa.repository.*;
 @Service
 @RequiredArgsConstructor
 public class AnswerService {
+    private final Logger log = LoggerFactory.getLogger(getClass());
+    private final FirebaseMessaging firebaseMessaging;
     private final AnswerRepository answerRepository;
     private final InquiryRepository inquiryRepository;
     private final UserRepository userRepository;
@@ -41,6 +46,31 @@ public class AnswerService {
         );
         notification.setTypeId(NotificationTypeEnum.INQUIRY.getTypeId());
         notificationRepository.save(notification);
+
+        if (!user.getPrimaryNofi() || user.getNotificationToken() == null) return;
+
+        try {
+            Message message = Message.builder()
+                    .setToken(user.getNotificationToken())
+                    .setNotification(Notification.builder()
+                            .setTitle("문의 답변 도착!")
+                            .setBody(inquiry.getTitle() + "에 대한 문의 답변이 도착했어요!")
+                            .build())
+                    .build();
+
+            firebaseMessaging.send(message);
+        } catch (FirebaseMessagingException e) {
+            if (e.getMessagingErrorCode() == MessagingErrorCode.INVALID_ARGUMENT || e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
+                user.setNotificationToken(null);
+                user.setNotificationTokenTime(null);
+                userRepository.save(user);
+                log.debug("Delete Notification Token : " + user.getUserId());
+            }
+
+            log.debug("Failed to send answer notification : " + answer.getAnswerId() + " : " + e.getMessage());
+        } catch (Exception e) {
+            log.debug("Failed to send answer notification : " + answer.getAnswerId() + " : " + e.getMessage());
+        }
     }
 
     @Transactional

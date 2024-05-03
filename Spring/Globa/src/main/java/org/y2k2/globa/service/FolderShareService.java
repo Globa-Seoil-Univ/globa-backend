@@ -1,7 +1,10 @@
 package org.y2k2.globa.service;
 
+import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +27,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class FolderShareService {
+    private final Logger log = LoggerFactory.getLogger(getClass());
+    private final FirebaseMessaging firebaseMessaging;
     private final FolderShareRepository folderShareRepository;
     private final FolderRepository folderRepository;
     private final FolderRoleRepository folderRoleRepository;
@@ -71,6 +76,31 @@ public class FolderShareService {
         );
         notification.setTypeId(NotificationTypeEnum.SHARE_FOLDER_INVITE.getTypeId());
         notificationRepository.save(notification);
+
+        if (!targetEntity.getShareNofi() || targetEntity.getNotificationToken() == null) return;
+
+        try {
+            Message message = Message.builder()
+                    .setToken(targetEntity.getNotificationToken())
+                    .setNotification(Notification.builder()
+                            .setTitle("공유 초대를 보냈습니다!")
+                            .setBody(ownerEntity.getName() + "님이 " + folderEntity.getTitle() + " 폴더를 공유하고 싶어합니다.")
+                            .build())
+                    .build();
+
+            firebaseMessaging.send(message);
+        } catch (FirebaseMessagingException e) {
+            if (e.getMessagingErrorCode() == MessagingErrorCode.INVALID_ARGUMENT || e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
+                targetEntity.setNotificationToken(null);
+                targetEntity.setNotificationTokenTime(null);
+                userRepository.save(targetEntity);
+                log.debug("Delete Notification Token : " + targetEntity.getUserId());
+            }
+
+            log.debug("Failed to send invite notification : " + saveFolderShare.getShareId() + " : " + e.getMessage());
+        } catch (Exception e) {
+            log.debug("Failed to send invite notification : " + saveFolderShare.getShareId() + " : " + e.getMessage());
+        }
     }
 
     @Transactional
@@ -115,11 +145,43 @@ public class FolderShareService {
         folderShareEntity.setInvitationStatus(String.valueOf(InvitationStatus.ACCEPT));
         folderShareRepository.save(folderShareEntity);
 
+        NotificationEntity invitationNotification = notificationRepository.findByFolderFolderIdAndFolderShareShareIdAndFromUserUserId(folderId, shareId, targetId);
+        if (invitationNotification != null) {
+            notificationRepository.delete(invitationNotification);
+        }
+
         NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareAddUser(
                 new RequestNotificationWithFolderShareAddUserDto(folderShareEntity.getTargetUser(), folderShareEntity.getFolder(), folderShareEntity)
         );
         notification.setTypeId(NotificationTypeEnum.SHARE_FOLDER_ADD_USER.getTypeId());
         notificationRepository.save(notification);
+
+        List<FolderShareEntity> targetFolderShares = folderShareRepository.findAllByFolderFolderId(folderId);
+        List<Message> messages = new ArrayList<>();
+
+        try {
+            for (FolderShareEntity targetFolderShare : targetFolderShares) {
+                boolean isNotTarget = !targetFolderShare.getTargetUser().getShareNofi()
+                        || targetFolderShare.getTargetUser().getNotificationToken() == null
+                        || targetFolderShare.getTargetUser().getUserId().equals(targetId);
+                if (isNotTarget) {
+                    continue;
+                }
+
+                Message message = Message.builder()
+                        .setToken(targetFolderShare.getTargetUser().getNotificationToken())
+                        .setNotification(Notification.builder()
+                                .setTitle("새로운 사용자가 추가되었습니다!")
+                                .setBody(folderShareEntity.getTargetUser().getName() + "님이 " + folderShareEntity.getFolder().getTitle() + " 폴더 공유를 수락했습니다.")
+                                .build())
+                        .build();
+                messages.add(message);
+            }
+
+            firebaseMessaging.sendEach(messages, false);
+        }  catch (Exception e) {
+            log.debug("Failed to send invite notification : " + folderShareEntity.getShareId() + " : " + e.getMessage());
+        }
     }
     @Transactional
     public void refuseShare(Long folderId, Long shareId, Long targetId) {

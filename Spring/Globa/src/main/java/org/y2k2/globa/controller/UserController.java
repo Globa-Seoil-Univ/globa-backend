@@ -2,6 +2,7 @@ package org.y2k2.globa.controller;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jsonwebtoken.Jwt;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import org.y2k2.globa.util.JwtToken;
 import org.y2k2.globa.util.JwtTokenProvider;
 import org.y2k2.globa.util.ValidValues;
 
+import java.net.URI;
 import java.util.Map;
 
 @RestController
@@ -121,35 +123,27 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
-
-
-
-
-
-
-
-
-
     @GetMapping("/login")
     public ResponseEntity<?> getToken(@RequestParam(required = false, value = "userId") Long userId) {
         JwtToken result = jwtTokenProvider.generateToken(userId);
 
         return ResponseEntity.ok(result);
     }
-    @GetMapping("/testToken") // 삭제 해야함
-    public ResponseEntity<?> getUserIdByAccessToken(@RequestParam(required = false, value = "token") String token) {
-        Long result = jwtTokenProvider.getUserIdByAccessToken(token);
 
-        return ResponseEntity.ok(jwtTokenProvider.validateToken(token));
+    @PostMapping(PRE_FIX + "/{userId}/notification/token")
+    public ResponseEntity<?> postNotificationToken(
+            @Valid @RequestBody RequestNotificationTokenDto dto,
+            @PathVariable(value = "userId", required = false) long userId) {
+        userService.addAndUpdateNotificationToken(dto, userId);
+        return ResponseEntity.created(URI.create("/user")).build();
     }
 
-
-
-    @GetMapping("/error/bad-request")
-    public ResponseEntity<?> getBadRequest() {
-        userService.errorTestBadRequest();
-
-        return ResponseEntity.ok("어라 이게 나오면 안되는뎅");
+    @PutMapping(PRE_FIX + "/{userId}/notification/token")
+    public ResponseEntity<?> updateNotificationToken(
+            @Valid @RequestBody RequestNotificationTokenDto dto,
+            @PathVariable(value = "userId", required = false) long userId) {
+        userService.addAndUpdateNotificationToken(dto, userId);
+        return ResponseEntity.noContent().build();
     }
 }
 

@@ -14,6 +14,7 @@ import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.StudyEntity;
 import org.y2k2.globa.entity.UserEntity;
+import org.y2k2.globa.exception.InvalidTokenException;
 import org.y2k2.globa.exception.UnAuthorizedException;
 import org.y2k2.globa.exception.BadRequestException;
 import org.y2k2.globa.repository.StudyRepository;
@@ -193,17 +194,6 @@ public class UserService {
         return responseAnalysisDto;
     }
 
-
-
-
-
-
-
-
-
-
-
-
     public String generateRandomCode(int length){
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         Random random = new SecureRandom();
@@ -219,62 +209,12 @@ public class UserService {
         return code.toString();
     }
 
+    public void addAndUpdateNotificationToken(RequestNotificationTokenDto requestNotificationTokenDto, Long userId){
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+        if (userEntity == null) throw new BadRequestException("Not found user");
 
-
-    public ObjectNode getRanking(int page, int count) {
-        try {
-            Pageable pageable = PageRequest.of(page-1, count);
-            Page<UserEntity> rankingEntities =  userRepository.findAll(pageable);
-
-
-            List<UserEntity> resultValue = rankingEntities.getContent();
-            List<ObjectNode> responseList = new ArrayList<>();
-
-            for (UserEntity userEntity : resultValue) {
-                ObjectNode rankingNode = createRankingNode(userEntity);
-                responseList.add(rankingNode);
-            }
-
-            return createResultNode(responseList);
-
-        }catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void errorTestBadRequest() {
-        try {
-
-            throw new BadRequestException("Test BAD");
-
-        }catch (BadRequestException e) {
-            throw e;
-        }
-    }
-
-    private ObjectNode createRankingNode(UserEntity userEntity) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode rankingNode = objectMapper.createObjectNode();
-
-
-        System.out.println(UserDTO.toUserDTO(userEntity));
-        rankingNode.put("user", userEntity.getName());
-
-        return rankingNode;
-    }
-
-    private ObjectNode createResultNode(List<ObjectNode> responseList) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ArrayNode codesArrayNode = objectMapper.createArrayNode();
-
-        for (ObjectNode node : responseList) {
-            codesArrayNode.add(node);
-        }
-
-        ObjectNode resultNode = objectMapper.createObjectNode();
-        resultNode.set("rankings", codesArrayNode);
-        resultNode.put("total", responseList.size());
-
-        return resultNode;
+        userEntity.setNotificationToken(requestNotificationTokenDto.getToken());
+        userEntity.setNotificationTokenTime(LocalDateTime.now());
+        userRepository.save(userEntity);
     }
 }

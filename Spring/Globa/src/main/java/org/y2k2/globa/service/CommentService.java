@@ -1,6 +1,11 @@
 package org.y2k2.globa.service;
 
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.Notification;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +27,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CommentService {
+    private final Logger log = LoggerFactory.getLogger(getClass());
+    private final FirebaseMessaging firebaseMessaging;
     private final CommentRepository commentRepository;
     private final FolderShareRepository folderShareRepository;
     private final SectionRepository sectionRepository;
@@ -91,6 +98,8 @@ public class CommentService {
         notification.setTypeId(NotificationTypeEnum.SHARE_FOLDER_ADD_COMMENT.getTypeId());
         notificationRepository.save(notification);
 
+        notificationComment(user, folderShare);
+
         return response.getHighlightId();
     }
 
@@ -109,6 +118,8 @@ public class CommentService {
         );
         notification.setTypeId(NotificationTypeEnum.SHARE_FOLDER_ADD_COMMENT.getTypeId());
         notificationRepository.save(notification);
+
+        notificationComment(user, folderShare);
     }
 
     @Transactional
@@ -130,6 +141,8 @@ public class CommentService {
         );
         notification.setTypeId(NotificationTypeEnum.SHARE_FOLDER_ADD_COMMENT.getTypeId());
         notificationRepository.save(notification);
+
+        notificationComment(user, folderShare);
     }
 
     public void updateComment(RequestCommentWithIdsDto request, long commentId, RequestCommentDto dto) {
@@ -196,5 +209,33 @@ public class CommentService {
         if (comment == null) throw new NotFoundException("Not found comment");
 
         return comment;
+    }
+
+    private void notificationComment(UserEntity user, FolderShareEntity folderShareEntity) {
+        List<FolderShareEntity> targetFolderShares = folderShareRepository.findAllByFolderFolderId(folderShareEntity.getFolder().getFolderId());
+        List<Message> messages = new ArrayList<>();
+
+        try {
+            for (FolderShareEntity targetFolderShare : targetFolderShares) {
+                boolean isNotTarget = !targetFolderShare.getTargetUser().getShareNofi()
+                        || targetFolderShare.getTargetUser().getNotificationToken() == null
+                        || targetFolderShare.getTargetUser().getUserId().equals(user.getUserId());
+                if (isNotTarget) {
+                    continue;
+                }
+
+                Message message = Message.builder()
+                        .setToken(targetFolderShare.getTargetUser().getNotificationToken())
+                        .setNotification(Notification.builder()
+                                .setTitle(user.getName() + "님이 댓글이 달았습니다!")
+                                .build())
+                        .build();
+                messages.add(message);
+            }
+
+            firebaseMessaging.sendEach(messages, false);
+        }  catch (Exception e) {
+            log.debug("Failed to comment notification : " + folderShareEntity.getShareId() + " : " + e.getMessage());
+        }
     }
 }

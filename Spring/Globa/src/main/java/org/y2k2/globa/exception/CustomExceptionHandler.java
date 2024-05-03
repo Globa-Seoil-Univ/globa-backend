@@ -128,6 +128,11 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleSignatureException(SignatureException ex) {
         return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.INVALID_TOKEN.value()), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(FcmException.class)
+    public ResponseEntity<Object> handleFcmException(FcmException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.FAILED_FCM_SEND.value()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
     // ErrorResponse 클래스 정의
 
 }
