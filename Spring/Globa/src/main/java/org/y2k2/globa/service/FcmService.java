@@ -1,6 +1,5 @@
 package org.y2k2.globa.service;
 
-import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.messaging.*;
 
 import lombok.RequiredArgsConstructor;

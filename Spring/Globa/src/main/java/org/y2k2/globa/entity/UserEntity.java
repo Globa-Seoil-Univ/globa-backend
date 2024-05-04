@@ -56,7 +56,7 @@ public class UserEntity {
     @Column(name = "profile_path")
     private String profilePath;
 
-    @Column(name = "notification_token")
+    @Column(name = "notification_token", unique = true)
     private String notificationToken;
 
     @Column(name = "notification_token_time")

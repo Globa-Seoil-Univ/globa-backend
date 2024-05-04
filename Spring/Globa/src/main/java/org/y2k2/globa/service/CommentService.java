@@ -192,7 +192,7 @@ public class CommentService {
 
     private FolderShareEntity validateFolderShare(SectionEntity section, UserEntity user) {
         FolderShareEntity folderShare = folderShareRepository.findByFolderAndTargetUser(section.getRecord().getFolder(), user);
-        if (folderShare == null) throw new ForbiddenException("You aren't authorized to post comments");
+        if (folderShare == null || folderShare.getInvitationStatus().equals(String.valueOf(InvitationStatus.PENDING))) throw new ForbiddenException("You aren't authorized to post comments");
 
         return folderShare;
     }
@@ -213,6 +213,8 @@ public class CommentService {
 
     private void notificationComment(UserEntity user, FolderShareEntity folderShareEntity) {
         List<FolderShareEntity> targetFolderShares = folderShareRepository.findAllByFolderFolderId(folderShareEntity.getFolder().getFolderId());
+        if (targetFolderShares.isEmpty()) return;
+
         List<Message> messages = new ArrayList<>();
 
         try {

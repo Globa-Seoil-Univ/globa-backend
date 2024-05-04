@@ -76,7 +76,7 @@ public class CommentController {
     ) {
         // token 체크
 
-        RequestCommentWithIdsDto request = new RequestCommentWithIdsDto(1L, folderId, recordId, sectionId, highlightId);
+        RequestCommentWithIdsDto request = new RequestCommentWithIdsDto(2L, folderId, recordId, sectionId, highlightId);
         commentService.addComment(request, dto);
         return ResponseEntity.created(URI.create("/folder/" + folderId + "/record/" + recordId + "/highlight/" + highlightId)).build();
     }
