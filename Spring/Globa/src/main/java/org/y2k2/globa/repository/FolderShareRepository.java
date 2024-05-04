@@ -10,7 +10,7 @@ import org.y2k2.globa.entity.UserEntity;
 
 public interface FolderShareRepository extends JpaRepository<FolderShareEntity, Long> {
     Page<FolderShareEntity> findByFolderOrderByCreatedTimeAsc(Pageable pageable, FolderEntity folder);
-    FolderShareEntity findFirstByTargetUser(UserEntity user);
+    FolderShareEntity findFirstByTargetUserAndFolderFolderId(UserEntity user,Long folderId);
     FolderShareEntity findFirstByFolderAndTargetUser(FolderEntity folderId, UserEntity user);
     FolderShareEntity findFirstByShareId(Long folderId);
 }

@@ -7,12 +7,12 @@ import lombok.ToString;
 
 import java.io.Serializable;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
 @ToString
-public class ResponseUserNotificationDto implements Serializable {
-    private Boolean uploadNofi;
-    private Boolean shareNofi;
-    private Boolean eventNofi;
+public class RequestSurveyDto implements Serializable {
+    private Integer surveyType;
+    private String content;
 }

@@ -66,7 +66,7 @@ public class FolderShareService {
         if (folderEntity == null) throw new NotFoundException("Not found folder");
         if (!folderEntity.getUser().getUserId().equals(ownerId)) throw new ForbiddenException("You aren't owned this folder");
 
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUser(targetEntity);
+        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(targetEntity,folderId);
         if (folderShareEntity != null) throw new BadRequestException("This user has already been shared or sent a share request");
 
         FolderRoleEntity folderRoleEntity = convertRole(role);

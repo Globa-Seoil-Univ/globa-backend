@@ -8,15 +8,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.StudyEntity;
+import org.y2k2.globa.entity.SurveyEntity;
 import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.exception.UnAuthorizedException;
 import org.y2k2.globa.exception.BadRequestException;
 import org.y2k2.globa.repository.StudyRepository;
+import org.y2k2.globa.repository.SurveyRepository;
 import org.y2k2.globa.repository.UserRepository;
 import org.y2k2.globa.util.JwtToken;
 import org.y2k2.globa.util.JwtTokenProvider;
@@ -35,6 +38,9 @@ public class UserService {
 
     public final UserRepository userRepository;;
     public final StudyRepository studyRepository;
+    public final SurveyRepository surveyRepository;
+
+    public final FolderService folderService;
 
     public JwtToken reloadRefreshToken(String refreshToken, String accessToken){
         try {
@@ -71,10 +77,11 @@ public class UserService {
         UserEntity postUserEntity = userRepository.findBySnsId(requestUserPostDTO.getSnsId());
 
         if(postUserEntity == null) {
+            String USER_CODE = generateRandomCode(6);
             UserEntity userEntity = new UserEntity();
             userEntity.setSnsKind(requestUserPostDTO.getSnsKind());
             userEntity.setSnsId(requestUserPostDTO.getSnsId());
-            userEntity.setCode(generateRandomCode(6));
+            userEntity.setCode(USER_CODE);
             userEntity.setName(requestUserPostDTO.getName());
             userEntity.setProfilePath(requestUserPostDTO.getProfile());
             userEntity.setPrimaryNofi(requestUserPostDTO.getNotification());
@@ -85,6 +92,8 @@ public class UserService {
             userEntity.setDeleted(false);
 
             postUserEntity = userRepository.save(userEntity);
+
+            folderService.postDefaultFolder(postUserEntity, USER_CODE);
         }
 
         JwtToken jwtToken = jwtTokenProvider.generateToken(postUserEntity.getUserId());
@@ -129,7 +138,7 @@ public class UserService {
 
     }
 
-    public ResponseUserNotificationDto getNotification(String accessToken, Long pathUserId){
+    public NotificationDto getNotification(String accessToken, Long pathUserId){
 
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
@@ -139,14 +148,13 @@ public class UserService {
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
-        ResponseUserNotificationDto responseUserNotificationDto = new ResponseUserNotificationDto();
+        NotificationDto responseUserNotificationDto = new NotificationDto();
 
         responseUserNotificationDto.setUploadNofi(userEntity.getUploadNofi());
         responseUserNotificationDto.setShareNofi(userEntity.getShareNofi());
         responseUserNotificationDto.setEventNofi(userEntity.getEventNofi());
 
         return responseUserNotificationDto;
-
     }
 
     public ResponseAnalysisDto getAnalysis(String accessToken, Long pathUserId){
@@ -154,8 +162,9 @@ public class UserService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
         if (!Objects.equals(userId, pathUserId)){
-            throw new UnAuthorizedException("Not Matched User ! owner : " + userId + ", request : " + pathUserId);
+            throw new UnAuthorizedException("Not Matched User !");
         }
+
 
         List<StudyEntity> studyEntities = studyRepository.findAllByUserUserId(userId);
         List<QuizGradeProjection> quizGradeProjectionList = userRepository.findQuizGradeByUser(userId);
@@ -193,9 +202,71 @@ public class UserService {
         return responseAnalysisDto;
     }
 
+    public NotificationDto putNotification(String accessToken, Long putUserId, NotificationDto notificationDto){
+
+        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+
+        if (!Objects.equals(userId, putUserId)){
+            throw new UnAuthorizedException("Not Matched User ");
+        }
+
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+
+        userEntity.setUploadNofi(notificationDto.getUploadNofi());
+        userEntity.setShareNofi(notificationDto.getShareNofi());
+        userEntity.setEventNofi(notificationDto.getEventNofi());
+
+        UserEntity savedEntity = userRepository.save(userEntity);
+
+        NotificationDto responseUserNotificationDto = new NotificationDto();
+
+        responseUserNotificationDto.setUploadNofi(savedEntity.getUploadNofi());
+        responseUserNotificationDto.setShareNofi(savedEntity.getShareNofi());
+        responseUserNotificationDto.setEventNofi(savedEntity.getEventNofi());
+
+        return responseUserNotificationDto;
+    }
+
+    public HttpStatus patchUserName(String accessToken, Long putUserId, String name){
+
+        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+
+        if (!Objects.equals(userId, putUserId)){
+            throw new UnAuthorizedException("Not Matched User ");
+        }
+
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+
+        userEntity.setName(name);
+
+        userRepository.save(userEntity);
 
 
+        return HttpStatus.OK;
+    }
 
+
+    public HttpStatus deleteUser(String accessToken, RequestSurveyDto requestSurveyDto){
+
+        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+
+        userEntity.setDeleted(true);
+        userEntity.setDeletedTime(LocalDateTime.now());
+
+        SurveyEntity surveyEntity = new SurveyEntity();
+        surveyEntity.setSurveyType(String.valueOf(requestSurveyDto.getSurveyType()));
+        surveyEntity.setContent(requestSurveyDto.getContent());
+        surveyEntity.setCreatedTime(LocalDateTime.now());
+
+        userRepository.save(userEntity);
+        surveyRepository.save(surveyEntity);
+
+        folderService.deleteDefaultFolder(userEntity);
+
+        return HttpStatus.OK;
+    }
 
 
 

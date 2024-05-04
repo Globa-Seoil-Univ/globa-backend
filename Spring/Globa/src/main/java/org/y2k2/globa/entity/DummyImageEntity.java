@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity(name = "dummyImage")
-@Table(name = "dummyImage")
+@Table(name = "dummy_image")
 public class DummyImageEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

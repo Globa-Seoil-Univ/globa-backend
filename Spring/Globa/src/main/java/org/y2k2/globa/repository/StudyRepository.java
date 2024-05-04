@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface StudyRepository extends JpaRepository<StudyEntity, Long> {
     List<StudyEntity> findAllByUserUserId(Long user);
+    List<StudyEntity> findAllByUserUserIdAndRecordRecordId(Long user,Long recordId);
 }

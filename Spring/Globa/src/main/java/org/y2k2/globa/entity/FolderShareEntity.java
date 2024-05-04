@@ -55,7 +55,7 @@ public class FolderShareEntity {
 
     @PrePersist
     public void prePersist() {
-        this.setInvitationStatus(String.valueOf(InvitationStatus.PENDING));
+        if (this.invitationStatus == null) this.setInvitationStatus(String.valueOf(InvitationStatus.PENDING));
     }
 
     public static FolderShareEntity create(FolderEntity folder, UserEntity ownerUser, UserEntity targetUser, FolderRoleEntity folderRole) {

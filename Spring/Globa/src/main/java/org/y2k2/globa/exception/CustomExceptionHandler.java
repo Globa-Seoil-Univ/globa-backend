@@ -128,6 +128,11 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleSignatureException(SignatureException ex) {
         return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.INVALID_TOKEN.value()), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(BadRequestFolderException.class)
+    public ResponseEntity<Object> handleBadRequestFolderException(BadRequestFolderException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.FOLDER_DELETE_BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
+    }
     // ErrorResponse 클래스 정의
 
 }
