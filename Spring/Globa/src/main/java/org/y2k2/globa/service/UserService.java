@@ -4,16 +4,24 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.cloud.storage.Bucket;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.StudyEntity;
 import org.y2k2.globa.entity.UserEntity;
+import org.y2k2.globa.exception.FileUploadException;
 import org.y2k2.globa.exception.InvalidTokenException;
 import org.y2k2.globa.exception.UnAuthorizedException;
 import org.y2k2.globa.exception.BadRequestException;
@@ -31,10 +39,14 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UserService {
 
+    @Autowired
+    private final Bucket bucket;
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtUtil jwtUtil;
 
-    public final UserRepository userRepository;;
+    public final UserRepository userRepository;
     public final StudyRepository studyRepository;
 
     public JwtToken reloadRefreshToken(String refreshToken, String accessToken){
@@ -148,6 +160,44 @@ public class UserService {
 
         return responseUserNotificationDto;
 
+    }
+
+    @Transactional
+    public void updateProfile(MultipartFile file, long userId) {
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+        if (userEntity == null) throw new BadRequestException("Not found user");
+
+        long current = new Date().getTime();
+        long size = file.getSize();
+        String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());
+        String mimeType = file.getContentType();
+
+        String oldPath = userEntity.getProfilePath();
+        String newPath = "users/" + userId + "/profile/" + current + "." + extension;
+
+        try {
+            bucket.create(newPath, file.getBytes());
+
+            userEntity.setProfilePath(newPath);
+            userEntity.setProfileType(mimeType);
+            userEntity.setProfileSize(size);
+            userRepository.save(userEntity);
+
+            if(oldPath != null && bucket.get(oldPath) != null) {
+                try {
+                    bucket.get(oldPath).delete();
+                } catch (Exception e) {
+                    log.error("Failed to delete old profile : " + e);
+                }
+            }
+        } catch (Exception e) {
+            if(bucket.get(newPath) != null) {
+                bucket.get(newPath).delete();
+            }
+
+            log.error("Failed to update profile : " + e);
+            throw new FileUploadException("Failed to update profile");
+        }
     }
 
     public ResponseAnalysisDto getAnalysis(String accessToken, Long pathUserId){

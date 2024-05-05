@@ -48,7 +48,7 @@ public class UserEntity {
     private Boolean eventNofi;
 
     @Column(name = "profile_size")
-    private String profileSize;
+    private Long profileSize;
 
     @Column(name = "profile_type")
     private String profileType;

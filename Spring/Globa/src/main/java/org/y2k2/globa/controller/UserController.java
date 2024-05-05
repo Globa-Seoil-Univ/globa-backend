@@ -3,8 +3,10 @@ package org.y2k2.globa.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.exception.BadRequestException;
 import org.y2k2.globa.exception.ForbiddenException;
@@ -17,11 +19,10 @@ import java.net.URI;
 import java.util.Map;
 
 @RestController
+@RequestMapping("user")
 @ResponseBody
 @RequiredArgsConstructor
 public class UserController {
-
-    private final String PRE_FIX = "/user";
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -44,7 +45,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(jwtToken);
     }
 
-    @PostMapping(PRE_FIX)
+    @PostMapping
     public ResponseEntity<?> postUser(@RequestBody RequestUserPostDTO requestUserPostDTO) {
 
         if ( requestUserPostDTO.getSnsKind() == null )
@@ -67,7 +68,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(jwtToken);
     }
 
-    @GetMapping(PRE_FIX)
+    @GetMapping
     public ResponseEntity<?> getUser(@RequestHeader(value = "Authorization", required = false) String accessToken) {
 
         if ( accessToken == null )
@@ -79,7 +80,7 @@ public class UserController {
     }
 
 
-    @GetMapping(PRE_FIX+"/search")
+    @GetMapping("/search")
     public ResponseEntity<?> getUserSearch(@RequestHeader(value = "Authorization", required = false) String accessToken,
                                            @RequestParam(value = "code", required = false) String code) {
 
@@ -92,7 +93,7 @@ public class UserController {
 
         return ResponseEntity.ok(result);
     }
-    @GetMapping(PRE_FIX+"/{user_id}/notification")
+    @GetMapping("/{user_id}/notification")
     public ResponseEntity<?> getUserNotification(@RequestHeader(value = "Authorization", required = false) String accessToken,
                                            @PathVariable(value = "user_id", required = false) Long userId) {
 
@@ -106,7 +107,7 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping(PRE_FIX+"/{user_id}/analysis")
+    @GetMapping("/{user_id}/analysis")
     public ResponseEntity<?> getAnalysis(@RequestHeader(value = "Authorization", required = false) String accessToken,
                                                  @PathVariable(value = "user_id", required = false) Long userId) {
 
@@ -156,6 +157,23 @@ public class UserController {
             throw new ForbiddenException("Invalid userId ! ");
 
         userService.addAndUpdateNotificationToken(dto, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping(value = "/{userId}/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateProfile(
+            @RequestHeader(value = "Authorization") String accessToken,
+            @RequestParam("profile") MultipartFile file,
+            @PathVariable(value = "userId", required = false) long userId) {
+        if ( accessToken == null )
+            throw new BadRequestException("Required AccessToken ! ");
+        if (file.isEmpty()) throw new BadRequestException("You must request profile field");
+
+        long accessUserId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        if (accessUserId != userId)
+            throw new ForbiddenException("Invalid userId ! ");
+
+        userService.updateProfile(file, userId);
         return ResponseEntity.noContent().build();
     }
 }
