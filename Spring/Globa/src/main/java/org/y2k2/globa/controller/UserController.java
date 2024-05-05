@@ -1,16 +1,13 @@
 package org.y2k2.globa.controller;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.jsonwebtoken.Jwt;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.exception.BadRequestException;
+import org.y2k2.globa.exception.ForbiddenException;
 import org.y2k2.globa.service.UserService;
 import org.y2k2.globa.util.JwtToken;
 import org.y2k2.globa.util.JwtTokenProvider;
@@ -130,18 +127,34 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping(PRE_FIX + "/{userId}/notification/token")
+    @PostMapping("/{userId}/notification/token")
     public ResponseEntity<?> postNotificationToken(
+            @RequestHeader(value = "Authorization") String accessToken,
             @Valid @RequestBody RequestNotificationTokenDto dto,
             @PathVariable(value = "userId", required = false) long userId) {
+        if ( accessToken == null )
+            throw new BadRequestException("Required AccessToken ! ");
+
+        long accessUserId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        if (accessUserId != userId)
+            throw new BadRequestException("Invalid userId ! ");
+
         userService.addAndUpdateNotificationToken(dto, userId);
         return ResponseEntity.created(URI.create("/user")).build();
     }
 
-    @PutMapping(PRE_FIX + "/{userId}/notification/token")
+    @PutMapping("/{userId}/notification/token")
     public ResponseEntity<?> updateNotificationToken(
+            @RequestHeader(value = "Authorization") String accessToken,
             @Valid @RequestBody RequestNotificationTokenDto dto,
             @PathVariable(value = "userId", required = false) long userId) {
+        if ( accessToken == null )
+            throw new BadRequestException("Required AccessToken ! ");
+
+        long accessUserId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        if (accessUserId != userId)
+            throw new ForbiddenException("Invalid userId ! ");
+
         userService.addAndUpdateNotificationToken(dto, userId);
         return ResponseEntity.noContent().build();
     }

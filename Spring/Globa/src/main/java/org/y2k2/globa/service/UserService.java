@@ -160,7 +160,7 @@ public class UserService {
 
         List<StudyEntity> studyEntities = studyRepository.findAllByUserUserId(userId);
         List<QuizGradeProjection> quizGradeProjectionList = userRepository.findQuizGradeByUser(userId);
-        List<KeywordProjection> keywordProjectionList = userRepository.findKeywordByRecordId(1L);
+        List<KeywordProjection> keywordProjectionList = userRepository.findKeywordByRecordId(userId);
 
         ResponseAnalysisDto responseAnalysisDto = new ResponseAnalysisDto();
         List<ResponseStudyTimesDto> studyTimes = new ArrayList<>();

@@ -30,7 +30,7 @@ public class JwtTokenProvider {
             long now = (new Date()).getTime();
 
             // Access Token 생성
-            Date accessTokenExpiresIn = new Date(now + 1800000); // 86400000는 24시간, 1800000은 30분
+            Date accessTokenExpiresIn = new Date(now + 604800000); // 86400000는 24시간, 1800000은 30분
 
             String accessToken = Jwts.builder()
                     .setSubject(String.valueOf(userId))
@@ -82,6 +82,7 @@ public class JwtTokenProvider {
 
     public Long getUserIdByAccessToken(String accessToken) {
         try{
+            accessToken = accessToken.split(" ")[1].trim();
             // Jwt 토큰 복호화
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(key)
@@ -93,7 +94,7 @@ public class JwtTokenProvider {
             return Long.valueOf(claims.getSubject());
         } catch (ExpiredJwtException e) {
             throw new AccessTokenException("Access Token Expired ! ");
-        } catch (SignatureException e ){
+        } catch (SignatureException e) {
             throw new org.y2k2.globa.exception.SignatureException("Not Matched Token");
         }
     }

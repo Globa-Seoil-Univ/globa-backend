@@ -5,44 +5,57 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.y2k2.globa.dto.*;
+import org.y2k2.globa.exception.BadRequestException;
 import org.y2k2.globa.service.InquiryService;
+import org.y2k2.globa.util.JwtTokenProvider;
 
 import java.net.URI;
 
 @RestController
+@RequestMapping("/inquiry")
 @ResponseBody
 @RequiredArgsConstructor
 public class InquiryController {
-    private final String PRE_FIX = "/inquiry";
     private final InquiryService inquiryService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    @GetMapping(value = PRE_FIX)
+    @GetMapping
     public ResponseEntity<?> getInquires(
+            @RequestHeader(value = "Authorization") String accessToken,
             @RequestParam(required = false, value = "page", defaultValue = "1") int page,
             @RequestParam(required = false, value = "count", defaultValue = "10") int count,
             @RequestParam(required = false, value = "sort", defaultValue = "r") String sort
     ) {
-        // token 체크
+        if (accessToken == null) {
+            throw new BadRequestException("You must be requested to access token.");
+        }
+        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
 
         SortDto sortDto = SortDto.valueOfString(sort);
         PaginationDto paginationDto = new PaginationDto(page, count, sortDto);
-        ResponseInquiryDto dto = inquiryService.getInquiries(1L, paginationDto);
+        ResponseInquiryDto dto = inquiryService.getInquiries(userId, paginationDto);
         return ResponseEntity.ok().body(dto);
     }
 
-    @GetMapping(value = PRE_FIX + "/{inquiryId}")
-    public ResponseEntity<?> getInquiry(@PathVariable(name = "inquiryId") long inquiryId) {
-        // token 체크
+    @GetMapping(value = "/{inquiryId}")
+    public ResponseEntity<?> getInquiry(@RequestHeader(value = "Authorization") String accessToken, @PathVariable(name = "inquiryId") long inquiryId) {
+        if (accessToken == null) {
+            throw new BadRequestException("You must be requested to access token.");
+        }
+        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
 
-        ResponseInquiryDetailDto dto = inquiryService.getInquiry(1L, inquiryId);
+        ResponseInquiryDetailDto dto = inquiryService.getInquiry(userId, inquiryId);
         return ResponseEntity.ok().body(dto);
     }
 
-    @PostMapping(value = PRE_FIX)
-    public ResponseEntity<?> addInquiry(@Valid @RequestBody RequestInquiryDto dto) {
-        // token 체크
+    @PostMapping
+    public ResponseEntity<?> addInquiry(@RequestHeader(value = "Authorization") String accessToken, @Valid @RequestBody RequestInquiryDto dto) {
+        if (accessToken == null) {
+            throw new BadRequestException("You must be requested to access token.");
+        }
+        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
 
-        long inquiryId = inquiryService.addInquiry(1L, dto);
-        return ResponseEntity.created(URI.create(PRE_FIX + "/" + inquiryId)).build();
+        long inquiryId = inquiryService.addInquiry(userId, dto);
+        return ResponseEntity.created(URI.create("/" + inquiryId)).build();
     }
 }

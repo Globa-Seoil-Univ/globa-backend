@@ -2,22 +2,25 @@ package org.y2k2.globa.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.y2k2.globa.exception.BadRequestException;
 import org.y2k2.globa.service.DictionaryService;
+import org.y2k2.globa.util.JwtTokenProvider;
 
 @RestController
+@RequestMapping("/dictionary")
 @ResponseBody
 @RequiredArgsConstructor
 public class DictionaryController {
-    private final String PRE_FIX = "/dictionary";
     private final DictionaryService dictionaryService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    @GetMapping(value = PRE_FIX)
-    public ResponseEntity<?> getDictionary(@RequestParam(required = true, value = "keyword") String keyword) {
-        // token 체크
+    @GetMapping
+    public ResponseEntity<?> getDictionary(@RequestHeader(value = "Authorization") String accessToken, @RequestParam(required = true, value = "keyword") String keyword) {
+        if (accessToken == null) {
+            throw new BadRequestException("You must be requested to access token.");
+        }
+        jwtTokenProvider.getUserIdByAccessToken(accessToken);
         return ResponseEntity.ok().body(dictionaryService.getDictionary(keyword));
     }
 }
