@@ -4,7 +4,6 @@ import firebase_admin
 from dotenv import load_dotenv
 from firebase_admin import credentials
 from firebase_admin import storage
-from datetime import timezone, datetime
 
 
 class FirebaseStorageManager:
