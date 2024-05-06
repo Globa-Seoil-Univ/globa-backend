@@ -13,11 +13,14 @@ import org.springframework.stereotype.Service;
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.dto.*;
+import org.y2k2.globa.entity.FolderEntity;
 import org.y2k2.globa.entity.StudyEntity;
 import org.y2k2.globa.entity.SurveyEntity;
 import org.y2k2.globa.entity.UserEntity;
+import org.y2k2.globa.exception.NotFoundException;
 import org.y2k2.globa.exception.UnAuthorizedException;
 import org.y2k2.globa.exception.BadRequestException;
+import org.y2k2.globa.repository.FolderRepository;
 import org.y2k2.globa.repository.StudyRepository;
 import org.y2k2.globa.repository.SurveyRepository;
 import org.y2k2.globa.repository.UserRepository;
@@ -39,6 +42,7 @@ public class UserService {
     public final UserRepository userRepository;;
     public final StudyRepository studyRepository;
     public final SurveyRepository surveyRepository;
+    public final FolderRepository folderRepository;
 
     public final FolderService folderService;
 
@@ -50,7 +54,7 @@ public class UserService {
 
             if(new Date().before(expiredTime)) {
                 jwtUtil.deleteValue(String.valueOf(userId));
-                throw new BadRequestException("우애우애우ㅐ우앵");
+                throw new BadRequestException("아직 토큰이 살아있습니다.");
             }
 
             if (!redisRefreshToken.equals(refreshToken)) {
@@ -93,7 +97,7 @@ public class UserService {
 
             postUserEntity = userRepository.save(userEntity);
 
-            folderService.postDefaultFolder(postUserEntity, USER_CODE);
+            folderService.postDefaultFolder(postUserEntity);
         }
 
         JwtToken jwtToken = jwtTokenProvider.generateToken(postUserEntity.getUserId());
@@ -110,13 +114,19 @@ public class UserService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
+        FolderEntity folderEntity = folderRepository.findFirstByUserUserIdOrderByCreatedTimeAsc(userId);
+
+        if(folderEntity == null)
+            throw new NotFoundException("기본 폴더를 찾을 수 없습니다 ! ");
+        if(userEntity == null)
+            throw new NotFoundException("유저를 찾을 수 없습니다 !");
 
         ResponseUserDTO responseUserDTO = new ResponseUserDTO();
 
         responseUserDTO.setProfile(userEntity.getProfilePath());
         responseUserDTO.setName(userEntity.getName());
         responseUserDTO.setCode(userEntity.getCode());
-        responseUserDTO.setPublicFolderId(9999);
+        responseUserDTO.setPublicFolderId(folderEntity.getFolderId());
 
         return responseUserDTO;
 
@@ -127,6 +137,9 @@ public class UserService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
         UserEntity userEntity = userRepository.findOneByCode(code);
+
+        if(userEntity == null)
+            throw new NotFoundException("유저를 찾을 수 없습니다 !");
 
         ResponseUserSearchDto responseUserSearchDto = new ResponseUserSearchDto();
 
@@ -143,10 +156,13 @@ public class UserService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
         if (!Objects.equals(userId, pathUserId)){
-            throw new UnAuthorizedException("Not Matched User ! owner : " + userId + ", request : " + pathUserId);
+            throw new UnAuthorizedException("Not Matched User !");
         }
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
+
+        if(userEntity == null)
+            throw new NotFoundException("유저를 찾을 수 없습니다 !");
 
         NotificationDto responseUserNotificationDto = new NotificationDto();
 

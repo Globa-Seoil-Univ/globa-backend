@@ -18,5 +18,5 @@ import java.util.List;
 public class ResponseRecordAnalysisDto {
     private Long analysisId;
     private String content;
-    private List<HighlightEntity> highlights;
+    private List<ResponseDetailHighlightDto> highlights;
 }

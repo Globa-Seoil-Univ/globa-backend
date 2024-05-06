@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface SectionRepository extends JpaRepository<SectionEntity, Long> {
 
-    List<SectionEntity> findAllByRecordRecordId(Long recordId);
+    List<SectionEntity> findAllByRecordRecordIdOrderByStartTimeAsc(Long recordId);
 }
 

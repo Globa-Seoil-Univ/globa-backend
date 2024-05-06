@@ -22,6 +22,6 @@ public class ResponseSectionDto {
     private int startTime;
     private int entTime;
     private ResponseRecordAnalysisDto analysis;
-    private List<SummaryEntity> summary;
+    private List<ResponseDetailSummaryDto> summary;
     private LocalDateTime createdTime;
 }

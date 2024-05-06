@@ -64,7 +64,7 @@ public class FolderService {
 
     }
 
-    public FolderDto postDefaultFolder(UserEntity userEntity, String Code){
+    public FolderDto postDefaultFolder(UserEntity userEntity){
         FolderEntity saveFolderEntity = new FolderEntity();
         saveFolderEntity.setUser(userEntity);
         saveFolderEntity.setTitle(userEntity.getName() + "의 기본 폴더");
@@ -83,7 +83,7 @@ public class FolderService {
         folderShareRepository.save(saveShareEntity);
 
 
-        BlobInfo blobInfo = BlobInfo.newBuilder("${firebase.bucket-path}", "folders/"+ Code + "/placeholder.txt").build();
+        BlobInfo blobInfo = BlobInfo.newBuilder("${firebase.bucket-path}", "folders/"+ savedEntity.getFolderId() + "/placeholder.txt").build();
         byte[] content = new byte[0]; // 빈 콘텐츠라도 넣어줘야 폴더가 생김 ㅠㅠ
         bucket.create(blobInfo.getName(), content);
         System.out.println("Folder created at path: " + Storage.BlobListOption.prefix("folders/"));
@@ -235,7 +235,7 @@ public class FolderService {
         }
 
 
-        for (Blob blob : bucket.list(Storage.BlobListOption.prefix("folders/" + userEntity.getCode())).iterateAll()) {
+        for (Blob blob : bucket.list(Storage.BlobListOption.prefix("folders/" + folderEntity.getFolderId())).iterateAll()) {
             blob.delete();
 
         }

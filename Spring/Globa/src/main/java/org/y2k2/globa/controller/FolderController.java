@@ -47,7 +47,7 @@ public class FolderController {
     }
 
     @PatchMapping(PRE_FIX + "/{folder_id}/name")
-    public ResponseEntity<?> postFolder(@RequestHeader(value = "Authorization", required = false) String accessToken,
+    public ResponseEntity<?> patchFolder(@RequestHeader(value = "Authorization", required = false) String accessToken,
                                         @PathVariable(value = "folder_id", required = false) Long folderId,
                                         @RequestBody Map<String, String> titleMap){
 

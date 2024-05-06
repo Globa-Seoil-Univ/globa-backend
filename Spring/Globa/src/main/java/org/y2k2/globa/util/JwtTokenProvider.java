@@ -30,7 +30,7 @@ public class JwtTokenProvider {
             long now = (new Date()).getTime();
 
             // Access Token 생성
-            Date accessTokenExpiresIn = new Date(now + 1800000); // 86400000는 24시간, 1800000은 30분
+            Date accessTokenExpiresIn = new Date(now + 86400000); // 86400000는 24시간, 1800000은 30분
 
             String accessToken = Jwts.builder()
                     .setSubject(String.valueOf(userId))

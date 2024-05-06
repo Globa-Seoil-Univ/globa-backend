@@ -2,11 +2,12 @@ package org.y2k2.globa.service;
 
 import com.google.api.Http;
 import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,7 @@ import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.BadRequestException;
+import org.y2k2.globa.exception.BadRequestFolderException;
 import org.y2k2.globa.exception.NotFoundException;
 import org.y2k2.globa.exception.UnAuthorizedException;
 import org.y2k2.globa.mapper.FolderMapper;
@@ -55,6 +57,12 @@ public class RecordService {
     public final SummaryRepository summaryRepository;
     public final QuizRepository quizRepository;
     public final QuizAttemptRepository quizAttemptRepository;
+
+    @Autowired
+    private Bucket bucket;
+
+    @Value("${firebase.bucket-path}")
+    private String firebaseBucketPath;
 
 
     public ResponseRecordsByFolderDto getRecords(String accessToken, Long folderId, int page, int count){
@@ -115,7 +123,7 @@ public class RecordService {
 
         ResponseRecordDetailDto responseDto = new ResponseRecordDetailDto();
 
-        List<SectionEntity> sections = sectionRepository.findAllByRecordRecordId(recordId);
+        List<SectionEntity> sections = sectionRepository.findAllByRecordRecordIdOrderByStartTimeAsc(recordId);
         List<ResponseSectionDto> responseSections = new ArrayList<>();
 
         for(SectionEntity section : sections){
@@ -137,26 +145,50 @@ public class RecordService {
             responseRecordAnalysisDto.setAnalysisId(analysis.getAnalysisId());
             responseRecordAnalysisDto.setContent(analysis.getContent());
             List<HighlightEntity> highlights = highlightRepository.findAllBySectionSectionId(section.getSectionId());
-            responseRecordAnalysisDto.setHighlights(highlights);
+
+            List<ResponseDetailHighlightDto> responseHighlights = new ArrayList<>();
+
+            for(HighlightEntity highlight : highlights){
+                ResponseDetailHighlightDto rdhd = new ResponseDetailHighlightDto();
+                rdhd.setHighlightId(highlight.getHighlightId());
+                rdhd.setType(highlight.getType());
+                rdhd.setStartIndex(highlight.getStartIndex());
+                rdhd.setEndIndex(highlight.getEndIndex());
+
+                responseHighlights.add(rdhd);
+            }
+
+            responseRecordAnalysisDto.setHighlights(responseHighlights);
 
 
 
             responseSectionDto.setAnalysis(responseRecordAnalysisDto);
 
-            responseSectionDto.setSummary(summaryRepository.findAllBySectionSectionId(section.getSectionId()));
+            List<ResponseDetailSummaryDto> responseSummaries = new ArrayList<>();
+
+            for(SummaryEntity summaryEntity : summaryRepository.findAllBySectionSectionId(section.getSectionId())){
+                ResponseDetailSummaryDto rdsd = new ResponseDetailSummaryDto();
+                rdsd.setContent(summaryEntity.getContent());
+
+                responseSummaries.add(rdsd);
+            }
+
+            responseSectionDto.setSummary(responseSummaries);
             responseSections.add(responseSectionDto);
         }
 
+        ResponseDetailFolderDto rdfd = new ResponseDetailFolderDto();
+        rdfd.setTitle(record.getFolder().getTitle());
+        rdfd.setCreatedTime(record.getFolder().getCreatedTime());
 
         responseDto.setRecordId(record.getRecordId());
         responseDto.setTitle(record.getTitle());
         responseDto.setPath(record.getPath());
         responseDto.setSize(record.getSize());
-        responseDto.setUser(record.getUser());
-        responseDto.setFolder(record.getFolder());
+//        responseDto.setUser(record.getUser());
+        responseDto.setFolder(rdfd);
         responseDto.setSection(responseSections);
         responseDto.setCreatedTime(record.getCreatedTime());
-        System.out.println(responseDto);
 
         return responseDto;
 
@@ -244,6 +276,137 @@ public class RecordService {
         }
 
         return HttpStatus.CREATED;
+    }
+
+    public HttpStatus postRecord(String accessToken, Long folderId, String title, String path, String size){
+
+        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        UserEntity userEntity = userRepository.findByUserId(userId);
+
+        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId);
+        if (folderEntity == null)
+            throw new UnAuthorizedException("Folder not Found");
+
+        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(userEntity,folderId);
+        if (folderShareEntity == null)
+            throw new UnAuthorizedException("This user not deserves");
+
+        RecordEntity recordEntity = new RecordEntity();
+        recordEntity.setCreatedTime(LocalDateTime.now());
+        recordEntity.setSize(size);
+        recordEntity.setPath(path);
+        recordEntity.setTitle(title);
+        recordEntity.setUser(userEntity);
+        recordEntity.setFolder(folderEntity);
+
+        recordRepository.save(recordEntity);
+
+        return HttpStatus.CREATED;
+    }
+
+    public HttpStatus patchRecordName(String accessToken, Long recordId, Long folderId, String title){
+        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+        RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
+
+        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(userEntity,folderId);
+
+        if (folderShareEntity == null)
+            throw new UnAuthorizedException("This user not deserves");
+
+        if(recordEntity == null)
+            throw new NotFoundException("Record Id not found ! ");
+
+        if (!Objects.equals(userId, recordEntity.getUser().getUserId())){
+            throw new UnAuthorizedException("Not Matched User ");
+        }
+
+
+        recordEntity.setTitle(title);
+
+        recordRepository.save(recordEntity);
+
+
+        return HttpStatus.OK;
+    }
+
+    public HttpStatus patchRecordMove(String accessToken, Long recordId, Long folderId, Long targetId){
+        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+        RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
+
+        FolderEntity folderEntity = folderRepository.findFolderEntityByFolderId(folderId);
+        FolderEntity targetEntity = folderRepository.findFolderEntityByFolderId(targetId);
+
+        FolderShareEntity folderShareEntity1 = folderShareRepository.findFirstByTargetUserAndFolderFolderId(userEntity,folderId);
+        FolderShareEntity folderShareEntity2 = folderShareRepository.findFirstByTargetUserAndFolderFolderId(userEntity,targetId);
+
+
+        if (folderEntity == null)
+            throw new NotFoundException("Origin Folder Not Found ! ");
+
+        if (targetEntity == null)
+            throw new NotFoundException("Target Folder Not Found ! ");
+
+        if (folderShareEntity1 == null)
+            throw new UnAuthorizedException("This user not deserves");
+
+        if (folderShareEntity2 == null)
+            throw new UnAuthorizedException("This user not deserves");
+
+        if(recordEntity == null)
+            throw new NotFoundException("Record not found ! ");
+
+        if (!Objects.equals(userId, recordEntity.getUser().getUserId())){
+            throw new UnAuthorizedException("Not Matched User ");
+        }
+
+        for (Blob blob : bucket.list(Storage.BlobListOption.prefix("folders/" + folderId)).iterateAll()) {
+            if(blob.getName().contains("folders/" + folderId + "/" +recordEntity.getTitle()) && recordEntity.getTitle() != null) {
+                String newFileName = blob.getName().substring(blob.getName().lastIndexOf("/"));
+                String newPath = "folders/" + targetId + newFileName;
+                blob.copyTo(BlobId.of(firebaseBucketPath, newPath));
+                blob.delete();
+
+                recordEntity.setFolder(targetEntity);
+
+                recordRepository.save(recordEntity);
+            }
+        }
+
+
+
+        return HttpStatus.OK;
+    }
+
+    public HttpStatus deleteRecord(String accessToken, Long recordId, Long folderId){
+        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+        RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
+
+        if(recordEntity == null) {
+            throw new NotFoundException("Record not found ! ");
+        }
+
+        if(folderId != recordEntity.getFolder().getFolderId())
+            throw new UnAuthorizedException("Not Matched Folder Id ");
+
+        if (!Objects.equals(userId, recordEntity.getUser().getUserId())){
+            throw new UnAuthorizedException("Not Matched User ");
+        }
+
+
+
+        for (Blob blob : bucket.list(Storage.BlobListOption.prefix("folders/" + recordEntity.getFolder().getFolderId())).iterateAll()) {
+            if(blob.getName().contains("folders/" + recordEntity.getFolder().getFolderId() + "/" +recordEntity.getTitle()) && recordEntity.getTitle() != null) {
+                blob.delete();
+                recordRepository.delete(recordEntity);
+            }
+        }
+
+
+
+        return HttpStatus.OK;
     }
 
 

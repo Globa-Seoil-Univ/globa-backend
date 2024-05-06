@@ -18,8 +18,8 @@ public class ResponseRecordDetailDto {
     private String title;
     private String path;
     private String size;
-    private UserEntity user;
-    private FolderEntity folder;
+//    private UserEntity user;
+    private ResponseDetailFolderDto folder;
     private List<ResponseSectionDto> section;
     private LocalDateTime createdTime;
 }

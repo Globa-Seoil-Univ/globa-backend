@@ -6,14 +6,13 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @ToString
-public class ResponseUserDTO implements Serializable {
-    private String profile;
-    private String name;
-    private String code;
-    private Long publicFolderId;
+public class ResponseDetailFolderDto implements Serializable {
+    private String title;
+    private LocalDateTime createdTime;
 }

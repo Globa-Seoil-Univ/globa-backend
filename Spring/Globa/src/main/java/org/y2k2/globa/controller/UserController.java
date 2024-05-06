@@ -35,7 +35,7 @@ public class UserController {
 
         try {
             if ( requestTokenMap.get("requestToken") == null )
-                throw new BadRequestException("Required requestToken ! ");
+                throw new BadRequestException("Required RequestToken ! ");
             jwtToken = userService.reloadRefreshToken(requestTokenMap.get("requestToken"), accessToken);
 
         } catch (Exception e) {
