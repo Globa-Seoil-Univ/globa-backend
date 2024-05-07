@@ -24,7 +24,7 @@ public class UserDTO implements Serializable {
     private Boolean uploadNofi;
     private Boolean shareNofi;
     private Boolean eventNofi;
-    private String profileSize;
+    private long profileSize;
     private String profileType;
     private String profilePath;
     private Boolean deleted;

@@ -4,7 +4,8 @@ import firebase_admin
 from dotenv import load_dotenv
 from firebase_admin import credentials
 from firebase_admin import storage
-from datetime import timezone, datetime
+
+from exception.NotFoundException import NotFoundException
 
 
 class FirebaseStorageManager:
@@ -22,7 +23,7 @@ class FirebaseStorageManager:
         blob = self.bucket.blob(path)
 
         if not blob.exists():
-            raise Exception("Not found audio file")
+            raise NotFoundException("Not found audio file")
 
         filename = path.split("/")[-1]
         download_dir = os.getcwd() + "/downloads/"
