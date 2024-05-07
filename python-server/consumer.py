@@ -1,6 +1,8 @@
 import json
 
 from kafka import KafkaConsumer
+
+from exception.NotFoundException import NotFoundException
 from util.log import Logger
 
 from analyze.stt import stt
@@ -43,8 +45,13 @@ class Consumer:
 
             try:
                 if is_json and is_enough_data and is_analyze:
-                    stt_results = stt(record_id=message.value["recordId"], user_id=message.value["userId"])
-                    self.logger.info(stt_results)
+                    try:
+                        stt_results = stt(record_id=message.value["recordId"], user_id=message.value["userId"])
+                    except NotFoundException as e:
+                        # error topic 전송
+                        self.logger.error("Notfound exception with recordId : %s, userId : %s cause message : %s" % (message.value["recordId"], message.value["userId"], e.message))
+                    except Exception as e:
+                        self.logger.error("Exception with recordId : %s, userId : %s cause message : %s" % (message.value["recordId"], message.value["userId"], e.__str__()))
 
                     # 2-1. 섹션 나누기
                     # 2-2. 섹션별 요약
