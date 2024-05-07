@@ -2,127 +2,143 @@ package org.y2k2.globa.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.TypeMismatchException;
+import org.springframework.http.*;
+import org.springframework.web.ErrorResponse;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.y2k2.globa.util.Const;
+import org.y2k2.globa.util.CustomTimestamp;
 
 @RestControllerAdvice
 @ControllerAdvice
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
-    @ExceptionHandler(GlobalException.class)
-    public ResponseEntity<Object> handleGlobalException(GlobalException ex, WebRequest request) {
+
+    private ObjectNode createErrorNode(Exception ex, int status) {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode errorNode = objectMapper.createObjectNode();
-        errorNode.put("errorCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        errorNode.put("message",ex.getMessage());
 
-        return new ResponseEntity<>(errorNode, HttpStatus.INTERNAL_SERVER_ERROR);
+        errorNode.put("errorCode", status);
+        errorNode.put("message",ex.getMessage());
+        errorNode.put("timestamp", String.valueOf(new CustomTimestamp()));
+
+        return errorNode;
+    }
+
+    @Override
+    public ResponseEntity<Object> handleNoResourceFoundException(NoResourceFoundException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        return new ResponseEntity<>(createErrorNode(ex, HttpStatus.NOT_FOUND.value()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(GlobalException.class)
+    public ResponseEntity<Object> handleGlobalException(GlobalException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, HttpStatus.INTERNAL_SERVER_ERROR.value()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<Object> handleBadRequestException(BadRequestException ex, WebRequest request) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode errorNode = objectMapper.createObjectNode();
-        errorNode.put("errorCode", HttpStatus.BAD_REQUEST.value());
-        errorNode.put("message",ex.getMessage());
-
-        return new ResponseEntity<>(errorNode, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Object> handleBadRequestException(BadRequestException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
     }
 
-
     @ExceptionHandler(UpdateException.class)
-    public ResponseEntity<Object> handleUpdateException(UpdateException ex, WebRequest request) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode errorNode = objectMapper.createObjectNode();
-        errorNode.put("errorCode", HttpStatus.BAD_REQUEST.value());
-        errorNode.put("message",ex.getMessage());
-
-        return new ResponseEntity<>(errorNode, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Object> handleUpdateException(UpdateException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(SQLException.class)
     public ResponseEntity<Object> handleSQLException(SQLException ex) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode errorNode = objectMapper.createObjectNode();
-        errorNode.put("errorCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        errorNode.put("message",ex.getMessage());
-
-        return new ResponseEntity<>(errorNode, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(createErrorNode(ex, HttpStatus.INTERNAL_SERVER_ERROR.value()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(RecordNameException.class)
-    public ResponseEntity<Object> handleRecordNameException(RecordNameException ex, WebRequest request) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode errorNode = objectMapper.createObjectNode();
-        errorNode.put("errorCode", Const.CustomErrorCode.RECORD_NAME_DUPLICATED.value());
-        errorNode.put("message",ex.getMessage());
-
-        return new ResponseEntity<>(errorNode, HttpStatus.CONFLICT);
+    public ResponseEntity<Object> handleRecordNameException(RecordNameException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.RECORD_NAME_DUPLICATED.value()), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(FolderNameException.class)
-    public ResponseEntity<Object> handleFolderNameException(FolderNameException ex, WebRequest request) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode errorNode = objectMapper.createObjectNode();
-        errorNode.put("errorCode", Const.CustomErrorCode.FOLDER_NAME_DUPLICATED.value());
-        errorNode.put("message",ex.getMessage());
-
-        return new ResponseEntity<>(errorNode, HttpStatus.CONFLICT);
+    public ResponseEntity<Object> handleFolderNameException(FolderNameException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.FOLDER_NAME_DUPLICATED.value()), HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(AuthorizedException.class)
-    public ResponseEntity<Object> handleAuthorizedException(AuthorizedException ex) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode errorNode = objectMapper.createObjectNode();
-        errorNode.put("errorCode", HttpStatus.UNAUTHORIZED.value());
-        errorNode.put("message",ex.getMessage());
-
-        // 적절한 HTTP 상태 코드 선택, 예: HttpStatus.INTERNAL_SERVER_ERROR
-        return new ResponseEntity<>(errorNode, HttpStatus.UNAUTHORIZED);
+    @ExceptionHandler(UnAuthorizedException.class)
+    public ResponseEntity<Object> handleAuthorizedException(UnAuthorizedException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, HttpStatus.UNAUTHORIZED.value()), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(DuplicatedExcepiton.class)
     public ResponseEntity<Object> handleDuplicatedException(DuplicatedExcepiton ex) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode errorNode = objectMapper.createObjectNode();
-        errorNode.put("errorCode", HttpStatus.CONFLICT.value());
-        errorNode.put("message",ex.getMessage());
-
-        // 적절한 HTTP 상태 코드 선택, 예: HttpStatus.INTERNAL_SERVER_ERROR
-        return new ResponseEntity<>(errorNode, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(createErrorNode(ex, HttpStatus.CONFLICT.value()), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<?> handleNotFoundException(NotFoundException ex) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode errorNode = objectMapper.createObjectNode();
-        errorNode.put("errorCode", HttpStatus.NOT_FOUND.value());
-        errorNode.put("message",ex.getMessage());
-
-        // 적절한 HTTP 상태 코드 선택, 예: HttpStatus.INTERNAL_SERVER_ERROR
-        return new ResponseEntity<>(errorNode,HttpStatus.NOT_FOUND);
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-
+        return new ResponseEntity<>(createErrorNode(ex, HttpStatus.NOT_FOUND.value()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(CompileException.class)
     public ResponseEntity<Object> handleCompileException(CompileException ex) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode errorNode = objectMapper.createObjectNode();
-        errorNode.put("errorCode", HttpStatus.BAD_REQUEST.value());
-        errorNode.put("message",ex.getMessage());
-
-        // 적절한 HTTP 상태 코드 선택, 예: HttpStatus.INTERNAL_SERVER_ERROR
-        return new ResponseEntity<>(errorNode, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(createErrorNode(ex, HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(FileUploadException.class)
+    public ResponseEntity<Object> handleFileUploadException(FileUploadException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.FAILED_FILE_UPLOAD.value()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<Object> handleInvalidTokenException(InvalidTokenException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.INVALID_TOKEN.value()), HttpStatus.UNAUTHORIZED);
+    }
 
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Object> handleForbiddenException(ForbiddenException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, HttpStatus.FORBIDDEN.value()), HttpStatus.FORBIDDEN);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode errorNode = objectMapper.createObjectNode();
+
+        errorNode.put("errorCode", status.value());
+        errorNode.put("message", ex.getBindingResult().getAllErrors().get(0).getDefaultMessage());
+        errorNode.put("timestamp", String.valueOf(new CustomTimestamp()));
+
+        return new ResponseEntity<>(errorNode, status);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleException(Exception ex) {
+        return new ResponseEntity<>(createErrorNode(ex, HttpStatus.INTERNAL_SERVER_ERROR.value()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  
+    @ExceptionHandler(RefreshTokenException.class)
+    public ResponseEntity<Object> handleRefreshTokenException(RefreshTokenException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.EXPIRED_REFRESH_TOKEN.value()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AccessTokenException.class)
+    public ResponseEntity<Object> handleAccessTokenException(AccessTokenException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.EXPIRED_ACCESS_TOKEN.value()), HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(SignatureException.class)
+    public ResponseEntity<Object> handleSignatureException(SignatureException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.INVALID_TOKEN.value()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(BadRequestFolderException.class)
+    public ResponseEntity<Object> handleBadRequestFolderException(BadRequestFolderException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.FOLDER_DELETE_BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
+
+    @ExceptionHandler(FcmException.class)
+    public ResponseEntity<Object> handleFcmException(FcmException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.FAILED_FCM_SEND.value()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
     // ErrorResponse 클래스 정의
 
 }

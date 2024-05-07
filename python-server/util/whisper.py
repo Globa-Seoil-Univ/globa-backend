@@ -1,6 +1,8 @@
 import os
 from faster_whisper import WhisperModel
 
+from util.log import Logger
+
 
 class STTResults:
     text: str
@@ -14,6 +16,8 @@ class STTResults:
 
 
 class WhisperManager:
+    logger = Logger(name="consumer").logger
+
     def __init__(self):
         model_size = "medium"
         self.model = WhisperModel(model_size, device="cuda", compute_type="float32")
@@ -32,11 +36,18 @@ class WhisperManager:
 
         results = []
         for segment in segments:
+            # self.logger.info(f"segment: {segment}, start: {segment.start}, end: {segment}\n")
             result: STTResults = STTResults(
                 text=segment.text,
                 start=segment.start,
                 end=segment.end
             )
+
+            print('{'
+                  f'\t"text": "{segment.text}",'
+                  f'\t"start": {segment.start},'
+                  f'\t"end": {segment.end},'
+                  '}')
 
             results.append(result)
 

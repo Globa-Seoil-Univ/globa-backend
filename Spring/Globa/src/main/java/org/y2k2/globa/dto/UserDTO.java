@@ -1,6 +1,5 @@
 package org.y2k2.globa.dto;
 
-import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,11 +20,11 @@ public class UserDTO implements Serializable {
     private String snsId;
     private String code;
     private String name;
-    private String primaryNofi;
-    private String uploadNofi;
-    private String shareNofi;
-    private String eventNofi;
-    private String profileSize;
+    private Boolean primaryNofi;
+    private Boolean uploadNofi;
+    private Boolean shareNofi;
+    private Boolean eventNofi;
+    private long profileSize;
     private String profileType;
     private String profilePath;
     private Boolean deleted;
