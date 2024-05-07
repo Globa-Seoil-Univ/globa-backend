@@ -23,5 +23,6 @@ public interface RecordRepository extends JpaRepository<RecordEntity, Long> {
             "WHERE folder_id IN (:folderIds) " +
             "ORDER BY created_time DESC ", nativeQuery = true)
     Page<RecordEntity> findRecordEntitiesByFolder(Pageable pageable, @Param("folderIds") List<Long> folderIds);
-
+  
+    RecordEntity findByRecordId(Long RecordId);
 }

@@ -7,6 +7,7 @@ import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.cloud.StorageClient;
 
+import com.google.firebase.messaging.FirebaseMessaging;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,5 +49,10 @@ public class FirebaseConfig {
     @Bean
     public Bucket bucket() throws IOException {
         return StorageClient.getInstance(firebaseApp()).bucket();
+    }
+
+    @Bean
+    public FirebaseMessaging firebaseMessaging() throws IOException {
+        return FirebaseMessaging.getInstance(firebaseApp());
     }
 }

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity(name = "folderRole")
-@Table(name = "folderRole")
+@Table(name = "folder_role")
 public class FolderRoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

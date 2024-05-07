@@ -1,10 +1,11 @@
 package org.y2k2.globa.entity;
 
 import jakarta.persistence.*;
+
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+
+import org.hibernate.annotations.*;
 
 import java.time.LocalDateTime;
 
@@ -19,19 +20,20 @@ public class SectionEntity {
     private Long sectionId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "record_id", referencedColumnName = "record_id")
     private RecordEntity record;
 
-    @Column(name = "title")
+    @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "start_time")
-    private int startTime;
+    @Column(name = "start_time", nullable = false)
+    private Long startTime;
 
-    @Column(name = "end_time")
-    private int entTime;
+    @Column(name = "end_time", nullable = false)
+    private Long endTime;
 
-    @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @CreationTimestamp
+    @Column(name = "created_time")
     private LocalDateTime createdTime;
 }

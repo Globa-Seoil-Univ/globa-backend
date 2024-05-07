@@ -48,13 +48,19 @@ public class UserEntity {
     private Boolean eventNofi;
 
     @Column(name = "profile_size")
-    private String profileSize;
+    private Long profileSize;
 
     @Column(name = "profile_type")
     private String profileType;
 
     @Column(name = "profile_path")
     private String profilePath;
+
+    @Column(name = "notification_token", unique = true)
+    private String notificationToken;
+
+    @Column(name = "notification_token_time")
+    private LocalDateTime notificationTokenTime;
 
     @Column(name = "deleted")
     @ColumnDefault("false")

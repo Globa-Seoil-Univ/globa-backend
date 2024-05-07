@@ -4,19 +4,37 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import com.google.cloud.storage.Bucket;
+
 import lombok.RequiredArgsConstructor;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.dto.*;
-import org.y2k2.globa.entity.*;
+
+import org.y2k2.globa.entity.StudyEntity;
+import org.y2k2.globa.entity.UserEntity;
+
 import org.y2k2.globa.exception.NotFoundException;
+import org.y2k2.globa.exception.FileUploadException;
+import org.y2k2.globa.exception.InvalidTokenException;
 import org.y2k2.globa.exception.UnAuthorizedException;
 import org.y2k2.globa.exception.BadRequestException;
+
 import org.y2k2.globa.repository.*;
 import org.y2k2.globa.util.JwtToken;
 import org.y2k2.globa.util.JwtTokenProvider;
@@ -30,10 +48,14 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UserService {
 
+    @Autowired
+    private final Bucket bucket;
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtUtil jwtUtil;
 
-    public final UserRepository userRepository;;
+    public final UserRepository userRepository;
     public final StudyRepository studyRepository;
     public final SurveyRepository surveyRepository;
     public final FolderRepository folderRepository;
@@ -168,6 +190,44 @@ public class UserService {
         return responseUserNotificationDto;
     }
 
+    @Transactional
+    public void updateProfile(MultipartFile file, long userId) {
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+        if (userEntity == null) throw new BadRequestException("Not found user");
+
+        long current = new Date().getTime();
+        long size = file.getSize();
+        String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());
+        String mimeType = file.getContentType();
+
+        String oldPath = userEntity.getProfilePath();
+        String newPath = "users/" + userId + "/profile/" + current + "." + extension;
+
+        try {
+            bucket.create(newPath, file.getBytes());
+
+            userEntity.setProfilePath(newPath);
+            userEntity.setProfileType(mimeType);
+            userEntity.setProfileSize(size);
+            userRepository.save(userEntity);
+
+            if(oldPath != null && bucket.get(oldPath) != null) {
+                try {
+                    bucket.get(oldPath).delete();
+                } catch (Exception e) {
+                    log.error("Failed to delete old profile : " + e);
+                }
+            }
+        } catch (Exception e) {
+            if(bucket.get(newPath) != null) {
+                bucket.get(newPath).delete();
+            }
+
+            log.error("Failed to update profile : " + e);
+            throw new FileUploadException("Failed to update profile");
+        }
+    }
+
     public ResponseAnalysisDto getAnalysis(String accessToken, Long pathUserId){
 
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
@@ -249,7 +309,6 @@ public class UserService {
     }
 
     public HttpStatus patchUserName(String accessToken, Long putUserId, String name){
-
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
         if (!Objects.equals(userId, putUserId)){
@@ -268,7 +327,6 @@ public class UserService {
 
 
     public HttpStatus deleteUser(String accessToken, RequestSurveyDto requestSurveyDto){
-
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
@@ -288,14 +346,7 @@ public class UserService {
 
         return HttpStatus.OK;
     }
-
-
-
-
-
-
-
-
+  
     public String generateRandomCode(int length){
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         Random random = new SecureRandom();
@@ -311,62 +362,12 @@ public class UserService {
         return code.toString();
     }
 
+    public void addAndUpdateNotificationToken(RequestNotificationTokenDto requestNotificationTokenDto, Long userId){
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+        if (userEntity == null) throw new BadRequestException("Not found user");
 
-
-    public ObjectNode getRanking(int page, int count) {
-        try {
-            Pageable pageable = PageRequest.of(page-1, count);
-            Page<UserEntity> rankingEntities =  userRepository.findAll(pageable);
-
-
-            List<UserEntity> resultValue = rankingEntities.getContent();
-            List<ObjectNode> responseList = new ArrayList<>();
-
-            for (UserEntity userEntity : resultValue) {
-                ObjectNode rankingNode = createRankingNode(userEntity);
-                responseList.add(rankingNode);
-            }
-
-            return createResultNode(responseList);
-
-        }catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void errorTestBadRequest() {
-        try {
-
-            throw new BadRequestException("Test BAD");
-
-        }catch (BadRequestException e) {
-            throw e;
-        }
-    }
-
-    private ObjectNode createRankingNode(UserEntity userEntity) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode rankingNode = objectMapper.createObjectNode();
-
-
-        System.out.println(UserDTO.toUserDTO(userEntity));
-        rankingNode.put("user", userEntity.getName());
-
-        return rankingNode;
-    }
-
-    private ObjectNode createResultNode(List<ObjectNode> responseList) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ArrayNode codesArrayNode = objectMapper.createArrayNode();
-
-        for (ObjectNode node : responseList) {
-            codesArrayNode.add(node);
-        }
-
-        ObjectNode resultNode = objectMapper.createObjectNode();
-        resultNode.set("rankings", codesArrayNode);
-        resultNode.put("total", responseList.size());
-
-        return resultNode;
+        userEntity.setNotificationToken(requestNotificationTokenDto.getToken());
+        userEntity.setNotificationTokenTime(LocalDateTime.now());
+        userRepository.save(userEntity);
     }
 }

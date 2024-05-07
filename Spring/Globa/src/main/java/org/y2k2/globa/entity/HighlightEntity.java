@@ -1,10 +1,11 @@
 package org.y2k2.globa.entity;
 
 import jakarta.persistence.*;
+
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+
+import org.hibernate.annotations.*;
 
 import java.time.LocalDateTime;
 
@@ -19,21 +20,33 @@ public class HighlightEntity {
     private Long highlightId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "section_id", referencedColumnName = "section_id")
     private SectionEntity section;
 
-    @Column(name = "start_index")
-    private int startIndex;
+    @Column(name = "start_index", nullable = false)
+    private Long startIndex;
 
-    @Column(name = "end_index")
-    private int endIndex;
+    @Column(name = "end_index", nullable = false)
+    private Long endIndex;
 
+    @Column(name = "type", nullable = false)
+    @ColumnDefault("1")
+    @Check(constraints = "type IN ('1', '2')")
+    private Character type;
 
-    @Column(name = "type")
-    private String type;
-
-
-    @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @CreationTimestamp
+    @Column(name = "created_time")
     private LocalDateTime createdTime;
+
+    public static HighlightEntity create(SectionEntity section, long startIndex, long endIndex) {
+        HighlightEntity entity = new HighlightEntity();
+
+        entity.setSection(section);
+        entity.setStartIndex(startIndex);
+        entity.setEndIndex(endIndex);
+        entity.setType('2');
+
+        return entity;
+    }
 }
