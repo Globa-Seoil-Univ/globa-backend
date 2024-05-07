@@ -4,11 +4,13 @@ import com.google.cloud.storage.*;
 import jakarta.mail.Folder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.dto.FolderDto;
 import org.y2k2.globa.dto.InvitationStatus;
 import org.y2k2.globa.dto.Role;
@@ -47,11 +49,16 @@ public class FolderService {
     @Autowired
     private Bucket bucket;
 
+    @Value("${firebase.bucket-path}")
+    private String firebaseBucketPath;
+
+
     public List<FolderDto> getFolders(String accessToken, int page, int count){
 
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
+
 
         Pageable pageable = PageRequest.of(page-1, count);
         Page<FolderEntity> folders = folderRepository.findAllByUserUserId(pageable, userId);
@@ -83,15 +90,23 @@ public class FolderService {
         folderShareRepository.save(saveShareEntity);
 
 
-        BlobInfo blobInfo = BlobInfo.newBuilder("${firebase.bucket-path}", "folders/"+ savedEntity.getFolderId() + "/placeholder.txt").build();
-        byte[] content = new byte[0]; // 빈 콘텐츠라도 넣어줘야 폴더가 생김 ㅠㅠ
-        bucket.create(blobInfo.getName(), content);
-        System.out.println("Folder created at path: " + Storage.BlobListOption.prefix("folders/"));
+        try {
+            String folderPath = "folders/" + savedEntity.getFolderId() + "/";
+            String placeholderPath = folderPath + "placeholder.txt";
+
+            BlobInfo blobInfo = BlobInfo.newBuilder(firebaseBucketPath, placeholderPath).build();
+            byte[] content = new byte[0];
+            bucket.create(blobInfo.getName(), content);
+        } catch (StorageException e) {
+            folderRepository.delete(savedEntity);
+            folderShareRepository.delete(saveShareEntity);
+            throw new RuntimeException("Error creating folder in Firebase", e);
+        }
 
         return FolderMapper.INSTANCE.toFolderDto(savedEntity);
 
     }
-
+    @Transactional
     public FolderDto postFolder(String accessToken, String title){
 
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
@@ -113,22 +128,28 @@ public class FolderService {
         saveShareEntity.setOwnerUser(userEntity);
         saveShareEntity.setTargetUser(userEntity);
 
-        folderShareRepository.save(saveShareEntity);
+        FolderShareEntity savedShareEntity = folderShareRepository.save(saveShareEntity);
 
+        try {
+            String folderPath = "folders/" + savedEntity.getFolderId() + "/";
+            String placeholderPath = folderPath + "placeholder.txt";
 
-        BlobInfo blobInfo = BlobInfo.newBuilder("${firebase.bucket-path}", "folders/"+savedEntity.getFolderId() + "/placeholder.txt").build();
-        byte[] content = new byte[0]; // 빈 콘텐츠라도 넣어줘야 폴더가 생김 ㅠㅠ
-        bucket.create(blobInfo.getName(), content);
-        System.out.println("Folder created at path: " + Storage.BlobListOption.prefix("folders/"));
+            BlobInfo blobInfo = BlobInfo.newBuilder(firebaseBucketPath, placeholderPath).build();
+            byte[] content = new byte[0];
+            bucket.create(blobInfo.getName(), content);
+        } catch (StorageException e) {
+            folderRepository.delete(savedEntity);
+            folderShareRepository.delete(savedShareEntity);
+            throw new RuntimeException("Error creating folder in Firebase", e);
+        }
 
         return FolderMapper.INSTANCE.toFolderDto(savedEntity);
 
     }
 
+    @Transactional
     public FolderDto postFolder(String accessToken, String title, List<ShareTarget> shareTargets){
-
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
-
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
         FolderEntity saveFolderEntity = new FolderEntity();
@@ -139,24 +160,22 @@ public class FolderService {
 
         FolderEntity savedEntity = folderRepository.save(saveFolderEntity);
 
-
         FolderShareEntity saveOwnerShareEntity = new FolderShareEntity();
         saveOwnerShareEntity.setFolder(savedEntity);
         saveOwnerShareEntity.setInvitationStatus(String.valueOf(InvitationStatus.ACCEPT));
         saveOwnerShareEntity.setRoleId(folderRoleRepository.findByRoleName("소유자"));
         saveOwnerShareEntity.setOwnerUser(userEntity);
         saveOwnerShareEntity.setTargetUser(userEntity);
-        folderShareRepository.save(saveOwnerShareEntity);
 
-
-
+        FolderShareEntity savedOwnerShareEntity = folderShareRepository.save(saveOwnerShareEntity);
 
         // 리스트를 순회하며 각 공유 타겟 수행
         for (ShareTarget target : shareTargets) {
             System.out.println("Code: " + target.getCode() + ", Role: " + target.getRole());
             UserEntity targetEntity = userRepository.findOneByCode(target.getCode());
 
-            if (target.getRole().isEmpty()) throw new BadRequestException("You must be request role field");
+            if (target.getRole().isEmpty())
+                throw new BadRequestException("You must be request role field");
             if (!target.getRole().toUpperCase().equals(Role.R.toString())
                     && !target.getRole().toUpperCase().equals(Role.W.toString())) {
                 throw new BadRequestException("Role field must be only 'r' or 'w'");
@@ -165,10 +184,16 @@ public class FolderService {
             folderShareService.inviteShare(savedEntity.getFolderId(), userEntity.getUserId(), targetEntity.getUserId(), Role.valueOf(target.getRole().toUpperCase()));
         }
 
-        BlobInfo blobInfo = BlobInfo.newBuilder("${firebase.bucket-path}", "folders/"+savedEntity.getFolderId() + "/placeholder.txt").build();
-        byte[] content = new byte[0]; // 빈 콘텐츠라도 넣어줘야 폴더가 생김 ㅠㅠ
-        bucket.create(blobInfo.getName(), content);
-        System.out.println("Folder created at path: " + Storage.BlobListOption.prefix("folders/"));
+        try {
+            String placeholderPath = "folders/" + savedEntity.getFolderId() + "/placeholder.txt";
+            BlobInfo blobInfo = BlobInfo.newBuilder(firebaseBucketPath, placeholderPath).build();
+            byte[] content = new byte[0]; // 빈 콘텐츠라도 넣어줘야 폴더가 생김
+            bucket.create(blobInfo.getName(), content);
+        } catch (Exception e) {
+            folderRepository.delete(savedEntity);
+            folderShareRepository.delete(savedOwnerShareEntity);
+            throw new RuntimeException("Error creating folder in Firebase", e);
+        }
 
         return FolderMapper.INSTANCE.toFolderDto(savedEntity);
 
@@ -186,6 +211,11 @@ public class FolderService {
         if(folderEntity == null)
             throw new NotFoundException("Folder Id not found ! ");
 
+        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(userEntity, folderId);
+
+        if(folderShareEntity == null)
+            throw new UnAuthorizedException("폴더에 대한 권한이 없습니다.");
+
         folderEntity.setTitle(title);
 
         folderRepository.save(folderEntity);
@@ -194,6 +224,7 @@ public class FolderService {
         return HttpStatus.OK;
     }
 
+    @Transactional
     public HttpStatus deleteFolderName(String accessToken, Long folderId){
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity userEntity = userRepository.findOneByUserId(userId);
@@ -212,12 +243,18 @@ public class FolderService {
             throw new BadRequestFolderException("Default Folder Cannot Be Deleted");
 
 
+        Iterable<Blob> blobs = bucket.list(Storage.BlobListOption.prefix("folders/" + folderId)).iterateAll();
+        if(blobs == null ) throw new NotFoundException("Not Found Folder By FolderId in Firebase");
 
-        for (Blob blob : bucket.list(Storage.BlobListOption.prefix("folders/" + folderId)).iterateAll()) {
-            blob.delete();
+        try{
+            for (Blob blob : blobs) {
+                blob.delete();
+            }
+            folderRepository.delete(folderEntity);
+        }catch (Exception e) {
+            throw new RuntimeException("Error deleting folder in Firebase", e);
         }
 
-        folderRepository.delete(folderEntity);
 
 
         return HttpStatus.OK;
@@ -235,13 +272,18 @@ public class FolderService {
         }
 
 
-        for (Blob blob : bucket.list(Storage.BlobListOption.prefix("folders/" + folderEntity.getFolderId())).iterateAll()) {
-            blob.delete();
+        Iterable<Blob> blobs = bucket.list(Storage.BlobListOption.prefix("folders/" + folderEntity.getFolderId())).iterateAll();
 
+        if(blobs == null ) throw new NotFoundException("Not Found Folder By FolderId in Firebase");
+
+        try{
+            for (Blob blob : blobs) {
+                blob.delete();
+            }
+            folderRepository.delete(folderEntity);
+        }catch (Exception e) {
+            throw new RuntimeException("Error deleting folder in Firebase", e);
         }
-
-        folderRepository.delete(folderEntity);
-
 
         return HttpStatus.OK;
     }

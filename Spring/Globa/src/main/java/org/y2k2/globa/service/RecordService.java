@@ -5,6 +5,8 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
+import jakarta.mail.Folder;
+import jdk.jshell.spi.ExecutionControlProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,14 +17,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.*;
-import org.y2k2.globa.exception.BadRequestException;
-import org.y2k2.globa.exception.BadRequestFolderException;
-import org.y2k2.globa.exception.NotFoundException;
-import org.y2k2.globa.exception.UnAuthorizedException;
+import org.y2k2.globa.exception.*;
 import org.y2k2.globa.mapper.FolderMapper;
 import org.y2k2.globa.mapper.QuizMapper;
 import org.y2k2.globa.mapper.RecordMapper;
@@ -30,6 +30,7 @@ import org.y2k2.globa.repository.*;
 import org.y2k2.globa.util.JwtTokenProvider;
 import org.y2k2.globa.util.JwtUtil;
 
+import java.rmi.server.ExportException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +73,11 @@ public class RecordService {
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
 
+        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(userEntity, folderId);
+
+        if(folderShareEntity == null)
+            throw new UnAuthorizedException("폴더에 대한 권한이 없습니다.");
+
         Pageable pageable = PageRequest.of(page-1, count);
         Page<RecordEntity> records = recordRepository.findAllByFolderFolderId(pageable, folderId);
 
@@ -87,10 +93,20 @@ public class RecordService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
+        List<FolderShareEntity> folderShareEntities = folderShareRepository.findFolderShareEntitiesByTargetUser(userEntity);
 
+        if(folderShareEntities == null)
+            throw new NotFoundException("접근 가능한 폴더가 없습니다");
+
+        List<Long> folderIds = new ArrayList<>();
+
+        for(FolderShareEntity folderShareEntity : folderShareEntities){
+            folderIds.add(folderShareEntity.getFolder().getFolderId());
+        }
 
         Pageable pageable = PageRequest.of(0, count);
-        Page<RecordEntity> records = recordRepository.findAllByOrderByCreatedTimeDesc(pageable);
+//        Page<RecordEntity> records = recordRepository.findAllByOrderByCreatedTimeDesc(pageable);
+        Page<RecordEntity> records = recordRepository.findRecordEntitiesByFolder(pageable,folderIds);
 
 
 
@@ -118,6 +134,10 @@ public class RecordService {
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
+        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(userEntity, folderId);
+
+        if(folderShareEntity == null)
+            throw new UnAuthorizedException("폴더에 대한 권한이 없습니다.");
 
         RecordEntity record = recordRepository.findRecordEntityByRecordId(recordId);
 
@@ -330,6 +350,7 @@ public class RecordService {
         return HttpStatus.OK;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public HttpStatus patchRecordMove(String accessToken, Long recordId, Long folderId, Long targetId){
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity userEntity = userRepository.findOneByUserId(userId);
@@ -361,20 +382,36 @@ public class RecordService {
             throw new UnAuthorizedException("Not Matched User ");
         }
 
-        for (Blob blob : bucket.list(Storage.BlobListOption.prefix("folders/" + folderId)).iterateAll()) {
-            if(blob.getName().contains("folders/" + folderId + "/" +recordEntity.getTitle()) && recordEntity.getTitle() != null) {
-                String newFileName = blob.getName().substring(blob.getName().lastIndexOf("/"));
-                String newPath = "folders/" + targetId + newFileName;
+        // Update local database
+        String oldPath = recordEntity.getPath();
+        String paramPath = "folders/" + folderId + oldPath.substring(oldPath.lastIndexOf("/"));
+        String newPath = "folders/" + targetId + oldPath.substring(oldPath.lastIndexOf("/"));
+        recordEntity.setFolder(targetEntity);
+        recordEntity.setPath(newPath);
+        recordRepository.save(recordEntity);
+
+        if(!oldPath.equals(paramPath))
+            throw new NotFoundException("Record not found ! ");
+
+        // Now move the file in Firebase
+        Blob blob = bucket.get(oldPath);
+        if (blob != null) {
+            System.out.println("true");
+            System.out.println(blob);
+            try {
                 blob.copyTo(BlobId.of(firebaseBucketPath, newPath));
                 blob.delete();
-
-                recordEntity.setFolder(targetEntity);
-
+            } catch (Exception e) {
+                // Rollback local DB changes if Firebase operation fails
+                recordEntity.setFolder(folderEntity);
+                recordEntity.setPath(oldPath);
                 recordRepository.save(recordEntity);
+                throw new RuntimeException("Firebase communication error", e);
             }
+        } else {
+            System.out.println(blob);
+            throw new NotFoundException("Firebase file not found");
         }
-
-
 
         return HttpStatus.OK;
     }
@@ -388,7 +425,7 @@ public class RecordService {
             throw new NotFoundException("Record not found ! ");
         }
 
-        if(folderId != recordEntity.getFolder().getFolderId())
+        if(!Objects.equals(folderId, recordEntity.getFolder().getFolderId()))
             throw new UnAuthorizedException("Not Matched Folder Id ");
 
         if (!Objects.equals(userId, recordEntity.getUser().getUserId())){

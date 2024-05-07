@@ -13,17 +13,11 @@ import org.springframework.stereotype.Service;
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.dto.*;
-import org.y2k2.globa.entity.FolderEntity;
-import org.y2k2.globa.entity.StudyEntity;
-import org.y2k2.globa.entity.SurveyEntity;
-import org.y2k2.globa.entity.UserEntity;
+import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.NotFoundException;
 import org.y2k2.globa.exception.UnAuthorizedException;
 import org.y2k2.globa.exception.BadRequestException;
-import org.y2k2.globa.repository.FolderRepository;
-import org.y2k2.globa.repository.StudyRepository;
-import org.y2k2.globa.repository.SurveyRepository;
-import org.y2k2.globa.repository.UserRepository;
+import org.y2k2.globa.repository.*;
 import org.y2k2.globa.util.JwtToken;
 import org.y2k2.globa.util.JwtTokenProvider;
 import org.y2k2.globa.util.JwtUtil;
@@ -43,6 +37,7 @@ public class UserService {
     public final StudyRepository studyRepository;
     public final SurveyRepository surveyRepository;
     public final FolderRepository folderRepository;
+    public final RecordRepository recordRepository;
 
     public final FolderService folderService;
 
@@ -181,10 +176,20 @@ public class UserService {
             throw new UnAuthorizedException("Not Matched User !");
         }
 
+        List<RecordEntity> recordEntities = recordRepository.findRecordEntitiesByUserUserId(userId);
+
+        if(recordEntities == null)
+            throw new NotFoundException("Not Founded Record");
+
+        List<Long> recordIds = new ArrayList<>();
+
+        for(RecordEntity recordEntity : recordEntities){
+            recordIds.add(recordEntity.getRecordId());
+        }
 
         List<StudyEntity> studyEntities = studyRepository.findAllByUserUserId(userId);
         List<QuizGradeProjection> quizGradeProjectionList = userRepository.findQuizGradeByUser(userId);
-        List<KeywordProjection> keywordProjectionList = userRepository.findKeywordByRecordId(1L);
+        List<KeywordProjection> keywordProjectionList = userRepository.findKeywordByRecordIds(recordIds);
 
         ResponseAnalysisDto responseAnalysisDto = new ResponseAnalysisDto();
         List<ResponseStudyTimesDto> studyTimes = new ArrayList<>();
