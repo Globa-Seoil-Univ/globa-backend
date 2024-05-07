@@ -37,5 +37,12 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             "ORDER BY importance DESC " +
             "LIMIT 10 ", nativeQuery = true)
     List<KeywordProjection> findKeywordByRecordId(@Param("recordId") Long recordId);
+
+    @Query(value = "SELECT word, importance " +
+            "FROM keyword " +
+            "WHERE record_id IN (:recordIds) " +
+            "ORDER BY importance DESC " +
+            "LIMIT 10", nativeQuery = true)
+    List<KeywordProjection> findKeywordByRecordIds(@Param("recordIds") List<Long> recordIds);
 }
 

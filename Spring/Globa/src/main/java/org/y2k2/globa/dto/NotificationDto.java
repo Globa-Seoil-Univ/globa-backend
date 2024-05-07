@@ -11,9 +11,8 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @ToString
-public class ResponseUserDTO implements Serializable {
-    private String profile;
-    private String name;
-    private String code;
-    private Long publicFolderId;
+public class NotificationDto implements Serializable {
+    private Boolean uploadNofi;
+    private Boolean shareNofi;
+    private Boolean eventNofi;
 }

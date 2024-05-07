@@ -7,13 +7,12 @@ import lombok.ToString;
 
 import java.io.Serializable;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
 @ToString
-public class ResponseUserDTO implements Serializable {
-    private String profile;
-    private String name;
-    private String code;
-    private Long publicFolderId;
+public class RequestSurveyDto implements Serializable {
+    private Integer surveyType;
+    private String content;
 }

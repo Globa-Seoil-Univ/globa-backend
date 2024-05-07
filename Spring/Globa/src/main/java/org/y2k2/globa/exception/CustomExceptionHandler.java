@@ -131,6 +131,10 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.INVALID_TOKEN.value()), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(BadRequestFolderException.class)
+    public ResponseEntity<Object> handleBadRequestFolderException(BadRequestFolderException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.FOLDER_DELETE_BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
+
     @ExceptionHandler(FcmException.class)
     public ResponseEntity<Object> handleFcmException(FcmException ex) {
         return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.FAILED_FCM_SEND.value()), HttpStatus.INTERNAL_SERVER_ERROR);

@@ -4,29 +4,38 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import com.google.cloud.storage.Bucket;
+
 import lombok.RequiredArgsConstructor;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.dto.*;
+
 import org.y2k2.globa.entity.StudyEntity;
 import org.y2k2.globa.entity.UserEntity;
+
+import org.y2k2.globa.exception.NotFoundException;
 import org.y2k2.globa.exception.FileUploadException;
 import org.y2k2.globa.exception.InvalidTokenException;
 import org.y2k2.globa.exception.UnAuthorizedException;
 import org.y2k2.globa.exception.BadRequestException;
-import org.y2k2.globa.repository.StudyRepository;
-import org.y2k2.globa.repository.UserRepository;
+
+import org.y2k2.globa.repository.*;
 import org.y2k2.globa.util.JwtToken;
 import org.y2k2.globa.util.JwtTokenProvider;
 import org.y2k2.globa.util.JwtUtil;
@@ -48,6 +57,11 @@ public class UserService {
 
     public final UserRepository userRepository;
     public final StudyRepository studyRepository;
+    public final SurveyRepository surveyRepository;
+    public final FolderRepository folderRepository;
+    public final RecordRepository recordRepository;
+
+    public final FolderService folderService;
 
     public JwtToken reloadRefreshToken(String refreshToken, String accessToken){
         try {
@@ -57,7 +71,7 @@ public class UserService {
 
             if(new Date().before(expiredTime)) {
                 jwtUtil.deleteValue(String.valueOf(userId));
-                throw new BadRequestException("우애우애우ㅐ우앵");
+                throw new BadRequestException("아직 토큰이 살아있습니다.");
             }
 
             if (!redisRefreshToken.equals(refreshToken)) {
@@ -84,10 +98,11 @@ public class UserService {
         UserEntity postUserEntity = userRepository.findBySnsId(requestUserPostDTO.getSnsId());
 
         if(postUserEntity == null) {
+            String USER_CODE = generateRandomCode(6);
             UserEntity userEntity = new UserEntity();
             userEntity.setSnsKind(requestUserPostDTO.getSnsKind());
             userEntity.setSnsId(requestUserPostDTO.getSnsId());
-            userEntity.setCode(generateRandomCode(6));
+            userEntity.setCode(USER_CODE);
             userEntity.setName(requestUserPostDTO.getName());
             userEntity.setProfilePath(requestUserPostDTO.getProfile());
             userEntity.setPrimaryNofi(requestUserPostDTO.getNotification());
@@ -98,6 +113,8 @@ public class UserService {
             userEntity.setDeleted(false);
 
             postUserEntity = userRepository.save(userEntity);
+
+            folderService.postDefaultFolder(postUserEntity);
         }
 
         JwtToken jwtToken = jwtTokenProvider.generateToken(postUserEntity.getUserId());
@@ -114,13 +131,19 @@ public class UserService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
+        FolderEntity folderEntity = folderRepository.findFirstByUserUserIdOrderByCreatedTimeAsc(userId);
+
+        if(folderEntity == null)
+            throw new NotFoundException("기본 폴더를 찾을 수 없습니다 ! ");
+        if(userEntity == null)
+            throw new NotFoundException("유저를 찾을 수 없습니다 !");
 
         ResponseUserDTO responseUserDTO = new ResponseUserDTO();
 
         responseUserDTO.setProfile(userEntity.getProfilePath());
         responseUserDTO.setName(userEntity.getName());
         responseUserDTO.setCode(userEntity.getCode());
-        responseUserDTO.setPublicFolderId(9999);
+        responseUserDTO.setPublicFolderId(folderEntity.getFolderId());
 
         return responseUserDTO;
 
@@ -132,6 +155,9 @@ public class UserService {
 
         UserEntity userEntity = userRepository.findOneByCode(code);
 
+        if(userEntity == null)
+            throw new NotFoundException("유저를 찾을 수 없습니다 !");
+
         ResponseUserSearchDto responseUserSearchDto = new ResponseUserSearchDto();
 
         responseUserSearchDto.setProfile(userEntity.getProfilePath());
@@ -142,24 +168,26 @@ public class UserService {
 
     }
 
-    public ResponseUserNotificationDto getNotification(String accessToken, Long pathUserId){
+    public NotificationDto getNotification(String accessToken, Long pathUserId){
 
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
         if (!Objects.equals(userId, pathUserId)){
-            throw new UnAuthorizedException("Not Matched User ! owner : " + userId + ", request : " + pathUserId);
+            throw new UnAuthorizedException("Not Matched User !");
         }
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
-        ResponseUserNotificationDto responseUserNotificationDto = new ResponseUserNotificationDto();
+        if(userEntity == null)
+            throw new NotFoundException("유저를 찾을 수 없습니다 !");
+
+        NotificationDto responseUserNotificationDto = new NotificationDto();
 
         responseUserNotificationDto.setUploadNofi(userEntity.getUploadNofi());
         responseUserNotificationDto.setShareNofi(userEntity.getShareNofi());
         responseUserNotificationDto.setEventNofi(userEntity.getEventNofi());
 
         return responseUserNotificationDto;
-
     }
 
     @Transactional
@@ -205,12 +233,23 @@ public class UserService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
         if (!Objects.equals(userId, pathUserId)){
-            throw new UnAuthorizedException("Not Matched User ! owner : " + userId + ", request : " + pathUserId);
+            throw new UnAuthorizedException("Not Matched User !");
+        }
+
+        List<RecordEntity> recordEntities = recordRepository.findRecordEntitiesByUserUserId(userId);
+
+        if(recordEntities == null)
+            throw new NotFoundException("Not Founded Record");
+
+        List<Long> recordIds = new ArrayList<>();
+
+        for(RecordEntity recordEntity : recordEntities){
+            recordIds.add(recordEntity.getRecordId());
         }
 
         List<StudyEntity> studyEntities = studyRepository.findAllByUserUserId(userId);
         List<QuizGradeProjection> quizGradeProjectionList = userRepository.findQuizGradeByUser(userId);
-        List<KeywordProjection> keywordProjectionList = userRepository.findKeywordByRecordId(userId);
+        List<KeywordProjection> keywordProjectionList = userRepository.findKeywordByRecordIds(recordIds);
 
         ResponseAnalysisDto responseAnalysisDto = new ResponseAnalysisDto();
         List<ResponseStudyTimesDto> studyTimes = new ArrayList<>();
@@ -244,6 +283,70 @@ public class UserService {
         return responseAnalysisDto;
     }
 
+    public NotificationDto putNotification(String accessToken, Long putUserId, NotificationDto notificationDto){
+
+        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+
+        if (!Objects.equals(userId, putUserId)){
+            throw new UnAuthorizedException("Not Matched User ");
+        }
+
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+
+        userEntity.setUploadNofi(notificationDto.getUploadNofi());
+        userEntity.setShareNofi(notificationDto.getShareNofi());
+        userEntity.setEventNofi(notificationDto.getEventNofi());
+
+        UserEntity savedEntity = userRepository.save(userEntity);
+
+        NotificationDto responseUserNotificationDto = new NotificationDto();
+
+        responseUserNotificationDto.setUploadNofi(savedEntity.getUploadNofi());
+        responseUserNotificationDto.setShareNofi(savedEntity.getShareNofi());
+        responseUserNotificationDto.setEventNofi(savedEntity.getEventNofi());
+
+        return responseUserNotificationDto;
+    }
+
+    public HttpStatus patchUserName(String accessToken, Long putUserId, String name){
+        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+
+        if (!Objects.equals(userId, putUserId)){
+            throw new UnAuthorizedException("Not Matched User ");
+        }
+
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+
+        userEntity.setName(name);
+
+        userRepository.save(userEntity);
+
+
+        return HttpStatus.OK;
+    }
+
+
+    public HttpStatus deleteUser(String accessToken, RequestSurveyDto requestSurveyDto){
+        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+
+        userEntity.setDeleted(true);
+        userEntity.setDeletedTime(LocalDateTime.now());
+
+        SurveyEntity surveyEntity = new SurveyEntity();
+        surveyEntity.setSurveyType(String.valueOf(requestSurveyDto.getSurveyType()));
+        surveyEntity.setContent(requestSurveyDto.getContent());
+        surveyEntity.setCreatedTime(LocalDateTime.now());
+
+        userRepository.save(userEntity);
+        surveyRepository.save(surveyEntity);
+
+        folderService.deleteDefaultFolder(userEntity);
+
+        return HttpStatus.OK;
+    }
+  
     public String generateRandomCode(int length){
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         Random random = new SecureRandom();

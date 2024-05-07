@@ -6,13 +6,13 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @ToString
-public class ResponseUserNotificationDto implements Serializable {
-    private Boolean uploadNofi;
-    private Boolean shareNofi;
-    private Boolean eventNofi;
+public class ResponseDetailFolderDto implements Serializable {
+    private String title;
+    private LocalDateTime createdTime;
 }

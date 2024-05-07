@@ -35,7 +35,7 @@ public class UserController {
 
         try {
             if ( requestTokenMap.get("requestToken") == null )
-                throw new BadRequestException("Required requestToken ! ");
+                throw new BadRequestException("Required RequestToken ! ");
             jwtToken = userService.reloadRefreshToken(requestTokenMap.get("requestToken"), accessToken);
 
         } catch (Exception e) {
@@ -102,7 +102,7 @@ public class UserController {
         if ( userId == null )
             throw new BadRequestException("Required userId ! ");
 
-        ResponseUserNotificationDto result = userService.getNotification(accessToken,userId);
+        NotificationDto result = userService.getNotification(accessToken,userId);
 
         return ResponseEntity.ok(result);
     }
@@ -120,6 +120,54 @@ public class UserController {
 
         return ResponseEntity.ok(result);
     }
+    @PutMapping(PRE_FIX+"/{user_id}/notification")
+    public ResponseEntity<?> putNotification(@RequestHeader(value = "Authorization", required = false) String accessToken,
+                                             @PathVariable(value = "user_id", required = false) Long userId,
+                                             @RequestBody NotificationDto notificationDto) {
+
+        if ( accessToken == null )
+            throw new BadRequestException("Required AccessToken ! ");
+        if ( userId == null )
+            throw new BadRequestException("Required userId ! ");
+        if ( notificationDto.getEventNofi() == null || notificationDto.getUploadNofi() == null  || notificationDto.getShareNofi() == null  )
+            throw new BadRequestException("Nofi Value, Null Not Allowed ! ");
+
+        NotificationDto result = userService.putNotification(accessToken,userId, notificationDto);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @PatchMapping(PRE_FIX+"/{user_id}/name")
+    public ResponseEntity<?> patchUserName(@RequestHeader(value = "Authorization", required = false) String accessToken,
+                                             @PathVariable(value = "user_id", required = false) Long userId,
+                                           @RequestBody Map<String, String> nameMap) {
+
+        if ( accessToken == null )
+            throw new BadRequestException("Required AccessToken ! ");
+        if ( userId == null )
+            throw new BadRequestException("Required userId ! ");
+        if ( nameMap.get("name") == null  )
+            throw new BadRequestException("Name Value, Null Not Allowed ! ");
+
+        HttpStatus result = userService.patchUserName(accessToken,userId, nameMap.get("name"));
+
+        return ResponseEntity.status(result).body("");
+    }
+
+    @DeleteMapping(PRE_FIX)
+    public ResponseEntity<?> deleteUser(@RequestHeader(value = "Authorization", required = false) String accessToken,
+                                        @RequestBody RequestSurveyDto requestSurveyDto) {
+
+        if ( accessToken == null )
+            throw new BadRequestException("Required AccessToken ! ");
+        if( requestSurveyDto.getSurveyType() == null || requestSurveyDto.getContent() == null)
+            throw new BadRequestException("Survey Value Not Null !!!!@#! ");
+
+        HttpStatus result = userService.deleteUser(accessToken, requestSurveyDto);
+
+        return ResponseEntity.status(result).body("");
+    }
+
 
     @GetMapping("/login")
     public ResponseEntity<?> getToken(@RequestParam(required = false, value = "userId") Long userId) {
