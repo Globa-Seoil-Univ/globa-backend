@@ -19,8 +19,8 @@ import java.util.List;
 public class ResponseSectionDto {
     private Long sectionId;
     private String title;
-    private int startTime;
-    private int entTime;
+    private Long startTime;
+    private Long endTime;
     private ResponseRecordAnalysisDto analysis;
     private List<ResponseDetailSummaryDto> summary;
     private LocalDateTime createdTime;

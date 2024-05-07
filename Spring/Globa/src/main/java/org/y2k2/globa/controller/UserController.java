@@ -120,7 +120,7 @@ public class UserController {
 
         return ResponseEntity.ok(result);
     }
-    @PutMapping(PRE_FIX+"/{user_id}/notification")
+    @PutMapping("/{user_id}/notification")
     public ResponseEntity<?> putNotification(@RequestHeader(value = "Authorization", required = false) String accessToken,
                                              @PathVariable(value = "user_id", required = false) Long userId,
                                              @RequestBody NotificationDto notificationDto) {
@@ -137,7 +137,7 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
-    @PatchMapping(PRE_FIX+"/{user_id}/name")
+    @PatchMapping("/{user_id}/name")
     public ResponseEntity<?> patchUserName(@RequestHeader(value = "Authorization", required = false) String accessToken,
                                              @PathVariable(value = "user_id", required = false) Long userId,
                                            @RequestBody Map<String, String> nameMap) {
@@ -154,7 +154,7 @@ public class UserController {
         return ResponseEntity.status(result).body("");
     }
 
-    @DeleteMapping(PRE_FIX)
+    @DeleteMapping
     public ResponseEntity<?> deleteUser(@RequestHeader(value = "Authorization", required = false) String accessToken,
                                         @RequestBody RequestSurveyDto requestSurveyDto) {
 

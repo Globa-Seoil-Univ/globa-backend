@@ -134,6 +134,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BadRequestFolderException.class)
     public ResponseEntity<Object> handleBadRequestFolderException(BadRequestFolderException ex) {
         return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.FOLDER_DELETE_BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(FcmException.class)
     public ResponseEntity<Object> handleFcmException(FcmException ex) {

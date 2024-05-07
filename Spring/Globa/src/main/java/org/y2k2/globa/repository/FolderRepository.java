@@ -14,5 +14,4 @@ public interface FolderRepository extends JpaRepository<FolderEntity, Long> {
     FolderEntity findFolderEntityByFolderId(Long folderId);
     Page<FolderEntity> findAllByUserUserId(Pageable pageable, Long userId);
     FolderEntity findFirstByUserUserIdOrderByCreatedTimeAsc(Long userId);
-    FolderEntity findFirstByFolderId(Long folderId);
 }

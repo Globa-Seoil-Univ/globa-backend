@@ -152,7 +152,7 @@ public class RecordService {
             responseSectionDto.setSectionId(section.getSectionId());
             responseSectionDto.setTitle(section.getTitle());
             responseSectionDto.setStartTime(section.getStartTime());
-            responseSectionDto.setEntTime(section.getEntTime());
+            responseSectionDto.setEndTime(section.getEndTime());
             responseSectionDto.setCreatedTime(section.getCreatedTime());
 
             System.out.println("==================== sectionId :: " + section.getSectionId() + "::::::::");

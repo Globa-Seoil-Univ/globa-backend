@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class ResponseDetailHighlightDto {
     private Long highlightId;
-    private String type;
-    private int startIndex;
-    private int endIndex;
+    private Character type;
+    private Long startIndex;
+    private Long endIndex;
 }
