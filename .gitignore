@@ -230,3 +230,6 @@ out/
 /dist/
 /nbdist/
 /.nb-gradle/
+
+### HTTPS ###
+*.p12
