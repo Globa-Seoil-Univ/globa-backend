@@ -1,11 +1,30 @@
 import json
+from typing import List
 
 from kafka import KafkaConsumer
 
 from exception.NotFoundException import NotFoundException
 from util.log import Logger
 
-from analyze.stt import stt
+from analyze.stt import stt, remove_noise_text
+from util.whisper import STTResults
+
+
+# STT json을 가져오기 위한 테스트 코드입니다.
+# 실제 로직에서는 필요 없는 코드입니다.
+def read_stt_results(file_path: str) -> List[STTResults]:
+    stt_results_list = []
+    with open(file_path, 'r', encoding="UTF-8") as file:
+        stt_data = json.load(file)
+
+        for item in stt_data["result"]:
+            text = item["text"]
+            start = float(item["start"])
+            end = float(item["end"])
+            stt_result = STTResults(text, start, end)
+            stt_results_list.append(stt_result)
+
+    return stt_results_list
 
 
 class Consumer:
@@ -45,13 +64,21 @@ class Consumer:
 
             try:
                 if is_json and is_enough_data and is_analyze:
-                    try:
-                        stt_results = stt(record_id=message.value["recordId"], user_id=message.value["userId"])
-                    except NotFoundException as e:
-                        # error topic 전송
-                        self.logger.error("Notfound exception with recordId : %s, userId : %s cause message : %s" % (message.value["recordId"], message.value["userId"], e.message))
-                    except Exception as e:
-                        self.logger.error("Exception with recordId : %s, userId : %s cause message : %s" % (message.value["recordId"], message.value["userId"], e.__str__()))
+                    # try:
+                    #     stt_results = stt(record_id=message.value["recordId"], user_id=message.value["userId"])
+                    # except NotFoundException as e:
+                    #     # error topic 전송
+                    #     self.logger.error("Notfound exception with recordId : %s, userId : %s cause message : %s" % (message.value["recordId"], message.value["userId"], e.message))
+                    # except Exception as e:
+                    #     self.logger.error("Exception with recordId : %s, userId : %s cause message : %s" % (message.value["recordId"], message.value["userId"], e.__str__()))
+
+                    # 해당 코드는 stt 결과를 가져오기 위한 테스트 코드입니다.
+                    # 실제  로직에서는 필요 없습니다.
+                    # JSON 파일 경로 설정
+                    file_path = 'downloads/stt.json'
+                    stt_results = read_stt_results(file_path)
+
+                    remove_noise_text(stt_results)
 
                     # 2-1. 섹션 나누기
                     # 2-2. 섹션별 요약
