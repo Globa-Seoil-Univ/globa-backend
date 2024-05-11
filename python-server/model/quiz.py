@@ -13,8 +13,7 @@ class Quiz(Base):
     answer = Column(BOOLEAN, nullable=False)
     created_time = Column(TIMESTAMP, default=func.now())
 
-    def __init__(self, quiz_id, record_id, question, answer):
-        self.quiz_id = quiz_id
+    def __init__(self, record_id, question, answer):
         self.record_id = record_id
         self.question = question
         self.answer = answer

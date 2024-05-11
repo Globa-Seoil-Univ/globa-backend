@@ -7,6 +7,7 @@ from exception.NotFoundException import NotFoundException
 from util.log import Logger
 
 from analyze.stt import stt, remove_noise_text
+from util.open_ai import OpenAIUtil
 from util.whisper import STTResults
 
 
@@ -64,6 +65,7 @@ class Consumer:
 
             try:
                 if is_json and is_enough_data and is_analyze:
+                    # 여기서 record, user, folder_share 체크 다 하고 들어가기
                     # try:
                     #     stt_results = stt(record_id=message.value["recordId"], user_id=message.value["userId"])
                     # except NotFoundException as e:
@@ -77,8 +79,15 @@ class Consumer:
                     # JSON 파일 경로 설정
                     file_path = 'downloads/stt.json'
                     stt_results = read_stt_results(file_path)
+                    texts = ''.join(result.text for result in stt_results)
 
-                    remove_noise_text(stt_results)
+                    open_ai = OpenAIUtil()
+
+                    try:
+                        open_ai.add_qa(record_id=message.value["recordId"], question=texts)
+                    except Exception as e:
+                        # error topic 전송
+                        self.logger.error(f"QA Error : {e}")
 
                     # 2-1. 섹션 나누기
                     # 2-2. 섹션별 요약
