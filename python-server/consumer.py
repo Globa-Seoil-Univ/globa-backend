@@ -3,11 +3,12 @@ from typing import List
 
 from kafka import KafkaConsumer
 
-from exception.NotFoundException import NotFoundException
+from analyze.keyword import add_keywords
+from analyze.quiz import add_qa
+from model.orm import Quiz
+from util.database import get_session
 from util.log import Logger
 
-from analyze.stt import stt, remove_noise_text
-from util.open_ai import OpenAIUtil
 from util.whisper import STTResults
 
 
@@ -79,15 +80,18 @@ class Consumer:
                     # JSON 파일 경로 설정
                     file_path = 'downloads/stt.json'
                     stt_results = read_stt_results(file_path)
-                    texts = ''.join(result.text for result in stt_results)
-
-                    open_ai = OpenAIUtil()
+                    text = ''.join(result.text for result in stt_results)
 
                     try:
-                        open_ai.add_qa(record_id=message.value["recordId"], question=texts)
+                        add_qa(record_id=message.value["recordId"], text=text)
                     except Exception as e:
                         # error topic 전송
                         self.logger.error(f"QA Error : {e}")
+
+                    try:
+                        add_keywords(record_id=message.value["recordId"], text=text)
+                    except Exception as e:
+                        self.logger.error(f"Keyword Error : {e}")
 
                     # 2-1. 섹션 나누기
                     # 2-2. 섹션별 요약

@@ -1,9 +1,7 @@
 from typing import List
 
 from exception.NotFoundException import NotFoundException
-
-from model.app_user import AppUser
-from model.record import Record
+from model.orm import AppUser, Record
 
 from util.whisper import WhisperManager, STTResults
 from util.storage import FirebaseStorageManager
@@ -29,6 +27,7 @@ def stt(record_id: int, user_id: int):
     record = session.query(Record).filter(Record.record_id == record_id).first()
     if record is None:
         raise NotFoundException("No such record")
+
 
     if record.path is None:
         raise NotFoundException("No such path")

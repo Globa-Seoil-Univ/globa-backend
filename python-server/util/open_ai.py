@@ -4,8 +4,7 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from model.quiz import Quiz
-from util.database import get_session
+from model.orm import Quiz
 from util.log import Logger
 
 load_dotenv()
@@ -51,11 +50,10 @@ class OpenAIUtil:
     ]
 
     def __init__(self):
-        self.logger = Logger(name="QA").logger
+        self.logger = Logger(name="Open AI").logger
         self.client = OpenAI(api_key=api_key)
-        self.session = get_session()
 
-    def add_qa(self, record_id: int, question: str):
+    def get_qa(self, record_id: int, question: str):
         try:
             chunks = chunk_string(text=question)
             results = []
@@ -64,13 +62,16 @@ class OpenAIUtil:
                 completion = self.client.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[
-                        {"role": "system", "content": "너는 사용자가 보내주는 2번째 줄부터 시작하는 내용을 보고 O/X 퀴즈를 여러 개 만들어주는 QA 모델이야."},
+                        {"role": "system",
+                         "content": "너는 사용자가 보내주는 2번째 줄부터 시작하는 내용을 보고 O/X 퀴즈를 여러 개 만들어주는 QA 모델이야.\n"
+                                    + "대화에서 자주 언급되는 내용으로만 질문을 구성해야해."
+                                    + "질문은 다음과 같이 예시를 들 수 있어. ex) 회의 내용의 중심적인 내용 중에는 디자인과 관련이 있다?"},
                         {"role": "user", "content": "다음 줄부터 보여주는 내용을 기반으로 O/X 퀴즈를 만들어서 json 형태로 반환해줘. \n\n" + chunks[0]}
                     ],
                     functions=self.qa_function_descriptions,
                     function_call="auto",
                     response_format={"type": "json_object"},
-                    temperature=0.5,
+                    temperature=0.6,
                     top_p=1
                 )
 
@@ -97,6 +98,7 @@ class OpenAIUtil:
                         messages=[
                             {"role": "system",
                              "content": "너는 사용자가 보내주는 2번째 줄부터 시작하는 내용을 보고 O/X 퀴즈를 여러 개 만들어주는 QA 모델이야.\n "
+                                        + "대화에서 자주 언급되는 내용으로만 질문을 구성해야해."
                                         + "질문은 다음과 같이 예시를 들 수 있어. ex) 회의 내용의 중심적인 내용 중에는 디자인과 관련이 있다?"},
                             {"role": "assistant", "content": prev_text},
                             {"role": "user",
@@ -112,7 +114,7 @@ class OpenAIUtil:
                     results.append(
                         json.loads(completion.choices[0].message.function_call.arguments))
 
-            quizs = []
+            quiz_list = []
 
             for result in results:
                 for question in result['questions']:
@@ -120,10 +122,8 @@ class OpenAIUtil:
                     answer = True if str(question['answer']).lower() == "o" else False
 
                     quiz = Quiz(record_id=record_id, question=quiz_question, answer=answer)
-                    quizs.append(quiz)
+                    quiz_list.append(quiz)
 
-            self.session.add_all(quizs)
-            self.session.commit()
+            return quiz_list
         except Exception as e:
-            self.session.rollback()
             raise e
