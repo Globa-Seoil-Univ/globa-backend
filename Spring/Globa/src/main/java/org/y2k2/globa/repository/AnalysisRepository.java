@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.entity.AnalysisEntity;
+import org.y2k2.globa.entity.SectionEntity;
 
 import java.util.List;
 
@@ -29,4 +30,6 @@ public interface AnalysisRepository extends JpaRepository<AnalysisEntity, Long> 
             "ORDER BY importance DESC " +
             "LIMIT 10; ", nativeQuery = true)
     List<KeywordProjection> findKeywordByRecordId(@Param("recordId") Long recordId);
+
+    boolean existsBySection(SectionEntity section);
 }

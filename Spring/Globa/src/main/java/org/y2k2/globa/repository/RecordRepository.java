@@ -2,6 +2,7 @@ package org.y2k2.globa.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,7 +15,6 @@ public interface RecordRepository extends JpaRepository<RecordEntity, Long> {
 
     RecordEntity findRecordEntityByRecordId(Long recordId);
     Page<RecordEntity> findAllByFolderFolderId(Pageable page, Long folderId);
-    Page<RecordEntity> findAllByOrderByCreatedTimeDesc(Pageable page);
 
     List<RecordEntity> findRecordEntitiesByUserUserId(Long userId);
 
@@ -24,5 +24,5 @@ public interface RecordRepository extends JpaRepository<RecordEntity, Long> {
             "ORDER BY created_time DESC ", nativeQuery = true)
     Page<RecordEntity> findRecordEntitiesByFolder(Pageable pageable, @Param("folderIds") List<Long> folderIds);
   
-    RecordEntity findByRecordId(Long RecordId);
+    RecordEntity findByRecordId(Long recordId);
 }
