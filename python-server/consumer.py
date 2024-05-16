@@ -11,9 +11,8 @@ from model.orm import Quiz
 from producer import Producer
 from util.database import get_session
 from util.log import Logger
-
 from util.whisper import STTResults
-
+from util.gpt import *
 
 # STT json을 가져오기 위한 테스트 코드입니다.
 # 실제 로직에서는 필요 없는 코드입니다.
@@ -61,6 +60,14 @@ class Consumer:
 
     def run(self):
         self.logger.info("Starting consumer")
+        #response = ask_chatgpt(question)
+        #file_path = 'downloads/stt.json'
+        #stt_results = read_stt_results(file_path)
+        #print("stt_results :: \n")
+
+        # ask_chatgpt_lib(stt_results)
+        # assign_text(stt_results,"3")
+        # print(response)
 
         try:
             for message in self.consumer:
