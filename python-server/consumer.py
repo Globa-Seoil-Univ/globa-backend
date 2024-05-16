@@ -6,6 +6,7 @@ from exception.NotFoundException import NotFoundException
 from util.log import Logger
 
 from analyze.stt import stt
+from util.gpt import *
 
 
 class Consumer:
@@ -32,6 +33,14 @@ class Consumer:
 
     def run(self):
         self.logger.info("Starting consumer")
+        #response = ask_chatgpt(question)
+        file_path = 'downloads/stt.json'
+        stt_results = read_stt_results(file_path)
+        print("stt_results :: \n")
+
+        # ask_chatgpt_lib(stt_results)
+        # assign_text(stt_results,"3")
+        # print(response)
 
         for message in self.consumer:
             key = str(message.key, 'utf-8')
