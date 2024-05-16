@@ -29,6 +29,7 @@ import org.y2k2.globa.mapper.RecordMapper;
 import org.y2k2.globa.repository.*;
 import org.y2k2.globa.util.JwtTokenProvider;
 import org.y2k2.globa.util.JwtUtil;
+import org.y2k2.globa.util.KafkaProducer;
 
 import java.rmi.server.ExportException;
 import java.time.LocalDateTime;
@@ -44,6 +45,7 @@ public class RecordService {
     private final JwtTokenProvider jwtTokenProvider;
     private final FolderShareService folderShareService;
     private final JwtUtil jwtUtil;
+    private final KafkaProducer kafkaProducer;
 
     public final UserRepository userRepository;;
     public final StudyRepository studyRepository;
@@ -299,7 +301,6 @@ public class RecordService {
     }
 
     public HttpStatus postRecord(String accessToken, Long folderId, String title, String path, String size){
-
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity userEntity = userRepository.findByUserId(userId);
 
@@ -320,6 +321,8 @@ public class RecordService {
         recordEntity.setFolder(folderEntity);
 
         recordRepository.save(recordEntity);
+
+        kafkaProducer.send("audio-analyze", "analyze", new KafkaRequestDto(recordEntity.getRecordId(), userEntity.getUserId()));
 
         return HttpStatus.CREATED;
     }
