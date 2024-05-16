@@ -6,6 +6,7 @@ import requests
 import os
 import openai
 
+
 from util.whisper import STTResults
 
 
@@ -22,6 +23,9 @@ def read_stt_results(file_path: str) -> List[STTResults]:
             stt_results_list.append(stt_result)
 
     return stt_results_list
+
+
+# 텍스트 전문을 이용해서, 주제별로 섹션 분리
 def ask_chatgpt_lib(stt):
     conn = pymysql.connect(host='127.0.0.1', user ='root', password ='1234', db ='globa', charset ='utf8')
 
@@ -108,8 +112,9 @@ def ask_chatgpt_lib(stt):
     print(responseContent)
     conn.commit()
     conn.close()
-    return responseContent  # API 응답을 JSON 형태로 반환
+    return responseContent  # API 응답을 JSON 형태로 반환  #
 
+# 위에서 분리된 섹션에 텍스트 전문을 할당해서 script 테이블에 insert
 def assign_text(stt, recordId):
     conn = pymysql.connect(host='localhost', user='root',
                            password='1234', db='globa', charset='utf8')
@@ -140,6 +145,7 @@ def assign_text(stt, recordId):
     conn.commit()
     conn.close()
 
+# section과 script를 불러와서 매칭시켜서, 요약하고, summary insert
 def summary_section(recordId) :
     connMysql = pymysql.connect(host='localhost', user='root',
                            password='1234', db='globa', charset='utf8')
