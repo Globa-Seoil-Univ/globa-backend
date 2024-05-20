@@ -10,4 +10,5 @@ import lombok.Setter;
 public class AnswerDto {
     private String title;
     private String content;
+    private String createdTime;
 }
