@@ -19,7 +19,7 @@ public class QuizEntity {
     private Long quizId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "record_id", referencedColumnName = "record_id")
     private RecordEntity record;
 
