@@ -31,5 +31,5 @@ public interface AnalysisRepository extends JpaRepository<AnalysisEntity, Long> 
             "LIMIT 10; ", nativeQuery = true)
     List<KeywordProjection> findKeywordByRecordId(@Param("recordId") Long recordId);
 
-    boolean existsBySection(SectionEntity section);
+    List<AnalysisEntity> findAllBySection(SectionEntity section);
 }

@@ -14,6 +14,7 @@ from util.log import Logger
 from util.whisper import STTResults
 from util.gpt import *
 
+
 # STT json을 가져오기 위한 테스트 코드입니다.
 # 실제 로직에서는 필요 없는 코드입니다.
 def read_stt_results(file_path: str) -> List[STTResults]:
@@ -60,21 +61,10 @@ class Consumer:
 
     def run(self):
         self.logger.info("Starting consumer")
-        #response = ask_chatgpt(question)
-        #file_path = 'downloads/stt.json'
-        #stt_results = read_stt_results(file_path)
-        #print("stt_results :: \n")
-
-        # ask_chatgpt_lib(stt_results)
-        # assign_text(stt_results,"3")
-        # print(response)
 
         try:
             for message in self.consumer:
                 key = str(message.key, 'utf-8')
-
-                print("%s:%d:%d: key=%s value=%s" % (
-                    message.topic, message.partition, message.offset, key, message.value))
 
                 is_json = isinstance(message.value, dict)
                 is_enough_data = "recordId" in message.value and "userId" in message.value
@@ -83,57 +73,39 @@ class Consumer:
                 record_id = message.value["recordId"]
                 user_id = message.value["userId"]
 
-
                 if is_json and is_enough_data and is_analyze:
-                    # 여기서 record, user, folder_share 체크 다 하고 들어가기
-
-                    # try:
-                    #     stt_results = stt(record_id=record_id, user_id=user_id)
-                    # except NotFoundException as e:
-                    #     # error topic 전송
-                    #     self.logger.error("Notfound exception with recordId : %s, userId : %s cause message : %s"
-                    #                       % (record_id, user_id, e.message))
-                    #     self.producer.send_message(key='failed',
-                    #                                message={'recordId': record_id, 'userId': user_id, 'message': e.message})
-                    #     return
-                    # except Exception as e:
-                    #     self.logger.error("Exception with recordId : %s, userId : %s cause message : %s"
-                    #                       % (record_id, user_id, e.__str__()))
-                    #     self.producer.send_message(key='failed',
-                    #                                message={'recordId': record_id, 'userId': user_id, 'message': e.__str__()})
-                    #     return
-
-                    # 해당 코드는 stt 결과를 가져오기 위한 테스트 코드입니다.
-                    # 실제  로직에서는 필요 없습니다.
-                    # JSON 파일 경로 설정
-                    file_path = 'downloads/stt.json'
-                    stt_results = read_stt_results(file_path)
-                    text = ''.join(result.text for result in stt_results)
+                    session = get_session()
 
                     try:
-                        add_qa(record_id=record_id, text=text)
-                    except Exception as e:
-                        self.logger.error(f"QA Error : {e}")
+                        # 여기서 record, user, folder_share 체크 다 하고 들어가기
+
+                        # stt_results = stt(record_id=record_id, user_id=user_id)
+                        # add_qa(record_id=record_id, text=text, session=session)
+                        # add_keywords(record_id=record_id, text=text, session=session)
+                        # session.commit()
+
+                        self.producer.send_message(key='success', message={'recordId': record_id, 'userId': user_id})
+                    except NotFoundException as e:
+                        session.rollback()
+                        self.logger.error("Notfound exception with recordId : %s, userId : %s cause message : %s"
+                                          % (record_id, user_id, e.message))
                         self.producer.send_message(key='failed',
-                                                   message={'recordId': record_id, 'userId': user_id, 'message': e.__str__()})
-                        return
-
-                    try:
-                        add_keywords(record_id=record_id, text=text)
+                                                   message={'recordId': record_id, 'userId': user_id,
+                                                            'message': e.message})
                     except Exception as e:
-                        self.logger.error(f"Keyword Error : {e}")
-                        return
-
-                    self.producer.send_message(key='success', message={
-                        'recordId': record_id, 'userId': user_id
-                    })
+                        session.rollback()
+                        self.logger.error(f"Analyze Error : {e}")
+                        self.producer.send_message(key='failed',
+                                                   message={'recordId': record_id, 'userId': user_id,
+                                                            'message': e.__str__()})
                 else:
                     self.producer.send_message(key='failed',
                                                message={'recordId': record_id, 'userId': user_id,
                                                         'message': "Not valid message is_json: {0}, "
                                                                    "is_enough_data: {1}, "
-                                                                   "is_analyze: {2}"
-                                               .format(is_json,is_enough_data, is_analyze)})
+                                                                   "is_analyze: {2}".format(
+                                                                    is_json, is_enough_data, is_analyze)
+                                                                    })
                     self.logger.info(
                         "Not valid message is_json: {0}, is_enough_data: {1}, is_analyze: {2}".format(is_json,
                                                                                                       is_enough_data,

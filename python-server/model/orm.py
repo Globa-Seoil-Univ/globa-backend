@@ -284,7 +284,6 @@ class Section(Base):
         return {
             'section_id': self.section_id,
             'record_id': self.record_id,
-            'user_id': self.user_id,
             'title': self.title,
             'start_time': self.start_time,
             'end_time': self.end_time,
