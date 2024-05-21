@@ -312,17 +312,17 @@ public class RecordService {
         if (folderShareEntity == null)
             throw new UnAuthorizedException("This user not deserves");
 
-//        RecordEntity recordEntity = new RecordEntity();
-//        recordEntity.setCreatedTime(LocalDateTime.now());
-//        recordEntity.setSize(size);
-//        recordEntity.setPath(path);
-//        recordEntity.setTitle(title);
-//        recordEntity.setUser(userEntity);
-//        recordEntity.setFolder(folderEntity);
-//
-//        recordRepository.save(recordEntity);
+        RecordEntity recordEntity = new RecordEntity();
+        recordEntity.setCreatedTime(LocalDateTime.now());
+        recordEntity.setSize(size);
+        recordEntity.setPath(path);
+        recordEntity.setTitle(title);
+        recordEntity.setUser(userEntity);
+        recordEntity.setFolder(folderEntity);
 
-        kafkaProducer.send("audio-analyze", "analyze", new KafkaRequestDto(21, userEntity.getUserId()));
+        recordRepository.save(recordEntity);
+
+        kafkaProducer.send("audio-analyze", "analyze", new KafkaRequestDto(recordEntity.getRecordId(), userEntity.getUserId()));
 
         return HttpStatus.CREATED;
     }
