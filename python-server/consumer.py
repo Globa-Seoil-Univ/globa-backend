@@ -5,6 +5,9 @@ from kafka import KafkaConsumer
 
 from analyze.keyword import add_keywords
 from analyze.quiz import add_qa
+from analyze.section import add_section
+from analyze.summary import add_summary
+from analyze.assign_text import assign_text
 from analyze.stt import stt
 from exception.NotFoundException import NotFoundException
 from model.orm import Quiz
@@ -60,14 +63,17 @@ class Consumer:
 
                     try:
                         # 여기서 record, user, folder_share 체크 다 하고 들어가기
-
                         stt_results = stt(record_id=record_id, user_id=user_id)
+
+                        add_section(record_id=record_id, text=stt_results, session=session)
+                        assign_text(record_id=record_id, text=stt_results, session=session)
+                        add_summary(record_id=record_id, session=session)
 
                         text = ''.join(result.text for result in stt_results)
                         add_qa(record_id=record_id, text=text, session=session)
                         add_keywords(record_id=record_id, text=text, session=session)
-                        session.commit()
 
+                        session.commit()
                         self.producer.send_message(key='success', message={'recordId': record_id, 'userId': user_id})
                     except NotFoundException as e:
                         session.rollback()

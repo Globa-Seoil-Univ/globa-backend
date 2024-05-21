@@ -276,7 +276,8 @@ class Section(Base):
     created_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, default=func.now())
 
     record: Mapped["Record"] = relationship(back_populates="sections")
-
+    summaries: Mapped[List["Summary"]] = relationship(back_populates="section")
+    script: Mapped["Script"] = relationship(back_populates="section")
     highlights: Mapped[List["Highlight"]] = relationship(back_populates="section", cascade="all, delete-orphan")
 
     @property
@@ -287,5 +288,43 @@ class Section(Base):
             'title': self.title,
             'start_time': self.start_time,
             'end_time': self.end_time,
+            'created_time': self.created_time
+        }
+
+class Summary(Base):
+    __tablename__ = "summary"
+
+    summary_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
+    section_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), ForeignKey("section.section_id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
+    content: Mapped[str] = mapped_column(VARCHAR(1000), nullable=False)
+    created_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, default=func.now())
+
+    section: Mapped["Section"] = relationship(back_populates="summaries")
+
+    @property
+    def serialize(self):
+        return {
+            'summary_id': self.summary_id,
+            'section_id': self.section_id,
+            'content': self.content,
+            'created_time': self.created_time
+        }
+
+class Script(Base):
+    __tablename__ = "script"
+
+    script_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
+    section_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), ForeignKey("section.section_id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
+    text: Mapped[str] = mapped_column(VARCHAR(5000), nullable=False)
+    created_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, default=func.now())
+
+    section: Mapped["Section"] = relationship(back_populates="script")
+
+    @property
+    def serialize(self):
+        return {
+            'script_id': self.script_id,
+            'section_id': self.section_id,
+            'text': self.text,
             'created_time': self.created_time
         }
