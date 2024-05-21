@@ -4,11 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
-public class AnswerDto {
-    private String title;
-    private String content;
-    private String createdTime;
+public class ResponseNotificationDto {
+    private List<NotificationDto> notifications;
+    private long total;
 }

@@ -18,5 +18,5 @@ public interface SectionRepository extends JpaRepository<SectionEntity, Long> {
     }, type = EntityGraph.EntityGraphType.LOAD)
     SectionEntity findBySectionId(@Param("sectionId") long sectionId);
 
-    SectionEntity findFirstByRecord(RecordEntity record);
+    List<SectionEntity> findAllByRecord(RecordEntity record);
 }

@@ -13,6 +13,7 @@ public interface FolderShareMapper {
     FolderShareMapper INSTANCE = Mappers.getMapper(FolderShareMapper.class);
 
     @Mapping(source = "shareEntity.roleId", target = "roleId", qualifiedByName = "MapRoleId")
+    @Mapping(source = "shareEntity.shareId", target = "shareId")
     @Mapping(source = "shareEntity.targetUser.userId", target = "user.userId")
     @Mapping(source = "shareEntity.targetUser.profilePath", target = "user.profile")
     @Mapping(source = "shareEntity.targetUser.name", target = "user.name")

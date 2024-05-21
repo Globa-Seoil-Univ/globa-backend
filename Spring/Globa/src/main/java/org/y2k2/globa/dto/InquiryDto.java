@@ -8,7 +8,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class InquiryDto {
+    private long inquiryId;
     private String title;
     private String content;
+    private String createdTime;
     private boolean isSolved;
 }

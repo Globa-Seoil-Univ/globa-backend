@@ -10,10 +10,7 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.dto.KafkaResponseDto;
-import org.y2k2.globa.entity.FolderShareEntity;
-import org.y2k2.globa.entity.RecordEntity;
-import org.y2k2.globa.entity.SectionEntity;
-import org.y2k2.globa.entity.UserEntity;
+import org.y2k2.globa.entity.*;
 import org.y2k2.globa.repository.*;
 
 import java.util.ArrayList;
@@ -30,9 +27,12 @@ public class KafkaService {
     private final SectionRepository sectionRepository;
     private final QuizRepository quizRepository;
     private final AnalysisRepository analysisRepository;
+    private final KeywordRepository keywordRepository;
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public void success(KafkaResponseDto dto) {
+        boolean isValid = true;
         long userId = dto.getUserId();
         long recordId = dto.getRecordId();
 
@@ -45,34 +45,52 @@ public class KafkaService {
         RecordEntity record = recordRepository.findByRecordId(recordId);
         if (record == null) {
             log.warn("Record not found and userId: {}, recordId: {}", userId, recordId);
-            sendNotification("업로드 실패", "업로드 실패하였습니다.\n나중에 다시 시도해주세요.", user);
-            return;
+            isValid = false;
         }
 
-        SectionEntity section = sectionRepository.findFirstByRecord(record);
-        if (section == null) {
+        List<SectionEntity> sections = sectionRepository.findAllByRecord(record);
+        if (sections.isEmpty()) {
             log.warn("Section not found and userId: {}, recordId: {}", userId, recordId);
-            sendNotification("업로드 실패", "업로드 실패하였습니다.\n나중에 다시 시도해주세요.", user);
-            return;
+            isValid = false;
         }
 
-        boolean isExistedQuiz = quizRepository.existsByRecord(record);
-        if (!isExistedQuiz) {
+        List<QuizEntity> quiz = quizRepository.findAllByRecord(record);
+        if (quiz.isEmpty()) {
             log.warn("Quiz not found and userId: {}, recordId: {}", userId, recordId);
-            sendNotification("업로드 실패", "업로드 실패하였습니다.\n나중에 다시 시도해주세요.", user);
-            return;
+            isValid = false;
         }
 
-        boolean existedAnalysis = analysisRepository.existsBySection(section);
-        if (!existedAnalysis) {
+        List<AnalysisEntity> analysis = new ArrayList<>();
+
+        for (SectionEntity section : sections) {
+            analysis.addAll(analysisRepository.findAllBySection(section));
+        }
+
+        if (analysis.isEmpty()) {
             log.warn("Analysis not found and userId: {}, recordId: {}", userId, recordId);
-            sendNotification("업로드 실패", "업로드 실패하였습니다.\n나중에 다시 시도해주세요.", user);
-            return;
+            isValid = false;
+        }
+
+        List<KeywordEntity> keywords = keywordRepository.findAllByRecord(record);
+        if (keywords.isEmpty()) {
+            log.warn("Keyword not found and userId: {}, recordId: {}", userId, recordId);
+            isValid = false;
         }
         
         // 유효성 검사 실패하면 퀴즈, 키워드, 분석 데이터 등 삭제
+        if (!isValid) {
+            quizRepository.deleteAll(quiz);
+            analysisRepository.deleteAll(analysis);
+            sectionRepository.deleteAll(sections);
+            keywordRepository.deleteAll(keywords);
+            if (record != null) recordRepository.delete(record);
 
-        // 공유된 폴더라면 공유된 사용자에게도 알림을 보냅니다. -> 아직 구현 안 됨
+            sendNotification("업로드 실패", "업로드 실패하였습니다.\n나중에 다시 시도해주세요.", user);
+            return;
+        }
+
+        addNotification(user, record, '6');
+
         sendNotificationShare(record.getTitle() + "이(가) 업로드 되었습니다.", userId, record.getFolder().getFolderId());
         sendNotification("업로드 성공", record.getTitle() + "의 업로드 성공하였습니다.", user);
     }
@@ -90,6 +108,17 @@ public class KafkaService {
         }
 
         sendNotification("업로드 실패", "업로드 실패하였습니다.\n나중에 다시 시도해주세요.", user);
+    }
+
+    private void addNotification(UserEntity user, RecordEntity record, char typeId) {
+        NotificationEntity entity = new NotificationEntity();
+        entity.setTypeId(typeId);
+        entity.setToUser(user);
+        entity.setFromUser(user);
+        entity.setFolder(record.getFolder());
+        entity.setRecord(record);
+
+        notificationRepository.save(entity);
     }
 
     private void sendNotification(String title, String body, UserEntity user) {

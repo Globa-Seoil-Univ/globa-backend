@@ -22,7 +22,7 @@ public class AnalysisEntity {
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "section_id", referencedColumnName = "section_id")
     private SectionEntity section;
 
