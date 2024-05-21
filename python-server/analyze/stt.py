@@ -50,4 +50,3 @@ def remove_noise_text(stt_results: List[STTResults]):
     for result in stt_results:
         text = limit_repeated_words(result.text, max_repeats=4)
         removed_noise_results.append(text)
-        print(text)

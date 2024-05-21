@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from sqlalchemy.orm import Session
 
-from model.orm import Quiz, Section, Summary, Script
+from model.orm import Quiz, Section, Summary, Analysis
 from util.log import Logger
 from util.whisper import STTResults
 
@@ -83,7 +83,7 @@ class OpenAIUtil:
                             }
                         }
                     },
-                    "required": ["subject", "start", "end"],
+                    "required": ["sections", "subject", "start", "end"],
                 },
             }
     ]
@@ -198,7 +198,6 @@ class OpenAIUtil:
         section_list = []
 
         while start_index < len(stt):  # 시작 인덱스가 stt 길이보다 작은 동안 계속 반복
-            print(start_index)
             current_str = ""
             for i in range(start_index, len(stt)):  # start_index부터 시작
                 current_str += stt[i].text + "*" + str(stt[i].start) + "," + str(stt[i].end) + "*" + "\n"
@@ -247,25 +246,25 @@ class OpenAIUtil:
         assign_text_list = []
 
         start_index = 0
-        print(sections)
         for section in sections:
-            print(section, "\n")
             current_str = ""  # 현재 섹션의 텍스트를 저장할 변수
+
             if section:
                 for i in range(start_index, len(stt_origin)):
                     if stt_origin[i].start <= section.end_time:
                         current_str += stt_origin[i].text  # 시간 범위 내의 텍스트 추가
                     elif current_str:  # 범위를 벗어나는 경우이며, current_str에 이미 텍스트가 있는 경우
                         # cursor.execute(insertQuery, (section[0], current_str))
-                        script_entity = Script(section_id=section.section_id, text=current_str)
+                        script_entity = Analysis(section_id=section.section_id, content=current_str)
                         assign_text_list.append(script_entity)
 
                         start_index = i
                         current_str = ""
                         break
+
                 if current_str:  # 마지막으로 범위 내 텍스트가 남아 있는 경우 출력
                     # cursor.execute(insertQuery, (section[0], current_str))
-                    script_entity = Script(section_id=section.section_id, text=current_str)
+                    script_entity = Analysis(section_id=section.section_id, content=current_str)
                     assign_text_list.append(script_entity)
         return assign_text_list
 
@@ -279,11 +278,8 @@ class OpenAIUtil:
 
         summary_list = []
         for data in datas:
-            print(data)
-            print(data)
-            print(data.text)
             if data:
-                if data.text:
+                if data.content:
                     completion = self.client.chat.completions.create(
                         model="gpt-3.5-turbo",
                         messages=[
@@ -294,7 +290,7 @@ class OpenAIUtil:
                             {
                                 "role": "user",
                                 "content": "다음의 텍스트를 주제에 맞게 요약해서 json형태로 반환해줘. 단, 요약 조건은 다음과 같아.\n1.마지막에 제시될 주제에 맞추어 본문을 요약해.\n2. 절대 우선적으로 본문을 기반하는데, 그대로 넣지말고 너가 문장을 다듬어서 요약해서 넣어.\n3.한 줄로 다 적지말고, 여러 개의 text 객체로 해줘. 즉, 가능하다면 여러줄로 표현되기를 원해\n4. 다시 한 번 강조하자면, 하나의 문장이 하나의 text 객체를 이루면 좋을거 같아.\n\n" + "주제 : " +
-                                           data.title + "\n본문 : " + data.text
+                                           data.title + "\n본문 : " + data.content
                             }
                         ],
                         functions= self.summary_function_descriptions,

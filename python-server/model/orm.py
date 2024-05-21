@@ -277,7 +277,7 @@ class Section(Base):
 
     record: Mapped["Record"] = relationship(back_populates="sections")
     summaries: Mapped[List["Summary"]] = relationship(back_populates="section")
-    script: Mapped["Script"] = relationship(back_populates="section")
+    analysis: Mapped["Analysis"] = relationship(back_populates="section")
     highlights: Mapped[List["Highlight"]] = relationship(back_populates="section", cascade="all, delete-orphan")
 
     @property
@@ -310,21 +310,22 @@ class Summary(Base):
             'created_time': self.created_time
         }
 
-class Script(Base):
-    __tablename__ = "script"
 
-    script_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
+class Analysis(Base):
+    __tablename__ = "analysis"
+
+    analysis_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
     section_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), ForeignKey("section.section_id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
-    text: Mapped[str] = mapped_column(VARCHAR(5000), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
     created_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, default=func.now())
 
-    section: Mapped["Section"] = relationship(back_populates="script")
+    section: Mapped["Section"] = relationship(back_populates="analysis")
 
     @property
     def serialize(self):
         return {
-            'script_id': self.script_id,
+            'analysis_id': self.analysis_id,
             'section_id': self.section_id,
-            'text': self.text,
+            'content': self.content,
             'created_time': self.created_time
         }
