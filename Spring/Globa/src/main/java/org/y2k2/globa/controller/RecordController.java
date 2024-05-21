@@ -17,8 +17,6 @@ import java.util.Map;
 @ResponseBody
 @RequiredArgsConstructor
 public class RecordController {
-
-    private final String PRE_FIX = "/folder/{folderId}/share";
     private final RecordService recordService;
 
     @GetMapping("/folder/{folder_id}/record")

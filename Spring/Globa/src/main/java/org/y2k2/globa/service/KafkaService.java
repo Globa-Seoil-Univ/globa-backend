@@ -28,6 +28,7 @@ public class KafkaService {
     private final QuizRepository quizRepository;
     private final AnalysisRepository analysisRepository;
     private final KeywordRepository keywordRepository;
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public void success(KafkaResponseDto dto) {
@@ -88,7 +89,8 @@ public class KafkaService {
             return;
         }
 
-        // 공유된 폴더라면 공유된 사용자에게도 알림을 보냅니다. -> 아직 구현 안 됨
+        addNotification(user, record, '6');
+
         sendNotificationShare(record.getTitle() + "이(가) 업로드 되었습니다.", userId, record.getFolder().getFolderId());
         sendNotification("업로드 성공", record.getTitle() + "의 업로드 성공하였습니다.", user);
     }
@@ -106,6 +108,17 @@ public class KafkaService {
         }
 
         sendNotification("업로드 실패", "업로드 실패하였습니다.\n나중에 다시 시도해주세요.", user);
+    }
+
+    private void addNotification(UserEntity user, RecordEntity record, char typeId) {
+        NotificationEntity entity = new NotificationEntity();
+        entity.setTypeId(typeId);
+        entity.setToUser(user);
+        entity.setFromUser(user);
+        entity.setFolder(record.getFolder());
+        entity.setRecord(record);
+
+        notificationRepository.save(entity);
     }
 
     private void sendNotification(String title, String body, UserEntity user) {
