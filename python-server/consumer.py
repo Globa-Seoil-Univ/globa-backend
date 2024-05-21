@@ -5,6 +5,9 @@ from kafka import KafkaConsumer
 
 from analyze.keyword import add_keywords
 from analyze.quiz import add_qa
+from analyze.section import add_section
+from analyze.summary import add_summary
+from analyze.assign_text import assign_text
 from analyze.stt import stt
 from exception.NotFoundException import NotFoundException
 from model.orm import Quiz
@@ -69,8 +72,43 @@ class Consumer:
         # assign_text(stt_results,"3")
         # print(response)
 
+        session = get_session()
+
+        record_id = 3
+        user_id = 3
+        print("111111")
+        file_path = 'downloads/stt.json'
+        stt_results = read_stt_results(file_path)
+        text = ''.join(result.text for result in stt_results)
+        print("22222222222")
         try:
+            file_path = 'downloads/stt.json'
+            stt_results = read_stt_results(file_path)
+            print("3333333333")
+            add_section(record_id=record_id, text=stt_results, session=session)
+            print("4")
+            assign_text(record_id=record_id, text=stt_results, session=session)
+            print("555555555555")
+            add_summary(record_id=record_id, session=session)
+            session.commit()
+        except NotFoundException as e:
+            session.rollback()
+            self.logger.error("Notfound exception with recordId : %s, userId : %s cause message : %s"
+                              % (record_id, user_id, e.message))
+            self.producer.send_message(key='failed',
+                                       message={'recordId': record_id, 'userId': user_id,
+                                                'message': e.message})
+        except Exception as e:
+            session.rollback()
+            self.logger.error(f"Analyze Error : {e}")
+            self.producer.send_message(key='failed',
+                                       message={'recordId': record_id, 'userId': user_id,
+                                                'message': e.__str__()})
+
+        try:
+            print("구루루")
             for message in self.consumer:
+                print("구루루")
                 key = str(message.key, 'utf-8')
 
                 print("%s:%d:%d: key=%s value=%s" % (
@@ -80,11 +118,15 @@ class Consumer:
                 is_enough_data = "recordId" in message.value and "userId" in message.value
                 is_analyze = message.topic == self.topic and key == "analyze"
 
-                record_id = message.value["recordId"]
-                user_id = message.value["userId"]
+                # record_id = message.value["recordId"]
+                # user_id = message.value["userId"]
+                record_id = 3
+                user_id = 3
 
 
                 if is_json and is_enough_data and is_analyze:
+                    session = get_session()
+
                     # 여기서 record, user, folder_share 체크 다 하고 들어가기
 
                     # try:
@@ -106,27 +148,42 @@ class Consumer:
                     # 해당 코드는 stt 결과를 가져오기 위한 테스트 코드입니다.
                     # 실제  로직에서는 필요 없습니다.
                     # JSON 파일 경로 설정
+                    print("111111")
                     file_path = 'downloads/stt.json'
                     stt_results = read_stt_results(file_path)
                     text = ''.join(result.text for result in stt_results)
-
+                    print("22222222222")
                     try:
-                        add_qa(record_id=record_id, text=text)
-                    except Exception as e:
-                        self.logger.error(f"QA Error : {e}")
+                        # 여기서 record, user, folder_share 체크 다 하고 들어가기
+
+                        # 해당 코드는 stt 결과를 가져오기 위한 테스트 코드입니다.
+                        # 실제  로직에서는 필요 없습니다.
+                        # JSON 파일 경로 설정
+                        file_path = 'downloads/stt.json'
+                        stt_results = read_stt_results(file_path)
+                        text = ''.join(result.text for result in stt_results)
+
+                        stt_results = stt(record_id=record_id, user_id=user_id)
+                        print("3333333333")
+                        add_section(record_id=record_id, text=stt_results, session=session)
+                        print("4")
+                        add_summary(record_id=record_id,session=session)
+                        # add_qa(record_id=record_id, text=text, session=session)
+                        # add_keywords(record_id=record_id, text=text, session=session)
+                        session.commit()
+                    except NotFoundException as e:
+                        session.rollback()
+                        self.logger.error("Notfound exception with recordId : %s, userId : %s cause message : %s"
+                                          % (record_id, user_id, e.message))
                         self.producer.send_message(key='failed',
-                                                   message={'recordId': record_id, 'userId': user_id, 'message': e.__str__()})
-                        return
-
-                    try:
-                        add_keywords(record_id=record_id, text=text)
+                                                   message={'recordId': record_id, 'userId': user_id,
+                                                            'message': e.message})
                     except Exception as e:
-                        self.logger.error(f"Keyword Error : {e}")
-                        return
-
-                    self.producer.send_message(key='success', message={
-                        'recordId': record_id, 'userId': user_id
-                    })
+                        session.rollback()
+                        self.logger.error(f"Analyze Error : {e}")
+                        self.producer.send_message(key='failed',
+                                                   message={'recordId': record_id, 'userId': user_id,
+                                                            'message': e.__str__()})
                 else:
                     self.producer.send_message(key='failed',
                                                message={'recordId': record_id, 'userId': user_id,

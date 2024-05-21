@@ -123,7 +123,7 @@ public class RecordService {
                         keywords.add(responseKeywordDto);
                     }
 
-                   return RecordMapper.INSTANCE.toResponseAllRecordDto(record,keywords);
+                   return RecordMapper.INSTANCE.toResponseAllRecordDto(record, recordRepository.findRecordEntityByRecordId(record.getRecordId()).getFolder().getFolderId(),keywords);
 
                 })
                 .collect(Collectors.toList()), (int) records.getTotalElements());

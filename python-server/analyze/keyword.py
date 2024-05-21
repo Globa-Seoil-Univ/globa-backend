@@ -1,11 +1,13 @@
 from typing import List
 
+from sqlalchemy.orm import Session
+
 from model.orm import Keyword
 from util.database import get_session
 from util.keyword import KeywordUtil
 
 
-def add_keywords(record_id: int, text: str):
+def add_keywords(record_id: int, text: str, session: Session):
     keyword_util = KeywordUtil()
     keyword_result = keyword_util.get_keywords(text)
     keywords: List[Keyword] = []
