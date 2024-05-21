@@ -11,25 +11,7 @@ from model.orm import Quiz
 from producer import Producer
 from util.database import get_session
 from util.log import Logger
-from util.whisper import STTResults
 from util.gpt import *
-
-
-# STT json을 가져오기 위한 테스트 코드입니다.
-# 실제 로직에서는 필요 없는 코드입니다.
-def read_stt_results(file_path: str) -> List[STTResults]:
-    stt_results_list = []
-    with open(file_path, 'r', encoding="UTF-8") as file:
-        stt_data = json.load(file)
-
-        for item in stt_data["result"]:
-            text = item["text"]
-            start = float(item["start"])
-            end = float(item["end"])
-            stt_result = STTResults(text, start, end)
-            stt_results_list.append(stt_result)
-
-    return stt_results_list
 
 
 class Consumer:
@@ -79,10 +61,12 @@ class Consumer:
                     try:
                         # 여기서 record, user, folder_share 체크 다 하고 들어가기
 
-                        # stt_results = stt(record_id=record_id, user_id=user_id)
-                        # add_qa(record_id=record_id, text=text, session=session)
-                        # add_keywords(record_id=record_id, text=text, session=session)
-                        # session.commit()
+                        stt_results = stt(record_id=record_id, user_id=user_id)
+
+                        text = ''.join(result.text for result in stt_results)
+                        add_qa(record_id=record_id, text=text, session=session)
+                        add_keywords(record_id=record_id, text=text, session=session)
+                        session.commit()
 
                         self.producer.send_message(key='success', message={'recordId': record_id, 'userId': user_id})
                     except NotFoundException as e:
