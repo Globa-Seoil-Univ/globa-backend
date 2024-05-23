@@ -1,6 +1,3 @@
-import json
-from typing import List
-
 from kafka import KafkaConsumer
 
 from analyze.keyword import add_keywords
@@ -10,25 +7,11 @@ from analyze.summary import add_summary
 from analyze.assign_text import assign_text
 from analyze.stt import stt
 from exception.NotFoundException import NotFoundException
+from model.orm import AppUser, Record, FolderShare
 from producer import Producer
 from util.database import get_session
 from util.log import Logger
 from util.gpt import *
-
-
-def read_stt_results(file_path: str) -> List[STTResults]:
-    stt_results_list = []
-    with open(file_path, 'r', encoding="UTF-8") as file:
-        stt_data = json.load(file)
-
-        for item in stt_data["result"]:
-            text = item["text"]
-            start = float(item["start"])
-            end = float(item["end"])
-            stt_result = STTResults(text, start, end)
-            stt_results_list.append(stt_result)
-
-    return stt_results_list
 
 
 class Consumer:
@@ -73,13 +56,28 @@ class Consumer:
                 user_id = message.value["userId"]
 
                 if is_json and is_enough_data and is_analyze:
+                    self.logger.info(f"In stt method recordId: {record_id} user_id: {user_id}")
                     session = get_session()
 
                     try:
-                        # 여기서 record, user, folder_share 체크 다 하고 들어가기
-                        # stt_results = stt(record_id=record_id, user_id=user_id)
-                        file_path = 'downloads/stt.json'
-                        stt_results = read_stt_results(file_path)
+                        user = session.query(AppUser).filter(AppUser.user_id == user_id).first()
+                        if user is None:
+                            raise NotFoundException("No such user")
+
+                        record = session.query(Record).filter(Record.record_id == record_id).first()
+                        if record is None:
+                            raise NotFoundException("No such record")
+
+                        if record.path is None:
+                            raise NotFoundException("No such path")
+
+                        folder_share = (session.query(FolderShare).filter(FolderShare.folder_id == record.folder_id
+                                                                          and FolderShare.owner_id == user.user_id)
+                                        .first())
+                        if folder_share is None:
+                            raise NotFoundException("No such foldershare")
+
+                        stt_results = stt(record.path)
 
                         add_section(record_id=record_id, text=stt_results, session=session)
                         assign_text(record_id=record_id, text=stt_results, session=session)
@@ -110,8 +108,8 @@ class Consumer:
                                                         'message': "Not valid message is_json: {0}, "
                                                                    "is_enough_data: {1}, "
                                                                    "is_analyze: {2}".format(
-                                                                    is_json, is_enough_data, is_analyze)
-                                                                    })
+                                                            is_json, is_enough_data, is_analyze)
+                                                        })
                     self.logger.info(
                         "Not valid message is_json: {0}, is_enough_data: {1}, is_analyze: {2}".format(is_json,
                                                                                                       is_enough_data,
