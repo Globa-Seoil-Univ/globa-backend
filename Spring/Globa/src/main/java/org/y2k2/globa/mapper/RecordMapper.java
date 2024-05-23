@@ -29,9 +29,10 @@ public interface RecordMapper {
     RequestRecordDto toRequestRecordDto(RecordEntity recordEntity);
 
     @Mapping(source = "recordEntity.recordId", target = "recordId")
+    @Mapping(source = "folderId", target = "folderId")
     @Mapping(source = "recordEntity.title", target = "title")
     @Mapping(source = "recordEntity.path", target = "path")
     @Mapping(source = "keywords", target = "keywords")
     @Mapping(source = "recordEntity.createdTime", target = "createdTime")
-    ResponseAllRecordDto toResponseAllRecordDto(RecordEntity recordEntity, List<ResponseKeywordDto> keywords);
+    ResponseAllRecordDto toResponseAllRecordDto(RecordEntity recordEntity, Long folderId, List<ResponseKeywordDto> keywords);
 }

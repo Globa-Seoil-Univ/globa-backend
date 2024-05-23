@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class FolderShareUserDto {
+    private final long shareId;
     private final String roleId;
     private final UserIntroDto user;
     private final InvitationStatus invitationStatus;

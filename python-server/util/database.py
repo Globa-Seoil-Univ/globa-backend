@@ -1,17 +1,20 @@
 import os
 
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, DeclarativeBase
 from dotenv import load_dotenv
 
 load_dotenv()
 
+
 DATABASE_URL = os.getenv('database-url')
 engine = create_engine(DATABASE_URL)
-session = sessionmaker(bind=engine)
-Base = declarative_base()
+session = Session(engine)
+
+
+class Base(DeclarativeBase):
+    pass
 
 
 def get_session():
-    return session()
+    return session

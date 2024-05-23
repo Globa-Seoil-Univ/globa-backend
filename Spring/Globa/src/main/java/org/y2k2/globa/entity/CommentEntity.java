@@ -21,14 +21,17 @@ public class CommentEntity {
     private Long commentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "parent_id", referencedColumnName = "comment_id")
     private CommentEntity parent;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "highlight_id", referencedColumnName = "highlight_id", nullable = false)
     private HighlightEntity highlight;
 

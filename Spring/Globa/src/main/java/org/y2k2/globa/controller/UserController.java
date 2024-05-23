@@ -102,7 +102,7 @@ public class UserController {
         if ( userId == null )
             throw new BadRequestException("Required userId ! ");
 
-        NotificationDto result = userService.getNotification(accessToken,userId);
+        NotificationSettingDto result = userService.getNotification(accessToken,userId);
 
         return ResponseEntity.ok(result);
     }
@@ -123,16 +123,16 @@ public class UserController {
     @PutMapping("/{user_id}/notification")
     public ResponseEntity<?> putNotification(@RequestHeader(value = "Authorization", required = false) String accessToken,
                                              @PathVariable(value = "user_id", required = false) Long userId,
-                                             @RequestBody NotificationDto notificationDto) {
+                                             @RequestBody NotificationSettingDto NotificationSettingDto) {
 
         if ( accessToken == null )
             throw new BadRequestException("Required AccessToken ! ");
         if ( userId == null )
             throw new BadRequestException("Required userId ! ");
-        if ( notificationDto.getEventNofi() == null || notificationDto.getUploadNofi() == null  || notificationDto.getShareNofi() == null  )
+        if ( NotificationSettingDto.getEventNofi() == null || NotificationSettingDto.getUploadNofi() == null  || NotificationSettingDto.getShareNofi() == null  )
             throw new BadRequestException("Nofi Value, Null Not Allowed ! ");
 
-        NotificationDto result = userService.putNotification(accessToken,userId, notificationDto);
+        NotificationSettingDto result = userService.putNotification(accessToken,userId, NotificationSettingDto);
 
         return ResponseEntity.ok(result);
     }

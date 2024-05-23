@@ -7,8 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class AnswerDto {
-    private String title;
-    private String content;
-    private String createdTime;
+public class KafkaRequestDto {
+    private long recordId;
+    private long userId;
 }

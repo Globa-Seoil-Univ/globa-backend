@@ -12,6 +12,7 @@ import java.util.List;
 @Getter
 public class ResponseAllRecordDto implements Serializable {
     private Long recordId;
+    private Long folderId;
     private String title;
     private String path;
     private List<ResponseKeywordDto> keywords;

@@ -167,7 +167,7 @@ public class UserService {
 
     }
 
-    public NotificationDto getNotification(String accessToken, Long pathUserId){
+    public NotificationSettingDto getNotification(String accessToken, Long pathUserId){
 
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
@@ -180,13 +180,13 @@ public class UserService {
         if(userEntity == null)
             throw new NotFoundException("유저를 찾을 수 없습니다 !");
 
-        NotificationDto responseUserNotificationDto = new NotificationDto();
+        NotificationSettingDto responseUserNotificationSettingDto = new NotificationSettingDto();
 
-        responseUserNotificationDto.setUploadNofi(userEntity.getUploadNofi());
-        responseUserNotificationDto.setShareNofi(userEntity.getShareNofi());
-        responseUserNotificationDto.setEventNofi(userEntity.getEventNofi());
+        responseUserNotificationSettingDto.setUploadNofi(userEntity.getUploadNofi());
+        responseUserNotificationSettingDto.setShareNofi(userEntity.getShareNofi());
+        responseUserNotificationSettingDto.setEventNofi(userEntity.getEventNofi());
 
-        return responseUserNotificationDto;
+        return responseUserNotificationSettingDto;
     }
 
     @Transactional
@@ -282,7 +282,7 @@ public class UserService {
         return responseAnalysisDto;
     }
 
-    public NotificationDto putNotification(String accessToken, Long putUserId, NotificationDto notificationDto){
+    public NotificationSettingDto putNotification(String accessToken, Long putUserId, NotificationSettingDto NotificationSettingDto){
 
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
@@ -292,19 +292,19 @@ public class UserService {
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
-        userEntity.setUploadNofi(notificationDto.getUploadNofi());
-        userEntity.setShareNofi(notificationDto.getShareNofi());
-        userEntity.setEventNofi(notificationDto.getEventNofi());
+        userEntity.setUploadNofi(NotificationSettingDto.getUploadNofi());
+        userEntity.setShareNofi(NotificationSettingDto.getShareNofi());
+        userEntity.setEventNofi(NotificationSettingDto.getEventNofi());
 
         UserEntity savedEntity = userRepository.save(userEntity);
 
-        NotificationDto responseUserNotificationDto = new NotificationDto();
+        NotificationSettingDto responseUserNotificationSettingDto = new NotificationSettingDto();
 
-        responseUserNotificationDto.setUploadNofi(savedEntity.getUploadNofi());
-        responseUserNotificationDto.setShareNofi(savedEntity.getShareNofi());
-        responseUserNotificationDto.setEventNofi(savedEntity.getEventNofi());
+        responseUserNotificationSettingDto.setUploadNofi(savedEntity.getUploadNofi());
+        responseUserNotificationSettingDto.setShareNofi(savedEntity.getShareNofi());
+        responseUserNotificationSettingDto.setEventNofi(savedEntity.getEventNofi());
 
-        return responseUserNotificationDto;
+        return responseUserNotificationSettingDto;
     }
 
     public HttpStatus patchUserName(String accessToken, Long putUserId, String name){

@@ -1,11 +1,17 @@
-import json
-
 from kafka import KafkaConsumer
 
-from exception.NotFoundException import NotFoundException
-from util.log import Logger
-
+from analyze.keyword import add_keywords
+from analyze.quiz import add_qa
+from analyze.section import add_section
+from analyze.summary import add_summary
+from analyze.assign_text import assign_text
 from analyze.stt import stt
+from exception.NotFoundException import NotFoundException
+from model.orm import AppUser, Record, FolderShare
+from producer import Producer
+from util.database import get_session
+from util.log import Logger
+from util.gpt import *
 
 
 class Consumer:
@@ -13,6 +19,7 @@ class Consumer:
     topic = ""
     group_id = ""
     consumer = None
+    producer = None
     logger = None
 
     def __init__(self, broker, topic, group_id):
@@ -28,39 +35,85 @@ class Consumer:
             enable_auto_commit=False,
             value_deserializer=lambda m: json.loads(m.decode('utf-8'))
         )
+        self.producer = Producer(
+            broker=self.broker,
+            topic="response"
+        )
         self.consumer.subscribe(self.topic)
 
     def run(self):
         self.logger.info("Starting consumer")
 
-        for message in self.consumer:
-            key = str(message.key, 'utf-8')
+        try:
+            for message in self.consumer:
+                key = str(message.key, 'utf-8')
 
-            print("%s:%d:%d: key=%s value=%s" % (
-                message.topic, message.partition, message.offset, key, message.value))
+                is_json = isinstance(message.value, dict)
+                is_enough_data = "recordId" in message.value and "userId" in message.value
+                is_analyze = message.topic == self.topic and key == "analyze"
 
-            is_json = isinstance(message.value, dict)
-            is_enough_data = "recordId" in message.value and "userId" in message.value
-            is_analyze = message.topic == self.topic and key == "analyze"
+                record_id = message.value["recordId"]
+                user_id = message.value["userId"]
 
-            try:
                 if is_json and is_enough_data and is_analyze:
-                    try:
-                        stt_results = stt(record_id=message.value["recordId"], user_id=message.value["userId"])
-                    except NotFoundException as e:
-                        # error topic 전송
-                        self.logger.error("Notfound exception with recordId : %s, userId : %s cause message : %s" % (message.value["recordId"], message.value["userId"], e.message))
-                    except Exception as e:
-                        self.logger.error("Exception with recordId : %s, userId : %s cause message : %s" % (message.value["recordId"], message.value["userId"], e.__str__()))
+                    self.logger.info(f"In stt method recordId: {record_id} user_id: {user_id}")
+                    session = get_session()
 
-                    # 2-1. 섹션 나누기
-                    # 2-2. 섹션별 요약
-                    # 2-3. 중요 키워드 추출
-                    # 2-4. 퀴즈 생성
+                    try:
+                        user = session.query(AppUser).filter(AppUser.user_id == user_id).first()
+                        if user is None:
+                            raise NotFoundException("No such user")
+
+                        record = session.query(Record).filter(Record.record_id == record_id).first()
+                        if record is None:
+                            raise NotFoundException("No such record")
+
+                        if record.path is None:
+                            raise NotFoundException("No such path")
+
+                        folder_share = (session.query(FolderShare).filter(FolderShare.folder_id == record.folder_id
+                                                                          and FolderShare.owner_id == user.user_id)
+                                        .first())
+                        if folder_share is None:
+                            raise NotFoundException("No such foldershare")
+
+                        stt_results = stt(record.path)
+
+                        add_section(record_id=record_id, text=stt_results, session=session)
+                        assign_text(record_id=record_id, text=stt_results, session=session)
+                        add_summary(record_id=record_id, session=session)
+
+                        text = ''.join(result.text for result in stt_results)
+                        add_qa(record_id=record_id, text=text, session=session)
+                        add_keywords(record_id=record_id, text=text, session=session)
+
+                        session.commit()
+                        self.producer.send_message(key='success', message={'recordId': record_id, 'userId': user_id})
+                    except NotFoundException as e:
+                        session.rollback()
+                        self.logger.error("Notfound exception with recordId : %s, userId : %s cause message : %s"
+                                          % (record_id, user_id, e.message))
+                        self.producer.send_message(key='failed',
+                                                   message={'recordId': record_id, 'userId': user_id,
+                                                            'message': e.message})
+                    except Exception as e:
+                        session.rollback()
+                        self.logger.error(f"Analyze Error : {e}")
+                        self.producer.send_message(key='failed',
+                                                   message={'recordId': record_id, 'userId': user_id,
+                                                            'message': e.__str__()})
                 else:
+                    self.producer.send_message(key='failed',
+                                               message={'recordId': record_id, 'userId': user_id,
+                                                        'message': "Not valid message is_json: {0}, "
+                                                                   "is_enough_data: {1}, "
+                                                                   "is_analyze: {2}".format(
+                                                            is_json, is_enough_data, is_analyze)
+                                                        })
                     self.logger.info(
                         "Not valid message is_json: {0}, is_enough_data: {1}, is_analyze: {2}".format(is_json,
                                                                                                       is_enough_data,
                                                                                                       is_analyze))
-            except Exception as e:
-                self.logger.error("Exception: {0}".format(e))
+        except Exception as e:
+            self.logger.error("Exception: {0}".format(e))
+            self.producer.send_message(key='failed', message={'recordId': 0, 'userId': 0, 'message': e.__str__()})
