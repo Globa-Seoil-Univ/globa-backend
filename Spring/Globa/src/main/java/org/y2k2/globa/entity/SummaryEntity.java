@@ -18,6 +18,7 @@ public class SummaryEntity {
     @Column(name = "summary_id", columnDefinition = "INT UNSIGNED")
     private Long summaryId;
 
+    @Lob
     @Column(name = "content")
     private String content;
 
