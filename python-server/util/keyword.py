@@ -19,7 +19,7 @@ class KeywordUtil:
             with open(keyword_file_path, 'r', encoding="utf-8") as file:
                 json_data = json.load(file)
 
-            for data in json_data["keywords"]:
+            for data in json_data["words"]:
                 self.kiwi.add_user_word(data["word"], data["tag"])
 
     # 명사만 가져오기
@@ -44,11 +44,10 @@ class KeywordUtil:
         return [text.replace("\n", " ")], [self.__preprocess(text)]
 
     def get_keywords(self, text: str):
-        pass
-        # sentences, pre_sentences = self.__split_into_sentences(text)
-        #
-        # # 하나의 문장으로 키워드 추출
-        # keywords = self.kw_model.extract_keywords(pre_sentences[0], keyphrase_ngram_range=(1, 1), stop_words=None,
-        #                                           use_maxsum=True, use_mmr=True, diversity=0.3, top_n=10)
-        #
-        # return keywords
+        sentences, pre_sentences = self.__split_into_sentences(text)
+
+        # 하나의 문장으로 키워드 추출
+        keywords = self.kw_model.extract_keywords(pre_sentences[0], keyphrase_ngram_range=(1, 1), stop_words=None,
+                                                  use_maxsum=True, use_mmr=True, diversity=0.3, top_n=10)
+
+        return keywords
