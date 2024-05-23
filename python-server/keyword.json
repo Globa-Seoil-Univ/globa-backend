@@ -1,0 +1,1004 @@
+{
+  "words": [
+    {
+      "word": "딥러닝",
+      "tag": "NNP"
+    },
+    {
+      "word": "핸드폰",
+      "tag": "NNP"
+    },
+    {
+      "word": "휴대폰",
+      "tag": "NNP"
+    },
+    {
+      "word": "스마트폰",
+      "tag": "NNP"
+    },
+    {
+      "word": "아이폰",
+      "tag": "NNP"
+    },
+    {
+      "word": "안드로이드",
+      "tag": "NNP"
+    },
+    {
+      "word": "아이패드",
+      "tag": "NNP"
+    },
+    {
+      "word": "갤럭시",
+      "tag": "NNP"
+    },
+    {
+      "word": "맥북",
+      "tag": "NNP"
+    },
+    {
+      "word": "윈도우",
+      "tag": "NNP"
+    },
+    {
+      "word": "리눅스",
+      "tag": "NNP"
+    },
+    {
+      "word": "인공지능",
+      "tag": "NNP"
+    },
+    {
+      "word": "빅데이터",
+      "tag": "NNP"
+    },
+    {
+      "word": "클라우드",
+      "tag": "NNP"
+    },
+    {
+      "word": "사물인터넷",
+      "tag": "NNP"
+    },
+    {
+      "word": "블록체인",
+      "tag": "NNP"
+    },
+    {
+      "word": "핀테크",
+      "tag": "NNP"
+    },
+    {
+      "word": "드론",
+      "tag": "NNP"
+    },
+    {
+      "word": "메타버스",
+      "tag": "NNP"
+    },
+    {
+      "word": "챗봇",
+      "tag": "NNP"
+    },
+    {
+      "word": "자율주행",
+      "tag": "NNP"
+    },
+    {
+      "word": "스마트홈",
+      "tag": "NNP"
+    },
+    {
+      "word": "증강현실",
+      "tag": "NNP"
+    },
+    {
+      "word": "가상현실",
+      "tag": "NNP"
+    },
+    {
+      "word": "머신러닝",
+      "tag": "NNP"
+    },
+    {
+      "word": "로봇",
+      "tag": "NNP"
+    },
+    {
+      "word": "알고리즘",
+      "tag": "NNP"
+    },
+    {
+      "word": "프로세서",
+      "tag": "NNP"
+    },
+    {
+      "word": "웹사이트",
+      "tag": "NNP"
+    },
+    {
+      "word": "앱스토어",
+      "tag": "NNP"
+    },
+    {
+      "word": "프로그래밍",
+      "tag": "NNP"
+    },
+    {
+      "word": "코딩",
+      "tag": "NNP"
+    },
+    {
+      "word": "데이터베이스",
+      "tag": "NNP"
+    },
+    {
+      "word": "서버",
+      "tag": "NNP"
+    },
+    {
+      "word": "네트워크",
+      "tag": "NNP"
+    },
+    {
+      "word": "디지털",
+      "tag": "NNP"
+    },
+    {
+      "word": "바이오",
+      "tag": "NNP"
+    },
+    {
+      "word": "나노",
+      "tag": "NNP"
+    },
+    {
+      "word": "기술",
+      "tag": "NNP"
+    },
+    {
+      "word": "유튜브",
+      "tag": "NNP"
+    },
+    {
+      "word": "페이스북",
+      "tag": "NNP"
+    },
+    {
+      "word": "트위터",
+      "tag": "NNP"
+    },
+    {
+      "word": "인스타그램",
+      "tag": "NNP"
+    },
+    {
+      "word": "틱톡",
+      "tag": "NNP"
+    },
+    {
+      "word": "넷플릭스",
+      "tag": "NNP"
+    },
+    {
+      "word": "디즈니플러스",
+      "tag": "NNP"
+    },
+    {
+      "word": "아마존",
+      "tag": "NNP"
+    },
+    {
+      "word": "알리바바",
+      "tag": "NNP"
+    },
+    {
+      "word": "구글",
+      "tag": "NNP"
+    },
+    {
+      "word": "애플",
+      "tag": "NNP"
+    },
+    {
+      "word": "삼성",
+      "tag": "NNP"
+    },
+    {
+      "word": "현대",
+      "tag": "NNP"
+    },
+    {
+      "word": "기아",
+      "tag": "NNP"
+    },
+    {
+      "word": "LG",
+      "tag": "NNP"
+    },
+    {
+      "word": "스타벅스",
+      "tag": "NNP"
+    },
+    {
+      "word": "맥도날드",
+      "tag": "NNP"
+    },
+    {
+      "word": "코카콜라",
+      "tag": "NNP"
+    },
+    {
+      "word": "펩시",
+      "tag": "NNP"
+    },
+    {
+      "word": "포드",
+      "tag": "NNP"
+    },
+    {
+      "word": "테슬라",
+      "tag": "NNP"
+    },
+    {
+      "word": "BMW",
+      "tag": "NNP"
+    },
+    {
+      "word": "벤츠",
+      "tag": "NNP"
+    },
+    {
+      "word": "도요타",
+      "tag": "NNP"
+    },
+    {
+      "word": "혼다",
+      "tag": "NNP"
+    },
+    {
+      "word": "소니",
+      "tag": "NNP"
+    },
+    {
+      "word": "니콘",
+      "tag": "NNP"
+    },
+    {
+      "word": "캐논",
+      "tag": "NNP"
+    },
+    {
+      "word": "닌텐도",
+      "tag": "NNP"
+    },
+    {
+      "word": "플레이스테이션",
+      "tag": "NNP"
+    },
+    {
+      "word": "엑스박스",
+      "tag": "NNP"
+    },
+    {
+      "word": "포켓몬",
+      "tag": "NNP"
+    },
+    {
+      "word": "디지몬",
+      "tag": "NNP"
+    },
+    {
+      "word": "드래곤볼",
+      "tag": "NNP"
+    },
+    {
+      "word": "원피스",
+      "tag": "NNP"
+    },
+    {
+      "word": "나루토",
+      "tag": "NNP"
+    },
+    {
+      "word": "슬램덩크",
+      "tag": "NNP"
+    },
+    {
+      "word": "마블",
+      "tag": "NNP"
+    },
+    {
+      "word": "DC",
+      "tag": "NNP"
+    },
+    {
+      "word": "어벤져스",
+      "tag": "NNP"
+    },
+    {
+      "word": "아이언맨",
+      "tag": "NNP"
+    },
+    {
+      "word": "스파이더맨",
+      "tag": "NNP"
+    },
+    {
+      "word": "배트맨",
+      "tag": "NNP"
+    },
+    {
+      "word": "슈퍼맨",
+      "tag": "NNP"
+    },
+    {
+      "word": "원더우먼",
+      "tag": "NNP"
+    },
+    {
+      "word": "헐크",
+      "tag": "NNP"
+    },
+    {
+      "word": "토르",
+      "tag": "NNP"
+    },
+    {
+      "word": "캡틴아메리카",
+      "tag": "NNP"
+    },
+    {
+      "word": "블랙위도우",
+      "tag": "NNP"
+    },
+    {
+      "word": "유럽연합",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제연합",
+      "tag": "NNP"
+    },
+    {
+      "word": "세계보건기구",
+      "tag": "NNP"
+    },
+    {
+      "word": "월드뱅크",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제통화기금",
+      "tag": "NNP"
+    },
+    {
+      "word": "북대서양조약기구",
+      "tag": "NNP"
+    },
+    {
+      "word": "유니세프",
+      "tag": "NNP"
+    },
+    {
+      "word": "레드크로스",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제올림픽위원회",
+      "tag": "NNP"
+    },
+    {
+      "word": "유네스코",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제원자력기구",
+      "tag": "NNP"
+    },
+    {
+      "word": "세계무역기구",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제농업개발기금",
+      "tag": "NNP"
+    },
+    {
+      "word": "세계식량계획",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제형사재판소",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제사법재판소",
+      "tag": "NNP"
+    },
+    {
+      "word": "세계경제포럼",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제축구연맹",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제농구연맹",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제배구연맹",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제핸드볼연맹",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제테니스연맹",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제탁구연맹",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제수영연맹",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제육상경기연맹",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제역도연맹",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제레슬링연맹",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제사이클연맹",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제요트연맹",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제럭비연맹",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제카누연맹",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제트라이애슬론연맹",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제체조연맹",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제유도연맹",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제태권도연맹",
+      "tag": "NNP"
+    },
+    {
+      "word": "기계 학습",
+      "tag": "NNP"
+    },
+    {
+      "word": "스마트 시티",
+      "tag": "NNP"
+    },
+    {
+      "word": "클라우드 컴퓨팅",
+      "tag": "NNP"
+    },
+    {
+      "word": "사물 인터넷",
+      "tag": "NNP"
+    },
+    {
+      "word": "인공 지능",
+      "tag": "NNP"
+    },
+    {
+      "word": "양자 컴퓨팅",
+      "tag": "NNP"
+    },
+    {
+      "word": "사이버 보안",
+      "tag": "NNP"
+    },
+    {
+      "word": "유전자 편집",
+      "tag": "NNP"
+    },
+    {
+      "word": "3D 프린팅",
+      "tag": "NNP"
+    },
+    {
+      "word": "인터넷 뱅킹",
+      "tag": "NNP"
+    },
+    {
+      "word": "블록 체인",
+      "tag": "NNP"
+    },
+    {
+      "word": "디지털 트윈",
+      "tag": "NNP"
+    },
+    {
+      "word": "로봇 공학",
+      "tag": "NNP"
+    },
+    {
+      "word": "뉴럴 네트워크",
+      "tag": "NNP"
+    },
+    {
+      "word": "자연어 처리",
+      "tag": "NNP"
+    },
+    {
+      "word": "컴퓨터 비전",
+      "tag": "NNP"
+    },
+    {
+      "word": "데이터 마이닝",
+      "tag": "NNP"
+    },
+    {
+      "word": "소셜 미디어",
+      "tag": "NNP"
+    },
+    {
+      "word": "증권 거래소",
+      "tag": "NNP"
+    },
+    {
+      "word": "전자 상거래",
+      "tag": "NNP"
+    },
+    {
+      "word": "디지털 마케팅",
+      "tag": "NNP"
+    },
+    {
+      "word": "비디오 게임",
+      "tag": "NNP"
+    },
+    {
+      "word": "무인 항공기",
+      "tag": "NNP"
+    },
+    {
+      "word": "소프트웨어 엔지니어링",
+      "tag": "NNP"
+    },
+    {
+      "word": "웹 개발",
+      "tag": "NNP"
+    },
+    {
+      "word": "모바일 앱",
+      "tag": "NNP"
+    },
+    {
+      "word": "데이터 분석",
+      "tag": "NNP"
+    },
+    {
+      "word": "가상 회의",
+      "tag": "NNP"
+    },
+    {
+      "word": "원격 근무",
+      "tag": "NNP"
+    },
+    {
+      "word": "헬스 케어",
+      "tag": "NNP"
+    },
+    {
+      "word": "사물 인식",
+      "tag": "NNP"
+    },
+    {
+      "word": "기상 예측",
+      "tag": "NNP"
+    },
+    {
+      "word": "스포츠 분석",
+      "tag": "NNP"
+    },
+    {
+      "word": "스마트 팩토리",
+      "tag": "NNP"
+    },
+    {
+      "word": "지능형 교통",
+      "tag": "NNP"
+    },
+    {
+      "word": "스마트 그리드",
+      "tag": "NNP"
+    },
+    {
+      "word": "양자 컴퓨팅",
+      "tag": "NNP"
+    },
+    {
+      "word": "사이버 보안",
+      "tag": "NNP"
+    },
+    {
+      "word": "유전자 편집",
+      "tag": "NNP"
+    },
+    {
+      "word": "3D 프린팅",
+      "tag": "NNP"
+    },
+    {
+      "word": "인터넷 뱅킹",
+      "tag": "NNP"
+    },
+    {
+      "word": "블록 체인",
+      "tag": "NNP"
+    },
+    {
+      "word": "디지털 트윈",
+      "tag": "NNP"
+    },
+    {
+      "word": "로봇 공학",
+      "tag": "NNP"
+    },
+    {
+      "word": "뉴럴 네트워크",
+      "tag": "NNP"
+    },
+    {
+      "word": "자연어 처리",
+      "tag": "NNP"
+    },
+    {
+      "word": "컴퓨터 비전",
+      "tag": "NNP"
+    },
+    {
+      "word": "데이터 마이닝",
+      "tag": "NNP"
+    },
+    {
+      "word": "소셜 미디어",
+      "tag": "NNP"
+    },
+    {
+      "word": "증권 거래소",
+      "tag": "NNP"
+    },
+    {
+      "word": "전자 상거래",
+      "tag": "NNP"
+    },
+    {
+      "word": "디지털 마케팅",
+      "tag": "NNP"
+    },
+    {
+      "word": "비디오 게임",
+      "tag": "NNP"
+    },
+    {
+      "word": "무인 항공기",
+      "tag": "NNP"
+    },
+    {
+      "word": "소프트웨어 엔지니어링",
+      "tag": "NNP"
+    },
+    {
+      "word": "웹 개발",
+      "tag": "NNP"
+    },
+    {
+      "word": "모바일 앱",
+      "tag": "NNP"
+    },
+    {
+      "word": "데이터 분석",
+      "tag": "NNP"
+    },
+    {
+      "word": "가상 회의",
+      "tag": "NNP"
+    },
+    {
+      "word": "원격 근무",
+      "tag": "NNP"
+    },
+    {
+      "word": "헬스 케어",
+      "tag": "NNP"
+    },
+    {
+      "word": "사물 인식",
+      "tag": "NNP"
+    },
+    {
+      "word": "기상 예측",
+      "tag": "NNP"
+    },
+    {
+      "word": "스포츠 분석",
+      "tag": "NNP"
+    },
+    {
+      "word": "스마트 팩토리",
+      "tag": "NNP"
+    },
+    {
+      "word": "지능형 교통",
+      "tag": "NNP"
+    },
+    {
+      "word": "스마트 그리드",
+      "tag": "NNP"
+    },
+    {
+      "word": "문화 유산",
+      "tag": "NNP"
+    },
+    {
+      "word": "세계 유산",
+      "tag": "NNP"
+    },
+    {
+      "word": "고고학 연구",
+      "tag": "NNP"
+    },
+    {
+      "word": "역사 유적",
+      "tag": "NNP"
+    },
+    {
+      "word": "문학 작품",
+      "tag": "NNP"
+    },
+    {
+      "word": "철학 사상",
+      "tag": "NNP"
+    },
+    {
+      "word": "음악 공연",
+      "tag": "NNP"
+    },
+    {
+      "word": "연극 무대",
+      "tag": "NNP"
+    },
+    {
+      "word": "영화 촬영",
+      "tag": "NNP"
+    },
+    {
+      "word": "미술 전시",
+      "tag": "NNP"
+    },
+    {
+      "word": "사진 촬영",
+      "tag": "NNP"
+    },
+    {
+      "word": "패션 디자인",
+      "tag": "NNP"
+    },
+    {
+      "word": "요리 학교",
+      "tag": "NNP"
+    },
+    {
+      "word": "푸드 트럭",
+      "tag": "NNP"
+    },
+    {
+      "word": "레스토랑 가이드",
+      "tag": "NNP"
+    },
+    {
+      "word": "와인 시음",
+      "tag": "NNP"
+    },
+    {
+      "word": "커피 로스팅",
+      "tag": "NNP"
+    },
+    {
+      "word": "맥주 양조",
+      "tag": "NNP"
+    },
+    {
+      "word": "소믈리에 과정",
+      "tag": "NNP"
+    },
+    {
+      "word": "건축 디자인",
+      "tag": "NNP"
+    },
+    {
+      "word": "인테리어 디자인",
+      "tag": "NNP"
+    },
+    {
+      "word": "환경 공학",
+      "tag": "NNP"
+    },
+    {
+      "word": "토목 공학",
+      "tag": "NNP"
+    },
+    {
+      "word": "기계 공학",
+      "tag": "NNP"
+    },
+    {
+      "word": "화학 공학",
+      "tag": "NNP"
+    },
+    {
+      "word": "전기 공학",
+      "tag": "NNP"
+    },
+    {
+      "word": "산업 디자인",
+      "tag": "NNP"
+    },
+    {
+      "word": "우주 과학",
+      "tag": "NNP"
+    },
+    {
+      "word": "천문학 연구",
+      "tag": "NNP"
+    },
+    {
+      "word": "해양 생물학",
+      "tag": "NNP"
+    },
+    {
+      "word": "지질학 연구",
+      "tag": "NNP"
+    },
+    {
+      "word": "기상학 연구",
+      "tag": "NNP"
+    },
+    {
+      "word": "분자 생물학",
+      "tag": "NNP"
+    },
+    {
+      "word": "생명 공학",
+      "tag": "NNP"
+    },
+    {
+      "word": "화학 분석",
+      "tag": "NNP"
+    },
+    {
+      "word": "물리 실험",
+      "tag": "NNP"
+    },
+    {
+      "word": "수학 문제",
+      "tag": "NNP"
+    },
+    {
+      "word": "통계 분석",
+      "tag": "NNP"
+    },
+    {
+      "word": "경제 정책",
+      "tag": "NNP"
+    },
+    {
+      "word": "사회 과학",
+      "tag": "NNP"
+    },
+    {
+      "word": "정치 연구",
+      "tag": "NNP"
+    },
+    {
+      "word": "법률 상담",
+      "tag": "NNP"
+    },
+    {
+      "word": "범죄 심리학",
+      "tag": "NNP"
+    },
+    {
+      "word": "심리 치료",
+      "tag": "NNP"
+    },
+    {
+      "word": "교육 과정",
+      "tag": "NNP"
+    },
+    {
+      "word": "언어 학습",
+      "tag": "NNP"
+    },
+    {
+      "word": "국제 교류",
+      "tag": "NNP"
+    },
+    {
+      "word": "스포츠 경기",
+      "tag": "NNP"
+    },
+    {
+      "word": "피트니스 트레이닝",
+      "tag": "NNP"
+    },
+    {
+      "word": "요가 수업",
+      "tag": "NNP"
+    },
+    {
+      "word": "헬스클럽",
+      "tag": "NNP"
+    },
+    {
+      "word": "피트니스 트레이닝",
+      "tag": "NNP"
+    },
+    {
+      "word": "요가 수업",
+      "tag": "NNP"
+    },
+    {
+      "word": "헬스클럽",
+      "tag": "NNP"
+    },
+    {
+      "word": "필라테스 스튜디오",
+      "tag": "NNP"
+    },
+    {
+      "word": "아웃도어 스포츠",
+      "tag": "NNP"
+    },
+    {
+      "word": "스킨 스쿠버",
+      "tag": "NNP"
+    },
+    {
+      "word": "패러글라이딩",
+      "tag": "NNP"
+    },
+    {
+      "word": "마라톤 대회",
+      "tag": "NNP"
+    },
+    {
+      "word": "테니스 클럽",
+      "tag": "NNP"
+    }
+  ]
+}

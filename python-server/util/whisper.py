@@ -3,7 +3,6 @@ from faster_whisper import WhisperModel
 
 from util.log import Logger
 
-import ctypes
 
 class STTResults:
     text: str
@@ -24,12 +23,6 @@ class WhisperManager:
         self.model = WhisperModel(model_size, device="cuda", compute_type="float32")
 
     def stt(self, path: str):
-        print("아잇11111111111111111")
-        print(path)
-        # cudnn_path = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.3/bin/cudnn_ops_infer64_8.dll"
-        # if os.path.exists(cudnn_path):
-        #     ctypes.cdll.LoadLibrary(cudnn_path)
-        # Could not locate
         segments, info = self.model.transcribe(
             path,
             initial_prompt="너는 이제부터 한국어로 대화하는 회의, 강의, 모임 등 사람들과의 대화를 한글로 변환해야 하는 역할이야.",
@@ -43,22 +36,14 @@ class WhisperManager:
             no_repeat_ngram_size=3,
             vad_parameters=dict(min_silence_duration_ms=500)
         )
-        print("222222222222222222222222222")
+
         results = []
         for segment in segments:
-            print("412435346345345")
-            # self.logger.info(f"segment: {segment}, start: {segment.start}, end: {segment}\n")
             result: STTResults = STTResults(
                 text=segment.text,
                 start=segment.start,
                 end=segment.end
             )
-
-            print('{'
-                  f'\t"text": "{segment.text}",'
-                  f'\t"start": {segment.start},'
-                  f'\t"end": {segment.end}'
-                  ' }')
 
             results.append(result)
 

@@ -1,10 +1,5 @@
 import json
-import pymysql
 from typing import List
-
-import requests
-import os
-import openai
 
 
 from util.whisper import STTResults
