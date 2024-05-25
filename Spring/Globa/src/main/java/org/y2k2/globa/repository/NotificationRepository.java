@@ -9,7 +9,7 @@ import org.y2k2.globa.entity.NotificationEntity;
 import org.y2k2.globa.entity.UserEntity;
 
 public interface NotificationRepository extends JpaRepository<NotificationEntity, Long> {
-    NotificationEntity findByFolderFolderIdAndFolderShareShareIdAndFromUserUserId(long folderId, long folderShareId, long userId);
+    NotificationEntity findByFolderFolderIdAndFolderShareShareIdAndToUserUserId(long folderId, long folderShareId, long userId);
 
-    Page<NotificationEntity> findAllByFromUserOrTypeIdIn(Pageable pageable, UserEntity user, char[] typeIds);
+    Page<NotificationEntity> findAllByToUserOrTypeIdIn(Pageable pageable, UserEntity user, char[] typeIds);
 }

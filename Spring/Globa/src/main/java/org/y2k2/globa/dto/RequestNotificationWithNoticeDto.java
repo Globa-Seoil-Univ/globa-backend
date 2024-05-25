@@ -10,6 +10,6 @@ import org.y2k2.globa.entity.UserEntity;
 @Setter
 @AllArgsConstructor
 public class RequestNotificationWithNoticeDto {
-    private UserEntity toUser;
+    private UserEntity fromUser;
     private NoticeEntity notice;
 }

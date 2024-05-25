@@ -11,8 +11,8 @@ import org.y2k2.globa.entity.UserEntity;
 @Setter
 @AllArgsConstructor
 public class RequestNotificationWithInvitationDto {
-    private UserEntity toUser;
     private UserEntity fromUser;
+    private UserEntity toUser;
     private FolderEntity folder;
     private FolderShareEntity folderShare;
 }
