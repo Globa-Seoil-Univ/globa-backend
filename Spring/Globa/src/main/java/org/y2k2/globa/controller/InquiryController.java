@@ -56,6 +56,6 @@ public class InquiryController {
         long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
 
         long inquiryId = inquiryService.addInquiry(userId, dto);
-        return ResponseEntity.created(URI.create("/" + inquiryId)).build();
+        return ResponseEntity.created(URI.create("/inquiry/" + inquiryId)).build();
     }
 }
