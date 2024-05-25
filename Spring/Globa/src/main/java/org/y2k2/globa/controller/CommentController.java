@@ -78,7 +78,9 @@ public class CommentController {
 
         RequestCommentWithIdsDto request = new RequestCommentWithIdsDto(userId, folderId, recordId, sectionId);
         long highlightId = commentService.addFirstComment(request, dto);
-        return ResponseEntity.created(URI.create("/folder/" + folderId + "/record/" + recordId + "/highlight/" + highlightId)).build();
+        return ResponseEntity.created(
+                URI.create("/folder/" + folderId + "/record/" + recordId + "/section/" + sectionId + "/highlight/" + highlightId  + "/comment")
+        ).build();
     }
 
     @PostMapping(value = "/section/{sectionId}/highlight/{highlightId}/comment")
@@ -97,7 +99,9 @@ public class CommentController {
 
         RequestCommentWithIdsDto request = new RequestCommentWithIdsDto(userId, folderId, recordId, sectionId, highlightId);
         commentService.addComment(request, dto);
-        return ResponseEntity.created(URI.create("/folder/" + folderId + "/record/" + recordId + "/highlight/" + highlightId)).build();
+        return ResponseEntity.created(
+                URI.create("/folder/" + folderId + "/record/" + recordId + "/section/" + sectionId + "/highlight/" + highlightId + "/comment")
+        ).build();
     }
 
     @PostMapping(value = "/section/{sectionId}/highlight/{highlightId}/comment/{parentId}")
@@ -117,7 +121,9 @@ public class CommentController {
 
         RequestCommentWithIdsDto request = new RequestCommentWithIdsDto(userId, folderId, recordId, sectionId, highlightId, parentId);
         commentService.addReply(request, dto);
-        return ResponseEntity.created(URI.create("/folder/" + folderId + "/record/" + recordId + "/highlight/" + highlightId)).build();
+        return ResponseEntity.created(
+                URI.create("/folder/" + folderId + "/record/" + recordId + "/section/" + sectionId + "/highlight/" + highlightId + "/comment/" + parentId)
+        ).build();
     }
 
     @PatchMapping(value = "/section/{sectionId}/highlight/{highlightId}/comment/{commentId}")
