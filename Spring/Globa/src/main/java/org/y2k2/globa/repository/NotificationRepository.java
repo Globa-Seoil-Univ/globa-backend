@@ -11,5 +11,5 @@ import org.y2k2.globa.entity.UserEntity;
 public interface NotificationRepository extends JpaRepository<NotificationEntity, Long> {
     NotificationEntity findByFolderFolderIdAndFolderShareShareIdAndToUserUserId(long folderId, long folderShareId, long userId);
 
-    Page<NotificationEntity> findAllByToUserOrTypeIdIn(Pageable pageable, UserEntity user, char[] typeIds);
+    Page<NotificationEntity> findAllByToUserOrTypeIdInOrderByCreatedTimeDesc(Pageable pageable, UserEntity user, char[] typeIds);
 }
