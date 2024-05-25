@@ -29,7 +29,7 @@ public class NotificationService {
         }
 
         Pageable pageable = PageRequest.of(page - 1, count);
-        Page<NotificationEntity> notificationEntityPage = notificationRepository.findAllByFromUserOrTypeIdIn(pageable, user, new char[]{'1'});
+        Page<NotificationEntity> notificationEntityPage = notificationRepository.findAllByToUserOrTypeIdInOrderByCreatedTimeDesc(pageable, user, new char[]{'1'});
         List<NotificationEntity> notifications = notificationEntityPage.getContent();
         List<NotificationDto> dtos = notifications.stream()
                 .map(NotificationMapper.INSTANCE::toResponseNotificationDto)

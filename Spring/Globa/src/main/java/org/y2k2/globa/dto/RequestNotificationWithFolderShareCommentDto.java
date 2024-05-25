@@ -9,7 +9,7 @@ import org.y2k2.globa.entity.*;
 @Setter
 @AllArgsConstructor
 public class RequestNotificationWithFolderShareCommentDto {
-    private UserEntity toUser;
+    private UserEntity fromUser;
     private FolderEntity folder;
     private FolderShareEntity folderShare;
     private RecordEntity record;
