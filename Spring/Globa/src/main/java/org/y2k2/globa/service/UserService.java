@@ -162,6 +162,7 @@ public class UserService {
         responseUserSearchDto.setProfile(userEntity.getProfilePath());
         responseUserSearchDto.setName(userEntity.getName());
         responseUserSearchDto.setCode(userEntity.getCode());
+        responseUserSearchDto.setUserId(userEntity.getUserId());
 
         return responseUserSearchDto;
 

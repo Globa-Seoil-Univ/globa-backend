@@ -15,4 +15,5 @@ public class ResponseUserSearchDto implements Serializable {
     private String profile;
     private String name;
     private String code;
+    private Long userId;
 }
