@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,21 +22,24 @@ import org.y2k2.globa.util.JwtTokenProvider;
 @RequestMapping("/fcm")
 @ResponseBody
 @RequiredArgsConstructor
-@Tag(name = "Fcm", description = "Firebase Cloud Messaging을 사용하여 특정 토픽에게 알림을 보내는 API입니다.")
+@Tag(name = "Fcm", description = "Firebase Cloud Messaging을 사용하여 알림을 보내는 API입니다.")
 public class FcmController {
     private final FcmService fcmService;
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/send")
-    @Operation(summary = "특정 토픽 알림 전송", description = "특정 토픽에게 알림을 보냅니다. 공지사항, 이벤트 알림에서 사용할 수 있습니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "알림 전송 성공", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "400", description = "필요 정보가 부족 (주제, 제목, 내용)", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "401", description = "액세스 토큰 인증 실패", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "40110", description = "유효하지 않은 액세스 토큰", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "40120", description = "만료된 액세스 토큰", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "500", description = "서버에서 발생한 에러", content = @Content(mediaType = "application/json")),
-    })
+    @Operation(
+            summary = "특정 토픽 알림 전송",
+            description = "특정 토픽에게 알림을 보냅니다. 공지사항, 이벤트 알림에서 사용할 수 있습니다.",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "알림 전송 성공"),
+                    @ApiResponse(responseCode = "400", ref = "400"),
+                    @ApiResponse(responseCode = "401", ref = "401"),
+                    @ApiResponse(responseCode = "40110", ref = "40110"),
+                    @ApiResponse(responseCode = "40120", ref = "40120"),
+                    @ApiResponse(responseCode = "500", ref = "500"),
+            }
+    )
     public ResponseEntity<?> pushMessage(
             @Parameter(hidden = true)
             @RequestHeader(value = "Authorization") String accessToken,
