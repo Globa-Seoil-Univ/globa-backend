@@ -256,7 +256,12 @@ class OpenAIUtil:
                         start_index = i
                         current_str = ""
                         break
+                    else:
+                        script_entity = Analysis(section_id=section.section_id, content="")
+                        assign_text_list.append(script_entity)
 
+                        start_index = i
+                        current_str = ""
                 if current_str:  # 마지막으로 범위 내 텍스트가 남아 있는 경우 출력
                     # cursor.execute(insertQuery, (section[0], current_str))
                     script_entity = Analysis(section_id=section.section_id, content=current_str)
