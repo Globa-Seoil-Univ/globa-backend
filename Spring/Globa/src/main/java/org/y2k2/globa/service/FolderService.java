@@ -204,12 +204,13 @@ public class FolderService {
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         FolderEntity folderEntity = folderRepository.findFolderEntityByFolderId(folderId);
 
+        if(folderEntity == null)
+            throw new NotFoundException("Folder Id not found ! ");
+
         if (!Objects.equals(userId, folderEntity.getUser().getUserId())){
             throw new UnAuthorizedException("Not Matched User ");
         }
 
-        if(folderEntity == null)
-            throw new NotFoundException("Folder Id not found ! ");
 
         FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(userEntity, folderId);
 
