@@ -142,6 +142,7 @@ public class UserService {
         responseUserDTO.setProfile(userEntity.getProfilePath());
         responseUserDTO.setName(userEntity.getName());
         responseUserDTO.setCode(userEntity.getCode());
+        responseUserDTO.setUserId(userEntity.getUserId());
         responseUserDTO.setPublicFolderId(folderEntity.getFolderId());
 
         return responseUserDTO;

@@ -15,5 +15,6 @@ public class ResponseUserDTO implements Serializable {
     private String profile;
     private String name;
     private String code;
+    private Long userId;
     private Long publicFolderId;
 }
