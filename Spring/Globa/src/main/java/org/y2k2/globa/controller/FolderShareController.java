@@ -110,6 +110,7 @@ public class FolderShareController {
 
 
     private void checkRole(String role) {
+        if (role == null) throw new BadRequestException("You must be request role field");
         if (role.isEmpty()) throw new BadRequestException("You must be request role field");
         if (!role.toUpperCase().equals(Role.R.toString())
                 && !role.toUpperCase().equals(Role.W.toString())) {
