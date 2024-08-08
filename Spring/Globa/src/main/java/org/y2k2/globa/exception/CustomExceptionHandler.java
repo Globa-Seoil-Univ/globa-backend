@@ -2,9 +2,9 @@ package org.y2k2.globa.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.springframework.beans.TypeMismatchException;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.http.*;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,9 +14,12 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.y2k2.globa.util.Const;
 import org.y2k2.globa.util.CustomTimestamp;
+import org.y2k2.globa.exception.ErrorCode;
 
 @RestControllerAdvice
 @ControllerAdvice
+@Getter
+@AllArgsConstructor
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     private ObjectNode createErrorNode(Exception ex, int status) {
@@ -45,25 +48,6 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(createErrorNode(ex, HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(UpdateException.class)
-    public ResponseEntity<Object> handleUpdateException(UpdateException ex) {
-        return new ResponseEntity<>(createErrorNode(ex, HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(SQLException.class)
-    public ResponseEntity<Object> handleSQLException(SQLException ex) {
-        return new ResponseEntity<>(createErrorNode(ex, HttpStatus.INTERNAL_SERVER_ERROR.value()), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(RecordNameException.class)
-    public ResponseEntity<Object> handleRecordNameException(RecordNameException ex) {
-        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.RECORD_NAME_DUPLICATED.value()), HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(FolderNameException.class)
-    public ResponseEntity<Object> handleFolderNameException(FolderNameException ex) {
-        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.FOLDER_NAME_DUPLICATED.value()), HttpStatus.CONFLICT);
-    }
 
     @ExceptionHandler(UnAuthorizedException.class)
     public ResponseEntity<Object> handleAuthorizedException(UnAuthorizedException ex) {
@@ -80,10 +64,6 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(createErrorNode(ex, HttpStatus.NOT_FOUND.value()), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(CompileException.class)
-    public ResponseEntity<Object> handleCompileException(CompileException ex) {
-        return new ResponseEntity<>(createErrorNode(ex, HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST);
-    }
 
     @ExceptionHandler(FileUploadException.class)
     public ResponseEntity<Object> handleFileUploadException(FileUploadException ex) {
