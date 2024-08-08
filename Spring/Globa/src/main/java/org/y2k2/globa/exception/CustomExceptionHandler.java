@@ -140,6 +140,11 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleFcmException(FcmException ex) {
         return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.FAILED_FCM_SEND.value()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(DictionaryException.class)
+    public ResponseEntity<Object> handleDictionaryException(FcmException ex) {
+        return new ResponseEntity<>(createErrorNode(ex, Const.CustomErrorCode.FAILED_DICTIONARY_SAVE.value()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
     // ErrorResponse 클래스 정의
 
 }
