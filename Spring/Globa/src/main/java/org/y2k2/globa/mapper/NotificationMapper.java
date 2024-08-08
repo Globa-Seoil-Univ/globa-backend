@@ -10,27 +10,27 @@ import org.y2k2.globa.entity.NotificationEntity;
 public interface NotificationMapper {
     NotificationMapper INSTANCE = Mappers.getMapper(NotificationMapper.class);
 
-    @Mapping(source = "toUser", target = "toUser")
+    @Mapping(source = "fromUser", target = "fromUser")
     @Mapping(source = "notice", target = "notice")
     NotificationEntity toNotificationWithNotice(RequestNotificationWithNoticeDto dto);
 
-    @Mapping(source = "toUser", target = "toUser")
     @Mapping(source = "fromUser", target = "fromUser")
+    @Mapping(source = "toUser", target = "toUser")
     @Mapping(source = "inquiry", target = "inquiry")
     NotificationEntity toNotificationWithInquiry(RequestNotificationWithInquiryDto dto);
 
-    @Mapping(source = "toUser", target = "toUser")
     @Mapping(source = "fromUser", target = "fromUser")
+    @Mapping(source = "toUser", target = "toUser")
     @Mapping(source = "folder", target = "folder")
     @Mapping(source = "folderShare", target = "folderShare")
     NotificationEntity toNotificationWithInvitation(RequestNotificationWithInvitationDto dto);
 
-    @Mapping(source = "toUser", target = "toUser")
+    @Mapping(source = "fromUser", target = "fromUser")
     @Mapping(source = "folder", target = "folder")
     @Mapping(source = "folderShare", target = "folderShare")
     NotificationEntity toNotificationWithFolderShareAddUser(RequestNotificationWithFolderShareAddUserDto dto);
 
-    @Mapping(source = "toUser", target = "toUser")
+    @Mapping(source = "fromUser", target = "fromUser")
     @Mapping(source = "folder", target = "folder")
     @Mapping(source = "folderShare", target = "folderShare")
     @Mapping(source = "record", target = "record")
@@ -41,7 +41,7 @@ public interface NotificationMapper {
     @Mapping(source = "entity.typeId", target = "type")
     @Mapping(source = "entity.createdTime", target = "createdTime", qualifiedBy = { CustomTimestampTranslator.class, MapCreatedTime.class })
     @Mapping(source = "entity.notice", target = "notice")
-    @Mapping(source = "entity.toUser", target = "user")
+    @Mapping(source = "entity.fromUser", target = "user")
     @Mapping(source = "entity.folderShare", target = "share")
     @Mapping(source = "entity.folder", target = "folder")
     @Mapping(source = "entity.record", target = "record")

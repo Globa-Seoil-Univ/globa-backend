@@ -145,6 +145,7 @@ public class UserService {
         responseUserDTO.setProfile(userEntity.getProfilePath());
         responseUserDTO.setName(userEntity.getName());
         responseUserDTO.setCode(userEntity.getCode());
+        responseUserDTO.setUserId(userEntity.getUserId());
         responseUserDTO.setPublicFolderId(folderEntity.getFolderId());
 
         return responseUserDTO;
@@ -168,6 +169,7 @@ public class UserService {
         responseUserSearchDto.setProfile(userEntity.getProfilePath());
         responseUserSearchDto.setName(userEntity.getName());
         responseUserSearchDto.setCode(userEntity.getCode());
+        responseUserSearchDto.setUserId(userEntity.getUserId());
 
         return responseUserSearchDto;
 

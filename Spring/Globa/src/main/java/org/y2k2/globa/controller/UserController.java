@@ -64,7 +64,7 @@ public class UserController {
 
         if ( ValidValues.validSnsIds.contains(requestUserPostDTO.getSnsId()) )
             throw new BadRequestException(" snsId only ' 1001 ~ 1004 ' ");
-        if ( requestUserPostDTO.getName().length() > 10 )
+        if ( requestUserPostDTO.getName().length() > 32 )
             throw new BadRequestException("name too long ! ");
 
         if ( requestUserPostDTO.getNotification() == null )
