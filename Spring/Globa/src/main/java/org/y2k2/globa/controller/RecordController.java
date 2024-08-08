@@ -161,6 +161,19 @@ public class RecordController {
         return ResponseEntity.status(recordService.patchRecordMove(accessToken, recordId, folderId, Long.valueOf(targetIdMap.get("targetId")))).body("");
     }
 
+    @PatchMapping("/folder/{folder_id}/record/{record_id}/study")
+    public ResponseEntity<?> patchStudyTime(@RequestHeader(value = "Authorization", required = false) String accessToken,
+                                            @PathVariable(value = "folder_id", required = false) Long folderId,
+                                            @PathVariable(value = "record_id", required = false) Long recordId,
+                                            @RequestBody RequestStudyDto dto) {
+        if ( accessToken == null )
+            throw new BadRequestException("Required AccessToken !");
+
+        recordService.patchStudyTime(accessToken, recordId, folderId, dto);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/folder/{folder_id}/record/{record_id}")
     public ResponseEntity<?> deleteFolder(@RequestHeader(value = "Authorization", required = false) String accessToken,
                                           @PathVariable(value = "record_id", required = false) Long recordId,
@@ -174,6 +187,8 @@ public class RecordController {
         if ( recordId == null)
             throw new BadRequestException("recordId Path Value, Null Not Allowed ! ");
 
-        return ResponseEntity.status(recordService.deleteRecord(accessToken, recordId, folderId)).body("");
+        recordService.deleteRecord(accessToken, recordId, folderId);
+
+        return ResponseEntity.noContent().build();
     }
 }

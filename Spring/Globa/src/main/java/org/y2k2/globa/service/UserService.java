@@ -35,6 +35,7 @@ import org.y2k2.globa.exception.UnAuthorizedException;
 import org.y2k2.globa.exception.BadRequestException;
 
 import org.y2k2.globa.repository.*;
+import org.y2k2.globa.util.CustomTimestamp;
 import org.y2k2.globa.util.JwtToken;
 import org.y2k2.globa.util.JwtTokenProvider;
 import org.y2k2.globa.util.JwtUtil;
@@ -278,9 +279,12 @@ public class UserService {
         List<ResponseKeywordDto> keywords = new ArrayList<>();
 
         for( StudyEntity studyEntitiy : studyEntities ){
+            CustomTimestamp timestamp = new CustomTimestamp();
+            timestamp.setTimestamp(studyEntitiy.getCreatedTime());
+
             ResponseStudyTimesDto responseStudyTimesDto = new ResponseStudyTimesDto();
             responseStudyTimesDto.setStudyTime(studyEntitiy.getStudyTime());
-            responseStudyTimesDto.setCreatedTime(studyEntitiy.getCreatedTime());
+            responseStudyTimesDto.setCreatedTime(timestamp.toString());
             studyTimes.add(responseStudyTimesDto);
         }
 
