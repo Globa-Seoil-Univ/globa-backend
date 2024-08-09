@@ -1,15 +1,14 @@
 package org.y2k2.globa.util;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.netty.resolver.dns.DnsNameResolverTimeoutException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.y2k2.globa.exception.AccessTokenException;
-import org.y2k2.globa.exception.GlobalException;
-import org.y2k2.globa.exception.RefreshTokenException;
+import org.y2k2.globa.exception.*;
 
 import java.security.Key;
 import java.util.Date;
@@ -50,7 +49,7 @@ public class JwtTokenProvider {
                     .refreshToken(refreshToken)
                     .build();
         } catch ( DnsNameResolverTimeoutException e){
-            throw new GlobalException("Redis TimeOut !!!! ");
+            throw new CustomException(ErrorCode.REDIS_TIMEOUT);
         }
 
     }
@@ -62,9 +61,9 @@ public class JwtTokenProvider {
 
             return Long.valueOf(claims.getSubject());
         } catch (ExpiredJwtException e) {
-            throw new AccessTokenException("Access Token Expired ! ");
+            throw new CustomException(ErrorCode.EXPIRED_ACCESS_TOKEN);
         } catch (SignatureException e ){
-            throw new org.y2k2.globa.exception.SignatureException("Not Matched Token");
+            throw new CustomException(ErrorCode.SIGNATURE);
         }
     }
     public Date getExpiredTimeByAccessTokenWithoutCheck(String token){
@@ -74,9 +73,9 @@ public class JwtTokenProvider {
 
             return claims.getExpiration();
         } catch (ExpiredJwtException e) {
-            throw new AccessTokenException("Access Token Expired ! ");
+            throw new CustomException(ErrorCode.EXPIRED_ACCESS_TOKEN);
         } catch (SignatureException e ){
-            throw new org.y2k2.globa.exception.SignatureException("Not Matched Token");
+            throw new CustomException(ErrorCode.SIGNATURE);
         }
     }
 
@@ -93,9 +92,9 @@ public class JwtTokenProvider {
 
             return Long.valueOf(claims.getSubject());
         } catch (ExpiredJwtException e) {
-            throw new AccessTokenException("Access Token Expired ! ");
+            throw new CustomException(ErrorCode.EXPIRED_ACCESS_TOKEN);
         } catch (SignatureException e) {
-            throw new org.y2k2.globa.exception.SignatureException("Not Matched Token");
+            throw new CustomException(ErrorCode.SIGNATURE);
         }
     }
 
@@ -109,7 +108,7 @@ public class JwtTokenProvider {
 
             return claims.getExpiration();
         } catch (ExpiredJwtException e) {
-            throw new RefreshTokenException("Refresh Token Expired ! ");
+            throw new CustomException(ErrorCode.EXPIRED_REFRESH_TOKEN);
         }
     }
 
@@ -125,7 +124,7 @@ public class JwtTokenProvider {
         } catch (SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
         } catch (ExpiredJwtException e) {
-           throw new AccessTokenException("Access Token Expired ! ");
+           throw new CustomException(ErrorCode.EXPIRED_ACCESS_TOKEN);
         } catch (UnsupportedJwtException e) {
             log.info("Unsupported JWT Token", e);
         } catch (IllegalArgumentException e) {

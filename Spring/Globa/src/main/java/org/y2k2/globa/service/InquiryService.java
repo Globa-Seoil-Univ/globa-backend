@@ -9,10 +9,7 @@ import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.AnswerEntity;
 import org.y2k2.globa.entity.InquiryEntity;
 import org.y2k2.globa.entity.UserEntity;
-import org.y2k2.globa.exception.BadRequestException;
-import org.y2k2.globa.exception.ForbiddenException;
-import org.y2k2.globa.exception.InvalidTokenException;
-import org.y2k2.globa.exception.NotFoundException;
+import org.y2k2.globa.exception.*;
 import org.y2k2.globa.mapper.InquiryMapper;
 import org.y2k2.globa.repository.AnswerRepository;
 import org.y2k2.globa.repository.InquiryRepository;
@@ -29,8 +26,8 @@ public class InquiryService {
 
     public ResponseInquiryDto getInquiries(long userId, PaginationDto pagination) {
         UserEntity user = userRepository.findByUserId(userId);
-        if (user == null) throw new InvalidTokenException("Not found user");
-        if (user.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         Pageable pageable = PageRequest.of(pagination.getPage() - 1, pagination.getCount());
         Page<InquiryEntity> inquiryEntityPage;
@@ -54,11 +51,11 @@ public class InquiryService {
 
     public ResponseInquiryDetailDto getInquiry(long userId, long inquiryId) {
         UserEntity user = userRepository.findByUserId(userId);
-        if (user == null) throw new InvalidTokenException("Not found user");
+        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
 
         InquiryEntity inquiry = inquiryRepository.findByInquiryId(inquiryId);
-        if (inquiry == null) throw new NotFoundException("Not found inquiry");
-        else if (!inquiry.getUser().getUserId().equals(userId)) throw new ForbiddenException("This inquiry isn't your own");
+        if (inquiry == null) throw new CustomException(ErrorCode.NOT_FOUND_INQUIRY);
+        else if (!inquiry.getUser().getUserId().equals(userId)) throw new CustomException(ErrorCode.MISMATCH_INQUIRY_OWNER);
 
         AnswerEntity answer = null;
 
@@ -75,7 +72,7 @@ public class InquiryService {
 
     public long addInquiry(long userId, RequestInquiryDto dto) {
         UserEntity user = userRepository.findByUserId(userId);
-        if (user == null) throw new InvalidTokenException("Not found user");
+        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
 
         InquiryEntity inquiry = InquiryEntity.create(user, dto.getTitle(), dto.getContent());
         InquiryEntity response = inquiryRepository.save(inquiry);

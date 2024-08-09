@@ -29,8 +29,8 @@ public class AnswerService {
         validateRole(user);
 
         InquiryEntity inquiry = inquiryRepository.findByInquiryId(inquiryId);
-        if (inquiry == null) throw new NotFoundException("Not found inquiry");
-        if (inquiry.isSolved()) throw new DuplicatedExcepiton("Answer already exists");
+        if (inquiry == null) throw new CustomException(ErrorCode.NOT_FOUND_INQUIRY);
+        if (inquiry.isSolved()) throw new CustomException(ErrorCode.INQUIRY_ANSWER_DUPLICATED);
 
         inquiry.setSolved(true);
         AnswerEntity answer = AnswerEntity.create(user, inquiry, dto.getTitle(), dto.getContent());
@@ -76,7 +76,7 @@ public class AnswerService {
         validateRole(user);
 
         InquiryEntity inquiry = inquiryRepository.findByInquiryId(inquiryId);
-        if (inquiry == null) throw new NotFoundException("Not found inquiry");
+        if (inquiry == null) throw new CustomException(ErrorCode.NOT_FOUND_INQUIRY);
 
         AnswerEntity answer = validateAnswer(answerId);
 
@@ -95,7 +95,7 @@ public class AnswerService {
         validateRole(user);
 
         InquiryEntity inquiry = inquiryRepository.findByInquiryId(inquiryId);
-        if (inquiry == null) throw new NotFoundException("Not found inquiry");
+        if (inquiry == null) throw new CustomException(ErrorCode.NOT_FOUND_INQUIRY);
 
         AnswerEntity answer = validateAnswer(answerId);
 
@@ -107,25 +107,25 @@ public class AnswerService {
 
     private UserEntity validateUser(long userId) {
         UserEntity user = userRepository.findByUserId(userId);
-        if (user == null) throw new InvalidTokenException("Not found user");
-        if (user.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (user == null) throw new CustomException(ErrorCode.INVALID_TOKEN);
+        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         return user;
     }
 
     private void validateRole(UserEntity user) {
         UserRoleEntity role = userRoleRepository.findByUser(user);
-        if (role == null) throw new ForbiddenException("Wrong approach");
+        if (role == null) throw new CustomException(ErrorCode.REQUIRED_ROLE);
 
         String roleName = role.getRoleId().getName();
         boolean isValid = UserRole.ADMIN.getRoleName().equals(roleName) || UserRole.EDITOR.getRoleName().equals(roleName);
-        if (!isValid) throw new ForbiddenException("Only admin or editor can write answers");
+        if (!isValid) throw new CustomException(ErrorCode.NOT_DESERVE_ADD_NOTICE);
 
     }
 
     private AnswerEntity validateAnswer(long answerId) {
         AnswerEntity answer = answerRepository.findByAnswerId(answerId);
-        if (answer == null) throw new NotFoundException("Not found answer");
+        if (answer == null) throw new CustomException(ErrorCode.NOT_FOUND_ANSWER);
 
         return answer;
     }

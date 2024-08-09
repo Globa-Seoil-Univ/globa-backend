@@ -13,9 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.*;
-import org.y2k2.globa.exception.BadRequestException;
-import org.y2k2.globa.exception.ForbiddenException;
-import org.y2k2.globa.exception.NotFoundException;
+import org.y2k2.globa.exception.*;
 import org.y2k2.globa.mapper.FolderShareMapper;
 import org.y2k2.globa.mapper.NotificationMapper;
 import org.y2k2.globa.repository.*;
@@ -39,10 +37,10 @@ public class FolderShareService {
         FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId);
 
         UserEntity user = userRepository.findByUserId(userId);
-        if (user.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
-        if (folderEntity == null) throw new NotFoundException("Not found folder");
-        if (!folderEntity.getUser().getUserId().equals(userId)) throw new ForbiddenException("You are not owned this folder");
+        if (folderEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_FOLDER);
+        if (!folderEntity.getUser().getUserId().equals(userId)) throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
 
         Pageable pageable = PageRequest.of(page - 1, count);
         Page<FolderShareEntity> folderShareEntityPage = folderShareRepository.findByFolderOrderByCreatedTimeAsc(pageable, folderEntity);
@@ -61,7 +59,7 @@ public class FolderShareService {
         UserEntity ownerEntity = userRepository.findByUserId(ownerId);
         UserEntity targetEntity = userRepository.findByUserId(targetId);
 
-        if (ownerEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (ownerEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         if (ownerId.equals(targetId)) throw new BadRequestException("You can't invite yourself");
         if (targetEntity == null) throw new BadRequestException("Not found target user");

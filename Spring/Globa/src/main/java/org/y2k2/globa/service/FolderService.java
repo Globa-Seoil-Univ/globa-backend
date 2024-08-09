@@ -56,8 +56,8 @@ public class FolderService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if (userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
 
         Pageable pageable = PageRequest.of(page-1, count);
@@ -73,8 +73,8 @@ public class FolderService {
 
     public FolderDto postDefaultFolder(UserEntity userEntity){
         FolderEntity saveFolderEntity = new FolderEntity();
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if (userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
         saveFolderEntity.setUser(userEntity);
         saveFolderEntity.setTitle(userEntity.getName() + "의 기본 폴더");
         saveFolderEntity.setCreatedTime(LocalDateTime.now());
@@ -114,8 +114,8 @@ public class FolderService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if (userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderEntity saveFolderEntity = new FolderEntity();
         saveFolderEntity.setUser(userEntity);
@@ -155,8 +155,8 @@ public class FolderService {
     public FolderDto postFolder(String accessToken, String title, List<ShareTarget> shareTargets){
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity userEntity = userRepository.findOneByUserId(userId);
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if (userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderEntity saveFolderEntity = new FolderEntity();
         saveFolderEntity.setUser(userEntity);

@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.exception.BadRequestException;
+import org.y2k2.globa.exception.CustomException;
+import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.service.InquiryService;
 import org.y2k2.globa.util.JwtTokenProvider;
 
@@ -27,7 +29,7 @@ public class InquiryController {
             @RequestParam(required = false, value = "sort", defaultValue = "r") String sort
     ) {
         if (accessToken == null) {
-            throw new BadRequestException("You must be requested to access token.");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
         long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
 
@@ -40,7 +42,7 @@ public class InquiryController {
     @GetMapping(value = "/{inquiryId}")
     public ResponseEntity<?> getInquiry(@RequestHeader(value = "Authorization") String accessToken, @PathVariable(name = "inquiryId") long inquiryId) {
         if (accessToken == null) {
-            throw new BadRequestException("You must be requested to access token.");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
         long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
 
@@ -51,7 +53,7 @@ public class InquiryController {
     @PostMapping
     public ResponseEntity<?> addInquiry(@RequestHeader(value = "Authorization") String accessToken, @Valid @RequestBody RequestInquiryDto dto) {
         if (accessToken == null) {
-            throw new BadRequestException("You must be requested to access token.");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
         long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
 

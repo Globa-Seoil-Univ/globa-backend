@@ -74,13 +74,13 @@ public class RecordService {
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if(userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if(userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(userEntity, folderId);
 
         if(folderShareEntity == null)
-            throw new UnAuthorizedException("폴더에 대한 권한이 없습니다.");
+            throw new CustomException(ErrorCode.NOT_DESERVE_FOLDER);
 
         Pageable pageable = PageRequest.of(page-1, count);
         Page<RecordEntity> records = recordRepository.findAllByFolderFolderId(pageable, folderId);
@@ -97,8 +97,8 @@ public class RecordService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if(userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if(userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         List<FolderShareEntity> folderShareEntities = folderShareRepository.findFolderShareEntitiesByTargetUser(userEntity);
 

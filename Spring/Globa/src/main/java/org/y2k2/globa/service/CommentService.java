@@ -43,7 +43,7 @@ public class CommentService {
         validateFolderShare(section, user);
 
         HighlightEntity highlight = highlightRepository.findByHighlightId(request.getHighlightId());
-        if (highlight == null) throw new NotFoundException("Not found highlight");
+        if (highlight == null) throw new CustomException(ErrorCode.NOT_FOUND_HIGHLIGHT);
 
         Pageable pageable = PageRequest.of(page - 1, count);
         Page<CommentEntity> commentEntityPage = commentRepository.findByHighlightAndParentIsNullOrderByCreatedTimeDescCommentIdDesc(highlight, pageable);
@@ -63,10 +63,10 @@ public class CommentService {
         validateFolderShare(section, user);
 
         HighlightEntity highlight = highlightRepository.findByHighlightId(request.getHighlightId());
-        if (highlight == null) throw new NotFoundException("Not found highlight");
+        if (highlight == null) throw new CustomException(ErrorCode.NOT_FOUND_HIGHLIGHT);
 
         CommentEntity parent = commentRepository.findByCommentId(request.getParentId());
-        if (parent == null) throw new NotFoundException("Not found parent comment");
+        if (parent == null) throw new CustomException(ErrorCode.NOT_FOUND_PARENT_COMMENT);
 
         Pageable pageable = PageRequest.of(page - 1, count);
         Page<CommentEntity> commentEntityPage = commentRepository.findByParentOrderByCreatedTimeAscCommentIdAsc(parent, pageable);
@@ -87,7 +87,7 @@ public class CommentService {
 
         // 같은 인덱스에 있는 곳에 댓글을 추가할라면 리턴 
         HighlightEntity highlight = highlightRepository.findBySectionAndStartIndexAndEndIndex(section, dto.getStartIdx(), dto.getEndIdx());
-        if (highlight != null) throw new DuplicatedExcepiton("Already highlight");
+        if (highlight != null) throw new CustomException(ErrorCode.HIGHLIGHT_DUPLICATED);
 
         HighlightEntity createdHighlight = HighlightEntity.create(section, dto.getStartIdx(), dto.getEndIdx());
         HighlightEntity response = highlightRepository.save(createdHighlight);
@@ -135,8 +135,8 @@ public class CommentService {
         HighlightEntity highlight = validateHighlight(request.getHighlightId());
 
         CommentEntity parentComment = commentRepository.findByCommentId(request.getParentId());
-        if (parentComment == null) throw new NotFoundException("Not found parent comment");
-        else if (parentComment.getParent() != null) throw new BadRequestException("Parent id exists in the requested comment id");
+        if (parentComment == null) throw new CustomException(ErrorCode.NOT_FOUND_PARENT_COMMENT);
+        else if (parentComment.getParent() != null) throw new CustomException(ErrorCode.NOT_PARENT_COMMENT);
 
         CommentEntity comment = CommentEntity.createReply(user, highlight, parentComment, dto.getContent());
         CommentEntity addedComment = commentRepository.save(comment);
@@ -158,7 +158,7 @@ public class CommentService {
         validateHighlight(request.getHighlightId());
         CommentEntity comment = validateComment(commentId);
 
-        if (!user.getUserId().equals(comment.getUser().getUserId())) throw new ForbiddenException("You can't update comment of other user");
+        if (!user.getUserId().equals(comment.getUser().getUserId())) throw new CustomException(ErrorCode.MISMATCH_COMMENT_OWNER);
 
         comment.setContent(dto.getContent());
         commentRepository.save(comment);
@@ -174,7 +174,7 @@ public class CommentService {
         CommentEntity comment = validateComment(commentId);
         LocalDateTime now = new CustomTimestamp().getTimestamp();
 
-        if (!user.getUserId().equals(comment.getUser().getUserId())) throw new ForbiddenException("You can't delete comment of other user");
+        if (!user.getUserId().equals(comment.getUser().getUserId())) throw new CustomException(ErrorCode.MISMATCH_COMMENT_OWNER);
 
         comment.setDeleted(true);
         comment.setDeletedTime(now);

@@ -28,11 +28,7 @@ import org.y2k2.globa.dto.*;
 
 import org.y2k2.globa.entity.*;
 
-import org.y2k2.globa.exception.NotFoundException;
-import org.y2k2.globa.exception.FileUploadException;
-import org.y2k2.globa.exception.InvalidTokenException;
-import org.y2k2.globa.exception.UnAuthorizedException;
-import org.y2k2.globa.exception.BadRequestException;
+import org.y2k2.globa.exception.*;
 
 import org.y2k2.globa.repository.*;
 import org.y2k2.globa.util.JwtToken;
@@ -70,12 +66,12 @@ public class UserService {
 
             if(new Date().before(expiredTime)) {
                 jwtUtil.deleteValue(String.valueOf(userId));
-                throw new BadRequestException("아직 토큰이 살아있습니다.");
+                throw new CustomException(ErrorCode.ACTIVE_REFRESH_TOKEN);
             }
 
             if (!redisRefreshToken.equals(refreshToken)) {
                 jwtUtil.deleteValue(String.valueOf(userId));
-                throw new BadRequestException("Not equal RefreshToken");
+                throw new CustomException(ErrorCode.NOT_MATCH_REFRESH_TOKEN);
             }
 
             jwtTokenProvider.getExpirationDateFromToken(redisRefreshToken);
@@ -132,13 +128,12 @@ public class UserService {
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         FolderEntity folderEntity = folderRepository.findFirstByUserUserIdOrderByCreatedTimeAsc(userId);
 
-        if(userEntity.getDeleted())
-            throw new BadRequestException("User Deleted ! ");
-
-        if(folderEntity == null)
-            throw new NotFoundException("기본 폴더를 찾을 수 없습니다 ! ");
         if(userEntity == null)
-            throw new NotFoundException("유저를 찾을 수 없습니다 !");
+            throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if(userEntity.getDeleted())
+            throw new CustomException(ErrorCode.DELETED_USER);
+        if(folderEntity == null)
+            throw new CustomException(ErrorCode.NOT_FOUND_DEFAULT_FOLDER);
 
         ResponseUserDTO responseUserDTO = new ResponseUserDTO();
 
@@ -158,11 +153,12 @@ public class UserService {
 
         UserEntity userEntity = userRepository.findOneByCode(code);
 
-        if(userEntity.getDeleted())
-            throw new BadRequestException("User Deleted ! ");
-
         if(userEntity == null)
-            throw new NotFoundException("유저를 찾을 수 없습니다 !");
+            throw new CustomException(ErrorCode.NOT_FOUND_USER);
+
+        if(userEntity.getDeleted())
+            throw new CustomException(ErrorCode.DELETED_USER);
+
 
         ResponseUserSearchDto responseUserSearchDto = new ResponseUserSearchDto();
 
