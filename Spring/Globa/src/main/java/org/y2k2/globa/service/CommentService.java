@@ -183,38 +183,39 @@ public class CommentService {
 
     private UserEntity validateUser(long userId) {
         UserEntity user = userRepository.findByUserId(userId);
-        if (user == null) throw new InvalidTokenException("Invalid Token");
-        if (user.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (user == null) throw new CustomException(ErrorCode.INVALID_TOKEN);
+        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         return user;
     }
 
     public SectionEntity validateSection(long sectionId, long recordId, long folderId) {
         SectionEntity section = sectionRepository.findBySectionId(sectionId);
-        if (section == null) throw new NotFoundException("Not found section");
-        if (!section.getRecord().getRecordId().equals(recordId)) throw new NotFoundException("Not found record");
-        if (!section.getRecord().getFolder().getFolderId().equals(folderId)) throw new NotFoundException("Not found folder");
+        if (section == null) throw new CustomException(ErrorCode.NOT_FOUND_SECTION);
+        if (!section.getRecord().getRecordId().equals(recordId)) throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
+        if (!section.getRecord().getFolder().getFolderId().equals(folderId)) throw new CustomException(ErrorCode.NOT_FOUND_FOLDER);
 
         return section;
     }
 
     private FolderShareEntity validateFolderShare(SectionEntity section, UserEntity user) {
         FolderShareEntity folderShare = folderShareRepository.findByFolderAndTargetUser(section.getRecord().getFolder(), user);
-        if (folderShare == null || folderShare.getInvitationStatus().equals(String.valueOf(InvitationStatus.PENDING))) throw new ForbiddenException("You aren't authorized to post comments");
+        if (folderShare == null || folderShare.getInvitationStatus().equals(String.valueOf(InvitationStatus.PENDING)))
+            throw new CustomException(ErrorCode.NOT_DESERVE_POST_COMMENT);
 
         return folderShare;
     }
 
     private HighlightEntity validateHighlight(long highlightId) {
         HighlightEntity highlight = highlightRepository.findByHighlightId(highlightId);
-        if (highlight == null) throw new NotFoundException("Not found highlight");
+        if (highlight == null) throw new CustomException(ErrorCode.NOT_FOUND_HIGHLIGHT);
 
         return highlight;
     }
 
     private CommentEntity validateComment(long commentId) {
         CommentEntity comment = commentRepository.findByCommentId(commentId);
-        if (comment == null) throw new NotFoundException("Not found comment");
+        if (comment == null) throw new CustomException(ErrorCode.NOT_FOUND_COMMENT);
 
         return comment;
     }

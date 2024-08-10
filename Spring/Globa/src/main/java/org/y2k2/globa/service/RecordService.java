@@ -103,7 +103,7 @@ public class RecordService {
         List<FolderShareEntity> folderShareEntities = folderShareRepository.findFolderShareEntitiesByTargetUser(userEntity);
 
         if(folderShareEntities == null)
-            throw new NotFoundException("접근 가능한 폴더가 없습니다");
+            throw new CustomException(ErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER);
 
         List<Long> folderIds = new ArrayList<>();
 
@@ -141,13 +141,13 @@ public class RecordService {
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if(userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if(userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(userEntity, folderId);
 
         if(folderShareEntity == null)
-            throw new UnAuthorizedException("폴더에 대한 권한이 없습니다.");
+            throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
         RecordEntity record = recordRepository.findRecordEntityByRecordId(recordId);
 
@@ -169,7 +169,7 @@ public class RecordService {
             AnalysisEntity analysis = analysisRepository.findAllBySectionSectionId(section.getSectionId());
 
             if(analysis == null)
-                throw new NotFoundException("anlayis not found");
+                throw new CustomException(ErrorCode.NOT_FOUND_ANALYSIS);
 
             ResponseRecordAnalysisDto responseRecordAnalysisDto = new ResponseRecordAnalysisDto();
             responseRecordAnalysisDto.setAnalysisId(analysis.getAnalysisId());
@@ -229,11 +229,11 @@ public class RecordService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity targetEntity = userRepository.findByUserId(userId);
 
-        if (targetEntity == null) throw new BadRequestException("Not found user");
-        if(targetEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if(targetEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(targetEntity,folderId);
-        if (folderShareEntity == null) throw new UnAuthorizedException("This user not deserves");
+        if (folderShareEntity == null) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
         List<StudyEntity> studyEntities = studyRepository.findAllByUserUserIdAndRecordRecordId(userId,recordId);
         List<QuizGradeProjection> quizGradeProjectionList = analysisRepository.findQuizGradeByUserUserIdAndRecordRecordId(userId, recordId);
@@ -276,15 +276,15 @@ public class RecordService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity targetEntity = userRepository.findByUserId(userId);
 
-        if (targetEntity == null) throw new BadRequestException("Not found user");
-        if(targetEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if(targetEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(targetEntity,folderId);
-        if (folderShareEntity == null) throw new UnAuthorizedException("This user not deserves");
+        if (folderShareEntity == null) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
         List<QuizEntity> quizEntities = quizRepository.findAllByRecordRecordId(recordId);
         if(quizEntities.isEmpty())
-            throw new NotFoundException("Not Found Quiz ! ");
+            throw new CustomException(ErrorCode.NOT_FOUND_QUIZ);
 
         return quizEntities.stream()
                 .map(QuizMapper.INSTANCE::toQuizDto)
@@ -296,23 +296,23 @@ public class RecordService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity targetEntity = userRepository.findByUserId(userId);
 
-        if (targetEntity == null) throw new BadRequestException("Not found user");
-        if(targetEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if(targetEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(targetEntity,folderId);
-        if (folderShareEntity == null) throw new UnAuthorizedException("This user not deserves");
+        if (folderShareEntity == null) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
         RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
 
         for(RequestQuizDto requestQuizDto : quizs){
 
             if( requestQuizDto.getQuizId() == null)
-                throw new BadRequestException("Required Quiz Id");
+                throw new CustomException(ErrorCode.REQUIRED_QUIZ_ID);
 
             QuizEntity quizEntity = quizRepository.findQuizEntityByQuizId(requestQuizDto.getQuizId());
 
             if(!Objects.equals(recordEntity.getRecordId(), quizEntity.getRecord().getRecordId()))
-                throw new BadRequestException("This quiz not included record");
+                throw new CustomException(ErrorCode.MISMATCH_QUIZ_RECORD_ID);
 
             QuizAttemptEntity quizAttemptEntity = new QuizAttemptEntity();
             quizAttemptEntity.setUser(targetEntity);
@@ -330,16 +330,16 @@ public class RecordService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity userEntity = userRepository.findByUserId(userId);
 
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if(userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if(userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId);
         if (folderEntity == null)
-            throw new UnAuthorizedException("Folder not Found");
+            throw new CustomException(ErrorCode.NOT_FOUND_FOLDER);
 
         FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(userEntity,folderId);
         if (folderShareEntity == null)
-            throw new UnAuthorizedException("This user not deserves");
+            throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
         RecordEntity recordEntity = new RecordEntity();
         recordEntity.setCreatedTime(LocalDateTime.now());
@@ -352,7 +352,7 @@ public class RecordService {
 
         Blob blob = bucket.get(path);
         if( blob == null )
-            throw new NotFoundException("Not Found Record in Firebase");
+            throw new CustomException(ErrorCode.NOT_FOUND_RECORD_FIREBASE);
 
 
         recordRepository.save(recordEntity);
@@ -367,19 +367,19 @@ public class RecordService {
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
 
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if(userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if(userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(userEntity,folderId);
 
         if (folderShareEntity == null)
-            throw new UnAuthorizedException("This user not deserves");
+            throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
         if(recordEntity == null)
-            throw new NotFoundException("Record Id not found ! ");
+            throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
 
         if (!Objects.equals(userId, recordEntity.getUser().getUserId())){
-            throw new UnAuthorizedException("Not Matched User ");
+            throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
         }
 
 
@@ -397,8 +397,8 @@ public class RecordService {
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
 
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if (userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderEntity folderEntity = folderRepository.findFolderEntityByFolderId(folderId);
         FolderEntity targetEntity = folderRepository.findFolderEntityByFolderId(targetId);
@@ -408,22 +408,22 @@ public class RecordService {
 
 
         if (folderEntity == null)
-            throw new NotFoundException("Origin Folder Not Found ! ");
+            throw new CustomException(ErrorCode.NOT_FOUND_ORIGIN_FOLDER);
 
         if (targetEntity == null)
-            throw new NotFoundException("Target Folder Not Found ! ");
+            throw new CustomException(ErrorCode.NOT_FOUND_TARGET_FOLDER);
 
         if (folderShareEntity1 == null)
-            throw new ForbiddenException("This user not deserves");
+            throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
         if (folderShareEntity2 == null)
-            throw new ForbiddenException("This user not deserves");
+            throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
         if(recordEntity == null)
-            throw new NotFoundException("Record not found ! ");
+            throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
 
         if (!Objects.equals(userId, recordEntity.getUser().getUserId())){
-            throw new UnAuthorizedException("Not Matched User ");
+            throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
         }
 
         // Update local database
@@ -435,13 +435,11 @@ public class RecordService {
         recordRepository.save(recordEntity);
 
         if(!oldPath.equals(paramPath))
-            throw new NotFoundException("Record not found ! ");
+            throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
 
         // Now move the file in Firebase
         Blob blob = bucket.get(oldPath);
         if (blob != null) {
-            System.out.println("true");
-            System.out.println(blob);
             try {
                 blob.copyTo(BlobId.of(firebaseBucketPath, newPath));
                 blob.delete();
@@ -450,11 +448,10 @@ public class RecordService {
                 recordEntity.setFolder(folderEntity);
                 recordEntity.setPath(oldPath);
                 recordRepository.save(recordEntity);
-                throw new RuntimeException("Firebase communication error", e);
+                throw new CustomException(ErrorCode.FAILED_FIREBASE);
             }
         } else {
-            System.out.println(blob);
-            throw new NotFoundException("Firebase file not found");
+            throw new CustomException(ErrorCode.NOT_FOUND_RECORD_FIREBASE);
         }
 
         return HttpStatus.OK;
@@ -465,33 +462,24 @@ public class RecordService {
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
 
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if (userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         if(recordEntity == null) {
-            throw new NotFoundException("Record not found ! ");
+            throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
         }
 
         if(!Objects.equals(folderId, recordEntity.getFolder().getFolderId()))
-            throw new UnAuthorizedException("Not Matched Folder Id ");
+            throw new CustomException(ErrorCode.MISMATCH_RECORD_FOLDER);
 
         if (!Objects.equals(userId, recordEntity.getUser().getUserId())){
-            throw new UnAuthorizedException("Not Matched User ");
+            throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
         }
-
-
-
-//        for (Blob blob : bucket.list(Storage.BlobListOption.prefix("folders/" + recordEntity.getFolder().getFolderId())).iterateAll()) {
-//            if(blob.getName().contains("folders/" + recordEntity.getFolder().getFolderId() + "/" +recordEntity.getTitle()) && recordEntity.getTitle() != null) {
-//                blob.delete();
-//                recordRepository.delete(recordEntity);
-//            }
-//        }
 
 
         Blob blob = bucket.get(recordEntity.getPath());
         if( blob == null )
-            throw new NotFoundException("Not Found Record in Firebase");
+            throw new CustomException(ErrorCode.NOT_FOUND_RECORD_FIREBASE);
         else {
             blob.delete();
             recordRepository.delete(recordEntity);

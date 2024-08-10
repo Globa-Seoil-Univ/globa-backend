@@ -176,17 +176,17 @@ public class UserService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
         if (!Objects.equals(userId, pathUserId)){
-            throw new UnAuthorizedException("Not Matched User !");
+            throw new CustomException(ErrorCode.MISMATCH_NOFI_OWNER);
         }
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
 
         if(userEntity == null)
-            throw new NotFoundException("유저를 찾을 수 없습니다 !");
+            throw new CustomException(ErrorCode.NOT_FOUND_USER);
 
         if(userEntity.getDeleted())
-            throw new BadRequestException("User Deleted ! ");
+            throw new CustomException(ErrorCode.DELETED_USER);
 
         NotificationSettingDto responseUserNotificationSettingDto = new NotificationSettingDto();
 
@@ -201,10 +201,11 @@ public class UserService {
     public void updateProfile(MultipartFile file, long userId) {
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
-        if (userEntity == null) throw new BadRequestException("Not found user");
+        if (userEntity == null)
+            throw new CustomException(ErrorCode.NOT_FOUND_USER);
 
         if(userEntity.getDeleted())
-            throw new BadRequestException("User Deleted ! ");
+            throw new CustomException(ErrorCode.DELETED_USER);
 
         long current = new Date().getTime();
         long size = file.getSize();
@@ -235,7 +236,7 @@ public class UserService {
             }
 
             log.error("Failed to update profile : " + e);
-            throw new FileUploadException("Failed to update profile");
+            throw new CustomException(ErrorCode.FAILED_FILE_UPLOAD);
         }
     }
 
@@ -245,18 +246,20 @@ public class UserService {
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
-        if (userEntity == null) throw new BadRequestException("Not found user");
+        if (userEntity == null)
+            throw new CustomException(ErrorCode.NOT_FOUND_USER);
 
-        if(userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if(userEntity.getDeleted())
+            throw new CustomException(ErrorCode.DELETED_USER);
 
         if (!Objects.equals(userId, pathUserId)){
-            throw new UnAuthorizedException("Not Matched User !");
+            throw new CustomException(ErrorCode.MISMATCH_ANALYSIS_OWNER);
         }
 
         List<RecordEntity> recordEntities = recordRepository.findRecordEntitiesByUserUserId(userId);
 
         if(recordEntities == null)
-            throw new NotFoundException("Not Founded Record");
+            throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
 
         List<Long> recordIds = new ArrayList<>();
 
@@ -305,13 +308,15 @@ public class UserService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
         if (!Objects.equals(userId, putUserId)){
-            throw new UnAuthorizedException("Not Matched User ");
+            throw new CustomException(ErrorCode.MISMATCH_NOFI_OWNER);
         }
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if(userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null)
+            throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if(userEntity.getDeleted())
+            throw new CustomException(ErrorCode.DELETED_USER);
 
         userEntity.setUploadNofi(NotificationSettingDto.getUploadNofi());
         userEntity.setShareNofi(NotificationSettingDto.getShareNofi());
@@ -332,13 +337,15 @@ public class UserService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
         if (!Objects.equals(userId, putUserId)){
-            throw new UnAuthorizedException("Not Matched User ");
+            throw new CustomException(ErrorCode.MISMATCH_RENAME_OWNER);
         }
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if(userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null)
+            throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if(userEntity.getDeleted())
+            throw new CustomException(ErrorCode.DELETED_USER);
 
         userEntity.setName(name);
 
@@ -354,8 +361,10 @@ public class UserService {
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if(userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null)
+            throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if(userEntity.getDeleted())
+            throw new CustomException(ErrorCode.DELETED_USER);
 
         userEntity.setDeleted(true);
         userEntity.setDeletedTime(LocalDateTime.now());
@@ -390,7 +399,8 @@ public class UserService {
 
     public void addAndUpdateNotificationToken(RequestNotificationTokenDto requestNotificationTokenDto, Long userId){
         UserEntity userEntity = userRepository.findOneByUserId(userId);
-        if (userEntity == null) throw new BadRequestException("Not found user");
+        if (userEntity == null)
+            throw new CustomException(ErrorCode.NOT_FOUND_USER);
 
         userEntity.setNotificationToken(requestNotificationTokenDto.getToken());
         userEntity.setNotificationTokenTime(LocalDateTime.now());

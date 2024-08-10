@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import org.y2k2.globa.dto.FolderShareUserResponseDto;
 import org.y2k2.globa.dto.Role;
 import org.y2k2.globa.exception.BadRequestException;
+import org.y2k2.globa.exception.CustomException;
+import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.service.FolderShareService;
 import org.y2k2.globa.util.JwtTokenProvider;
 
@@ -27,7 +29,7 @@ public class FolderShareController {
             @RequestParam(required = false, defaultValue = "1", value = "page") int page,
             @RequestParam(required = false, defaultValue = "10", value = "count") int count) {
         if (accessToken == null) {
-            throw new BadRequestException("You must be requested to access token.");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
         long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
         FolderShareUserResponseDto folderShareUserResponseDto = folderShareService.getShares(folderId, userId, page, count);
@@ -41,7 +43,7 @@ public class FolderShareController {
             @PathVariable(value = "folderId") Long folderId,
             @PathVariable(value = "userId") Long targetId) {
         if (accessToken == null) {
-            throw new BadRequestException("You must be requested to access token.");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
         long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
         String role = body.get("role");
@@ -58,7 +60,7 @@ public class FolderShareController {
             @PathVariable(value = "folderId") Long folderId,
             @PathVariable(value = "userId") Long targetId) {
         if (accessToken == null) {
-            throw new BadRequestException("You must be requested to access token.");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
         long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
         String role = body.get("role");
@@ -74,7 +76,7 @@ public class FolderShareController {
             @PathVariable(value = "folderId") Long folderId,
             @PathVariable(value = "userId") Long targetId) {
             if (accessToken == null) {
-            throw new BadRequestException("You must be requested to access token.");
+                throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
         long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
             folderShareService.deleteInviteShare(folderId, userId, targetId);
@@ -88,7 +90,7 @@ public class FolderShareController {
             @PathVariable(value = "folderId") Long folderId,
             @PathVariable(value = "shareId") Long shareId) {
         if (accessToken == null) {
-            throw new BadRequestException("You must be requested to access token.");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
         long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
         folderShareService.acceptShare(folderId, shareId, userId);
@@ -101,7 +103,7 @@ public class FolderShareController {
             @PathVariable(value = "folderId") Long folderId,
             @PathVariable(value = "shareId") Long shareId) {
         if (accessToken == null) {
-            throw new BadRequestException("You must be requested to access token.");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
         long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
         folderShareService.refuseShare(folderId, shareId, userId);
@@ -110,11 +112,11 @@ public class FolderShareController {
 
 
     private void checkRole(String role) {
-        if (role == null) throw new BadRequestException("You must be request role field");
-        if (role.isEmpty()) throw new BadRequestException("You must be request role field");
+        if (role == null) throw new CustomException(ErrorCode.NOT_NULL_ROLE);
+        if (role.isEmpty()) throw new CustomException(ErrorCode.REQUIRED_ROLE);
         if (!role.toUpperCase().equals(Role.R.toString())
                 && !role.toUpperCase().equals(Role.W.toString())) {
-            throw new BadRequestException("Role field must be only 'r' or 'w'");
+            throw new CustomException(ErrorCode.ROLE_BAD_REQUEST);
         }
     }
 

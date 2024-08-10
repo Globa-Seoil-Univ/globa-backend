@@ -115,7 +115,7 @@ public class AnswerService {
 
     private void validateRole(UserEntity user) {
         UserRoleEntity role = userRoleRepository.findByUser(user);
-        if (role == null) throw new CustomException(ErrorCode.REQUIRED_ROLE);
+        if (role == null) throw new CustomException(ErrorCode.NOT_NULL_ROLE);
 
         String roleName = role.getRoleId().getName();
         boolean isValid = UserRole.ADMIN.getRoleName().equals(roleName) || UserRole.EDITOR.getRoleName().equals(roleName);
