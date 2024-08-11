@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.exception.BadRequestException;
 import org.y2k2.globa.exception.ForbiddenException;
+import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.UserService;
 import org.y2k2.globa.util.JwtToken;
 import org.y2k2.globa.util.JwtTokenProvider;
@@ -30,7 +31,7 @@ import java.util.Map;
 @RequestMapping("user")
 @ResponseBody
 @RequiredArgsConstructor
-@Tag(name = "User", description = "사용자 관련 알림을 보내는 API입니다.")
+@Tag(name = "User", description = "사용자 관련 API입니다.")
 public class UserController {
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
@@ -48,7 +49,13 @@ public class UserController {
                             description = "회원 가입 또는 로그인 완료",
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = JwtToken.class))
                     ),
-                    @ApiResponse(responseCode = "400", ref = "400"),
+                    @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_SNS_KIND, ref = SwaggerErrorCode.REQUIRED_SNS_KIND_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_SNS_ID, ref = SwaggerErrorCode.REQUIRED_SNS_ID_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_NAME, ref = SwaggerErrorCode.REQUIRED_NAME_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.SNS_KIND_BAD_REQUEST, ref = SwaggerErrorCode.SNS_KIND_BAD_REQUEST_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NAME_BAD_REQUEST, ref = SwaggerErrorCode.NAME_BAD_REQUEST_VALUE),
+                    })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
@@ -84,7 +91,16 @@ public class UserController {
                             description = "Access Token 갱신 완료",
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = JwtToken.class))
                     ),
-                    @ApiResponse(responseCode = "400", ref = "400"),
+                    @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.ACTIVE_REFRESH_TOKEN, ref = SwaggerErrorCode.ACTIVE_REFRESH_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_MATCH_REFRESH_TOKEN, ref = SwaggerErrorCode.NOT_MATCH_REFRESH_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_REQUEST_TOKEN, ref = SwaggerErrorCode.REQUIRED_REQUEST_TOKEN_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE)
+                    })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
@@ -117,8 +133,18 @@ public class UserController {
                             description = "내 정보 가져오기 완료",
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseUserDTO.class))
                     ),
-                    @ApiResponse(responseCode = "401", ref = "401"),
-                    @ApiResponse(responseCode = "404", ref = "404"),
+                    @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE)
+                    })),
+                    @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_DEFAULT_FOLDER, ref = SwaggerErrorCode.NOT_FOUND_DEFAULT_FOLDER_VALUE),
+                    })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
@@ -142,9 +168,18 @@ public class UserController {
                             description = "상대 정보 가져오기 완료",
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseUserSearchDto.class))
                     ),
-                    @ApiResponse(responseCode = "400", ref = "400"),
-                    @ApiResponse(responseCode = "401", ref = "401"),
-                    @ApiResponse(responseCode = "404", ref = "404"),
+                    @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_USER_CODE, ref = SwaggerErrorCode.REQUIRED_USER_CODE_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_USER_CODE, ref = SwaggerErrorCode.REQUIRED_USER_CODE_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE)
+                    })),
+                    @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                    })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
@@ -171,11 +206,21 @@ public class UserController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "내 알림 정보 가져오기 완료",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = NotificationSettingDto.class))
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = NotificationSettingDto.class))
                     ),
-                    @ApiResponse(responseCode = "400", ref = "400"),
-                    @ApiResponse(responseCode = "401", ref = "401"),
-                    @ApiResponse(responseCode = "404", ref = "404"),
+                    @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_USER_ID, ref = SwaggerErrorCode.REQUIRED_USER_ID_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.MISMATCH_NOFI_OWNER, ref = SwaggerErrorCode.MISMATCH_NOFI_OWNER_VALUE)
+                    })),
+                    @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                    })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
@@ -204,9 +249,20 @@ public class UserController {
                             description = "내 분석 정보 가져오기 완료",
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseAnalysisDto.class))
                     ),
-                    @ApiResponse(responseCode = "400", ref = "400"),
-                    @ApiResponse(responseCode = "401", ref = "401"),
-                    @ApiResponse(responseCode = "404", ref = "404"),
+                    @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_USER_ID, ref = SwaggerErrorCode.REQUIRED_USER_ID_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.MISMATCH_ANALYSIS_OWNER, ref = SwaggerErrorCode.MISMATCH_ANALYSIS_OWNER_VALUE)
+                    })),
+                    @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_RECORD, ref = SwaggerErrorCode.NOT_FOUND_RECORD_VALUE),
+                    })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
@@ -235,8 +291,20 @@ public class UserController {
                             description = "알림 정보 수정 완료",
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = NotificationSettingDto.class))
                     ),
-                    @ApiResponse(responseCode = "400", ref = "400"),
-                    @ApiResponse(responseCode = "401", ref = "401"),
+                    @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_USER_ID, ref = SwaggerErrorCode.REQUIRED_USER_ID_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOFI_POST_BAD_REQUEST, ref = SwaggerErrorCode.NOFI_POST_BAD_REQUEST_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.MISMATCH_NOFI_OWNER, ref = SwaggerErrorCode.MISMATCH_NOFI_OWNER_VALUE)
+                    })),
+                    @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                    })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
@@ -268,8 +336,17 @@ public class UserController {
                             description = "이름 수정 완료",
                             content = @Content(mediaType = "application/json")
                     ),
-                    @ApiResponse(responseCode = "400", ref = "400"),
-                    @ApiResponse(responseCode = "401", ref = "401"),
+                    @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_USER_ID, ref = SwaggerErrorCode.REQUIRED_USER_ID_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_NAME, ref = SwaggerErrorCode.REQUIRED_NAME_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.MISMATCH_RENAME_OWNER, ref = SwaggerErrorCode.MISMATCH_RENAME_OWNER_VALUE)
+                    })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
@@ -309,8 +386,18 @@ public class UserController {
                             description = "회원 탈퇴 완료",
                             content = @Content(mediaType = "application/json")
                     ),
-                    @ApiResponse(responseCode = "400", ref = "400"),
-                    @ApiResponse(responseCode = "401", ref = "401"),
+                    @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_USER_ID, ref = SwaggerErrorCode.REQUIRED_USER_ID_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.SURVEY_POST_BAD_REQUEST, ref = SwaggerErrorCode.SURVEY_POST_BAD_REQUEST_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE)
+                    })),
+                    @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                    })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
@@ -343,8 +430,19 @@ public class UserController {
                             ),
                             content = @Content(mediaType = "application/json")
                     ),
-                    @ApiResponse(responseCode = "400", ref = "400"),
-                    @ApiResponse(responseCode = "401", ref = "401"),
+                    @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE)
+                    })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.INVALID_TOKEN_USER, ref = SwaggerErrorCode.INVALID_TOKEN_USER_VALUE)
+                    })),
+                    @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                    })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
@@ -378,9 +476,19 @@ public class UserController {
                             ),
                             content = @Content(mediaType = "application/json")
                     ),
-                    @ApiResponse(responseCode = "400", ref = "400"),
-                    @ApiResponse(responseCode = "401", ref = "401"),
-                    @ApiResponse(responseCode = "403", ref = "403"),
+                    @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE)
+                    })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.INVALID_TOKEN_USER, ref = SwaggerErrorCode.INVALID_TOKEN_USER_VALUE)
+                    })),
+                    @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                    })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
@@ -410,24 +518,24 @@ public class UserController {
                             description = "프로필 사진 수정 완료",
                             content = @Content(mediaType = "application/json")
                     ),
-                    @ApiResponse(responseCode = "400", ref = "400"),
-                    @ApiResponse(responseCode = "401", ref = "401"),
-                    @ApiResponse(responseCode = "403", ref = "403"),
-                    @ApiResponse(responseCode = "500",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    examples = {
-                                            @ExampleObject(
-                                                    name = "default",
-                                                    value = "{\"errorCode\":500,\"message\":\"Internal Server Error\",\"timestamp\":\"2024-05-30 15:00:00\"}"
-                                            ),
-                                            @ExampleObject(
-                                                    name = "firebase upload failed",
-                                                    value = "{\"errorCode\":50010,\"message\":\"Failed to file upload to Firebase\",\"timestamp\":\"2024-05-30 15:00:00\"}"
-                                            )
-                                    }
-                            )
-                    )
+                    @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_IMAGE, ref = SwaggerErrorCode.REQUIRED_IMAGE_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE)
+                    })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.INVALID_TOKEN_USER, ref = SwaggerErrorCode.INVALID_TOKEN_USER_VALUE)
+                    })),
+                    @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "500", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.FAILED_FILE_UPLOAD, ref = SwaggerErrorCode.FAILED_FILE_UPLOAD_VALUE),
+                    })),
             }
     )
     @PatchMapping(value = "/{userId}/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

@@ -34,16 +34,8 @@ public class DictionaryService {
     @Transactional
     public void saveDictionary() {
         List<DictionaryDto> dtos = excel.getDictionaryDto();
-        List<DictionaryEntity> entities = dtos.stream().map((dto) -> DictionaryEntity.builder()
-                        .word(dto.getWord())
-                        .engWord(dto.getEngWord())
-                        .description(dto.getDescription())
-                        .pronunciation(dto.getPronunciation())
-                        .category(dto.getCategory())
-                        .build())
-                .toList();
 
-        dictionaryRepository.deleteAllBy();
+        dictionaryRepository.deleteAllInBatch();
 
         final long[] num = {1};
         // bulk insert
