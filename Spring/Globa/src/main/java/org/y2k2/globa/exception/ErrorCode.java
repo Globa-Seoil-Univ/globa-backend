@@ -51,8 +51,7 @@ public enum ErrorCode {
 
     /* 401 UNAUTHORIZED : 허락되지 않은 사용자 */
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Access Token Invalid", 40110),
-    SIGNATURE(HttpStatus.UNAUTHORIZED, "Not Matched Token", 40111),
-    NOT_DESERVE_FOLDER(HttpStatus.UNAUTHORIZED, "Not Deserve for Folder", 40120),
+    SIGNATURE(HttpStatus.UNAUTHORIZED, "Not Matched Token", 40120),
     EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED,  "Refresh Token Expired ! ", 40130),
     MISMATCH_INQUIRY_OWNER(HttpStatus.UNAUTHORIZED, "This Inquiry isn't Your Own", 40140),
     MISMATCH_FOLDER_OWNER(HttpStatus.UNAUTHORIZED, "This Folder isn't Your Own", 40141),

@@ -31,7 +31,7 @@ public class FolderShareController {
         if (accessToken == null) {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         FolderShareUserResponseDto folderShareUserResponseDto = folderShareService.getShares(folderId, userId, page, count);
         return ResponseEntity.ok().body(folderShareUserResponseDto);
     }

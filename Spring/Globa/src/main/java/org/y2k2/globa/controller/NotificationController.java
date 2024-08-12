@@ -25,7 +25,7 @@ public class NotificationController {
         if (accessToken == null) {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         return ResponseEntity.ok().body(notificationService.getNotifications(userId, count, page));
     }

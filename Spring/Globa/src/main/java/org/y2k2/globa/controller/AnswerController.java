@@ -29,7 +29,7 @@ public class AnswerController {
     ) {
         if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         answerService.addAnswer(userId, inquiryId, dto);
         return ResponseEntity.created(URI.create("/inquiry/" + inquiryId)).build();
@@ -44,7 +44,7 @@ public class AnswerController {
     ) {
         if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         answerService.editAnswer(userId, inquiryId, answerId, dto);
         return ResponseEntity.noContent().build();
@@ -58,7 +58,7 @@ public class AnswerController {
     ) {
         if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         answerService.deleteAnswer(userId, inquiryId, answerId);
         return ResponseEntity.noContent().build();

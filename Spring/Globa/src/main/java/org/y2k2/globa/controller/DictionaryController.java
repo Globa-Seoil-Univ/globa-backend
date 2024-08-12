@@ -22,7 +22,7 @@ public class DictionaryController {
         if (accessToken == null) {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
-        jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         return ResponseEntity.ok().body(dictionaryService.getDictionary(keyword));
     }
 }

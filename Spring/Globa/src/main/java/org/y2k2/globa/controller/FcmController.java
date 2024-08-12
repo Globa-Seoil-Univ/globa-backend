@@ -50,7 +50,7 @@ public class FcmController {
         if (accessToken == null) {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
-        jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         fcmService.sendTopicNotification(requestFcmTopicDto);
         return ResponseEntity.noContent().build();

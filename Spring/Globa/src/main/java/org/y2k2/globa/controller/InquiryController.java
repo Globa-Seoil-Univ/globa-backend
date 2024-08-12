@@ -31,7 +31,7 @@ public class InquiryController {
         if (accessToken == null) {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         SortDto sortDto = SortDto.valueOfString(sort);
         PaginationDto paginationDto = new PaginationDto(page, count, sortDto);
@@ -44,7 +44,7 @@ public class InquiryController {
         if (accessToken == null) {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         ResponseInquiryDetailDto dto = inquiryService.getInquiry(userId, inquiryId);
         return ResponseEntity.ok().body(dto);
@@ -55,7 +55,7 @@ public class InquiryController {
         if (accessToken == null) {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         long inquiryId = inquiryService.addInquiry(userId, dto);
         return ResponseEntity.created(URI.create("/inquiry/" + inquiryId)).build();

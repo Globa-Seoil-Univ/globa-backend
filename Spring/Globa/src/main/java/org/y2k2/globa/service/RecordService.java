@@ -70,7 +70,7 @@ public class RecordService {
 
     public ResponseRecordsByFolderDto getRecords(String accessToken, Long folderId, int page, int count){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
@@ -80,7 +80,7 @@ public class RecordService {
         FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(userEntity, folderId);
 
         if(folderShareEntity == null)
-            throw new CustomException(ErrorCode.NOT_DESERVE_FOLDER);
+            throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
         Pageable pageable = PageRequest.of(page-1, count);
         Page<RecordEntity> records = recordRepository.findAllByFolderFolderId(pageable, folderId);
@@ -94,7 +94,7 @@ public class RecordService {
 
     public ResponseAllRecordWithTotalDto getAllRecords(String accessToken, int count){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
@@ -137,7 +137,7 @@ public class RecordService {
 
     public ResponseRecordDetailDto getRecordDetail(String accessToken, Long folderId, Long recordId){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
@@ -226,7 +226,7 @@ public class RecordService {
 
     public ResponseAnalysisDto getAnalysis(String accessToken, Long recordId, Long folderId){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity targetEntity = userRepository.findByUserId(userId);
 
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
@@ -273,7 +273,7 @@ public class RecordService {
 
     public List<QuizDto> getQuiz(String accessToken, Long recordId, Long folderId){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity targetEntity = userRepository.findByUserId(userId);
 
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
@@ -293,7 +293,7 @@ public class RecordService {
 
     public HttpStatus postQuiz(String accessToken, Long recordId, Long folderId, List<RequestQuizDto> quizs){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity targetEntity = userRepository.findByUserId(userId);
 
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
@@ -327,7 +327,7 @@ public class RecordService {
     }
 
     public HttpStatus postRecord(String accessToken, Long folderId, String title, String path, String size){
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity userEntity = userRepository.findByUserId(userId);
 
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
@@ -363,7 +363,7 @@ public class RecordService {
     }
 
     public HttpStatus patchRecordName(String accessToken, Long recordId, Long folderId, String title){
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
 
@@ -393,7 +393,7 @@ public class RecordService {
 
     @Transactional(rollbackFor = Exception.class)
     public HttpStatus patchRecordMove(String accessToken, Long recordId, Long folderId, Long targetId){
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
 
@@ -458,7 +458,7 @@ public class RecordService {
     }
 
     public HttpStatus deleteRecord(String accessToken, Long recordId, Long folderId){
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
 

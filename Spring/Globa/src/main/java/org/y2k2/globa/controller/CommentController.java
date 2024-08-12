@@ -37,7 +37,7 @@ public class CommentController {
         if (accessToken == null) {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         RequestCommentWithIdsDto request = new RequestCommentWithIdsDto(userId, folderId, recordId, sectionId, highlightId);
         ResponseCommentDto commentDto = commentService.getComments(request, page, count);
@@ -57,7 +57,7 @@ public class CommentController {
     ) {
         if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         RequestCommentWithIdsDto request = new RequestCommentWithIdsDto(userId, folderId, recordId, sectionId, highlightId, parentId);
         ResponseReplyDto replyDto = commentService.getReply(request, page, count);
@@ -74,7 +74,7 @@ public class CommentController {
     ) {
         if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         RequestCommentWithIdsDto request = new RequestCommentWithIdsDto(userId, folderId, recordId, sectionId);
         long highlightId = commentService.addFirstComment(request, dto);
@@ -94,7 +94,7 @@ public class CommentController {
     ) {
         if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         RequestCommentWithIdsDto request = new RequestCommentWithIdsDto(userId, folderId, recordId, sectionId, highlightId);
         commentService.addComment(request, dto);
@@ -115,7 +115,7 @@ public class CommentController {
     ) {
         if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         RequestCommentWithIdsDto request = new RequestCommentWithIdsDto(userId, folderId, recordId, sectionId, highlightId, parentId);
         commentService.addReply(request, dto);
@@ -136,7 +136,7 @@ public class CommentController {
     ) {
         if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         RequestCommentWithIdsDto requestCommentWithIdsDto = new RequestCommentWithIdsDto(userId, folderId, recordId, sectionId, highlightId);
         commentService.updateComment(requestCommentWithIdsDto, commentId, dto);
@@ -153,7 +153,7 @@ public class CommentController {
     ) {
         if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         RequestCommentWithIdsDto requestCommentWithIdsDto = new RequestCommentWithIdsDto(userId, folderId, recordId, sectionId, highlightId);
         commentService.deleteComment(requestCommentWithIdsDto, commentId);

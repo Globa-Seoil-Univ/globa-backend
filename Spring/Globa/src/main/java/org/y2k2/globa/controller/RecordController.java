@@ -118,7 +118,7 @@ public class RecordController {
                                       @PathVariable(value = "folder_id", required = false) Long folderId,
                                       @RequestBody RequestPostRecordDto requestPostRecordDto) {
 
-        if ( accessToken == null )
+        if (accessToken == null)
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( folderId == null )
             throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);

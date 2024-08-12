@@ -123,7 +123,7 @@ public class UserService {
 
     public ResponseUserDTO getUser(String accessToken){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         FolderEntity folderEntity = folderRepository.findFirstByUserUserIdOrderByCreatedTimeAsc(userId);
@@ -149,7 +149,7 @@ public class UserService {
 
     public ResponseUserSearchDto getUser(String accessToken, String code){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         UserEntity userEntity = userRepository.findOneByCode(code);
 
@@ -173,7 +173,7 @@ public class UserService {
 
     public NotificationSettingDto getNotification(String accessToken, Long pathUserId){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         if (!Objects.equals(userId, pathUserId)){
             throw new CustomException(ErrorCode.MISMATCH_NOFI_OWNER);
@@ -242,7 +242,7 @@ public class UserService {
 
     public ResponseAnalysisDto getAnalysis(String accessToken, Long pathUserId){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
@@ -305,7 +305,7 @@ public class UserService {
 
     public NotificationSettingDto putNotification(String accessToken, Long putUserId, NotificationSettingDto NotificationSettingDto){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         if (!Objects.equals(userId, putUserId)){
             throw new CustomException(ErrorCode.MISMATCH_NOFI_OWNER);
@@ -334,7 +334,7 @@ public class UserService {
     }
 
     public HttpStatus patchUserName(String accessToken, Long putUserId, String name){
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         if (!Objects.equals(userId, putUserId)){
             throw new CustomException(ErrorCode.MISMATCH_RENAME_OWNER);
@@ -357,7 +357,7 @@ public class UserService {
 
 
     public HttpStatus deleteUser(String accessToken, RequestSurveyDto requestSurveyDto){
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 

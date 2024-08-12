@@ -27,7 +27,7 @@ public class NoticeController {
         if (accessToken == null) {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
-        jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         return ResponseEntity.ok().body(noticeService.getIntroNotices());
     }
 
@@ -36,7 +36,7 @@ public class NoticeController {
         if (accessToken == null) {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
-        jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         if (noticeId == null) throw new CustomException(ErrorCode.REQUIRED_NOTICE_ID);
 
         return ResponseEntity.ok().body(noticeService.getNoticeDetail(noticeId));
@@ -47,7 +47,7 @@ public class NoticeController {
         if (accessToken == null) {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         Long noticeId = noticeService.addNotice(userId, dto);
         return ResponseEntity.created(URI.create("/" + noticeId)).build();

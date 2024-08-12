@@ -26,10 +26,8 @@ public class FolderController {
     public ResponseEntity<?> getFolders(@RequestHeader(value = "Authorization", required = false) String accessToken,
                                         @RequestParam(required = false, defaultValue = "1", value = "page") int page,
                                         @RequestParam(required = false, defaultValue = "10", value = "count") int count) {
-
         if ( accessToken == null )
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-
         return ResponseEntity.status(HttpStatus.OK).body(folderService.getFolders(accessToken,page,count));
     }
 

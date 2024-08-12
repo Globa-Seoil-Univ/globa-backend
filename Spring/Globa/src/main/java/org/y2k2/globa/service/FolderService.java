@@ -53,8 +53,7 @@ public class FolderService {
 
     public List<FolderDto> getFolders(String accessToken, int page, int count){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
-
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
@@ -111,7 +110,7 @@ public class FolderService {
     @Transactional
     public FolderDto postFolder(String accessToken, String title){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
@@ -153,7 +152,7 @@ public class FolderService {
 
     @Transactional
     public FolderDto postFolder(String accessToken, String title, List<ShareTarget> shareTargets){
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
@@ -208,7 +207,7 @@ public class FolderService {
     }
 
     public HttpStatus patchFolderName(String accessToken, Long folderId, String title){
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
@@ -237,7 +236,7 @@ public class FolderService {
 
     @Transactional
     public HttpStatus deleteFolderName(String accessToken, Long folderId){
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);

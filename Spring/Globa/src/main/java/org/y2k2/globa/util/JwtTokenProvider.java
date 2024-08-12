@@ -56,6 +56,9 @@ public class JwtTokenProvider {
 
     public Long getUserIdByAccessTokenWithoutCheck(String token){
         try{
+            if(token == null)
+                throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
+            token = token.split(" ")[1].trim();
             // Jwt 토큰 복호화
             Claims claims = parseClaims(token);
 
@@ -81,6 +84,8 @@ public class JwtTokenProvider {
 
     public Long getUserIdByAccessToken(String accessToken) {
         try{
+            if(accessToken == null)
+                throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
             accessToken = accessToken.split(" ")[1].trim();
             // Jwt 토큰 복호화
             Claims claims = Jwts.parserBuilder()

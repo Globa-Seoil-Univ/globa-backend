@@ -27,7 +27,7 @@ public class DummyImageController {
         if (accessToken == null) {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
-        jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         if (file.isEmpty()) throw new CustomException(ErrorCode.REQUIRED_IMAGE);
 
         DummyImageResponseDto responseDto = dummyImageService.addDummyImage(file);

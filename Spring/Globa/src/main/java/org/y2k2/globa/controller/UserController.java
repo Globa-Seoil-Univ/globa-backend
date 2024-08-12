@@ -64,7 +64,7 @@ public class UserController {
         if ( requestUserPostDTO.getName() == null )
             throw new CustomException(ErrorCode.REQUIRED_NAME);
 
-        if ( ValidValues.validSnsKinds.contains(requestUserPostDTO.getSnsKind()) )
+        if ( !ValidValues.validSnsKinds.contains(requestUserPostDTO.getSnsKind()) )
             throw new CustomException(ErrorCode.SNS_KIND_BAD_REQUEST);
         if ( requestUserPostDTO.getName().length() > 32 )
             throw new CustomException(ErrorCode.NAME_BAD_REQUEST);
@@ -126,10 +126,8 @@ public class UserController {
     )
     @GetMapping
     public ResponseEntity<?> getUser(@Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String accessToken) {
-
         if ( accessToken == null )
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-
         ResponseUserDTO result = userService.getUser(accessToken);
 
         return ResponseEntity.ok(result);
@@ -358,7 +356,7 @@ public class UserController {
         if ( accessToken == null )
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
-        long accessUserId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long accessUserId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         if (accessUserId != userId)
             throw new CustomException(ErrorCode.INVALID_TOKEN_USER);
 
@@ -395,7 +393,7 @@ public class UserController {
         if ( accessToken == null )
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
-        long accessUserId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long accessUserId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         if (accessUserId != userId)
             throw new CustomException(ErrorCode.INVALID_TOKEN_USER);
 
@@ -442,7 +440,7 @@ public class UserController {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if (file.isEmpty()) throw new CustomException(ErrorCode.REQUIRED_IMAGE);
 
-        long accessUserId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long accessUserId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         if (accessUserId != userId)
             throw new CustomException(ErrorCode.INVALID_TOKEN_USER);
 
