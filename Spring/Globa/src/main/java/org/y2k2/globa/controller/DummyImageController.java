@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import org.y2k2.globa.dto.DummyImageResponseDto;
-import org.y2k2.globa.exception.BadRequestException;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.service.DummyImageService;

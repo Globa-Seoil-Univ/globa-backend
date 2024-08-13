@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.dto.RequestFcmTopicDto;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
-import org.y2k2.globa.exception.FcmException;
 
 @Service
 @Slf4j

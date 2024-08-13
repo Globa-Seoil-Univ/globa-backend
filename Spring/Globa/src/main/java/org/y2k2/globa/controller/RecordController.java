@@ -5,12 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.y2k2.globa.dto.*;
-import org.y2k2.globa.exception.BadRequestException;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
-import org.y2k2.globa.service.FolderShareService;
 import org.y2k2.globa.service.RecordService;
-import org.y2k2.globa.util.JwtToken;
 
 import java.util.List;
 import java.util.Map;
@@ -169,7 +166,7 @@ public class RecordController {
                                             @PathVariable(value = "record_id", required = false) Long recordId,
                                             @RequestBody RequestStudyDto dto) {
         if ( accessToken == null )
-            throw new BadRequestException("Required AccessToken !");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
         recordService.patchStudyTime(accessToken, recordId, folderId, dto);
 
