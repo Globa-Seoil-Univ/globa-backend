@@ -105,12 +105,15 @@ public enum ErrorCode {
     SHARE_USER_DUPLICATED(HttpStatus.CONFLICT, "This user has already been shared or sent a share request ", 40940),
 
     /* 500 SERVER ERROR : 서버 단 에러 */
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error ! ", 500),
     FAILED_FILE_UPLOAD(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to file upload to Firebase ! ",50010),
     FAILED_FCM_SEND(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to send FCM message !", 50020),
     REDIS_TIMEOUT(HttpStatus.INTERNAL_SERVER_ERROR, "REDIS TIMEOUT ! ", 50030),
     FAILED_FOLDER_CREATE(HttpStatus.INTERNAL_SERVER_ERROR, "Error creating folder in Firebase ! ",50040),
     FAILED_FOLDER_DELETE(HttpStatus.INTERNAL_SERVER_ERROR, "Error deleting folder in Firebase ! ",50041),
     FAILED_FIREBASE(HttpStatus.INTERNAL_SERVER_ERROR, "Firebase communication error ! ",50050),
+    FAILED_EXCEL(HttpStatus.INTERNAL_SERVER_ERROR, "엑셀 변환 과정에서 오류가 발생하였습니다.",50060),
+    NOT_FOUND_KEYWORD_EXCEL(HttpStatus.INTERNAL_SERVER_ERROR, "키워드 엑셀 파일을 찾을 수 없습니다.",50070),
     ;
 
     private final HttpStatus httpStatus;

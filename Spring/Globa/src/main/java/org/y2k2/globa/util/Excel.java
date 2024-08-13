@@ -9,8 +9,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.dto.DictionaryDto;
-import org.y2k2.globa.dto.ResponseDictionaryDto;
-import org.y2k2.globa.exception.DictionaryException;
+import org.y2k2.globa.exception.CustomException;
+import org.y2k2.globa.exception.ErrorCode;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -18,7 +18,6 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 @Component
 @Slf4j
@@ -36,7 +35,8 @@ public class Excel {
                 excelFiles.addAll(Arrays.asList(files));
             }
         } else {
-            throw new IllegalArgumentException("Directory not found: " + dictionaryPath);
+            log.error("Not found keyword excel files %s".formatted(dictionaryPath));
+            throw new CustomException(ErrorCode.NOT_FOUND_KEYWORD_EXCEL);
         }
 
         return excelFiles;
@@ -93,7 +93,7 @@ public class Excel {
             return dictionaryDtos;
         } catch (Exception e) {
             log.error(e.getMessage());
-            throw new DictionaryException("Dictionary Error");
+            throw new CustomException(ErrorCode.FAILED_EXCEL);
         }
     }
 }

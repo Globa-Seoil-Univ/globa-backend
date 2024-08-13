@@ -15,11 +15,9 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.HttpClientErrorException;
-import org.y2k2.globa.exception.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.y2k2.globa.exception.CustomException;
+import org.y2k2.globa.exception.SwaggerErrorCode;
 
 @Configuration
 public class SwaggerConfig {
@@ -50,21 +48,11 @@ public class SwaggerConfig {
     }
 
     private void addResponse(Components components) {
-        Schema badRequestSchema = ModelConverters.getInstance()
-                .resolveAsResolvedSchema(new AnnotatedType(BadRequestException.class)).schema;
-        Schema unAuthroizedSchema = ModelConverters.getInstance()
-                .resolveAsResolvedSchema(new AnnotatedType(UnAuthorizedException.class)).schema;
-        Schema forbiddenSchema = ModelConverters.getInstance()
-                .resolveAsResolvedSchema(new AnnotatedType(ForbiddenException.class)).schema;
-        Schema notFoundSchema = ModelConverters.getInstance()
-                .resolveAsResolvedSchema(new AnnotatedType(NotFoundException.class)).schema;
-        Schema conflitedSchema = ModelConverters.getInstance()
-                .resolveAsResolvedSchema(new AnnotatedType(HttpClientErrorException.Conflict.class)).schema;
-        Schema internalSchema = ModelConverters.getInstance()
-                .resolveAsResolvedSchema(new AnnotatedType(InternalError.class)).schema;
+        Schema exceptionSchema = ModelConverters.getInstance()
+                .resolveAsResolvedSchema(new AnnotatedType(CustomException.class)).schema;
 
         // 400 Errors
-        components.addResponses("400", createApiResponse(badRequestSchema, "Bad Request", createExample("400", "~~~ 인자가 필요 또는 잘못되었습니다.")));
+        components.addResponses("400", createApiResponse(exceptionSchema, "Bad Request", createExample("400", "~~~ 인자가 필요 또는 잘못되었습니다.")));
         components.addExamples(SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE, createExample(SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE, "만료된 인증 토큰입니다."));
         components.addExamples(SwaggerErrorCode.ACTIVE_REFRESH_TOKEN_VALUE, createExample(SwaggerErrorCode.ACTIVE_REFRESH_TOKEN_VALUE, "갱신 토큰이 아직 만료되지 않았습니다."));
         components.addExamples(SwaggerErrorCode.NOT_MATCH_REFRESH_TOKEN_VALUE, createExample(SwaggerErrorCode.NOT_MATCH_REFRESH_TOKEN_VALUE, "갱신 토큰이 일치하지 않습니다."));
@@ -149,7 +137,7 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.SHARE_USER_DUPLICATED_VALUE, createExample(SwaggerErrorCode.SHARE_USER_DUPLICATED_VALUE, "이미 초대한 사용자입니다."));
 
         // 500 Errors
-        components.addResponses("500", createApiResponse(badRequestSchema, "Internal Server Error", createExample("500", "예기치 못한 오류가 발생하였습니다.")));
+        components.addResponses("500", createApiResponse(exceptionSchema, "Internal Server Error", createExample(SwaggerErrorCode.INTERNAL_SERVER_ERROR_VALUE, "서버 내부 오류가 발생하였습니다.")));
         components.addExamples(SwaggerErrorCode.FAILED_FILE_UPLOAD_VALUE, createExample(SwaggerErrorCode.FAILED_FILE_UPLOAD_VALUE, "파이어베이스 파일 업로드 오류가 발생하였습니다."));
         components.addExamples(SwaggerErrorCode.FAILED_FCM_SEND_VALUE, createExample(SwaggerErrorCode.FAILED_FCM_SEND_VALUE, "FCM 오류가 발생하였습니다."));
         components.addExamples(SwaggerErrorCode.REDIS_TIMEOUT_VALUE, createExample(SwaggerErrorCode.REDIS_TIMEOUT_VALUE, "레디스에 연결하지 못했습니다."));

@@ -1,6 +1,5 @@
 package org.y2k2.globa.repository;
 
-import lombok.NonNull;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.y2k2.globa.entity.NoticeEntity;

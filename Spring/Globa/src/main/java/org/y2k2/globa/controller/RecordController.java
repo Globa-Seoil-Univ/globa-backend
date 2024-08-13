@@ -5,12 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.y2k2.globa.dto.*;
-import org.y2k2.globa.exception.BadRequestException;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
-import org.y2k2.globa.service.FolderShareService;
 import org.y2k2.globa.service.RecordService;
-import org.y2k2.globa.util.JwtToken;
 
 import java.util.List;
 import java.util.Map;
@@ -94,6 +91,18 @@ public class RecordController {
         return ResponseEntity.ok(result);
     }
 
+    @PostMapping("/folder/{folder_id}/record/{record_id}/link")
+    public ResponseEntity<?> addLinkShare(@RequestHeader(value = "Authorization", required = false) String accessToken,
+                                      @PathVariable(value = "folder_id", required = false) Long folderId,
+                                      @PathVariable(value = "record_id", required = false) Long recordId) {
+        if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
+        if (folderId == null) throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
+        if (recordId == null) throw new CustomException(ErrorCode.REQUIRED_RECORD_ID);
+
+        recordService.changeLinkShare(accessToken, folderId, recordId, true);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/folder/{folder_id}/record/{record_id}/quiz")
     public ResponseEntity<?> postQuiz(@RequestHeader(value = "Authorization", required = false) String accessToken,
                                       @PathVariable(value = "folder_id", required = false) Long folderId,
@@ -169,7 +178,7 @@ public class RecordController {
                                             @PathVariable(value = "record_id", required = false) Long recordId,
                                             @RequestBody RequestStudyDto dto) {
         if ( accessToken == null )
-            throw new BadRequestException("Required AccessToken !");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
         recordService.patchStudyTime(accessToken, recordId, folderId, dto);
 
@@ -191,6 +200,18 @@ public class RecordController {
 
         recordService.deleteRecord(accessToken, recordId, folderId);
 
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/folder/{folder_id}/record/{record_id}/link")
+    public ResponseEntity<?> deleteLinkShare(@RequestHeader(value = "Authorization", required = false) String accessToken,
+                                          @PathVariable(value = "folder_id", required = false) Long folderId,
+                                          @PathVariable(value = "record_id", required = false) Long recordId) {
+        if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
+        if (folderId == null) throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
+        if (recordId == null) throw new CustomException(ErrorCode.REQUIRED_RECORD_ID);
+
+        recordService.changeLinkShare(accessToken, folderId, recordId, false);
         return ResponseEntity.noContent().build();
     }
 }

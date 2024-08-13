@@ -1,12 +1,8 @@
 package org.y2k2.globa.service;
 
-import com.google.api.Http;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Bucket;
-import com.google.cloud.storage.Storage;
-import jakarta.mail.Folder;
-import jdk.jshell.spi.ExecutionControlProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,32 +10,25 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.*;
-import org.y2k2.globa.exception.*;
-import org.y2k2.globa.mapper.FolderMapper;
+import org.y2k2.globa.exception.CustomException;
+import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.mapper.QuizMapper;
 import org.y2k2.globa.mapper.RecordMapper;
 import org.y2k2.globa.repository.*;
 import org.y2k2.globa.util.CustomTimestamp;
 import org.y2k2.globa.util.JwtTokenProvider;
-import org.y2k2.globa.util.JwtUtil;
 import org.y2k2.globa.util.KafkaProducer;
 
-import java.rmi.server.ExportException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,8 +36,6 @@ import java.util.stream.Collectors;
 public class RecordService {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final FolderShareService folderShareService;
-    private final JwtUtil jwtUtil;
     private final KafkaProducer kafkaProducer;
 
     public final UserRepository userRepository;;
@@ -116,10 +103,7 @@ public class RecordService {
         }
 
         Pageable pageable = PageRequest.of(0, count);
-//        Page<RecordEntity> records = recordRepository.findAllByOrderByCreatedTimeDesc(pageable);
         Page<RecordEntity> records = recordRepository.findRecordEntitiesByFolder(pageable,folderIds);
-
-
 
         return new ResponseAllRecordWithTotalDto(records.stream()
                 .map(record -> {
@@ -140,20 +124,22 @@ public class RecordService {
     }
 
     public ResponseRecordDetailDto getRecordDetail(String accessToken, Long folderId, Long recordId){
-
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if(userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(userEntity, folderId);
-
-        if(folderShareEntity == null)
-            throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
-
         RecordEntity record = recordRepository.findRecordEntityByRecordId(recordId);
+
+        if (record == null) throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
+
+        if (!record.getIsShare()) {
+            FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(userEntity, folderId);
+            if(folderShareEntity == null)
+                throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
+        }
 
         ResponseRecordDetailDto responseDto = new ResponseRecordDetailDto();
 
@@ -169,7 +155,6 @@ public class RecordService {
             responseSectionDto.setEndTime(section.getEndTime());
             responseSectionDto.setCreatedTime(section.getCreatedTime());
 
-            System.out.println("==================== sectionId :: " + section.getSectionId() + "::::::::");
             AnalysisEntity analysis = analysisRepository.findAllBySectionSectionId(section.getSectionId());
 
             if(analysis == null)
@@ -179,7 +164,6 @@ public class RecordService {
             responseRecordAnalysisDto.setAnalysisId(analysis.getAnalysisId());
             responseRecordAnalysisDto.setContent(analysis.getContent());
             List<HighlightEntity> highlights = highlightRepository.findAllBySectionSectionId(section.getSectionId());
-
             List<ResponseDetailHighlightDto> responseHighlights = new ArrayList<>();
 
             for(HighlightEntity highlight : highlights){
@@ -193,9 +177,6 @@ public class RecordService {
             }
 
             responseRecordAnalysisDto.setHighlights(responseHighlights);
-
-
-
             responseSectionDto.setAnalysis(responseRecordAnalysisDto);
 
             List<ResponseDetailSummaryDto> responseSummaries = new ArrayList<>();
@@ -219,7 +200,6 @@ public class RecordService {
         responseDto.setTitle(record.getTitle());
         responseDto.setPath(record.getPath());
         responseDto.setSize(record.getSize());
-//        responseDto.setUser(record.getUser());
         responseDto.setFolder(rdfd);
         responseDto.setSection(responseSections);
         responseDto.setCreatedTime(record.getCreatedTime());
@@ -299,7 +279,6 @@ public class RecordService {
     }
 
     public HttpStatus postQuiz(String accessToken, Long recordId, Long folderId, List<RequestQuizDto> quizs){
-
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity targetEntity = userRepository.findByUserId(userId);
 
@@ -355,7 +334,6 @@ public class RecordService {
         recordEntity.setTitle(title);
         recordEntity.setUser(userEntity);
         recordEntity.setFolder(folderEntity);
-
 
         Blob blob = bucket.get(path);
         if( blob == null )
@@ -469,10 +447,10 @@ public class RecordService {
         UserEntity user = userRepository.findByUserId(userId);
         RecordEntity record = recordRepository.findRecordEntityByRecordId(recordId);
 
-        if (user == null) throw new BadRequestException("Not found user");
-        if (user.getDeleted()) throw new BadRequestException("User Deleted !");
-        if (record == null) throw new NotFoundException("Record not found !");
-        if (!record.getFolder().getFolderId().equals(folderId)) throw new UnAuthorizedException("Not Matched Folder Id");
+        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (record == null) throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
+        if (!record.getFolder().getFolderId().equals(folderId)) throw new CustomException(ErrorCode.MISMATCH_RECORD_FOLDER);
 
         LocalDateTime dateTime = CustomTimestamp.toLocalDateTime(dto.getCreatedTime());
         StudyEntity study = studyRepository.findByCreatedTime(dateTime)
@@ -485,6 +463,23 @@ public class RecordService {
         study.setStudyTime(dto.getStudyTime());
 
         studyRepository.save(study);
+    }
+
+    public void changeLinkShare(String accessToken, Long folderId, Long recordId, boolean isShare){
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        UserEntity user = userRepository.findByUserId(userId);
+        FolderEntity folder = folderRepository.findFirstByFolderId(folderId);
+        RecordEntity record = recordRepository.findRecordEntityByRecordId(recordId);
+
+        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (folder == null) throw new CustomException(ErrorCode.NOT_FOUND_FOLDER);
+        if (record == null) throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
+        if (!Objects.equals(folder.getUser().getUserId(), user.getUserId())) throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
+        if (!Objects.equals(record.getUser().getUserId(), user.getUserId())) throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
+
+        record.setIsShare(isShare);
+        recordRepository.save(record);
     }
 
     public HttpStatus deleteRecord(String accessToken, Long recordId, Long folderId){
@@ -515,9 +510,6 @@ public class RecordService {
             recordRepository.delete(recordEntity);
         }
 
-
         return HttpStatus.OK;
     }
-
-
 }

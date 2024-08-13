@@ -1,16 +1,15 @@
 package org.y2k2.globa.controller;
 
-import com.google.api.Http;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import org.y2k2.globa.dto.FolderPostRequestDto;
-import org.y2k2.globa.exception.BadRequestException;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.service.FolderService;
-import org.y2k2.globa.util.JwtToken;
 
 import java.util.Map;
 

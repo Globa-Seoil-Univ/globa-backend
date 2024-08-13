@@ -167,6 +167,8 @@ public class SwaggerErrorCode {
     public static final String SHARE_USER_DUPLICATED_VALUE = "40940";
 
     /* 500 SERVER ERROR : 서버 단 에러 */
+    public static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
+    public static final String INTERNAL_SERVER_ERROR_VALUE = "500";
     public static final String FAILED_FILE_UPLOAD = "FAILED_FILE_UPLOAD";
     public static final String FAILED_FILE_UPLOAD_VALUE = "50010";
     public static final String FAILED_FCM_SEND = "FAILED_FCM_SEND";
@@ -179,4 +181,8 @@ public class SwaggerErrorCode {
     public static final String FAILED_FOLDER_DELETE_VALUE = "50041";
     public static final String FAILED_FIREBASE = "FAILED_FIREBASE";
     public static final String FAILED_FIREBASE_VALUE = "50050";
+    public static final String FAILED_EXCEL = "FAILED_EXCEL";
+    public static final String FAILED_EXCEL_VALUE = "50060";
+    public static final String NOT_FOUND_KEYWORD_EXCEL = "NOT_FOUND_KEYWORD_EXCEL";
+    public static final String NOT_FOUND_KEYWORD_EXCEL_VALUE = "50070";
 }

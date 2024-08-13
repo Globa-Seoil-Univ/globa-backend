@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.y2k2.globa.dto.FolderShareUserResponseDto;
 import org.y2k2.globa.dto.Role;
-import org.y2k2.globa.exception.BadRequestException;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.service.FolderShareService;

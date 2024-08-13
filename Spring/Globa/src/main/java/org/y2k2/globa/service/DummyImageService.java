@@ -14,7 +14,6 @@ import org.y2k2.globa.dto.DummyImageResponseDto;
 import org.y2k2.globa.entity.DummyImageEntity;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
-import org.y2k2.globa.exception.FileUploadException;
 import org.y2k2.globa.mapper.DummyImageMapper;
 import org.y2k2.globa.repository.DummyImageRepository;
 

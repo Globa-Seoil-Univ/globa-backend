@@ -1,6 +1,5 @@
 package org.y2k2.globa.config;
 
-
 import com.fasterxml.jackson.core.JsonParseException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;

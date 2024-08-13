@@ -1,35 +1,21 @@
 package org.y2k2.globa.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import com.google.cloud.storage.Bucket;
-
 import lombok.RequiredArgsConstructor;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.dto.*;
-
 import org.y2k2.globa.entity.*;
-
-import org.y2k2.globa.exception.*;
-
+import org.y2k2.globa.exception.CustomException;
+import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.repository.*;
 import org.y2k2.globa.util.CustomTimestamp;
 import org.y2k2.globa.util.JwtToken;
