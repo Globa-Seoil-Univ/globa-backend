@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.y2k2.globa.dto.NoticeAddRequestDto;
 import org.y2k2.globa.exception.BadRequestException;
+import org.y2k2.globa.exception.CustomException;
+import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.service.NoticeService;
 import org.y2k2.globa.util.JwtTokenProvider;
 
@@ -23,19 +25,19 @@ public class NoticeController {
     @GetMapping("/intro")
     public ResponseEntity<?> getIntroNotices(@RequestHeader(value = "Authorization") String accessToken) {
         if (accessToken == null) {
-            throw new BadRequestException("You must be requested to access token.");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
-        jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         return ResponseEntity.ok().body(noticeService.getIntroNotices());
     }
 
     @GetMapping("/{noticeId}")
     public ResponseEntity<?> getNoticeDetail(@RequestHeader(value = "Authorization") String accessToken, @PathVariable("noticeId") Long noticeId) {
         if (accessToken == null) {
-            throw new BadRequestException("You must be requested to access token.");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
-        jwtTokenProvider.getUserIdByAccessToken(accessToken);
-        if (noticeId == null) throw new BadRequestException("You must request notice id");
+        jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        if (noticeId == null) throw new CustomException(ErrorCode.REQUIRED_NOTICE_ID);
 
         return ResponseEntity.ok().body(noticeService.getNoticeDetail(noticeId));
     }
@@ -43,9 +45,9 @@ public class NoticeController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> addNotice(@RequestHeader(value = "Authorization") String accessToken, @Valid @ModelAttribute final NoticeAddRequestDto dto) {
         if (accessToken == null) {
-            throw new BadRequestException("You must be requested to access token.");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         Long noticeId = noticeService.addNotice(userId, dto);
         return ResponseEntity.created(URI.create("/" + noticeId)).build();

@@ -45,9 +45,7 @@ public class NoticeService {
     public NoticeDetailResponseDto getNoticeDetail(Long noticeId) {
         NoticeEntity noticeEntity = noticeRepository.findByNoticeId(noticeId);
 
-        if (noticeEntity == null) {
-            throw new NotFoundException("Not found notice using noticeId : " + noticeId);
-        }
+        if (noticeEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_NOTICE);
 
         return NoticeMapper.INSTANCE.toDetailResponseDto(noticeEntity);
     }
@@ -56,15 +54,15 @@ public class NoticeService {
     public Long addNotice(Long userId, NoticeAddRequestDto dto) {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) {
-            throw new InvalidTokenException("Invalid Token");
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
 
-        if (user.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         UserRoleEntity userRole = userRoleRepository.findByUser(user);
         String roleName = userRole.getRoleId().getName();
         boolean isAdminOrEditor = UserRole.ADMIN.getRoleName().equals(roleName) || UserRole.EDITOR.getRoleName().equals(roleName);
-        if (!isAdminOrEditor) throw new ForbiddenException("Only admin or editor can write answers");
+        if (!isAdminOrEditor) throw new CustomException(ErrorCode.NOT_DESERVE_ADD_NOTICE);
 
         NoticeEntity requestEntity = NoticeMapper.INSTANCE.toEntity(dto);
         requestEntity.setUser(user);
@@ -141,7 +139,7 @@ public class NoticeService {
                 bucket.get(path).delete();
             }
 
-            throw new FileUploadException(e.getMessage());
+            throw new CustomException(ErrorCode.FAILED_FILE_UPLOAD);
         }
     }
 }

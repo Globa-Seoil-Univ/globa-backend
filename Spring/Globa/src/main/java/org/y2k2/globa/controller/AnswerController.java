@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.y2k2.globa.dto.RequestAnswerDto;
 import org.y2k2.globa.exception.BadRequestException;
+import org.y2k2.globa.exception.CustomException;
+import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.service.AnswerService;
 import org.y2k2.globa.util.JwtTokenProvider;
 
@@ -25,10 +27,9 @@ public class AnswerController {
             @PathVariable("inquiryId") long inquiryId,
             @Valid @RequestBody RequestAnswerDto dto
     ) {
-        if (accessToken == null) {
-            throw new BadRequestException("You must be requested to access token.");
-        }
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
+
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         answerService.addAnswer(userId, inquiryId, dto);
         return ResponseEntity.created(URI.create("/inquiry/" + inquiryId)).build();
@@ -41,10 +42,9 @@ public class AnswerController {
             @PathVariable("answerId") long answerId,
             @Valid @RequestBody RequestAnswerDto dto
     ) {
-        if (accessToken == null) {
-            throw new BadRequestException("You must be requested to access token.");
-        }
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
+
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         answerService.editAnswer(userId, inquiryId, answerId, dto);
         return ResponseEntity.noContent().build();
@@ -56,10 +56,9 @@ public class AnswerController {
             @PathVariable("inquiryId") long inquiryId,
             @PathVariable("answerId") long answerId
     ) {
-        if (accessToken == null) {
-            throw new BadRequestException("You must be requested to access token.");
-        }
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
+
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         answerService.deleteAnswer(userId, inquiryId, answerId);
         return ResponseEntity.noContent().build();
