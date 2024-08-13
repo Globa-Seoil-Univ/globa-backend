@@ -91,6 +91,18 @@ public class RecordController {
         return ResponseEntity.ok(result);
     }
 
+    @PostMapping("/folder/{folder_id}/record/{record_id}/link")
+    public ResponseEntity<?> addLinkShare(@RequestHeader(value = "Authorization", required = false) String accessToken,
+                                      @PathVariable(value = "folder_id", required = false) Long folderId,
+                                      @PathVariable(value = "record_id", required = false) Long recordId) {
+        if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
+        if (folderId == null) throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
+        if (recordId == null) throw new CustomException(ErrorCode.REQUIRED_RECORD_ID);
+
+        recordService.changeLinkShare(accessToken, folderId, recordId, true);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/folder/{folder_id}/record/{record_id}/quiz")
     public ResponseEntity<?> postQuiz(@RequestHeader(value = "Authorization", required = false) String accessToken,
                                       @PathVariable(value = "folder_id", required = false) Long folderId,
@@ -188,6 +200,18 @@ public class RecordController {
 
         recordService.deleteRecord(accessToken, recordId, folderId);
 
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/folder/{folder_id}/record/{record_id}/link")
+    public ResponseEntity<?> deleteLinkShare(@RequestHeader(value = "Authorization", required = false) String accessToken,
+                                          @PathVariable(value = "folder_id", required = false) Long folderId,
+                                          @PathVariable(value = "record_id", required = false) Long recordId) {
+        if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
+        if (folderId == null) throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
+        if (recordId == null) throw new CustomException(ErrorCode.REQUIRED_RECORD_ID);
+
+        recordService.changeLinkShare(accessToken, folderId, recordId, false);
         return ResponseEntity.noContent().build();
     }
 }

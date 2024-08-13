@@ -3,6 +3,7 @@ package org.y2k2.globa.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity(name="record")
 @Table(name="record")
+@DynamicInsert
 public class RecordEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
