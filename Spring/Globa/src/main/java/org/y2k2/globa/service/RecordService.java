@@ -27,15 +27,19 @@ import org.y2k2.globa.mapper.FolderMapper;
 import org.y2k2.globa.mapper.QuizMapper;
 import org.y2k2.globa.mapper.RecordMapper;
 import org.y2k2.globa.repository.*;
+import org.y2k2.globa.util.CustomTimestamp;
 import org.y2k2.globa.util.JwtTokenProvider;
 import org.y2k2.globa.util.JwtUtil;
 import org.y2k2.globa.util.KafkaProducer;
 
 import java.rmi.server.ExportException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Service
@@ -245,9 +249,12 @@ public class RecordService {
         List<ResponseKeywordDto> keywords = new ArrayList<>();
 
         for( StudyEntity studyEntitiy : studyEntities ){
+            CustomTimestamp timestamp = new CustomTimestamp();
+            timestamp.setTimestamp(studyEntitiy.getCreatedTime());
+
             ResponseStudyTimesDto responseStudyTimesDto = new ResponseStudyTimesDto();
             responseStudyTimesDto.setStudyTime(studyEntitiy.getStudyTime());
-            responseStudyTimesDto.setCreatedTime(studyEntitiy.getCreatedTime());
+            responseStudyTimesDto.setCreatedTime(timestamp.toString());
             studyTimes.add(responseStudyTimesDto);
         }
 
@@ -455,6 +462,29 @@ public class RecordService {
         }
 
         return HttpStatus.OK;
+    }
+
+    public void patchStudyTime(String accessToken, Long recordId, Long folderId, RequestStudyDto dto) {
+        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        UserEntity user = userRepository.findByUserId(userId);
+        RecordEntity record = recordRepository.findRecordEntityByRecordId(recordId);
+
+        if (user == null) throw new BadRequestException("Not found user");
+        if (user.getDeleted()) throw new BadRequestException("User Deleted !");
+        if (record == null) throw new NotFoundException("Record not found !");
+        if (!record.getFolder().getFolderId().equals(folderId)) throw new UnAuthorizedException("Not Matched Folder Id");
+
+        LocalDateTime dateTime = CustomTimestamp.toLocalDateTime(dto.getCreatedTime());
+        StudyEntity study = studyRepository.findByCreatedTime(dateTime)
+                .orElseGet(() -> StudyEntity.builder()
+                        .user(user)
+                        .record(record)
+                        .build()
+                );
+
+        study.setStudyTime(dto.getStudyTime());
+
+        studyRepository.save(study);
     }
 
     public HttpStatus deleteRecord(String accessToken, Long recordId, Long folderId){

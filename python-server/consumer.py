@@ -88,6 +88,7 @@ class Consumer:
                         add_keywords(record_id=record_id, text=text, session=session)
 
                         session.commit()
+                        self.logger.info(f"Success Record Id {record_id}")
                         self.producer.send_message(key='success', message={'recordId': record_id, 'userId': user_id})
                     except NotFoundException as e:
                         session.rollback()

@@ -13,8 +13,8 @@ public class Const {
         FOLDER_NAME_DUPLICATED(40920,  HttpStatus.Series.CLIENT_ERROR, "Folder Name Duplicated"),
         // ... 추가적인 에러 코드
         FAILED_FILE_UPLOAD(50010, HttpStatus.Series.CLIENT_ERROR, "Failed to file upload to Firebase"),
-
         FAILED_FCM_SEND(50020, HttpStatus.Series.CLIENT_ERROR, "Failed to send FCM message"),
+        FAILED_DICTIONARY_SAVE(50030, HttpStatus.Series.CLIENT_ERROR, "Failed to save dictionary"),
         ;
 
         private final int code;

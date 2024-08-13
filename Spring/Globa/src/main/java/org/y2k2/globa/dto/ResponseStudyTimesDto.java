@@ -15,5 +15,5 @@ import java.time.LocalDateTime;
 @ToString
 public class ResponseStudyTimesDto implements Serializable {
     private Long studyTime;
-    private LocalDateTime createdTime;
+    private String createdTime;
 }

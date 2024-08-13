@@ -1,14 +1,18 @@
 package org.y2k2.globa.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 @Getter
 @Setter
+@NoArgsConstructor
 @Entity(name="study")
 @Table(name="study")
 public class StudyEntity {
@@ -30,7 +34,13 @@ public class StudyEntity {
     @Column(name = "study_time", columnDefinition = "INT UNSIGNED")
     private Long studyTime;
 
-
+    @CreationTimestamp
     @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
+
+    @Builder
+    public StudyEntity(UserEntity user, RecordEntity record) {
+        this.user = user;
+        this.record = record;
+    }
 }
