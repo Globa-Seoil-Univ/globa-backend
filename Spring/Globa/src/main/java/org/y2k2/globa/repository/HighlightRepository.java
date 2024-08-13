@@ -19,7 +19,7 @@ public interface HighlightRepository extends JpaRepository<HighlightEntity, Long
                                     "WHERE child.parent_id = c.comment_id " +
                                     "AND child.deleted = FALSE" +
                             ") " +
-                        "GROUP BY h.highlight_id " +
+                        "GROUP BY h.highlight_id, c.created_time " +
                         "ORDER BY c.created_time DESC",
             nativeQuery = true)
     List<HighlightEntity> findAllBySectionSectionId(Long sectionId);

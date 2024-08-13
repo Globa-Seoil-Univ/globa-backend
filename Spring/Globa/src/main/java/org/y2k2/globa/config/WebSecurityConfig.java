@@ -31,12 +31,8 @@ public class WebSecurityConfig {
                                 .requestMatchers("/**").permitAll()
                                 .anyRequest().authenticated()
                 );
-
-
         return http.build();
     }
-
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {

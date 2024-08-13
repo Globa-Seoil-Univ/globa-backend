@@ -1,20 +1,18 @@
 package org.y2k2.globa.controller;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import org.y2k2.globa.dto.RequestFcmTopicDto;
-import org.y2k2.globa.exception.BadRequestException;
-import org.y2k2.globa.exception.UnAuthorizedException;
+import org.y2k2.globa.exception.CustomException;
+import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.service.FcmService;
 import org.y2k2.globa.util.JwtTokenProvider;
 
@@ -46,9 +44,9 @@ public class FcmController {
             @RequestBody RequestFcmTopicDto requestFcmTopicDto
     ) {
         if (accessToken == null) {
-            throw new UnAuthorizedException("You must be requested to access token.");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
-        jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         fcmService.sendTopicNotification(requestFcmTopicDto);
         return ResponseEntity.noContent().build();

@@ -12,7 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import org.y2k2.globa.dto.DummyImageResponseDto;
 import org.y2k2.globa.entity.DummyImageEntity;
-import org.y2k2.globa.exception.FileUploadException;
+import org.y2k2.globa.exception.CustomException;
+import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.mapper.DummyImageMapper;
 import org.y2k2.globa.repository.DummyImageRepository;
 
@@ -52,7 +53,7 @@ public class DummyImageService {
                 bucket.get(path).delete();
             }
 
-            throw new FileUploadException(e.getMessage());
+            throw new CustomException(ErrorCode.FAILED_FILE_UPLOAD);
         }
     }
 }

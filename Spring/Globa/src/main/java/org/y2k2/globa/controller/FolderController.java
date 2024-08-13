@@ -1,14 +1,15 @@
 package org.y2k2.globa.controller;
 
-import com.google.api.Http;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import org.y2k2.globa.dto.FolderPostRequestDto;
-import org.y2k2.globa.exception.BadRequestException;
+import org.y2k2.globa.exception.CustomException;
+import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.service.FolderService;
-import org.y2k2.globa.util.JwtToken;
 
 import java.util.Map;
 
@@ -24,10 +25,8 @@ public class FolderController {
     public ResponseEntity<?> getFolders(@RequestHeader(value = "Authorization", required = false) String accessToken,
                                         @RequestParam(required = false, defaultValue = "1", value = "page") int page,
                                         @RequestParam(required = false, defaultValue = "10", value = "count") int count) {
-
         if ( accessToken == null )
-            throw new BadRequestException("Required AccessToken ! ");
-
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         return ResponseEntity.status(HttpStatus.OK).body(folderService.getFolders(accessToken,page,count));
     }
 
@@ -37,9 +36,9 @@ public class FolderController {
 
 
         if ( accessToken == null )
-            throw new BadRequestException("Required AccessToken ! ");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( request.getTitle() == null  )
-            throw new BadRequestException("Title Value, Null Not Allowed ! ");
+            throw new CustomException(ErrorCode.REQUIRED_FOLDER_TITLE);
         if ( request.getShareTarget() == null)
             return ResponseEntity.status(HttpStatus.CREATED).body(folderService.postFolder(accessToken, request.getTitle()));
         else
@@ -53,11 +52,11 @@ public class FolderController {
 
 
         if ( accessToken == null )
-            throw new BadRequestException("Required AccessToken ! ");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( titleMap.get("title") == null  )
-            throw new BadRequestException("Title Value, Null Not Allowed ! ");
+            throw new CustomException(ErrorCode.REQUIRED_FOLDER_TITLE);
         if ( folderId == null)
-            throw new BadRequestException("folderId Path Value, Null Not Allowed ! ");
+            throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
 
         return ResponseEntity.status(folderService.patchFolderName(accessToken, folderId, titleMap.get("title"))).body("");
     }
@@ -68,9 +67,9 @@ public class FolderController {
 
 
         if ( accessToken == null )
-            throw new BadRequestException("Required AccessToken ! ");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( folderId == null)
-            throw new BadRequestException("folderId Path Value, Null Not Allowed ! ");
+            throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
 
         return ResponseEntity.status(folderService.deleteFolderName(accessToken, folderId)).body("");
     }

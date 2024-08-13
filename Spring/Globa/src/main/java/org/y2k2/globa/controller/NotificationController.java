@@ -3,7 +3,8 @@ package org.y2k2.globa.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.y2k2.globa.exception.BadRequestException;
+import org.y2k2.globa.exception.CustomException;
+import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.service.NotificationService;
 import org.y2k2.globa.util.JwtTokenProvider;
 
@@ -21,9 +22,9 @@ public class NotificationController {
             @RequestParam(value = "count", defaultValue = "10") int count,
             @RequestParam(value = "page", defaultValue = "1") int page) {
         if (accessToken == null) {
-            throw new BadRequestException("You must be requested to access token.");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         return ResponseEntity.ok().body(notificationService.getNotifications(userId, count, page));
     }

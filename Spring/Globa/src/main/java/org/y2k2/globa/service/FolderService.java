@@ -53,11 +53,10 @@ public class FolderService {
 
     public List<FolderDto> getFolders(String accessToken, int page, int count){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
-
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if (userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
 
         Pageable pageable = PageRequest.of(page-1, count);
@@ -73,8 +72,8 @@ public class FolderService {
 
     public FolderDto postDefaultFolder(UserEntity userEntity){
         FolderEntity saveFolderEntity = new FolderEntity();
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if (userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
         saveFolderEntity.setUser(userEntity);
         saveFolderEntity.setTitle(userEntity.getName() + "의 기본 폴더");
         saveFolderEntity.setCreatedTime(LocalDateTime.now());
@@ -102,7 +101,7 @@ public class FolderService {
         } catch (StorageException e) {
             folderRepository.delete(savedEntity);
             folderShareRepository.delete(saveShareEntity);
-            throw new RuntimeException("Error creating folder in Firebase", e);
+            throw new CustomException(ErrorCode.FAILED_FOLDER_CREATE);
         }
 
         return FolderMapper.INSTANCE.toFolderDto(savedEntity);
@@ -111,11 +110,11 @@ public class FolderService {
     @Transactional
     public FolderDto postFolder(String accessToken, String title){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if (userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderEntity saveFolderEntity = new FolderEntity();
         saveFolderEntity.setUser(userEntity);
@@ -144,7 +143,7 @@ public class FolderService {
         } catch (StorageException e) {
             folderRepository.delete(savedEntity);
             folderShareRepository.delete(savedShareEntity);
-            throw new RuntimeException("Error creating folder in Firebase", e);
+            throw new CustomException(ErrorCode.FAILED_FOLDER_CREATE);
         }
 
         return FolderMapper.INSTANCE.toFolderDto(savedEntity);
@@ -153,10 +152,10 @@ public class FolderService {
 
     @Transactional
     public FolderDto postFolder(String accessToken, String title, List<ShareTarget> shareTargets){
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if (userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderEntity saveFolderEntity = new FolderEntity();
         saveFolderEntity.setUser(userEntity);
@@ -180,13 +179,13 @@ public class FolderService {
             System.out.println("Code: " + target.getCode() + ", Role: " + target.getRole());
             UserEntity targetEntity = userRepository.findOneByCode(target.getCode());
             if(targetEntity == null)
-                throw new NotFoundException("Share Target Not Found ");
+                throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
 
             if (target.getRole().isEmpty())
-                throw new BadRequestException("You must be request role field");
+                throw new CustomException(ErrorCode.NOT_NULL_ROLE);
             if (!target.getRole().toUpperCase().equals(Role.R.toString())
                     && !target.getRole().toUpperCase().equals(Role.W.toString())) {
-                throw new BadRequestException("Role field must be only 'r' or 'w'");
+                throw new CustomException(ErrorCode.ROLE_BAD_REQUEST);
             }
 
             folderShareService.inviteShare(savedEntity.getFolderId(), userEntity.getUserId(), targetEntity.getUserId(), Role.valueOf(target.getRole().toUpperCase()));
@@ -200,7 +199,7 @@ public class FolderService {
         } catch (Exception e) {
             folderRepository.delete(savedEntity);
             folderShareRepository.delete(savedOwnerShareEntity);
-            throw new RuntimeException("Error creating folder in Firebase", e);
+            throw new CustomException(ErrorCode.FAILED_FOLDER_CREATE);
         }
 
         return FolderMapper.INSTANCE.toFolderDto(savedEntity);
@@ -208,24 +207,24 @@ public class FolderService {
     }
 
     public HttpStatus patchFolderName(String accessToken, Long folderId, String title){
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if (userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderEntity folderEntity = folderRepository.findFolderEntityByFolderId(folderId);
 
         if(folderEntity == null)
-            throw new NotFoundException("Folder Id not found ! ");
+            throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
 
         if (!Objects.equals(userId, folderEntity.getUser().getUserId())){
-            throw new UnAuthorizedException("Not Matched User ");
+            throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
         }
 
         FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(userEntity, folderId);
 
         if(folderShareEntity == null)
-            throw new ForbiddenException("폴더에 대한 권한이 없습니다.");
+            throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
         folderEntity.setTitle(title);
 
@@ -237,28 +236,28 @@ public class FolderService {
 
     @Transactional
     public HttpStatus deleteFolderName(String accessToken, Long folderId){
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if (userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderEntity folderEntity = folderRepository.findFolderEntityByFolderId(folderId);
         FolderEntity defaultFolderEntity = folderRepository.findFirstByUserUserIdOrderByCreatedTimeAsc(userEntity.getUserId());
 
         if(folderEntity == null) {
-            throw new NotFoundException("Folder not found ! ");
+            throw new CustomException(ErrorCode.NOT_FOUND_FOLDER);
         }
 
         if (!Objects.equals(userId, folderEntity.getUser().getUserId())){
-            throw new UnAuthorizedException("Not Matched User ");
+            throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
         }
 
         if(folderEntity == defaultFolderEntity)
-            throw new BadRequestFolderException("Default Folder Cannot Be Deleted");
+            throw new CustomException(ErrorCode.FOLDER_DELETE_BAD_REQUEST);
 
 
         Iterable<Blob> blobs = bucket.list(Storage.BlobListOption.prefix("folders/" + folderId)).iterateAll();
-        if(blobs == null ) throw new NotFoundException("Not Found Folder By FolderId in Firebase");
+        if(blobs == null ) throw new CustomException(ErrorCode.NOT_FOUND_FOLDER_FIREBASE);
 
         try{
             for (Blob blob : blobs) {
@@ -266,7 +265,7 @@ public class FolderService {
             }
             folderRepository.delete(folderEntity);
         }catch (Exception e) {
-            throw new RuntimeException("Error deleting folder in Firebase", e);
+            throw new CustomException(ErrorCode.FAILED_FOLDER_DELETE);
         }
 
 
@@ -275,23 +274,23 @@ public class FolderService {
     }
 
     public HttpStatus deleteDefaultFolder(UserEntity userEntity){
-        if (userEntity == null) throw new BadRequestException("Not found user");
-        if (userEntity.getDeleted()) throw new BadRequestException("User Deleted ! ");
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderEntity folderEntity = folderRepository.findFirstByUserUserIdOrderByCreatedTimeAsc(userEntity.getUserId());
 
         if(folderEntity == null) {
-            throw new NotFoundException("Folder not found ! ");
+            throw new CustomException(ErrorCode.NOT_FOUND_FOLDER);
         }
 
         if (!Objects.equals(userEntity.getUserId(), folderEntity.getUser().getUserId())){
-            throw new UnAuthorizedException("Not Matched User ");
+            throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
         }
 
 
         Iterable<Blob> blobs = bucket.list(Storage.BlobListOption.prefix("folders/" + folderEntity.getFolderId())).iterateAll();
 
-        if(blobs == null ) throw new NotFoundException("Not Found Folder By FolderId in Firebase");
+        if(blobs == null ) throw new CustomException(ErrorCode.NOT_FOUND_FOLDER_FIREBASE);
 
         try{
             for (Blob blob : blobs) {
@@ -299,7 +298,7 @@ public class FolderService {
             }
             folderRepository.delete(folderEntity);
         }catch (Exception e) {
-            throw new RuntimeException("Error deleting folder in Firebase", e);
+            throw new CustomException(ErrorCode.FAILED_FOLDER_DELETE);
         }
 
         return HttpStatus.OK;

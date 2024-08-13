@@ -233,3 +233,6 @@ out/
 
 ### HTTPS ###
 *.p12
+
+### word ###
+/Spring/Globa/word/*
