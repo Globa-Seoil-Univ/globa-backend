@@ -59,7 +59,7 @@ public class NoticeService {
             throw new InvalidTokenException("Invalid Token");
         }
 
-        if (user.getDeleted()) throw new BadRequestException("User Deleted !");
+        if (user.getDeleted()) throw new BadRequestException("User Deleted ! ");
 
         UserRoleEntity userRole = userRoleRepository.findByUser(user);
         String roleName = userRole.getRoleId().getName();

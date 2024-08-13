@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.exception.BadRequestException;
+import org.y2k2.globa.exception.CustomException;
+import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.ForbiddenException;
 import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.UserService;
@@ -63,16 +65,16 @@ public class UserController {
     public ResponseEntity<?> postUser(@RequestBody RequestUserPostDTO requestUserPostDTO) {
 
         if ( requestUserPostDTO.getSnsKind() == null )
-            throw new BadRequestException("Required snsKind ! ");
+            throw new CustomException(ErrorCode.REQUIRED_SNS_KIND);
         if ( requestUserPostDTO.getSnsId() == null )
-            throw new BadRequestException("Required snsId ! ");
+            throw new CustomException(ErrorCode.REQUIRED_SNS_ID);
         if ( requestUserPostDTO.getName() == null )
-            throw new BadRequestException("Required name ! ");
+            throw new CustomException(ErrorCode.REQUIRED_NAME);
 
-        if ( ValidValues.validSnsIds.contains(requestUserPostDTO.getSnsId()) )
-            throw new BadRequestException(" snsId only ' 1001 ~ 1004 ' ");
+        if ( !ValidValues.validSnsKinds.contains(requestUserPostDTO.getSnsKind()) )
+            throw new CustomException(ErrorCode.SNS_KIND_BAD_REQUEST);
         if ( requestUserPostDTO.getName().length() > 32 )
-            throw new BadRequestException("name too long ! ");
+            throw new CustomException(ErrorCode.NAME_BAD_REQUEST);
 
         if ( requestUserPostDTO.getNotification() == null )
             requestUserPostDTO.setNotification(true);
@@ -109,12 +111,12 @@ public class UserController {
                                       @Parameter(hidden = true)
                                       @RequestHeader(value = "Authorization", required = false) String accessToken) {
         if ( accessToken == null )
-            throw new BadRequestException("Required AccessToken ! ");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         JwtToken jwtToken;
 
         try {
             if ( requestTokenMap.get("requestToken") == null )
-                throw new BadRequestException("Required RequestToken ! ");
+                throw new CustomException(ErrorCode.REQUIRED_REQUEST_TOKEN);
             jwtToken = userService.reloadRefreshToken(requestTokenMap.get("requestToken"), accessToken);
 
         } catch (Exception e) {
@@ -150,10 +152,8 @@ public class UserController {
     )
     @GetMapping
     public ResponseEntity<?> getUser(@Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String accessToken) {
-
         if ( accessToken == null )
-            throw new BadRequestException("Required AccessToken ! ");
-
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         ResponseUserDTO result = userService.getUser(accessToken);
 
         return ResponseEntity.ok(result);
@@ -190,9 +190,9 @@ public class UserController {
             @RequestParam(value = "code", required = false) String code) {
 
         if ( accessToken == null )
-            throw new BadRequestException("Required AccessToken ! ");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( code == null )
-            throw new BadRequestException("Required userCode ! ");
+            throw new CustomException(ErrorCode.REQUIRED_USER_CODE);
 
         ResponseUserSearchDto result = userService.getUser(accessToken,code);
 
@@ -231,9 +231,9 @@ public class UserController {
             @PathVariable(value = "user_id", required = false) Long userId) {
 
         if ( accessToken == null )
-            throw new BadRequestException("Required AccessToken ! ");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( userId == null )
-            throw new BadRequestException("Required userId ! ");
+            throw new CustomException(ErrorCode.REQUIRED_USER_ID);
 
         NotificationSettingDto result = userService.getNotification(accessToken,userId);
 
@@ -273,9 +273,9 @@ public class UserController {
             @PathVariable(value = "user_id", required = false) Long userId) {
 
         if ( accessToken == null )
-            throw new BadRequestException("Required AccessToken ! ");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( userId == null )
-            throw new BadRequestException("Required userId ! ");
+            throw new CustomException(ErrorCode.REQUIRED_USER_ID);
 
         ResponseAnalysisDto result = userService.getAnalysis(accessToken,userId);
 
@@ -316,11 +316,11 @@ public class UserController {
             @RequestBody NotificationSettingDto NotificationSettingDto) {
 
         if ( accessToken == null )
-            throw new BadRequestException("Required AccessToken ! ");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( userId == null )
-            throw new BadRequestException("Required userId ! ");
+            throw new CustomException(ErrorCode.REQUIRED_USER_ID);
         if ( NotificationSettingDto.getEventNofi() == null || NotificationSettingDto.getUploadNofi() == null  || NotificationSettingDto.getShareNofi() == null  )
-            throw new BadRequestException("Nofi Value, Null Not Allowed ! ");
+            throw new CustomException(ErrorCode.NOFI_POST_BAD_REQUEST);
 
         NotificationSettingDto result = userService.putNotification(accessToken,userId, NotificationSettingDto);
 
@@ -366,11 +366,11 @@ public class UserController {
             @RequestBody Map<String, String> nameMap) {
 
         if ( accessToken == null )
-            throw new BadRequestException("Required AccessToken ! ");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( userId == null )
-            throw new BadRequestException("Required userId ! ");
+            throw new CustomException(ErrorCode.REQUIRED_USER_ID);
         if ( nameMap.get("name") == null  )
-            throw new BadRequestException("Name Value, Null Not Allowed ! ");
+            throw new CustomException(ErrorCode.REQUIRED_NAME);
 
         HttpStatus result = userService.patchUserName(accessToken,userId, nameMap.get("name"));
 
@@ -407,9 +407,9 @@ public class UserController {
             @RequestHeader(value = "Authorization", required = false) String accessToken,
             @RequestBody RequestSurveyDto requestSurveyDto) {
         if ( accessToken == null )
-            throw new BadRequestException("Required AccessToken");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if( requestSurveyDto.getSurveyType() == null || requestSurveyDto.getContent() == null)
-            throw new BadRequestException("Survey Value Not Null");
+            throw new CustomException(ErrorCode.SURVEY_POST_BAD_REQUEST);
 
         HttpStatus result = userService.deleteUser(accessToken, requestSurveyDto);
 
@@ -452,11 +452,11 @@ public class UserController {
             @Valid @RequestBody RequestNotificationTokenDto dto,
             @PathVariable(value = "userId", required = false) long userId) {
         if ( accessToken == null )
-            throw new BadRequestException("Required AccessToken ! ");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
-        long accessUserId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long accessUserId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         if (accessUserId != userId)
-            throw new ForbiddenException("Invalid userId ! ");
+            throw new CustomException(ErrorCode.INVALID_TOKEN_USER);
 
         userService.addAndUpdateNotificationToken(dto, userId);
         return ResponseEntity.noContent().build();
@@ -499,11 +499,11 @@ public class UserController {
             @Valid @RequestBody RequestNotificationTokenDto dto,
             @PathVariable(value = "userId", required = false) long userId) {
         if ( accessToken == null )
-            throw new BadRequestException("Required AccessToken ! ");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
-        long accessUserId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long accessUserId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         if (accessUserId != userId)
-            throw new ForbiddenException("Invalid userId ! ");
+            throw new CustomException(ErrorCode.INVALID_TOKEN_USER);
 
         userService.addAndUpdateNotificationToken(dto, userId);
         return ResponseEntity.created(URI.create("/user")).build();
@@ -545,12 +545,12 @@ public class UserController {
             @RequestParam("profile") MultipartFile file,
             @PathVariable(value = "userId", required = false) long userId) {
         if ( accessToken == null )
-            throw new BadRequestException("Required AccessToken ! ");
-        if (file.isEmpty()) throw new BadRequestException("You must request profile field");
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
+        if (file.isEmpty()) throw new CustomException(ErrorCode.REQUIRED_IMAGE);
 
-        long accessUserId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
+        long accessUserId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         if (accessUserId != userId)
-            throw new ForbiddenException("Invalid userId ! ");
+            throw new CustomException(ErrorCode.INVALID_TOKEN_USER);
 
         userService.updateProfile(file, userId);
         return ResponseEntity.noContent().build();
