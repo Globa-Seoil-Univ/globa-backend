@@ -22,4 +22,14 @@ public class DictionaryController {
 
         return ResponseEntity.ok().body(dictionaryService.getDictionary(keyword));
     }
+
+    @PostMapping
+    public ResponseEntity<?> addDictionary(@RequestHeader(value = "Authorization") String accessToken) {
+        if (accessToken == null) {
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
+        }
+
+        dictionaryService.saveDictionary(accessToken);
+        return ResponseEntity.noContent().build();
+    }
 }

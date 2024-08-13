@@ -7,10 +7,18 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.y2k2.globa.dto.DictionaryDto;
 import org.y2k2.globa.dto.ResponseDictionaryDto;
+import org.y2k2.globa.dto.UserRole;
 import org.y2k2.globa.entity.DictionaryEntity;
+import org.y2k2.globa.entity.UserEntity;
+import org.y2k2.globa.entity.UserRoleEntity;
+import org.y2k2.globa.exception.CustomException;
+import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.mapper.DictionaryMapper;
 import org.y2k2.globa.repository.DictionaryRepository;
+import org.y2k2.globa.repository.UserRepository;
+import org.y2k2.globa.repository.UserRoleRepository;
 import org.y2k2.globa.util.Excel;
+import org.y2k2.globa.util.JwtTokenProvider;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -20,8 +28,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DictionaryService {
     private final Excel excel;
-    private final DictionaryRepository dictionaryRepository;
     private final JdbcTemplate jdbcTemplate;
+    private final JwtTokenProvider jwtTokenProvider;
+
+    private final UserRepository userRepository;
+    private final UserRoleRepository userRoleRepository;
+    private final DictionaryRepository dictionaryRepository;
 
     @Transactional
     public ResponseDictionaryDto getDictionary(String keyword) {
@@ -32,7 +44,18 @@ public class DictionaryService {
     }
 
     @Transactional
-    public void saveDictionary() {
+    public void saveDictionary(String accessToken) {
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        UserEntity user = userRepository.findByUserId(userId);
+
+        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+
+        UserRoleEntity userRole = userRoleRepository.findByUser(user);
+        String roleName = userRole.getRoleId().getName();
+        boolean isAdminOrEditor = UserRole.ADMIN.getRoleName().equals(roleName) || UserRole.EDITOR.getRoleName().equals(roleName);
+        if (!isAdminOrEditor) throw new CustomException(ErrorCode.NOT_DESERVE_ADD_NOTICE);
+
         List<DictionaryDto> dtos = excel.getDictionaryDto();
 
         dictionaryRepository.deleteAllInBatch();
