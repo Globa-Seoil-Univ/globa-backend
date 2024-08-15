@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import org.y2k2.globa.dto.DummyImageResponseDto;
+import org.y2k2.globa.dto.ResponseDummyImageDto;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
@@ -38,7 +38,7 @@ public class DummyImageController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "이미지 추가 성공",
-                            content = @Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = DummyImageResponseDto.class))
+                            content = @Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ResponseDummyImageDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
@@ -64,7 +64,7 @@ public class DummyImageController {
         }
         if (file.isEmpty()) throw new CustomException(ErrorCode.REQUIRED_IMAGE);
 
-        DummyImageResponseDto responseDto = dummyImageService.addDummyImage(accessToken, file);
+        ResponseDummyImageDto responseDto = dummyImageService.addDummyImage(accessToken, file);
         return ResponseEntity.ok().body(responseDto);
     }
 }

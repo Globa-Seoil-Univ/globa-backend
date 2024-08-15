@@ -18,7 +18,7 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.util.backoff.BackOff;
 import org.springframework.util.backoff.FixedBackOff;
-import org.y2k2.globa.dto.KafkaResponseDto;
+import org.y2k2.globa.dto.ResponseKafkaDto;
 
 import java.net.SocketTimeoutException;
 import java.util.HashMap;
@@ -42,7 +42,7 @@ public class KafkaConsumerConfig {
     private Long maxAttempts;
 
     @Bean
-    public ConsumerFactory<String, KafkaResponseDto> consumerFactory() {
+    public ConsumerFactory<String, ResponseKafkaDto> consumerFactory() {
         Map<String, Object> consumerProperties = new HashMap<>();
         consumerProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
@@ -51,15 +51,15 @@ public class KafkaConsumerConfig {
         consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
 
-        JsonDeserializer<KafkaResponseDto> deserializer = new JsonDeserializer<>(KafkaResponseDto.class, false);
-        ErrorHandlingDeserializer<KafkaResponseDto> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(deserializer);
+        JsonDeserializer<ResponseKafkaDto> deserializer = new JsonDeserializer<>(ResponseKafkaDto.class, false);
+        ErrorHandlingDeserializer<ResponseKafkaDto> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(deserializer);
 
         return new DefaultKafkaConsumerFactory<>(consumerProperties, new StringDeserializer(), errorHandlingDeserializer);
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, KafkaResponseDto> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, KafkaResponseDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, ResponseKafkaDto> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, ResponseKafkaDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         factory.setConsumerFactory(consumerFactory());
         factory.setCommonErrorHandler(errorHandler());

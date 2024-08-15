@@ -342,7 +342,7 @@ public class RecordService {
 
         recordRepository.save(recordEntity);
 
-        kafkaProducer.send("audio-analyze", "analyze", new KafkaRequestDto(recordEntity.getRecordId(), userEntity.getUserId()));
+        kafkaProducer.send("audio-analyze", "analyze", new RequestKafkaDto(recordEntity.getRecordId(), userEntity.getUserId()));
 
         return HttpStatus.CREATED;
     }

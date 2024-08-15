@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
-import org.y2k2.globa.dto.KafkaResponseDto;
+import org.y2k2.globa.dto.ResponseKafkaDto;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.repository.*;
 
@@ -31,7 +31,7 @@ public class KafkaService {
     private final NotificationRepository notificationRepository;
 
     @Transactional
-    public void success(KafkaResponseDto dto) {
+    public void success(ResponseKafkaDto dto) {
         boolean isValid = true;
         long userId = dto.getUserId();
         long recordId = dto.getRecordId();
@@ -95,7 +95,7 @@ public class KafkaService {
         sendNotification("업로드 성공", record.getTitle() + "의 업로드 성공하였습니다.", user);
     }
 
-    public void failed(KafkaResponseDto dto) {
+    public void failed(ResponseKafkaDto dto) {
         log.error("Failed to upload and userId: {}, recordId: {}, dto: {}", dto.getUserId(), dto.getRecordId(), dto.getMessage());
 
         long userId = dto.getUserId();

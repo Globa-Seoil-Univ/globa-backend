@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @AllArgsConstructor
-public class NoticeAddRequestDto {
+public class RequestNoticeAddDto {
     @NotBlank(message = "You must request title field")
     private final String title;
     @NotBlank(message = "You must request content field")

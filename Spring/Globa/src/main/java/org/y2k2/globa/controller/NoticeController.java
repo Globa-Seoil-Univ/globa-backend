@@ -13,10 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.y2k2.globa.dto.NoticeAddRequestDto;
-import org.y2k2.globa.dto.NoticeDetailResponseDto;
-import org.y2k2.globa.dto.NoticeIntroResponseDto;
-import org.y2k2.globa.dto.ResponseInquiryDto;
+import org.y2k2.globa.dto.RequestNoticeAddDto;
+import org.y2k2.globa.dto.ResponseNoticeDetailDto;
+import org.y2k2.globa.dto.ResponseNoticeIntroDto;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
@@ -41,7 +40,7 @@ public class NoticeController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "공지사항 조회 성공",
-                            content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = NoticeIntroResponseDto.class)))
+                            content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = ResponseNoticeIntroDto.class)))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
@@ -69,7 +68,7 @@ public class NoticeController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "공지사항 상세 조회 성공",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = NoticeDetailResponseDto.class))
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseNoticeDetailDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
@@ -126,7 +125,7 @@ public class NoticeController {
             }
     )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> addNotice(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken, @Valid @ModelAttribute final NoticeAddRequestDto dto) {
+    public ResponseEntity<?> addNotice(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken, @Valid @ModelAttribute final RequestNoticeAddDto dto) {
         if (accessToken == null) {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }

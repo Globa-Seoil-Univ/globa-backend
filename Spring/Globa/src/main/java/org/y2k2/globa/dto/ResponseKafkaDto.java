@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class KafkaResponseDto {
+public class ResponseKafkaDto {
     private long recordId = 0;
     private long userId = 0;
     private String message;

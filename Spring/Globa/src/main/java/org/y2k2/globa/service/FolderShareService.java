@@ -33,7 +33,7 @@ public class FolderShareService {
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
 
-    public FolderShareUserResponseDto getShares(Long folderId, Long userId, int page, int count) {
+    public ResponseFolderShareUserDto getShares(Long folderId, Long userId, int page, int count) {
         FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId);
 
         UserEntity user = userRepository.findByUserId(userId);
@@ -52,7 +52,7 @@ public class FolderShareService {
                 .map(FolderShareMapper.INSTANCE::toShareUserDto)
                 .collect(Collectors.toList());
 
-        return new FolderShareUserResponseDto(folderShareUserDtos, total);
+        return new ResponseFolderShareUserDto(folderShareUserDtos, total);
     }
 
     @Transactional

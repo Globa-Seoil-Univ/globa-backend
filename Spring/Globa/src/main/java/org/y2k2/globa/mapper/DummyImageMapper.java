@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-import org.y2k2.globa.dto.DummyImageResponseDto;
+import org.y2k2.globa.dto.ResponseDummyImageDto;
 import org.y2k2.globa.entity.DummyImageEntity;
 
 @Mapper
@@ -13,5 +13,5 @@ public interface DummyImageMapper {
 
     @Mapping(source = "imageId", target = "imageId")
     @Mapping(source = "imagePath", target = "path")
-    DummyImageResponseDto toResponseDto(DummyImageEntity imageEntity);
+    ResponseDummyImageDto toResponseDto(DummyImageEntity imageEntity);
 }

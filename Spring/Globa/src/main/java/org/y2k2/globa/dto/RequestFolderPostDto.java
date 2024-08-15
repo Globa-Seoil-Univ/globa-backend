@@ -4,10 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
-public class KafkaRequestDto {
-    private long recordId;
-    private long userId;
+public class RequestFolderPostDto {
+    private String title;
+    private List<ShareTarget> shareTarget;
 }

@@ -34,7 +34,7 @@ public class NoticeService {
     @Autowired
     private Bucket bucket;
 
-    public List<NoticeIntroResponseDto> getIntroNotices() {
+    public List<ResponseNoticeIntroDto> getIntroNotices() {
         List<NoticeEntity> noticeEntities = noticeRepository.findByOrderByCreatedTimeDesc(Limit.of(3));
 
         return noticeEntities.stream()
@@ -42,7 +42,7 @@ public class NoticeService {
                 .collect(Collectors.toList());
     }
 
-    public NoticeDetailResponseDto getNoticeDetail(Long noticeId) {
+    public ResponseNoticeDetailDto getNoticeDetail(Long noticeId) {
         NoticeEntity noticeEntity = noticeRepository.findByNoticeId(noticeId);
 
         if (noticeEntity == null) {
@@ -53,7 +53,7 @@ public class NoticeService {
     }
 
     @Transactional
-    public Long addNotice(Long userId, NoticeAddRequestDto dto) {
+    public Long addNotice(Long userId, RequestNoticeAddDto dto) {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) {
             throw new CustomException(ErrorCode.NOT_FOUND_USER);

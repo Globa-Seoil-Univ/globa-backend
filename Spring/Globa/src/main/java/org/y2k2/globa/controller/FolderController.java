@@ -16,7 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import org.y2k2.globa.dto.FolderDto;
-import org.y2k2.globa.dto.FolderPostRequestDto;
+import org.y2k2.globa.dto.RequestFolderPostDto;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
@@ -92,7 +92,7 @@ public class FolderController {
     )
     @PostMapping
     public ResponseEntity<?> postFolder(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
-                                        @RequestBody FolderPostRequestDto request){
+                                        @RequestBody RequestFolderPostDto request){
 
 
         if ( accessToken == null )

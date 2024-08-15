@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.y2k2.globa.dto.FolderShareUserResponseDto;
+import org.y2k2.globa.dto.ResponseFolderShareUserDto;
 import org.y2k2.globa.dto.ResponseRecordsByFolderDto;
 import org.y2k2.globa.dto.Role;
 import org.y2k2.globa.exception.CustomException;
@@ -39,7 +39,7 @@ public class FolderShareController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "공유된 사용자 조회 완료",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = FolderShareUserResponseDto.class))
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseFolderShareUserDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
@@ -70,7 +70,7 @@ public class FolderShareController {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }
         long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-        FolderShareUserResponseDto folderShareUserResponseDto = folderShareService.getShares(folderId, userId, page, count);
+        ResponseFolderShareUserDto folderShareUserResponseDto = folderShareService.getShares(folderId, userId, page, count);
         return ResponseEntity.ok().body(folderShareUserResponseDto);
     }
 
