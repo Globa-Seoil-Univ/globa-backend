@@ -42,8 +42,7 @@ public class CommentService {
         SectionEntity section = validateSection(request.getSectionId(), request.getRecordId(), request.getFolderId());
         validateFolderShare(section, user);
 
-        HighlightEntity highlight = highlightRepository.findByHighlightId(request.getHighlightId());
-        if (highlight == null) throw new CustomException(ErrorCode.NOT_FOUND_HIGHLIGHT);
+        HighlightEntity highlight = validateHighlight(request.getHighlightId());
 
         Pageable pageable = PageRequest.of(page - 1, count);
         Page<CommentEntity> commentEntityPage = commentRepository.findByHighlightAndParentIsNullOrderByCreatedTimeDescCommentIdDesc(highlight, pageable);
@@ -61,9 +60,7 @@ public class CommentService {
 
         SectionEntity section = validateSection(request.getSectionId(), request.getRecordId(), request.getFolderId());
         validateFolderShare(section, user);
-
-        HighlightEntity highlight = highlightRepository.findByHighlightId(request.getHighlightId());
-        if (highlight == null) throw new CustomException(ErrorCode.NOT_FOUND_HIGHLIGHT);
+        validateHighlight(request.getHighlightId());
 
         CommentEntity parent = commentRepository.findByCommentId(request.getParentId());
         if (parent == null) throw new CustomException(ErrorCode.NOT_FOUND_PARENT_COMMENT);
@@ -183,7 +180,7 @@ public class CommentService {
 
     private UserEntity validateUser(long userId) {
         UserEntity user = userRepository.findByUserId(userId);
-        if (user == null) throw new CustomException(ErrorCode.INVALID_TOKEN);
+        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         return user;

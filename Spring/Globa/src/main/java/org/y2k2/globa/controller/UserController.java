@@ -94,6 +94,7 @@ public class UserController {
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.ACTIVE_REFRESH_TOKEN, ref = SwaggerErrorCode.ACTIVE_REFRESH_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.NOT_MATCH_REFRESH_TOKEN, ref = SwaggerErrorCode.NOT_MATCH_REFRESH_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_REQUEST_TOKEN, ref = SwaggerErrorCode.REQUIRED_REQUEST_TOKEN_VALUE),

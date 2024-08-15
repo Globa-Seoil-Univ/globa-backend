@@ -451,6 +451,7 @@ public class RecordService {
         if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
         if (record == null) throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
         if (!record.getFolder().getFolderId().equals(folderId)) throw new CustomException(ErrorCode.MISMATCH_RECORD_FOLDER);
+        if (!record.getUser().getUserId().equals(userId)) throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
 
         LocalDateTime dateTime = CustomTimestamp.toLocalDateTime(dto.getCreatedTime());
         StudyEntity study = studyRepository.findByCreatedTime(dateTime)

@@ -36,7 +36,13 @@ public class DictionaryService {
     private final DictionaryRepository dictionaryRepository;
 
     @Transactional
-    public ResponseDictionaryDto getDictionary(String keyword) {
+    public ResponseDictionaryDto getDictionary(String accessToken, String keyword) {
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        UserEntity user = userRepository.findByUserId(userId);
+
+        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+
         List<DictionaryEntity> dtos = dictionaryRepository.findTop10ByWordStartingWithOrEngWordStartingWithOrderByCreatedTimeAsc(keyword, keyword);
         return new ResponseDictionaryDto(dtos.stream()
                 .map(DictionaryMapper.INSTANCE::toDictionaryDto)
@@ -54,7 +60,7 @@ public class DictionaryService {
         UserRoleEntity userRole = userRoleRepository.findByUser(user);
         String roleName = userRole.getRoleId().getName();
         boolean isAdminOrEditor = UserRole.ADMIN.getRoleName().equals(roleName) || UserRole.EDITOR.getRoleName().equals(roleName);
-        if (!isAdminOrEditor) throw new CustomException(ErrorCode.NOT_DESERVE_ADD_NOTICE);
+        if (!isAdminOrEditor) throw new CustomException(ErrorCode.NOT_DESERVE_DICTIONARY);
 
         List<DictionaryDto> dtos = excel.getDictionaryDto();
 

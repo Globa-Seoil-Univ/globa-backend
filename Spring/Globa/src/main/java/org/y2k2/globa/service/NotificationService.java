@@ -26,7 +26,6 @@ public class NotificationService {
     public ResponseNotificationDto getNotifications(long userId, int count, int page) {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-
         if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         Pageable pageable = PageRequest.of(page - 1, count);

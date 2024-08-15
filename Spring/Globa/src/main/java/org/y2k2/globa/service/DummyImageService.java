@@ -12,10 +12,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import org.y2k2.globa.dto.DummyImageResponseDto;
 import org.y2k2.globa.entity.DummyImageEntity;
+import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.mapper.DummyImageMapper;
 import org.y2k2.globa.repository.DummyImageRepository;
+import org.y2k2.globa.repository.UserRepository;
+import org.y2k2.globa.util.JwtTokenProvider;
 
 import java.util.Date;
 
@@ -24,17 +27,24 @@ import java.util.Date;
 public class DummyImageService {
     @Autowired
     private Bucket bucket;
-    private final String dummyPath = "dummies";
+    private final JwtTokenProvider jwtTokenProvider;
 
+    private final UserRepository userRepository;
     private final DummyImageRepository dummyImageRepository;
 
     @Transactional
-    public DummyImageResponseDto addDummyImage(MultipartFile file) {
+    public DummyImageResponseDto addDummyImage(String accessToken, MultipartFile file) {
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        UserEntity user = userRepository.findByUserId(userId);
+        if (userId == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+
         long current = new Date().getTime();
         long size = file.getSize();
         String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());
         String mimeType = file.getContentType();
 
+        String dummyPath = "dummies";
         String path = dummyPath + "/" + current + "." + extension;
 
         try {
