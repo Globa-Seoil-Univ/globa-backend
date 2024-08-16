@@ -28,4 +28,14 @@ public class NotificationController {
 
         return ResponseEntity.ok().body(notificationService.getNotifications(userId, count, page));
     }
+
+    @GetMapping("/notification/unread/check")
+    public ResponseEntity<?> getUnreadNotifications(
+            @RequestHeader(value = "Authorization") String accessToken
+        ) {
+        if (accessToken == null) {throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
+        }
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        return ResponseEntity.ok().body(notificationService.getUnreadNotification(userId));
+    }
 }

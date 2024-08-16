@@ -22,7 +22,7 @@ public class UserRoleEntity {
     private UserEntity user;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "role_id", referencedColumnName = "role_id")
     private RoleEntity roleId;
 }

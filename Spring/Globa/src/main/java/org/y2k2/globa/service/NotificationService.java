@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.y2k2.globa.dto.NotificationDto;
 import org.y2k2.globa.dto.ResponseNotificationDto;
+import org.y2k2.globa.dto.ResponseUnreadNotificationDto;
 import org.y2k2.globa.entity.NotificationEntity;
 import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.exception.CustomException;
@@ -39,4 +40,18 @@ public class NotificationService {
 
         return new ResponseNotificationDto(dtos, total);
     }
+
+    public ResponseUnreadNotificationDto getUnreadNotification(long userId) {
+        UserEntity user = userRepository.findByUserId(userId);
+        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+
+        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+
+        Long hasUnread = notificationRepository.countByUserUserIdAndIsRead(userId, false);
+
+        return new ResponseUnreadNotificationDto(hasUnread > 0);
+    }
+
+
+
 }
