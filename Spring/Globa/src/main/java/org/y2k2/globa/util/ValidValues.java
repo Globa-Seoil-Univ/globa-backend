@@ -8,4 +8,5 @@ import java.util.Set;
 public class ValidValues {
 
     public static Set<String> validSnsKinds = Set.of("1001","1002","1003","1004");
+    public static Set<String> validNotificationTypes = Set.of("a","n","s","r");
 }

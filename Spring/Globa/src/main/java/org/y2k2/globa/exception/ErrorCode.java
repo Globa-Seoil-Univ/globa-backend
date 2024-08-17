@@ -35,6 +35,8 @@ public enum ErrorCode {
     REQUIRED_NOTICE_ID(HttpStatus.BAD_REQUEST, "Must Be Requested To Notice Id ", 40050),
     NOFI_POST_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Notification Value Not Allowed Empty ! ", 40051),
     SURVEY_POST_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Survey Value Not Allowed Empty ! ", 40052),
+    NOFI_TYPE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Notification Type only 'a','n','s',r' ! ", 40053),
+    REQUIRED_NOTIFICATION_ID(HttpStatus.BAD_REQUEST, "Must Be Requested To Notification Id ", 40054),
 
     NOT_PARENT_COMMENT(HttpStatus.BAD_REQUEST, "Parent id exists in the requested comment id ", 40060),
 

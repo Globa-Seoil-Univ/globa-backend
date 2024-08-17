@@ -8,10 +8,13 @@ import org.y2k2.globa.entity.FolderShareEntity;
 import org.y2k2.globa.entity.NotificationEntity;
 import org.y2k2.globa.entity.UserEntity;
 
+import java.util.List;
+
 public interface NotificationRepository extends JpaRepository<NotificationEntity, Long> {
     NotificationEntity findByFolderFolderIdAndFolderShareShareIdAndToUserUserId(long folderId, long folderShareId, long userId);
 
     Page<NotificationEntity> findAllByToUserOrTypeIdInOrderByCreatedTimeDesc(Pageable pageable, UserEntity user, char[] typeIds);
 
-    Long countByUserUserIdAndIsRead(long userId, boolean isRead);
+    Long countByToUserUserIdAndIsRead(long userId, boolean isRead);
+    List<NotificationEntity> findAllByToUserUserIdAndIsReadAndTypeIdIn(long userId, boolean isRead, List<String> types);
 }
