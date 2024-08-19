@@ -74,8 +74,8 @@ public class NotificationController {
         return ResponseEntity.ok().body(notificationService.getCountUnreadNotification(userId));
     }
 
-    @GetMapping("/{notification_id}")
-    public ResponseEntity<?> getCountUnreadNotifications(
+    @PostMapping("/{notification_id}")
+    public ResponseEntity<?> postNotificationRead(
             @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable(value="notification_id") Long notificationId
     ) {
@@ -87,8 +87,29 @@ public class NotificationController {
 
         long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
-        return ResponseEntity.ok().body(notificationService.getCountUnreadNotification(userId));
+        notificationService.postNotificationRead(userId,notificationId);
+
+        return ResponseEntity.ok().body("");
     }
+
+    @DeleteMapping("/{notification_id}")
+    public ResponseEntity<?> deleteNotification(
+            @RequestHeader(value = "Authorization") String accessToken,
+            @PathVariable(value="notification_id") Long notificationId
+    ) {
+        if (accessToken == null)
+            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
+
+        if (notificationId == null || notificationId < 0)
+            throw new CustomException(ErrorCode.REQUIRED_NOTIFICATION_ID);
+
+        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+
+        notificationService.deleteNotification(userId,notificationId);
+
+        return ResponseEntity.ok().body("");
+    }
+
 
 
 }
