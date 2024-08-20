@@ -17,7 +17,7 @@ import org.y2k2.globa.service.KafkaService;
 public class KafkaConsumer {
     private final KafkaService kafkaService;
 
-    @KafkaListener(topics = "response", groupId = "globa_python_group")
+    @KafkaListener(topics = "response", groupId = "globa_audio_group")
     public void listen(ConsumerRecord<String, ResponseKafkaDto> record, Acknowledgment acknowledgment) {
         try {
             String key = record.key();

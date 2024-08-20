@@ -57,6 +57,10 @@ public class RecordService {
 
     @Value("${firebase.bucket-path}")
     private String firebaseBucketPath;
+    @Value("${kafka.topic.audio}")
+    private String topic;
+    @Value("${kafka.topic.audio.key}")
+    private String topicKey;
 
 
     public ResponseRecordsByFolderDto getRecords(String accessToken, Long folderId, int page, int count){
@@ -342,7 +346,7 @@ public class RecordService {
 
         recordRepository.save(recordEntity);
 
-        kafkaProducer.send("audio-analyze", "analyze", new RequestKafkaDto(recordEntity.getRecordId(), userEntity.getUserId()));
+        kafkaProducer.send(topic, topicKey, new RequestKafkaDto(recordEntity.getRecordId(), userEntity.getUserId()));
 
         return HttpStatus.CREATED;
     }
