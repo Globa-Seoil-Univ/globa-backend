@@ -29,7 +29,6 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-
     @Autowired
     private final Bucket bucket;
 

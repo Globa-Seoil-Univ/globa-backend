@@ -70,9 +70,11 @@ public class KafkaConsumerConfig {
     @Bean
     public DefaultErrorHandler errorHandler() {
         BackOff fixedBackOff = new FixedBackOff(interval, maxAttempts);
+
         DefaultErrorHandler errorHandler = new DefaultErrorHandler((consumerRecord, e) -> {
             log.error("Failed to process message: " + consumerRecord.value() + " with error: " + e.getMessage());
         }, fixedBackOff);
+
         errorHandler.addRetryableExceptions(SocketTimeoutException.class);
         errorHandler.addNotRetryableExceptions(NullPointerException.class);
         errorHandler.addNotRetryableExceptions(JsonParseException.class);
