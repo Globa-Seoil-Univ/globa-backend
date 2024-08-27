@@ -35,6 +35,8 @@ public enum ErrorCode {
     REQUIRED_NOTICE_ID(HttpStatus.BAD_REQUEST, "Must Be Requested To Notice Id ", 40050),
     NOFI_POST_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Notification Value Not Allowed Empty ! ", 40051),
     SURVEY_POST_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Survey Value Not Allowed Empty ! ", 40052),
+    NOFI_TYPE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Notification Type only 'a','n','s',r' ! ", 40053),
+    REQUIRED_NOTIFICATION_ID(HttpStatus.BAD_REQUEST, "Must Be Requested To Notification Id ", 40054),
 
     NOT_PARENT_COMMENT(HttpStatus.BAD_REQUEST, "Parent id exists in the requested comment id ", 40060),
 
@@ -53,15 +55,6 @@ public enum ErrorCode {
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Access Token Invalid", 40110),
     SIGNATURE(HttpStatus.UNAUTHORIZED, "Not Matched Token", 40120),
     EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED,  "Refresh Token Expired ! ", 40130),
-    MISMATCH_INQUIRY_OWNER(HttpStatus.UNAUTHORIZED, "This Inquiry isn't Your Own", 40140),
-    MISMATCH_FOLDER_OWNER(HttpStatus.UNAUTHORIZED, "This Folder isn't Your Own", 40141),
-    MISMATCH_COMMENT_OWNER(HttpStatus.UNAUTHORIZED, "This Comment isn't Your Own", 40142),
-    MISMATCH_NOFI_OWNER(HttpStatus.UNAUTHORIZED, "Not Matched Owner !", 40143),
-    MISMATCH_ANALYSIS_OWNER(HttpStatus.UNAUTHORIZED, "Not Matched Analysis Owner !", 40144),
-    MISMATCH_RENAME_OWNER(HttpStatus.UNAUTHORIZED, "Not Matched Name Owner !", 40145),
-    MISMATCH_QUIZ_RECORD_ID(HttpStatus.UNAUTHORIZED, "Not Matched Record Id ( Quiz not included this record ) !", 40146),
-    MISMATCH_RECORD_OWNER(HttpStatus.UNAUTHORIZED, "Not Matched Record Owner !", 40147),
-    MISMATCH_RECORD_FOLDER(HttpStatus.UNAUTHORIZED, "Not Matched Record Included Folder !", 40148),
 
 
     /* 403 FORBIDDEN : 잘못된 접근 */
@@ -71,7 +64,16 @@ public enum ErrorCode {
     NOT_DESERVE_MODIFY_INVITATION(HttpStatus.FORBIDDEN,"Can't change someone's invitation",40322),
     NOT_DESERVE_POST_COMMENT(HttpStatus.FORBIDDEN,"You aren't authorized to post comments",40323),
     INVALID_TOKEN_USER(HttpStatus.FORBIDDEN, "Invalid Token User !", 40330),
-
+    MISMATCH_INQUIRY_OWNER(HttpStatus.UNAUTHORIZED, "This Inquiry isn't Your Own", 40340),
+    MISMATCH_FOLDER_OWNER(HttpStatus.UNAUTHORIZED, "This Folder isn't Your Own", 40341),
+    MISMATCH_COMMENT_OWNER(HttpStatus.UNAUTHORIZED, "This Comment isn't Your Own", 40342),
+    MISMATCH_NOFI_OWNER(HttpStatus.UNAUTHORIZED, "Not Matched Owner !", 40343),
+    MISMATCH_ANALYSIS_OWNER(HttpStatus.UNAUTHORIZED, "Not Matched Analysis Owner !", 40344),
+    MISMATCH_RENAME_OWNER(HttpStatus.UNAUTHORIZED, "Not Matched Name Owner !", 40345),
+    MISMATCH_QUIZ_RECORD_ID(HttpStatus.UNAUTHORIZED, "Not Matched Record Id ( Quiz not included this record ) !", 40346),
+    MISMATCH_RECORD_OWNER(HttpStatus.UNAUTHORIZED, "Not Matched Record Owner !", 40347),
+    MISMATCH_RECORD_FOLDER(HttpStatus.UNAUTHORIZED, "Not Matched Record Included Folder !", 40348),
+    MISMATCH_NOTIFICATION_OWNER(HttpStatus.UNAUTHORIZED, "Not Matched Notification Owner !", 40349),
 
 
     /* 404 NOT_FOUND : 값이 없음 */
@@ -81,6 +83,7 @@ public enum ErrorCode {
     NOT_FOUND_TARGET_USER(HttpStatus.NOT_FOUND, " Not Found Target User ! ", 40412),
     NOT_FOUND_INQUIRY(HttpStatus.NOT_FOUND, " Not Found Inquiry ! ", 40420),
     NOT_FOUND_NOTICE(HttpStatus.NOT_FOUND, " Not Found Notice ! ", 40430),
+    NOT_FOUND_NOTIFICATION(HttpStatus.NOT_FOUND, " Not Found Notification ! ", 40431),
     NOT_FOUND_ANSWER(HttpStatus.NOT_FOUND, " Not Found ANSWER ! ", 40440),
     NOT_FOUND_FOLDER(HttpStatus.NOT_FOUND, " Not Found Folder ! ", 40450),
     NOT_FOUND_ACCESSIBLE_FOLDER(HttpStatus.NOT_FOUND, " Not Found Accessible Folder ! ", 40451),
@@ -103,6 +106,7 @@ public enum ErrorCode {
     FOLDER_NAME_DUPLICATED(HttpStatus.CONFLICT, "Folder Name Duplicated ! ", 40920),
     INQUIRY_ANSWER_DUPLICATED(HttpStatus.CONFLICT, "Answer Duplicated ! ", 40930),
     SHARE_USER_DUPLICATED(HttpStatus.CONFLICT, "This user has already been shared or sent a share request ", 40940),
+    NOTIFICATION_READ_DUPLICATED(HttpStatus.CONFLICT, "Read History Duplicated ! ", 40950),
 
     /* 500 SERVER ERROR : 서버 단 에러 */
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error ! ", 500),
