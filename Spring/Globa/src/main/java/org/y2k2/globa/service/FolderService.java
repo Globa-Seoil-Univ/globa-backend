@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 public class FolderService {
     private final JwtTokenProvider jwtTokenProvider;
     private final FolderShareService folderShareService;
-    private final JwtUtil jwtUtil;
 
     public final UserRepository userRepository;;
     public final StudyRepository studyRepository;
@@ -52,7 +51,6 @@ public class FolderService {
 
 
     public List<FolderDto> getFolders(String accessToken, int page, int count){
-
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
@@ -78,7 +76,6 @@ public class FolderService {
         saveFolderEntity.setTitle(userEntity.getName() + "의 기본 폴더");
         saveFolderEntity.setCreatedTime(LocalDateTime.now());
 
-
         FolderEntity savedEntity = folderRepository.save(saveFolderEntity);
 
 
@@ -89,7 +86,6 @@ public class FolderService {
         saveShareEntity.setTargetUser(userEntity);
 
         folderShareRepository.save(saveShareEntity);
-
 
         try {
             String folderPath = "folders/" + savedEntity.getFolderId() + "/";
@@ -252,23 +248,21 @@ public class FolderService {
             throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
         }
 
-        if(folderEntity == defaultFolderEntity)
+        if(folderEntity == defaultFolderEntity) {
             throw new CustomException(ErrorCode.FOLDER_DELETE_BAD_REQUEST);
-
+        }
 
         Iterable<Blob> blobs = bucket.list(Storage.BlobListOption.prefix("folders/" + folderId)).iterateAll();
-        if(blobs == null ) throw new CustomException(ErrorCode.NOT_FOUND_FOLDER_FIREBASE);
+        if(blobs == null) throw new CustomException(ErrorCode.NOT_FOUND_FOLDER_FIREBASE);
 
-        try{
+        try {
             for (Blob blob : blobs) {
                 blob.delete();
             }
             folderRepository.delete(folderEntity);
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new CustomException(ErrorCode.FAILED_FOLDER_DELETE);
         }
-
-
 
         return HttpStatus.OK;
     }

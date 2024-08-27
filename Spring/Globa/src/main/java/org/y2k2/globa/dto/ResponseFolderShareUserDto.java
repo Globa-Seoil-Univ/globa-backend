@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-public class FolderPostRequestDto {
-    private String title;
-    private List<ShareTarget> shareTarget;
+public class ResponseFolderShareUserDto {
+    private final List<FolderShareUserDto> users;
+    private Long total;
 }

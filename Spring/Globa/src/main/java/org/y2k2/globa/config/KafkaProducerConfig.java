@@ -8,7 +8,7 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import org.y2k2.globa.dto.KafkaRequestDto;
+import org.y2k2.globa.dto.RequestKafkaDto;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +18,7 @@ public class KafkaProducerConfig {
     private String bootstrapServers;
 
     @Bean
-    public ProducerFactory<String, KafkaRequestDto> producerFactory() {
+    public ProducerFactory<String, RequestKafkaDto> producerFactory() {
         Map<String, Object> producerProperties = new HashMap<>();
         producerProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -28,7 +28,7 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, KafkaRequestDto> kafkaTemplate() {
+    public KafkaTemplate<String, RequestKafkaDto> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 }

@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session
 
-from util.database import get_session
 from util.open_ai import OpenAIUtil
 
 

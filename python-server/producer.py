@@ -8,7 +8,6 @@ from util.log import Logger
 class Producer:
     broker = ""
     topic = ""
-    group_id = ""
     producer = None
     logger = None
 

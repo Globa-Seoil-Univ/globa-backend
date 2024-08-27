@@ -2,7 +2,6 @@ from typing import List
 
 from util.whisper import WhisperManager, STTResults
 from util.storage import FirebaseStorageManager
-from util.database import get_session
 
 from re import sub
 

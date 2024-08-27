@@ -84,21 +84,13 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.REQUIRED_NAME_VALUE, createExample(SwaggerErrorCode.REQUIRED_NAME_VALUE, "사용자 이름은 필수입니다."));
         components.addExamples(SwaggerErrorCode.SNS_KIND_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.SNS_KIND_BAD_REQUEST_VALUE, "SNS 종류 ID는 1001 ~ 1004이어야 합니다."));
         components.addExamples(SwaggerErrorCode.NAME_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.NAME_BAD_REQUEST_VALUE, "이름은 32글자 이하이어야 합니다."));
+        components.addExamples(SwaggerErrorCode.MISMATCH_FOLDER_ID_VALUE, createExample(SwaggerErrorCode.NAME_BAD_REQUEST_VALUE, "요청한 Folder Id와 DB의 정보가 일치하지 않습니다."));
 
         // 401 Errors
         components.addExamples(SwaggerErrorCode.INVALID_TOKEN_VALUE, createExample(SwaggerErrorCode.INVALID_TOKEN_VALUE, "유효하지 않은 토큰입니다."));
         components.addExamples(SwaggerErrorCode.SIGNATURE_VALUE, createExample(SwaggerErrorCode.SIGNATURE_VALUE, "토큰 파싱에 실패하였습니다."));
         components.addExamples(SwaggerErrorCode.NOT_DESERVE_FOLDER_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_FOLDER_VALUE, "폴더 접근 권한이 없습니다."));
         components.addExamples(SwaggerErrorCode.EXPIRED_REFRESH_TOKEN_VALUE, createExample(SwaggerErrorCode.EXPIRED_REFRESH_TOKEN_VALUE, "만료된 갱신 토큰입니다."));
-        components.addExamples(SwaggerErrorCode.MISMATCH_INQUIRY_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_INQUIRY_OWNER_VALUE, "문의 작성자만 요청할 수 있습니다."));
-        components.addExamples(SwaggerErrorCode.MISMATCH_FOLDER_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_FOLDER_OWNER_VALUE, "폴더 소유자 요청할 수 있습니다."));
-        components.addExamples(SwaggerErrorCode.MISMATCH_COMMENT_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_COMMENT_OWNER_VALUE, "댓글 작성자만 요청할 수 있습니다."));
-        components.addExamples(SwaggerErrorCode.MISMATCH_NOFI_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_NOFI_OWNER_VALUE, "요청한 사용자와 토큰 정보가 일치하지 않습니다."));
-        components.addExamples(SwaggerErrorCode.MISMATCH_ANALYSIS_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_ANALYSIS_OWNER_VALUE, "요청한 사용자와 토큰 정보가 일치하지 않습니다."));
-        components.addExamples(SwaggerErrorCode.MISMATCH_RENAME_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_RENAME_OWNER_VALUE, "이름 변경을 위한 사용자와 토큰 정보가 일치하지 않습니다."));
-        components.addExamples(SwaggerErrorCode.MISMATCH_QUIZ_RECORD_ID_VALUE, createExample(SwaggerErrorCode.MISMATCH_QUIZ_RECORD_ID_VALUE, "퀴즈의 음성 ID와 요청한 음성 ID 정보가 일치하지 않습니다."));
-        components.addExamples(SwaggerErrorCode.MISMATCH_RECORD_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_RECORD_OWNER_VALUE, "음성 소유자만 요청할 수 있습니다."));
-        components.addExamples(SwaggerErrorCode.MISMATCH_RECORD_FOLDER_VALUE, createExample(SwaggerErrorCode.MISMATCH_RECORD_FOLDER_VALUE, "요청한 음성 파일은 해당 폴더에 속해있지 않습니다."));
 
         // 403 Errors
         components.addExamples(SwaggerErrorCode.NOT_NULL_ROLE_VALUE, createExample(SwaggerErrorCode.NOT_NULL_ROLE_VALUE, "사용자 권한이 존재하지 않습니다."));
@@ -106,7 +98,18 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE, "폴더 접근 권한이 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_DESERVE_MODIFY_INVITATION_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_MODIFY_INVITATION_VALUE, "초대 수정 권한이 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_DESERVE_POST_COMMENT_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_POST_COMMENT_VALUE, "댓글 작성 권한이 없습니다."));
+        components.addExamples(SwaggerErrorCode.NOT_DESERVE_FCM_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_FCM , "관리자 또는 편집자만 요청할 수 있습니다."));
+        components.addExamples(SwaggerErrorCode.NOT_DESERVE_FCM_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_DICTIONARY, "관리자 또는 편집자만 요청할 수 있습니다."));
         components.addExamples(SwaggerErrorCode.INVALID_TOKEN_USER_VALUE, createExample(SwaggerErrorCode.INVALID_TOKEN_USER_VALUE, "잘못된 토큰 사용자입니다."));
+        components.addExamples(SwaggerErrorCode.MISMATCH_INQUIRY_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_INQUIRY_OWNER_VALUE, "문의 작성자만 요청할 수 있습니다."));
+        components.addExamples(SwaggerErrorCode.MISMATCH_FOLDER_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_FOLDER_OWNER_VALUE, "폴더 소유자만 요청할 수 있습니다."));
+        components.addExamples(SwaggerErrorCode.MISMATCH_COMMENT_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_COMMENT_OWNER_VALUE, "댓글 작성자만 요청할 수 있습니다."));
+        components.addExamples(SwaggerErrorCode.MISMATCH_NOFI_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_NOFI_OWNER_VALUE, "요청한 사용자와 토큰 정보가 일치하지 않습니다."));
+        components.addExamples(SwaggerErrorCode.MISMATCH_ANALYSIS_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_ANALYSIS_OWNER_VALUE, "요청한 사용자와 토큰 정보가 일치하지 않습니다."));
+        components.addExamples(SwaggerErrorCode.MISMATCH_RENAME_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_RENAME_OWNER_VALUE, "이름 변경을 위한 사용자와 토큰 정보가 일치하지 않습니다."));
+        components.addExamples(SwaggerErrorCode.MISMATCH_QUIZ_RECORD_ID_VALUE, createExample(SwaggerErrorCode.MISMATCH_QUIZ_RECORD_ID_VALUE, "퀴즈의 음성 ID와 요청한 음성 ID 정보가 일치하지 않습니다."));
+        components.addExamples(SwaggerErrorCode.MISMATCH_RECORD_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_RECORD_OWNER_VALUE, "음성 소유자만 요청할 수 있습니다."));
+        components.addExamples(SwaggerErrorCode.MISMATCH_RECORD_FOLDER_VALUE, createExample(SwaggerErrorCode.MISMATCH_RECORD_FOLDER_VALUE, "요청한 음성 파일은 해당 폴더에 속해있지 않습니다."));
 
         // 404 Errors
         components.addExamples(SwaggerErrorCode.NOT_FOUND_USER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_USER_VALUE, "사용자를 찾을 수 없습니다."));
@@ -120,13 +123,13 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.NOT_FOUND_ORIGIN_FOLDER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_ORIGIN_FOLDER_VALUE, "원본 폴더를 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_TARGET_FOLDER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_TARGET_FOLDER_VALUE, "대상 폴더를 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_SHARE_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_SHARE_VALUE, "공유 초대를 찾을 수 없습니다."));
-        components.addExamples(SwaggerErrorCode.NOT_FOUND_FOLDER_FIREBASE_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_FOLDER_FIREBASE_VALUE, "폴더를 찾을 수 없습니다."));
+        components.addExamples(SwaggerErrorCode.NOT_FOUND_FOLDER_FIREBASE_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_FOLDER_FIREBASE_VALUE, "Firebase Storage에서 폴더를 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_HIGHLIGHT_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_HIGHLIGHT_VALUE, "하이라이트를 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_PARENT_COMMENT_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_PARENT_COMMENT_VALUE, "부모 댓글을 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_RECORD_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_RECORD_VALUE, "레코드를 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_ANALYSIS_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_ANALYSIS_VALUE, "분석을 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_QUIZ_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_QUIZ_VALUE, "퀴즈를 찾을 수 없습니다."));
-        components.addExamples(SwaggerErrorCode.NOT_FOUND_RECORD_FIREBASE_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_RECORD_FIREBASE_VALUE, "음성을 찾을 수 없습니다."));
+        components.addExamples(SwaggerErrorCode.NOT_FOUND_RECORD_FIREBASE_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_RECORD_FIREBASE_VALUE, "Firebase Storage에서 음성을 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_SECTION_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_SECTION_VALUE, "섹션을 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_COMMENT_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_COMMENT_VALUE, "댓글을 찾을 수 없습니다."));
 

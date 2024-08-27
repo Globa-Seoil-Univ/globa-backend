@@ -7,7 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
-import org.y2k2.globa.dto.KafkaResponseDto;
+import org.y2k2.globa.dto.ResponseKafkaDto;
 import org.y2k2.globa.service.KafkaService;
 
 @Slf4j
@@ -17,11 +17,11 @@ import org.y2k2.globa.service.KafkaService;
 public class KafkaConsumer {
     private final KafkaService kafkaService;
 
-    @KafkaListener(topics = "response", groupId = "globa_python_group")
-    public void listen(ConsumerRecord<String, KafkaResponseDto> record, Acknowledgment acknowledgment) {
+    @KafkaListener(topics = "response", groupId = "globa_audio_group")
+    public void listen(ConsumerRecord<String, ResponseKafkaDto> record, Acknowledgment acknowledgment) {
         try {
             String key = record.key();
-            KafkaResponseDto payload = record.value();
+            ResponseKafkaDto payload = record.value();
 
             long recordId = payload.getRecordId();
             long userId = payload.getUserId();
