@@ -41,6 +41,8 @@ public class UserService {
     public final SurveyRepository surveyRepository;
     public final FolderRepository folderRepository;
     public final RecordRepository recordRepository;
+    public final UserRoleRepository userRoleRepository;
+    public final RoleRepository roleRepository;
 
     public final FolderService folderService;
 
@@ -94,6 +96,15 @@ public class UserService {
             userEntity.setDeleted(false);
 
             postUserEntity = userRepository.save(userEntity);
+
+            UserRoleEntity userRoleEntity = new UserRoleEntity();
+            RoleEntity roleEntity = roleRepository.findByRoleId(4);
+
+
+            userRoleEntity.setUser(postUserEntity);
+            userRoleEntity.setRoleId(roleEntity);
+            userRoleRepository.save(userRoleEntity);
+
 
             folderService.postDefaultFolder(postUserEntity);
         }
