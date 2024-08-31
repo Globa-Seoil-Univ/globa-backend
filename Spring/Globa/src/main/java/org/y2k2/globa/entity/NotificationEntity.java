@@ -62,6 +62,11 @@ public class NotificationEntity {
     @JoinColumn(name = "inquiry_id", referencedColumnName = "inquiry_id")
     private InquiryEntity inquiry;
 
+
+    @Column(name = "is_read")
+    @ColumnDefault("false")
+    private Boolean isRead;
+
     @CreationTimestamp
     @Column(name = "created_time")
     private LocalDateTime createdTime;

@@ -33,10 +33,11 @@ public class FolderShareService {
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
 
-    public FolderShareUserResponseDto getShares(Long folderId, Long userId, int page, int count) {
+    public ResponseFolderShareUserDto getShares(Long folderId, Long userId, int page, int count) {
         FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId);
 
         UserEntity user = userRepository.findByUserId(userId);
+        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         if (folderEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_FOLDER);
@@ -51,7 +52,7 @@ public class FolderShareService {
                 .map(FolderShareMapper.INSTANCE::toShareUserDto)
                 .collect(Collectors.toList());
 
-        return new FolderShareUserResponseDto(folderShareUserDtos, total);
+        return new ResponseFolderShareUserDto(folderShareUserDtos, total);
     }
 
     @Transactional
@@ -113,7 +114,6 @@ public class FolderShareService {
 
         UserEntity user = userRepository.findByUserId(ownerId);
         if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
 
         FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId);
@@ -203,12 +203,13 @@ public class FolderShareService {
 
     private void checkValidation(FolderShareEntity folderShareEntity, Long folderId, Long targetId) {
         if (folderShareEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_SHARE);
-        if (!folderShareEntity.getFolder().getFolderId().equals(folderId)) throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
+        if (!folderShareEntity.getFolder().getFolderId().equals(folderId)) throw new CustomException(ErrorCode.MISMATCH_FOLDER_ID);
         if (folderShareEntity.getInvitationStatus().equals(String.valueOf(InvitationStatus.ACCEPT))) throw new CustomException(ErrorCode.INVITE_ACCEPT_BAD_REQUEST);
 
         UserEntity targetEntity = folderShareEntity.getTargetUser();
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
         if (!targetEntity.getUserId().equals(targetId)) throw new CustomException(ErrorCode.NOT_DESERVE_MODIFY_INVITATION);
+        if (targetEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
     }
 
     private void checkValidation(FolderEntity folderEntity, Long ownerId, Long targetId, UserEntity targetEntity) {

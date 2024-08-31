@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class DummyImageResponseDto {
+public class ResponseDummyImageDto {
     private final Long imageId;
     private final String path;
 }

@@ -4,12 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @AllArgsConstructor
-public class FolderShareUserResponseDto {
-    private final List<FolderShareUserDto> users;
-    private Long total;
+public class RequestKafkaDto {
+    private long recordId;
+    private long userId;
 }

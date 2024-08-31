@@ -14,6 +14,7 @@ load_dotenv()
 
 api_key = os.environ.get("openai-api-key")
 
+
 def chunk_string(text, chunk_size=15000):
     chunks = [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
     return chunks
@@ -106,7 +107,6 @@ class OpenAIUtil:
                 },
             }
         ]
-
 
     def __init__(self):
         self.logger = Logger(name="Open AI").logger
@@ -221,14 +221,10 @@ class OpenAIUtil:
 
             completion_json = json.loads(completion.choices[0].message.function_call.arguments)
 
-            # query = "INSERT INTO section (record_id, title, start_time, end_time) VALUES (%s, %s, %s, %s)"
-
             for section in completion_json['sections']:
                 if section:
                     section_entity = Section(record_id=record_id, title=section['subject'], start_time=section['start'], end_time=section['end'])
                     section_list.append(section_entity)
-
-            # responseContent.append(completion.choices[0].message.function_call.arguments)
 
             start_index = i + 1  # 다음 시작 인덱스 업데이트
 
@@ -236,8 +232,6 @@ class OpenAIUtil:
 
     # 위에서 분리된 섹션에 텍스트 전문을 할당해서 script 테이블에 insert
     def assign_text(self, stt_origin: List[STTResults], sections: List[Section]):
-        # sql = "SELECT section_id, start_time, end_time FROM section WHERE record_id = %s"
-        # insertQuery = "INSERT INTO script (section_id, text) VALUES (%s, %s)"
         assign_text_list = []
 
         start_index = 0
@@ -249,7 +243,6 @@ class OpenAIUtil:
                     if stt_origin[i].start <= section.end_time:
                         current_str += stt_origin[i].text  # 시간 범위 내의 텍스트 추가
                     elif current_str:  # 범위를 벗어나는 경우이며, current_str에 이미 텍스트가 있는 경우
-                        # cursor.execute(insertQuery, (section[0], current_str))
                         script_entity = Analysis(section_id=section.section_id, content=current_str)
                         assign_text_list.append(script_entity)
 
@@ -263,19 +256,12 @@ class OpenAIUtil:
                         start_index = i
                         current_str = ""
                 if current_str:  # 마지막으로 범위 내 텍스트가 남아 있는 경우 출력
-                    # cursor.execute(insertQuery, (section[0], current_str))
                     script_entity = Analysis(section_id=section.section_id, content=current_str)
                     assign_text_list.append(script_entity)
         return assign_text_list
 
     # section과 script를 불러와서 매칭시켜서, 요약하고, summary insert
     def get_summary(self, datas: List[Section]):
-        # sectionSql = "SELECT section_id, title FROM section WHERE record_id = %s"
-        # scriptSql = "SELECT text FROM script WHERE section_id = %s"
-
-        # cursorMySQL.execute(sectionSql, record_id)
-        # sections = cursorMySQL.fetchall()
-
         summary_list = []
         for data in datas:
             if data:
