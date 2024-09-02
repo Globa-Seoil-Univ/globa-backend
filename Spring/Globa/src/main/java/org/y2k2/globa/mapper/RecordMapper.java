@@ -3,13 +3,14 @@ package org.y2k2.globa.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.y2k2.globa.Projection.RecordSearchProjection;
 import org.y2k2.globa.dto.*;
-import org.y2k2.globa.entity.FolderEntity;
 import org.y2k2.globa.entity.RecordEntity;
+import org.y2k2.globa.entity.RecordSearchDto;
 
 import java.util.List;
 
-@Mapper
+@Mapper(uses = CustomTimestampMapper.class)
 public interface RecordMapper {
     RecordMapper INSTANCE = Mappers.getMapper(RecordMapper.class);
 
@@ -35,4 +36,11 @@ public interface RecordMapper {
     @Mapping(source = "keywords", target = "keywords")
     @Mapping(source = "recordEntity.createdTime", target = "createdTime")
     ResponseAllRecordDto toResponseAllRecordDto(RecordEntity recordEntity, Long folderId, List<ResponseKeywordDto> keywords);
+
+    @Mapping(source = "uploader", target = "uploader")
+    @Mapping(source = "folderId", target = "folderId")
+    @Mapping(source = "record.recordId", target = "recordId")
+    @Mapping(source = "record.title", target = "title")
+    @Mapping(source = "record.createdTime", target = "createdTime", qualifiedBy = { CustomTimestampTranslator.class, MapCreatedTime.class })
+    RecordSearchDto toResponseRecordSearch(Long folderId, RecordSearchProjection record, UserIntroDto uploader);
 }

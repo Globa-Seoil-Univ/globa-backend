@@ -4,7 +4,6 @@ import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 import org.y2k2.globa.dto.CommentDto;
 import org.y2k2.globa.dto.ReplyDto;
-import org.y2k2.globa.dto.ResponseCommentDto;
 import org.y2k2.globa.entity.CommentEntity;
 
 @Mapper(uses = CustomTimestampMapper.class)
@@ -30,13 +29,6 @@ public interface CommentMapper {
 
     @AfterMapping
     static void handleDeletedContent(@MappingTarget CommentDto dto, CommentEntity entity) {
-        if (entity.getDeletedTime() != null) {
-            dto.setContent("삭제된 댓글입니다");
-        }
-    }
-
-    @AfterMapping
-    static void handleDeletedContent(@MappingTarget ReplyDto dto, CommentEntity entity) {
         if (entity.getDeletedTime() != null) {
             dto.setContent("삭제된 댓글입니다");
         }

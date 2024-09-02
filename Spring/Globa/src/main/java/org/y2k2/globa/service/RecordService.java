@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
+import org.y2k2.globa.Projection.RecordSearchProjection;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.CustomException;
@@ -280,6 +281,23 @@ public class RecordService {
         return quizEntities.stream()
                 .map(QuizMapper.INSTANCE::toQuizDto)
                 .collect(Collectors.toList());
+    }
+
+    public ResponseRecordSearchDto searchRecord(String accessToken, String keyword, int page, int count) {
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+
+        Page<RecordSearchProjection> recordEntities = recordRepository.findAllSharedOrOwnedRecords(PageRequest.of(page - 1, count), userEntity.getUserId(), keyword);
+
+        return new ResponseRecordSearchDto(recordEntities.stream()
+                .map(record -> {
+                    UserIntroDto uploader = new UserIntroDto(record.getUserId(), record.getProfilePath(), record.getName());
+                    return RecordMapper.INSTANCE.toResponseRecordSearch(record.getFolderId(), record, uploader);
+                })
+                .toList(), recordEntities.getTotalElements());
     }
 
     public HttpStatus postQuiz(String accessToken, Long recordId, Long folderId, List<RequestQuizDto> quizs){
