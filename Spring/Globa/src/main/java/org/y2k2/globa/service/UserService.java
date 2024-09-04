@@ -94,19 +94,20 @@ public class UserService {
             userEntity.setEventNofi(requestUserPostDTO.getNotification());
             userEntity.setCreatedTime(LocalDateTime.now());
             userEntity.setDeleted(false);
-
+            System.out.println("1");
             postUserEntity = userRepository.save(userEntity);
-
+            System.out.println("2");
             UserRoleEntity userRoleEntity = new UserRoleEntity();
             RoleEntity roleEntity = roleRepository.findByRoleId(4);
-
+            System.out.println("3");
 
             userRoleEntity.setUser(postUserEntity);
             userRoleEntity.setRoleId(roleEntity);
             userRoleRepository.save(userRoleEntity);
-
+            System.out.println("4");
 
             folderService.postDefaultFolder(postUserEntity);
+            System.out.println("5");
         }
 
         JwtToken jwtToken = jwtTokenProvider.generateToken(postUserEntity.getUserId());
