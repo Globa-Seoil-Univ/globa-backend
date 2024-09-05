@@ -13,10 +13,9 @@ import java.util.List;
 
 public interface FolderShareRepository extends JpaRepository<FolderShareEntity, Long> {
     Page<FolderShareEntity> findByFolderOrderByCreatedTimeAsc(Pageable pageable, FolderEntity folder);
-    FolderShareEntity findFirstByTargetUserAndFolderFolderId(UserEntity user,Long folderId);
+    FolderShareEntity findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(UserEntity user,Long folderId, String status);
     FolderShareEntity findFirstByShareId(Long folderId);
-
-    List<FolderShareEntity> findFolderShareEntitiesByTargetUser(UserEntity user);
+    List<FolderShareEntity> findFolderShareEntitiesByTargetUserAndInvitationStatus(UserEntity user, String status);
   
     FolderShareEntity findByFolderAndTargetUser(FolderEntity folder, UserEntity user);
     @EntityGraph(value = "FolderShare.getFolderShareAndUser", attributePaths = {

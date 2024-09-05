@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.y2k2.globa.Projection.NotificationProjection;
+import org.y2k2.globa.Projection.NotificationUnReadCount;
 import org.y2k2.globa.dto.NotificationDto;
 import org.y2k2.globa.dto.ResponseNotificationDto;
 import org.y2k2.globa.dto.ResponseUnreadCountDto;
@@ -18,6 +20,8 @@ import org.y2k2.globa.mapper.NotificationMapper;
 import org.y2k2.globa.repository.NotificationReadRepository;
 import org.y2k2.globa.repository.NotificationRepository;
 import org.y2k2.globa.repository.UserRepository;
+import org.y2k2.globa.type.NotificationSort;
+import org.y2k2.globa.type.NotificationType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,34 +34,51 @@ public class NotificationService {
     private final NotificationReadRepository notificationReadRepository;
     private final UserRepository userRepository;
 
-    // a전체 n공지 s공유 r문서
-    private final List<String> TYPE_ALL = new ArrayList<>(Arrays.asList("1","2","3","4","5","6","7","8"));
-    private final List<String> TYPE_NOTICE = new ArrayList<>(Arrays.asList("1"));
-    private final List<String> TYPE_SHARE = new ArrayList<>(Arrays.asList("2","3","4","5"));
-    private final List<String> TYPE_RECORD = new ArrayList<>(Arrays.asList("6","7"));
-
-    public ResponseNotificationDto getNotifications(long userId, int count, int page) {
+    public ResponseNotificationDto getNotifications(long userId, int count, int page, NotificationSort sort) {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
-        Pageable pageable = PageRequest.of(page - 1, count);
-        Page<NotificationEntity> notificationEntityPage = notificationRepository.findAllByToUserOrTypeIdInOrderByCreatedTimeDesc(pageable, user, new char[]{'1'});
-        List<NotificationEntity> tempNotifications = notificationEntityPage.getContent();
-        long total = notificationEntityPage.getTotalElements();
-        List<NotificationEntity> notifications = new ArrayList<>();
-        for(NotificationEntity notification : tempNotifications){
-            NotificationReadEntity readEntity = notificationReadRepository.findByNotificationNotificationId(notification.getNotificationId());
-            if(readEntity == null)
-                notifications.add(notification);
-            else{
-                if(readEntity.getIsDeleted() && readEntity.getUser().getUserId().equals(userId)) {
-                    total--;
-                    continue;
-                }
-                notifications.add(notification);
-            }
+        boolean includeNotice = false;
+        boolean includeShare = false;
+        boolean includeInvite = false;
+        boolean includeRecord = false;
+        boolean includeInquiry = false;
+
+        switch (sort) {
+            case NOTICE:
+                includeNotice = true;
+                break;
+            case SHARE:
+                includeShare = true;
+                includeInvite = true;
+                break;
+            case INQUIRY:
+                includeInquiry = true;
+                break;
+            case RECORD:
+                includeRecord = true;
+                break;
+            default:
+                includeNotice = true;
+                includeShare = true;
+                includeInvite = true;
+                includeRecord = true;
+                includeInquiry = true;
         }
+
+        Pageable pageable = PageRequest.of(page - 1, count);
+        Page<NotificationProjection> notificationEntityPage = notificationRepository.findAllByToUserOrTypeIdInOrderByCreatedTimeDesc(
+                pageable,
+                user.getUserId(),
+                includeNotice,
+                includeInvite,
+                includeShare,
+                includeRecord,
+                includeInquiry
+        );
+        List<NotificationProjection> notifications = notificationEntityPage.getContent();
+        long total = notificationEntityPage.getTotalElements();
 
         List<NotificationDto> dtos = notifications.stream()
                 .map(NotificationMapper.INSTANCE::toResponseNotificationDto)
@@ -69,147 +90,128 @@ public class NotificationService {
     public ResponseUnreadNotificationDto getHasUnreadNotification(long userId) {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-
         if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
-        List<NotificationEntity> notificationEntities = notificationRepository.findAllByToUserUserId(userId);
-
-        Boolean hasUnread = false;
-
-        for (NotificationEntity notification : notificationEntities) {
-            NotificationReadEntity readEntity = notificationReadRepository.findByNotificationNotificationId(notification.getNotificationId());
-            if (readEntity == null) {
-                hasUnread = true;
-                break;
-            }
-        }
-
-
-        return new ResponseUnreadNotificationDto(hasUnread);
+        Long hasUnread = notificationRepository.existsByToUser(userId);
+        return new ResponseUnreadNotificationDto(hasUnread != 0);
     }
 
-    public ResponseNotificationDto getUnreadNotification(long userId, String type) {
-        UserEntity user = userRepository.findByUserId(userId);
-
-        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
-        List<NotificationEntity> notificationEntities = notificationRepository.findAllByToUserUserId(userId);
-
-        List<Long> notificationIds = new ArrayList<>();
-
-        for (NotificationEntity notification : notificationEntities) {
-            NotificationReadEntity readEntity = notificationReadRepository.findByNotificationNotificationId(notification.getNotificationId());
-            if (readEntity == null)
-                notificationIds.add(notification.getNotificationId());
-        }
-
-        switch (type)
-        {
-            case "a" :
-                notificationEntities = notificationRepository.findAllByNotificationIdInAndTypeIdIn(notificationIds,TYPE_ALL);
-                break;
-            case "n" :
-                notificationEntities = notificationRepository.findAllByNotificationIdInAndTypeIdIn(notificationIds,TYPE_NOTICE);
-                break;
-            case "s" :
-                notificationEntities = notificationRepository.findAllByNotificationIdInAndTypeIdIn(notificationIds,TYPE_SHARE);
-                break;
-            case "r" :
-                notificationEntities = notificationRepository.findAllByNotificationIdInAndTypeIdIn(notificationIds,TYPE_RECORD);
-                break;
-            default:
-                throw new CustomException(ErrorCode.NOFI_TYPE_BAD_REQUEST);
-        }
-
-        List<NotificationDto> dtos = notificationEntities.stream()
-                .map(NotificationMapper.INSTANCE::toResponseNotificationDto)
-                .toList();
-        long total = notificationEntities.size();
-
-        return new ResponseNotificationDto(dtos, total);
-    }
+//    public ResponseNotificationDto getUnreadNotification(long userId, String type) {
+//        UserEntity user = userRepository.findByUserId(userId);
+//        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+//        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+//
+//        List<NotificationEntity> notificationEntities = notificationRepository.findAllByToUserUserId(userId);
+//
+//        List<Long> notificationIds = new ArrayList<>();
+//
+//        for (NotificationEntity notification : notificationEntities) {
+//            NotificationReadEntity readEntity = notificationReadRepository.findByNotificationNotificationId(notification.getNotificationId());
+//            if (readEntity == null)
+//                notificationIds.add(notification.getNotificationId());
+//        }
+//
+//        switch (type)
+//        {
+//            case "a" :
+//                notificationEntities = notificationRepository.findAllByNotificationIdInAndTypeIdIn(notificationIds,TYPE_ALL);
+//                break;
+//            case "n" :
+//                notificationEntities = notificationRepository.findAllByNotificationIdInAndTypeIdIn(notificationIds,TYPE_NOTICE);
+//                break;
+//            case "s" :
+//                notificationEntities = notificationRepository.findAllByNotificationIdInAndTypeIdIn(notificationIds,TYPE_SHARE);
+//                break;
+//            case "r" :
+//                notificationEntities = notificationRepository.findAllByNotificationIdInAndTypeIdIn(notificationIds,TYPE_RECORD);
+//                break;
+//            default:
+//                throw new CustomException(ErrorCode.NOFI_TYPE_BAD_REQUEST);
+//        }
+//
+//        List<NotificationDto> dtos = notificationEntities.stream()
+//                .map(NotificationMapper.INSTANCE::toResponseNotificationDto)
+//                .toList();
+//        long total = notificationEntities.size();
+//
+//        return new ResponseNotificationDto(dtos, total);
+//    }
 
     public ResponseUnreadCountDto getCountUnreadNotification(long userId) {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-
         if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
-        List<NotificationEntity> notificationEntities = notificationRepository.findAllByToUserUserId(userId);
-        List<Long> notificationIds = new ArrayList<>();
+        NotificationUnReadCount notificationUnReadCount = notificationRepository.countByToUserUserId(userId);
+        Long total = notificationUnReadCount.getNoticeCount() +
+                notificationUnReadCount.getInviteCount() +
+                notificationUnReadCount.getShareCount() +
+                notificationUnReadCount.getAddUserCount() +
+                notificationUnReadCount.getRecordCount() +
+                notificationUnReadCount.getInquiryCount();
 
-        for (NotificationEntity notification : notificationEntities) {
-            NotificationReadEntity readEntity = notificationReadRepository.findByNotificationNotificationId(notification.getNotificationId());
-            if (readEntity == null)
-                notificationIds.add(notification.getNotificationId());
-        }
-
-        notificationEntities = notificationRepository.findAllByNotificationIdInAndTypeIdIn(notificationIds,TYPE_ALL);
-        long allCount = notificationEntities.size();
-        notificationEntities = notificationRepository.findAllByNotificationIdInAndTypeIdIn(notificationIds,TYPE_NOTICE);
-        long noticeCount = notificationEntities.size();
-        notificationEntities = notificationRepository.findAllByNotificationIdInAndTypeIdIn(notificationIds,TYPE_SHARE);
-        long shareCount = notificationEntities.size();
-        notificationEntities = notificationRepository.findAllByNotificationIdInAndTypeIdIn(notificationIds,TYPE_RECORD);
-        long documentCount = notificationEntities.size();
-
-
-        return new ResponseUnreadCountDto(allCount,noticeCount,shareCount,documentCount);
+        return new ResponseUnreadCountDto(
+                total,
+                notificationUnReadCount.getNoticeCount(),
+                notificationUnReadCount.getInviteCount() + notificationUnReadCount.getShareCount() + notificationUnReadCount.getAddUserCount(),
+                notificationUnReadCount.getRecordCount(),
+                notificationUnReadCount.getInquiryCount()
+        );
     }
 
     public void postNotificationRead(long userId, long notificationId) {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-
         if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         NotificationReadEntity notificationRead = notificationReadRepository.findByNotificationNotificationId(notificationId);
-        if(notificationRead != null ) throw new CustomException(ErrorCode.NOTIFICATION_READ_DUPLICATED);
+        if(notificationRead != null) throw new CustomException(ErrorCode.NOTIFICATION_READ_DUPLICATED);
 
         NotificationEntity notification = notificationRepository.findByNotificationId(notificationId);
         if(notification == null) throw new CustomException(ErrorCode.NOT_FOUND_NOTIFICATION);
-
-        if(notification.getToUser().getUserId() != userId) throw new CustomException(ErrorCode.MISMATCH_NOTIFICATION_OWNER);
-
-
 
         NotificationReadEntity readEntity = new NotificationReadEntity();
         readEntity.setNotification(notification);
         readEntity.setUser(user);
         readEntity.setIsDeleted(false);
+
         notificationReadRepository.save(readEntity);
 
-    }// 주인 에러, 충돌에러
+    }
+
     public void deleteNotification(long userId, long notificationId) {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-
         if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         NotificationEntity notification = notificationRepository.findByNotificationId(notificationId);
         if(notification == null) throw new CustomException(ErrorCode.NOT_FOUND_NOTIFICATION);
 
-        if(notification.getToUser().getUserId() != userId) throw new CustomException(ErrorCode.MISMATCH_NOTIFICATION_OWNER);
+        char type = notification.getTypeId();
+        if (
+                type == NotificationType.NOTICE.getTypeId() ||
+                type == NotificationType.SHARE_FOLDER_ADD_COMMENT.getTypeId() ||
+                type == NotificationType.SHARE_FOLDER_ADD_FILE.getTypeId() ||
+                type == NotificationType.SHARE_FOLDER_ADD_USER.getTypeId()
+        ) {
+            NotificationReadEntity readEntity = notificationReadRepository.findByNotificationNotificationId(notificationId);
 
-        if(notification.getTypeId() != '1'){
-            notificationRepository.delete(notification);
-        }
-        else {
-            NotificationReadEntity notificationRead = notificationReadRepository.findByNotificationNotificationId(notificationId);
-            if(notificationRead != null){
-                notificationRead.setIsDeleted(true);
-                notificationReadRepository.save(notificationRead);
-            }
-            else{
-                NotificationReadEntity readEntity = new NotificationReadEntity();
-                readEntity.setNotification(notification);
-                readEntity.setUser(user);
+            if (readEntity == null) {
+                NotificationReadEntity newReadEntity = NotificationReadEntity
+                                                        .builder()
+                                                            .notification(notification)
+                                                            .user(user)
+                                                            .isDeleted(true)
+                                                        .build();
+
+                notificationReadRepository.save(newReadEntity);
+            } else {
                 readEntity.setIsDeleted(true);
                 notificationReadRepository.save(readEntity);
             }
+        } else {
+            notificationRepository.delete(notification);
         }
-
-    }// 주인 에러, 충돌에러
+    }
 
 }

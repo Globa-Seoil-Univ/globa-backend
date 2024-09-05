@@ -18,6 +18,8 @@ import org.y2k2.globa.exception.*;
 import org.y2k2.globa.mapper.CommentMapper;
 import org.y2k2.globa.mapper.NotificationMapper;
 import org.y2k2.globa.repository.*;
+import org.y2k2.globa.type.InvitationStatus;
+import org.y2k2.globa.type.NotificationType;
 import org.y2k2.globa.util.CustomTimestamp;
 
 import java.time.LocalDateTime;
@@ -95,7 +97,7 @@ public class CommentService {
         NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareComment(
                 new RequestNotificationWithFolderShareCommentDto(user, folderShare.getFolder(), folderShare, section.getRecord(),  addedComment)
         );
-        notification.setTypeId(NotificationTypeEnum.SHARE_FOLDER_ADD_COMMENT.getTypeId());
+        notification.setTypeId(NotificationType.SHARE_FOLDER_ADD_COMMENT.getTypeId());
         notificationRepository.save(notification);
 
         notificationComment(user, folderShare);
@@ -117,7 +119,7 @@ public class CommentService {
         NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareComment(
                 new RequestNotificationWithFolderShareCommentDto(user, folderShare.getFolder(), folderShare, section.getRecord(), addedComment)
         );
-        notification.setTypeId(NotificationTypeEnum.SHARE_FOLDER_ADD_COMMENT.getTypeId());
+        notification.setTypeId(NotificationType.SHARE_FOLDER_ADD_COMMENT.getTypeId());
         notificationRepository.save(notification);
 
         notificationComment(user, folderShare);
@@ -141,7 +143,7 @@ public class CommentService {
         NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareComment(
                 new RequestNotificationWithFolderShareCommentDto(user, folderShare.getFolder(), folderShare, section.getRecord(), addedComment)
         );
-        notification.setTypeId(NotificationTypeEnum.SHARE_FOLDER_ADD_COMMENT.getTypeId());
+        notification.setTypeId(NotificationType.SHARE_FOLDER_ADD_COMMENT.getTypeId());
         notificationRepository.save(notification);
 
         notificationComment(user, folderShare);

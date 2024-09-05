@@ -11,6 +11,7 @@ import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.*;
 import org.y2k2.globa.mapper.NotificationMapper;
 import org.y2k2.globa.repository.*;
+import org.y2k2.globa.type.NotificationType;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +42,7 @@ public class AnswerService {
         NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithInquiry(
                 new RequestNotificationWithInquiryDto(user, inquiry.getUser(), inquiry)
         );
-        notification.setTypeId(NotificationTypeEnum.INQUIRY.getTypeId());
+        notification.setTypeId(NotificationType.INQUIRY.getTypeId());
         notificationRepository.save(notification);
 
         if (!user.getPrimaryNofi() || user.getNotificationToken() == null) return;

@@ -16,6 +16,7 @@ import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.InquiryService;
+import org.y2k2.globa.type.InquirySort;
 import org.y2k2.globa.util.JwtTokenProvider;
 
 import java.net.URI;
@@ -64,8 +65,8 @@ public class InquiryController {
         }
         long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
-        SortDto sortDto = SortDto.valueOfString(sort);
-        PaginationDto paginationDto = new PaginationDto(page, count, sortDto);
+        InquirySort inquirySort = InquirySort.valueOfString(sort);
+        PaginationDto paginationDto = new PaginationDto(page, count, inquirySort);
         ResponseInquiryDto dto = inquiryService.getInquiries(userId, paginationDto);
         return ResponseEntity.ok().body(dto);
     }
