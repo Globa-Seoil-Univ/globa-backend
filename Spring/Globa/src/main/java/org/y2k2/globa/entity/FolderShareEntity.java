@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import org.hibernate.annotations.*;
-import org.y2k2.globa.dto.InvitationStatus;
+import org.y2k2.globa.type.InvitationStatus;
 
 import java.time.LocalDateTime;
 

@@ -12,4 +12,5 @@ public class ResponseUnreadCountDto {
     Long notice;
     Long share;
     Long document;
+    Long inquiry;
 }

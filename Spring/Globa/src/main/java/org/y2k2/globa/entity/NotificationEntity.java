@@ -23,7 +23,7 @@ public class NotificationEntity {
     private char typeId;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "to_user_id", referencedColumnName = "user_id")
     private UserEntity toUser;
 
@@ -33,39 +33,34 @@ public class NotificationEntity {
     private UserEntity fromUser;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "share_id", referencedColumnName = "share_id")
     private FolderShareEntity folderShare;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "folder_id", referencedColumnName = "folder_id")
     private FolderEntity folder;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "record_id", referencedColumnName = "record_id")
     private RecordEntity record;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "comment_id", referencedColumnName = "comment_id")
     private CommentEntity comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "notice_id", referencedColumnName = "notice_id")
     private NoticeEntity notice;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "inquiry_id", referencedColumnName = "inquiry_id")
     private InquiryEntity inquiry;
-
-
-    @Column(name = "is_read")
-    @ColumnDefault("false")
-    private Boolean isRead;
 
     @CreationTimestamp
     @Column(name = "created_time")

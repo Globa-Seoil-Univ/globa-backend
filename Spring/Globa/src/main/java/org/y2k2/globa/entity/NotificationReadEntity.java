@@ -2,7 +2,9 @@ package org.y2k2.globa.entity;
 
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.*;
 
@@ -13,11 +15,12 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Table(name = "notification_read")
+@NoArgsConstructor
 public class NotificationReadEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "read_id", columnDefinition = "INT UNSIGNED")
-    private long read_id;
+    private Long read_id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -36,4 +39,11 @@ public class NotificationReadEntity {
     @CreationTimestamp
     @Column(name = "created_time")
     private LocalDateTime createdTime;
+
+    @Builder
+    public NotificationReadEntity(UserEntity user, NotificationEntity notification, Boolean isDeleted) {
+        this.user = user;
+        this.notification = notification;
+        this.isDeleted = isDeleted;
+    }
 }

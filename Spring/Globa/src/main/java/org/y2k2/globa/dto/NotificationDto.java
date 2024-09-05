@@ -1,5 +1,7 @@
 package org.y2k2.globa.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,9 +9,11 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class NotificationDto {
-    private int notificationId;
+    private Long notificationId;
     private String type;
+    private Boolean isRead;
     private String createdTime;
 
     // 공지사항 알림
@@ -33,7 +37,7 @@ public class NotificationDto {
     @Setter
     @AllArgsConstructor
     public static class Notice {
-        private long noticeId;
+        private Long noticeId;
         private String thumbnail;
         private String title;
         private String content;
@@ -51,14 +55,14 @@ public class NotificationDto {
     @Setter
     @AllArgsConstructor
     public static class Share {
-        private int shareId;
+        private Long shareId;
     }
 
     @Getter
     @Setter
     @AllArgsConstructor
     public static class Folder {
-        private int folderId;
+        private Long folderId;
         private String title;
     }
 
@@ -66,7 +70,7 @@ public class NotificationDto {
     @Setter
     @AllArgsConstructor
     public static class Record {
-        private int recordId;
+        private Long recordId;
         private String title;
     }
 
@@ -74,7 +78,7 @@ public class NotificationDto {
     @Setter
     @AllArgsConstructor
     public static class Comment {
-        private int commentId;
+        private Long commentId;
         private String content;
     }
 
@@ -82,7 +86,7 @@ public class NotificationDto {
     @Setter
     @AllArgsConstructor
     public static class Inquiry {
-        private int inquiryId;
+        private Long inquiryId;
         private String title;
     }
 }
