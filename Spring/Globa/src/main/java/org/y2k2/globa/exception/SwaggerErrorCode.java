@@ -51,6 +51,12 @@ public class SwaggerErrorCode {
     public static final String NOFI_POST_BAD_REQUEST_VALUE = "40051";
     public static final String SURVEY_POST_BAD_REQUEST = "SURVEY_POST_BAD_REQUEST";
     public static final String SURVEY_POST_BAD_REQUEST_VALUE = "40052";
+
+    public static final String NOFI_TYPE_BAD_REQUEST = "NOFI_TYPE_BAD_REQUEST";
+    public static final String NOFI_TYPE_BAD_REQUEST_VALUE = "40053";
+    public static final String REQUIRED_NOTIFICATION_ID = "REQUIRED_NOTIFICATION_ID";
+    public static final String REQUIRED_NOTIFICATION_ID_VALUE = "40054";
+
     public static final String NOT_PARENT_COMMENT = "NOT_PARENT_COMMENT";
     public static final String NOT_PARENT_COMMENT_VALUE = "40060";
     public static final String REQUIRED_IMAGE = "REQUIRED_IMAGE";
@@ -76,9 +82,7 @@ public class SwaggerErrorCode {
     public static final String INVALID_TOKEN = "INVALID_TOKEN";
     public static final String INVALID_TOKEN_VALUE = "40110";
     public static final String SIGNATURE = "SIGNATURE";
-    public static final String SIGNATURE_VALUE = "40111";
-    public static final String NOT_DESERVE_FOLDER = "NOT_DESERVE_FOLDER";
-    public static final String NOT_DESERVE_FOLDER_VALUE = "40120";
+    public static final String SIGNATURE_VALUE = "40120";
     public static final String EXPIRED_REFRESH_TOKEN = "EXPIRED_REFRESH_TOKEN";
     public static final String EXPIRED_REFRESH_TOKEN_VALUE = "40130";
 
@@ -117,6 +121,8 @@ public class SwaggerErrorCode {
     public static final String MISMATCH_RECORD_OWNER_VALUE = "40347";
     public static final String MISMATCH_RECORD_FOLDER = "MISMATCH_RECORD_FOLDER";
     public static final String MISMATCH_RECORD_FOLDER_VALUE = "40348";
+    public static final String MISMATCH_NOTIFICATION_OWNER = "MISMATCH_NOTIFICATION_OWNER";
+    public static final String MISMATCH_NOTIFICATION_OWNER_VALUE = "40349";
 
     /* 404 NOT_FOUND : 값이 없음 */
     public static final String NOT_FOUND = "NOT_FOUND";
@@ -131,6 +137,8 @@ public class SwaggerErrorCode {
     public static final String NOT_FOUND_INQUIRY_VALUE = "40420";
     public static final String NOT_FOUND_NOTICE = "NOT_FOUND_NOTICE";
     public static final String NOT_FOUND_NOTICE_VALUE = "40430";
+    public static final String NOT_FOUND_NOTIFICATION = "NOT_FOUND_NOTICE";
+    public static final String NOT_FOUND_NOTIFICATION_VALUE = "40431";
     public static final String NOT_FOUND_ANSWER = "NOT_FOUND_ANSWER";
     public static final String NOT_FOUND_ANSWER_VALUE = "40440";
     public static final String NOT_FOUND_FOLDER = "NOT_FOUND_FOLDER";
@@ -171,6 +179,8 @@ public class SwaggerErrorCode {
     public static final String INQUIRY_ANSWER_DUPLICATED_VALUE = "40930";
     public static final String SHARE_USER_DUPLICATED = "SHARE_USER_DUPLICATED";
     public static final String SHARE_USER_DUPLICATED_VALUE = "40940";
+    public static final String NOTIFICATION_READ_DUPLICATED = "NOTIFICATION_READ_DUPLICATED";
+    public static final String NOTIFICATION_READ_DUPLICATED_VALUE = "40950";
 
     /* 500 SERVER ERROR : 서버 단 에러 */
     public static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";

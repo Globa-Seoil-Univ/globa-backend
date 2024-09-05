@@ -1,6 +1,9 @@
-package org.y2k2.globa.dto;
+package org.y2k2.globa.type;
 
-public enum NotificationTypeEnum {
+import lombok.Getter;
+
+@Getter
+public enum NotificationType {
     NOTICE('1'),
     SHARE_FOLDER_INVITE('2'),
     SHARE_FOLDER_ADD_FILE('3'),
@@ -13,11 +16,8 @@ public enum NotificationTypeEnum {
 
     private final char typeId;
 
-    NotificationTypeEnum(char typeId) {
+    NotificationType(char typeId) {
         this.typeId = typeId;
     }
 
-    public char getTypeId() {
-        return typeId;
-    }
 }

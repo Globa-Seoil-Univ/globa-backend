@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.dto.ConsumerValidateDto;
-import org.y2k2.globa.dto.NotificationTypeEnum;
+import org.y2k2.globa.type.NotificationType;
 import org.y2k2.globa.dto.ResponseKafkaDto;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.repository.*;
@@ -54,7 +54,7 @@ public class KafkaService {
         UserEntity user = validateDto.getUser();
         RecordEntity record = validateDto.getRecord();
 
-        addNotification(user, record, NotificationTypeEnum.UPLOAD_SUCCESS.getTypeId());
+        addNotification(user, record, NotificationType.UPLOAD_SUCCESS.getTypeId());
 
         sendNotificationShare(record.getTitle() + "이(가) 업로드 되었습니다.", userId, record.getFolder().getFolderId());
         sendNotification("업로드 성공", record.getTitle() + "의 업로드 성공하였습니다.", user);
@@ -80,7 +80,7 @@ public class KafkaService {
         // if => 오디오 분석엔 성공했지만, 알 수 없는 이유로 메시지 잘못 보냄 또는 에러가 발생 했을 때
         // else => 오디오 분석엔 실패했고, 기본 정보가 있다면 업로드 실패 알림 보내기 (일반적인 상황)
         if (validateDto.getIsValidated()) {
-            addNotification(user, record, NotificationTypeEnum.UPLOAD_SUCCESS.getTypeId());
+            addNotification(user, record, NotificationType.UPLOAD_SUCCESS.getTypeId());
 
             sendNotificationShare(record.getTitle() + "이(가) 업로드 되었습니다.", userId, record.getFolder().getFolderId());
             sendNotification("업로드 성공", record.getTitle() + "의 업로드 성공하였습니다.", user);

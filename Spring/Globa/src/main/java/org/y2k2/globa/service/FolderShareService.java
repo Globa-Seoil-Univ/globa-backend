@@ -17,6 +17,9 @@ import org.y2k2.globa.exception.*;
 import org.y2k2.globa.mapper.FolderShareMapper;
 import org.y2k2.globa.mapper.NotificationMapper;
 import org.y2k2.globa.repository.*;
+import org.y2k2.globa.type.InvitationStatus;
+import org.y2k2.globa.type.NotificationType;
+import org.y2k2.globa.type.Role;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +82,7 @@ public class FolderShareService {
         NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithInvitation(
                 new RequestNotificationWithInvitationDto(ownerEntity, targetEntity, folderEntity, saveFolderShare)
         );
-        notification.setTypeId(NotificationTypeEnum.SHARE_FOLDER_INVITE.getTypeId());
+        notification.setTypeId(NotificationType.SHARE_FOLDER_INVITE.getTypeId());
         notificationRepository.save(notification);
 
         if (!targetEntity.getShareNofi() || targetEntity.getNotificationToken() == null) return;
@@ -164,7 +167,7 @@ public class FolderShareService {
         NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareAddUser(
                 new RequestNotificationWithFolderShareAddUserDto(folderShareEntity.getTargetUser(), folderShareEntity.getFolder(), folderShareEntity)
         );
-        notification.setTypeId(NotificationTypeEnum.SHARE_FOLDER_ADD_USER.getTypeId());
+        notification.setTypeId(NotificationType.SHARE_FOLDER_ADD_USER.getTypeId());
         notificationRepository.save(notification);
 
         List<FolderShareEntity> targetFolderShares = folderShareRepository.findAllByFolderFolderId(folderId);

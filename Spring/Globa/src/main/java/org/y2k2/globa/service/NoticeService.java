@@ -15,6 +15,7 @@ import org.y2k2.globa.exception.*;
 import org.y2k2.globa.mapper.NoticeMapper;
 import org.y2k2.globa.mapper.NotificationMapper;
 import org.y2k2.globa.repository.*;
+import org.y2k2.globa.type.NotificationType;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -77,7 +78,7 @@ public class NoticeService {
                 NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithNotice(
                         new RequestNotificationWithNoticeDto(user, noticeEntity)
                 );
-                notification.setTypeId(NotificationTypeEnum.NOTICE.getTypeId());
+                notification.setTypeId(NotificationType.NOTICE.getTypeId());
                 notificationRepository.save(notification);
 
                 return noticeEntity.getNoticeId();
@@ -105,7 +106,7 @@ public class NoticeService {
             NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithNotice(
                     new RequestNotificationWithNoticeDto(user, noticeEntity)
             );
-            notification.setTypeId(NotificationTypeEnum.NOTICE.getTypeId());
+            notification.setTypeId(NotificationType.NOTICE.getTypeId());
             notificationRepository.save(notification);
 
             return noticeEntity.getNoticeId();
