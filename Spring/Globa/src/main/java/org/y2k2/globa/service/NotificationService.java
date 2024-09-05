@@ -93,7 +93,6 @@ public class NotificationService {
         if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         Long hasUnread = notificationRepository.existsByToUser(userId);
-        System.out.println(hasUnread);
         return new ResponseUnreadNotificationDto(hasUnread != 0);
     }
 

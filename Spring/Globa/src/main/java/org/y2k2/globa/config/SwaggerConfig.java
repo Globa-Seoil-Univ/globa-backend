@@ -75,6 +75,8 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.REQUIRED_NOTICE_ID_VALUE, createExample(SwaggerErrorCode.REQUIRED_NOTICE_ID_VALUE, "공지 ID는 필수입니다."));
         components.addExamples(SwaggerErrorCode.NOFI_POST_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.NOFI_POST_BAD_REQUEST_VALUE, "알림 정보는 모두 필수입니다."));
         components.addExamples(SwaggerErrorCode.SURVEY_POST_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.SURVEY_POST_BAD_REQUEST_VALUE, "설문 정보는 모두 필수입니다."));
+        components.addExamples(SwaggerErrorCode.NOFI_TYPE_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.NOFI_TYPE_BAD_REQUEST_VALUE , "알림의 검색 타입은 'a', 's', 'r', 'i', 'n'만 선택할 수 있습니다."));
+        components.addExamples(SwaggerErrorCode.REQUIRED_NOTIFICATION_ID_VALUE , createExample(SwaggerErrorCode.REQUIRED_NOTIFICATION_ID_VALUE , "알림 ID는 필수입니다."));
         components.addExamples(SwaggerErrorCode.NOT_PARENT_COMMENT_VALUE, createExample(SwaggerErrorCode.NOT_PARENT_COMMENT_VALUE, "부모 댓글 ID는 필수입니다."));
         components.addExamples(SwaggerErrorCode.REQUIRED_IMAGE_VALUE, createExample(SwaggerErrorCode.REQUIRED_IMAGE_VALUE, "이미지는 필수입니다."));
         components.addExamples(SwaggerErrorCode.REQUIRED_ROLE_VALUE, createExample(SwaggerErrorCode.REQUIRED_ROLE_VALUE, "초대하고자 하는 사용자의 권한 설정은 필수입니다."));
@@ -89,7 +91,6 @@ public class SwaggerConfig {
         // 401 Errors
         components.addExamples(SwaggerErrorCode.INVALID_TOKEN_VALUE, createExample(SwaggerErrorCode.INVALID_TOKEN_VALUE, "유효하지 않은 토큰입니다."));
         components.addExamples(SwaggerErrorCode.SIGNATURE_VALUE, createExample(SwaggerErrorCode.SIGNATURE_VALUE, "토큰 파싱에 실패하였습니다."));
-        components.addExamples(SwaggerErrorCode.NOT_DESERVE_FOLDER_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_FOLDER_VALUE, "폴더 접근 권한이 없습니다."));
         components.addExamples(SwaggerErrorCode.EXPIRED_REFRESH_TOKEN_VALUE, createExample(SwaggerErrorCode.EXPIRED_REFRESH_TOKEN_VALUE, "만료된 갱신 토큰입니다."));
 
         // 403 Errors
@@ -110,6 +111,8 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.MISMATCH_QUIZ_RECORD_ID_VALUE, createExample(SwaggerErrorCode.MISMATCH_QUIZ_RECORD_ID_VALUE, "퀴즈의 음성 ID와 요청한 음성 ID 정보가 일치하지 않습니다."));
         components.addExamples(SwaggerErrorCode.MISMATCH_RECORD_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_RECORD_OWNER_VALUE, "음성 소유자만 요청할 수 있습니다."));
         components.addExamples(SwaggerErrorCode.MISMATCH_RECORD_FOLDER_VALUE, createExample(SwaggerErrorCode.MISMATCH_RECORD_FOLDER_VALUE, "요청한 음성 파일은 해당 폴더에 속해있지 않습니다."));
+        components.addExamples(SwaggerErrorCode.MISMATCH_NOTIFICATION_OWNER_VALUE , createExample(SwaggerErrorCode.MISMATCH_NOTIFICATION_OWNER_VALUE , "알림 소유자만 접근할 수 있습니다."));
+
 
         // 404 Errors
         components.addExamples(SwaggerErrorCode.NOT_FOUND_USER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_USER_VALUE, "사용자를 찾을 수 없습니다."));
@@ -117,6 +120,7 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.NOT_FOUND_TARGET_USER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_TARGET_USER_VALUE, "대상 사용자를 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_INQUIRY_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_INQUIRY_VALUE, "문의 사항을 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_NOTICE_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_NOTICE_VALUE, "공지를 찾을 수 없습니다."));
+        components.addExamples(SwaggerErrorCode.NOT_FOUND_NOTIFICATION_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_NOTIFICATION_VALUE, "알림을 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_ANSWER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_ANSWER_VALUE, "답변을 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_FOLDER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_FOLDER_VALUE, "폴더를 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER_VALUE, "접근 가능한 폴더를 찾을 수 없습니다."));
@@ -138,6 +142,7 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.FOLDER_NAME_DUPLICATED_VALUE, createExample(SwaggerErrorCode.FOLDER_NAME_DUPLICATED_VALUE, "폴더 이름이 이미 존재합니다."));
         components.addExamples(SwaggerErrorCode.INQUIRY_ANSWER_DUPLICATED_VALUE, createExample(SwaggerErrorCode.INQUIRY_ANSWER_DUPLICATED_VALUE, "문의 답변이 이미 존재합니다."));
         components.addExamples(SwaggerErrorCode.SHARE_USER_DUPLICATED_VALUE, createExample(SwaggerErrorCode.SHARE_USER_DUPLICATED_VALUE, "이미 초대한 사용자입니다."));
+        components.addExamples(SwaggerErrorCode.NOTIFICATION_READ_DUPLICATED_VALUE , createExample(SwaggerErrorCode.NOTIFICATION_READ_DUPLICATED_VALUE , "이미 읽은 알림입니다."));
 
         // 500 Errors
         components.addResponses("500", createApiResponse(exceptionSchema, "Internal Server Error", createExample(SwaggerErrorCode.INTERNAL_SERVER_ERROR_VALUE, "서버 내부 오류가 발생하였습니다.")));
