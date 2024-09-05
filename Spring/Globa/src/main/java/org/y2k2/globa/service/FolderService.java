@@ -84,6 +84,7 @@ public class FolderService {
         saveShareEntity.setRoleId(folderRoleRepository.findByRoleName("소유자"));
         saveShareEntity.setOwnerUser(userEntity);
         saveShareEntity.setTargetUser(userEntity);
+        saveShareEntity.setInvitationStatus("ACCEPT");
 
         folderShareRepository.save(saveShareEntity);
 
@@ -216,8 +217,7 @@ public class FolderService {
         if (!Objects.equals(userId, folderEntity.getUser().getUserId())){
             throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
         }
-
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderId(userEntity, folderId);
+        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity,folderId,"ACCEPT");
 
         if(folderShareEntity == null)
             throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);

@@ -99,10 +99,14 @@ public class FolderController {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( request.getTitle() == null  )
             throw new CustomException(ErrorCode.REQUIRED_FOLDER_TITLE);
-        if ( request.getShareTarget() == null)
-            return ResponseEntity.status(HttpStatus.CREATED).body(folderService.postFolder(accessToken, request.getTitle()));
-        else
-            return ResponseEntity.status(HttpStatus.CREATED).body(folderService.postFolder(accessToken, request.getTitle(), request.getShareTarget()));
+        if ( request.getShareTarget() == null) {
+            folderService.postFolder(accessToken, request.getTitle());
+            return ResponseEntity.status(HttpStatus.CREATED).body("");
+        }
+        else {
+            folderService.postFolder(accessToken, request.getTitle(), request.getShareTarget());
+            return ResponseEntity.status(HttpStatus.CREATED).body("");
+        }
     }
 
     @Operation(
