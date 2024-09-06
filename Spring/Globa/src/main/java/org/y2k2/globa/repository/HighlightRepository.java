@@ -2,6 +2,7 @@ package org.y2k2.globa.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.y2k2.globa.entity.HighlightEntity;
 import org.y2k2.globa.entity.SectionEntity;
 
@@ -23,8 +24,14 @@ public interface HighlightRepository extends JpaRepository<HighlightEntity, Long
                         "ORDER BY c.created_time DESC",
             nativeQuery = true)
     List<HighlightEntity> findAllBySectionSectionId(Long sectionId);
-    // sectionId, startIndex, endIndex이 다 같은 거를 가져와라
-    HighlightEntity findBySectionAndStartIndexAndEndIndex(SectionEntity section, long startIndex, long endIndex);
+
+    @Query(value = "SELECT EXISTS ( " +
+                        "SELECT 1 FROM highlight h " +
+                            "WHERE h.section_id = :sectionId " +
+                            "AND (h.start_index <= :endIndex AND h.end_index >= :startIndex)" +
+                    ")",
+            nativeQuery = true)
+    Long existsBySectionAndInRange(@Param("sectionId") Long sectionId, @Param("startIndex") Long startIndex, @Param("endIndex") Long endIndex);
 
     HighlightEntity findByHighlightId(long highlightId);
 }
