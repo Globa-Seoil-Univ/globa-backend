@@ -84,9 +84,8 @@ public class CommentService {
         SectionEntity section = validateSection(request.getSectionId(), request.getRecordId(), request.getFolderId());
         FolderShareEntity folderShare = validateFolderShare(section, user);
 
-        // 같은 인덱스에 있는 곳에 댓글을 추가할라면 리턴 
-        HighlightEntity highlight = highlightRepository.findBySectionAndStartIndexAndEndIndex(section, dto.getStartIdx(), dto.getEndIdx());
-        if (highlight != null) throw new CustomException(ErrorCode.HIGHLIGHT_DUPLICATED);
+        Long isAlready = highlightRepository.existsBySectionAndInRange(section.getSectionId(), dto.getStartIdx(), dto.getEndIdx());
+        if (isAlready == 1) throw new CustomException(ErrorCode.HIGHLIGHT_DUPLICATED);
 
         HighlightEntity createdHighlight = HighlightEntity.create(section, dto.getStartIdx(), dto.getEndIdx());
         HighlightEntity response = highlightRepository.save(createdHighlight);
