@@ -28,7 +28,7 @@ public class NotificationEntity {
     private UserEntity toUser;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "from_user_id", referencedColumnName = "user_id")
     private UserEntity fromUser;
 

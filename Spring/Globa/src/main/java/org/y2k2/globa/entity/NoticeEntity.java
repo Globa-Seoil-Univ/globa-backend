@@ -22,7 +22,7 @@ public class NoticeEntity {
     private Long noticeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private UserEntity user;
 
