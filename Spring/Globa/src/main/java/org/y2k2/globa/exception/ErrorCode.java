@@ -56,6 +56,7 @@ public enum ErrorCode {
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Access Token Invalid", 40110),
     SIGNATURE(HttpStatus.UNAUTHORIZED, "Not Matched Token", 40120),
     EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED,  "Refresh Token Expired ! ", 40130),
+    INVALID_SNS_TOKEN(HttpStatus.UNAUTHORIZED,  "Invalid SNS Token ", 40140),
 
 
     /* 403 FORBIDDEN : 잘못된 접근 */

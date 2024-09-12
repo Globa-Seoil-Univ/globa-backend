@@ -16,5 +16,6 @@ public class RequestUserPostDTO implements Serializable {
     private String snsId;
     private String name;
     private String profile;
+    private String token;
     private Boolean notification;
 }
