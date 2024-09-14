@@ -89,6 +89,10 @@ public class UserService {
     public JwtToken postUser(RequestUserPostDTO requestUserPostDTO){
     // 1001 카카오 1004 구글
 
+        if ( requestUserPostDTO.getToken() == null || requestUserPostDTO.getToken().isEmpty())
+            throw new CustomException(ErrorCode.REQUIRED_SNS_TOKEN);
+
+
         switch (requestUserPostDTO.getSnsKind())
         {
             case "1001" :
@@ -111,9 +115,9 @@ public class UserService {
                         ObjectMapper objectMapper = new ObjectMapper();
                         JsonNode responseBody = objectMapper.readTree(response.getBody());
                         String kakaoUid = String.valueOf(responseBody.get("id"));
-                    if(!requestUserPostDTO.getSnsId().equalsIgnoreCase(kakaoUid)){
+                    if(!requestUserPostDTO.getSnsId().equalsIgnoreCase(kakaoUid))
                         throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
-                    }
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

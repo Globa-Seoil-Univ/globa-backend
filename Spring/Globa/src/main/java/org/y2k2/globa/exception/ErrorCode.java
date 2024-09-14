@@ -16,6 +16,7 @@ public enum ErrorCode {
     REQUIRED_REQUEST_TOKEN(HttpStatus.BAD_REQUEST, "Must Be Requested To Request Token ! ", 40014),
     REQUIRED_USER_CODE(HttpStatus.BAD_REQUEST, "Must Be Requested To User Code ! ", 40015),
     REQUIRED_USER_ID(HttpStatus.BAD_REQUEST, "Must Be Requested To User Id ! ", 40016),
+    REQUIRED_SNS_TOKEN(HttpStatus.BAD_REQUEST, "SNS 토큰이 필요합니다. ", 40017),
 
     FOLDER_DELETE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Default Folder Cannot Be Deleted ", 40020),
 
