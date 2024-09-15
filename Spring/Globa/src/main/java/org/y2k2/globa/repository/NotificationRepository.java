@@ -41,13 +41,11 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
                     "LEFT JOIN inquiry i ON n.inquiry_id = i.inquiry_id " +
                     "LEFT JOIN folder_share fs ON n.share_id = fs.share_id " +
                     "LEFT JOIN folder_share fs2 ON n.folder_id = fs2.folder_id AND (fs2.owner_id = :userId OR fs2.target_id = :userId) " +
-                    "LEFT JOIN folder_share fs3 ON n.folder_id = fs3.folder_id AND fs3.target_id = u2.user_id " +
                     "WHERE " +
                         "(" +
                             "(:includeNotice = TRUE AND n.type_id = '1') " +
                             "OR (:includeInvite = TRUE AND n.type_id = '2' AND fs.invitation_status = 'PENDING' AND fs.target_id = :userId) " +
-                            "OR (:includeShare = TRUE AND n.type_id IN ('3', '5') AND fs2.invitation_status = 'ACCEPT') " +
-                            "OR (:includeShare = TRUE AND n.type_id = '4' AND fs3.invitation_status = 'ACCEPT' AND fs3.target_id != :userId) " +
+                            "OR (:includeShare = TRUE AND n.type_id IN ('3', '4', '5') AND fs2.invitation_status = 'ACCEPT' AND fs2.target_id != :userId) " +
                             "OR (:includeRecord = TRUE AND n.type_id IN ('6', '7') AND n.to_user_id = :userId) " +
                             "OR (:includeInquiry = TRUE AND n.type_id = '8' AND n.to_user_id = :userId)" +
                         ") AND (nr.is_deleted = FALSE OR nr.is_deleted IS NULL) " +
@@ -69,8 +67,7 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
                         "COUNT(n.notification_id) != ( " +
                             "COUNT(CASE WHEN n.type_id = '1' AND nr.notification_id IS NOT NULL THEN 1 END) + " +
                             "COUNT(CASE WHEN n.type_id = '2' AND fs.invitation_status = 'PENDING' AND nr.notification_id IS NOT NULL AND fs.target_id = :userId THEN 1 END) + " +
-                            "COUNT(CASE WHEN n.type_id IN ('3', '5') AND fs2.invitation_status = 'ACCEPT' AND nr.notification_id IS NOT NULL THEN 1 END) + " +
-                            "COUNT(CASE WHEN n.type_id = '4' AND fs3.invitation_status = 'ACCEPT' AND fs3.target_id != :userId AND nr.notification_id IS NOT NULL THEN 1 END) + " +
+                            "COUNT(CASE WHEN n.type_id IN ('3', '4', '5') AND fs2.invitation_status = 'ACCEPT' AND fs2.target_id != :userId AND nr.notification_id IS NOT NULL THEN 1 END) + " +
                             "COUNT(CASE WHEN n.type_id IN ('6', '7') AND n.to_user_id = :userId AND nr.notification_id IS NOT NULL THEN 1 END) + " +
                             "COUNT(CASE WHEN n.type_id = '8' AND n.to_user_id = :userId AND nr.notification_id IS NOT NULL THEN 1 END) " +
                         ") " +
@@ -85,15 +82,13 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
                     "LEFT JOIN inquiry i ON n.inquiry_id = i.inquiry_id " +
                     "LEFT JOIN folder_share fs ON n.share_id = fs.share_id " +
                     "LEFT JOIN folder_share fs2 ON n.folder_id = fs2.folder_id AND (fs2.owner_id = :userId OR fs2.target_id = :userId) " +
-                    "LEFT JOIN folder_share fs3 ON n.folder_id = fs3.folder_id AND fs3.target_id = u2.user_id " +
                     "WHERE " +
                         "(" +
                             "n.type_id = '1' " +
-                            "OR n.type_id = '2' AND fs.invitation_status = 'PENDING' AND fs.target_id = :userId " +
-                            "OR n.type_id IN ('3', '5') AND fs2.invitation_status = 'ACCEPT' " +
-                            "OR n.type_id = '4' AND fs3.invitation_status = 'ACCEPT' AND fs3.target_id != :userId " +
-                            "OR n.type_id IN ('6', '7') AND n.to_user_id = :userId " +
-                            "OR n.type_id = '8' AND n.to_user_id = :userId" +
+                            "OR (n.type_id = '2' AND fs.invitation_status = 'PENDING' AND fs.target_id = :userId) " +
+                            "OR n.type_id IN ('3', '4', '5') AND fs2.invitation_status = 'ACCEPT' AND fs2.target_id != :userId " +
+                            "OR (n.type_id IN ('6', '7') AND n.to_user_id = :userId) " +
+                            "OR (n.type_id = '8' AND n.to_user_id = :userId)" +
                         ") AND (nr.is_deleted = FALSE OR nr.is_deleted IS NULL)",
             nativeQuery = true
     )
@@ -103,8 +98,7 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
             value = "SELECT " +
                         "COUNT(CASE WHEN n.type_id = '1' AND nr.notification_id IS NULL THEN 1 END) AS noticeCount, " +
                         "COUNT(CASE WHEN n.type_id = '2' AND fs.invitation_status = 'PENDING' AND nr.notification_id IS NULL AND fs.target_id = :userId THEN 1 END) AS inviteCount, " +
-                        "COUNT(CASE WHEN n.type_id IN ('3', '5') AND fs2.invitation_status = 'ACCEPT' AND nr.notification_id IS NULL THEN 1 END) AS shareCount, " +
-                        "COUNT(CASE WHEN n.type_id = '4' AND fs3.invitation_status = 'ACCEPT' AND fs3.target_id != :userId AND nr.notification_id IS NULL THEN 1 END) AS addUserCount, " +
+                        "COUNT(CASE WHEN n.type_id IN ('3', '4', '5') AND fs2.invitation_status = 'ACCEPT' AND fs2.target_id != :userId AND nr.notification_id IS NULL THEN 1 END) AS shareCount, " +
                         "COUNT(CASE WHEN n.type_id IN ('6', '7') AND n.to_user_id = :userId AND nr.notification_id IS NULL THEN 1 END) AS recordCount, " +
                         "COUNT(CASE WHEN n.type_id = '8' AND n.to_user_id = :userId AND nr.notification_id IS NULL THEN 1 END) AS inquiryCount " +
                     "FROM notification n " +
@@ -118,15 +112,13 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
                     "LEFT JOIN inquiry i ON n.inquiry_id = i.inquiry_id " +
                     "LEFT JOIN folder_share fs ON n.share_id = fs.share_id " +
                     "LEFT JOIN folder_share fs2 ON n.folder_id = fs2.folder_id AND (fs2.owner_id = :userId OR fs2.target_id = :userId) " +
-                    "LEFT JOIN folder_share fs3 ON n.folder_id = fs3.folder_id AND fs3.target_id = u2.user_id " +
                     "WHERE " +
                         "(" +
                             "n.type_id = '1' " +
-                            "OR n.type_id = '2' AND fs.invitation_status = 'PENDING' AND fs.target_id = :userId " +
-                            "OR n.type_id IN ('3', '5') AND fs2.invitation_status = 'ACCEPT' " +
-                            "OR n.type_id = '4' AND fs3.invitation_status = 'ACCEPT' AND fs3.target_id != :userId " +
-                            "OR n.type_id IN ('6', '7') AND n.to_user_id = :userId " +
-                            "OR n.type_id = '8' AND n.to_user_id = :userId" +
+                            "OR (n.type_id = '2' AND fs.invitation_status = 'PENDING' AND fs.target_id = :userId) " +
+                            "OR (n.type_id IN ('3', '4', '5') AND fs2.invitation_status = 'ACCEPT' AND fs2.target_id != :userId) " +
+                            "OR (n.type_id IN ('6', '7') AND n.to_user_id = :userId) " +
+                            "OR (n.type_id = '8' AND n.to_user_id = :userId)" +
                         ") AND (nr.is_deleted = FALSE OR nr.is_deleted IS NULL)",
             nativeQuery = true )
     NotificationUnReadCount countByToUserUserId(long userId);
