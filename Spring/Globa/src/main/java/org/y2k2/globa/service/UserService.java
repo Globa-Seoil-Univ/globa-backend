@@ -44,7 +44,6 @@ public class UserService {
 
     private static final String KAKAO_USER_INFO_URL = "https://kapi.kakao.com/v2/user/me";
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtUtil jwtUtil;
 
