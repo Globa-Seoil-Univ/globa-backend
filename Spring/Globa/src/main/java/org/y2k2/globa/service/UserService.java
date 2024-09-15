@@ -7,6 +7,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
     @Autowired
     private final Bucket bucket;
@@ -87,11 +89,9 @@ public class UserService {
     }
 
     public JwtToken postUser(RequestUserPostDTO requestUserPostDTO){
-    // 1001 카카오 1004 구글
-
-        if ( requestUserPostDTO.getToken() == null || requestUserPostDTO.getToken().isEmpty())
+        // 1001 카카오 1004 구글
+        if (requestUserPostDTO.getToken() == null || requestUserPostDTO.getToken().isEmpty())
             throw new CustomException(ErrorCode.REQUIRED_SNS_TOKEN);
-
 
         switch (requestUserPostDTO.getSnsKind())
         {
@@ -119,7 +119,8 @@ public class UserService {
                         throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("Failed to verify kakao token : " + e);
+                    throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
                 }
                 break;
             case "1004" :
@@ -135,7 +136,8 @@ public class UserService {
                     System.out.println(token.getName());
                     System.out.println(token.getPicture());
                 } catch (FirebaseAuthException e) {
-                    e.printStackTrace();
+                    log.error("Failed to verify firebase token : " + e);
+                    throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
                 }
                 break;
         }
@@ -170,12 +172,9 @@ public class UserService {
         }
 
         JwtToken jwtToken = jwtTokenProvider.generateToken(postUserEntity.getUserId());
-
         jwtUtil.insertRedisRefreshToken(postUserEntity.getUserId(), jwtToken.getRefreshToken());
 
-
         return jwtToken;
-
     }
 
     public ResponseUserDTO getUser(String accessToken){

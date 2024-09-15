@@ -38,6 +38,7 @@ public class NotificationService {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        System.out.println(userId);
 
         boolean includeNotice = false;
         boolean includeShare = false;
@@ -146,14 +147,13 @@ public class NotificationService {
         Long total = notificationUnReadCount.getNoticeCount() +
                 notificationUnReadCount.getInviteCount() +
                 notificationUnReadCount.getShareCount() +
-                notificationUnReadCount.getAddUserCount() +
                 notificationUnReadCount.getRecordCount() +
                 notificationUnReadCount.getInquiryCount();
 
         return new ResponseUnreadCountDto(
                 total,
                 notificationUnReadCount.getNoticeCount(),
-                notificationUnReadCount.getInviteCount() + notificationUnReadCount.getShareCount() + notificationUnReadCount.getAddUserCount(),
+                notificationUnReadCount.getInviteCount(),
                 notificationUnReadCount.getRecordCount(),
                 notificationUnReadCount.getInquiryCount()
         );

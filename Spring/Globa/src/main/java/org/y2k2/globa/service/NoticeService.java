@@ -115,7 +115,7 @@ public class NoticeService {
                 bucket.get(requestEntity.getThumbnailPath()).delete();
             }
 
-            throw e;
+            throw new CustomException(ErrorCode.FAILED_FILE_UPLOAD  );
         }
     }
 
