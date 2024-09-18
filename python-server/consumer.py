@@ -31,6 +31,7 @@ class Consumer:
     consumer = None
     producer = None
     logger = None
+    executor = None
 
     def __init__(self, broker, topic, group_id):
         self.logger = Logger(name="consumer").logger
@@ -49,28 +50,33 @@ class Consumer:
             topic=response_topic
         )
         self.consumer.subscribe(self.topic)
+        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)  # 최대 5개의 스레드
 
     def run(self):
         self.logger.info("Starting consumer")
-        executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)  # 최대 5개의 스레드
 
         try:
             for message in self.consumer:
-                executor.submit(self.process_message, message)
+                self.executor.submit(self.process_message, message)
+        except Exception as e:
+            self.logger.error("Failed to JSON : {0}".format(e))
+            self.producer.send_message(key=failed_key, message={'recordId': 0, 'userId': 0, 'message': e.__str__()})
+        finally:
+            self.executor.shutdown(wait=True)
+
+    def process_message(self, message):
+        try:
+            key = str(message.key, 'utf-8')
+            is_json = isinstance(message.value, dict)
+            is_enough_data = "recordId" in message.value and "userId" in message.value
+            is_analyze = message.topic == self.topic and key == "analyze"
+
+            record_id = message.value["recordId"]
+            user_id = message.value["userId"]
         except Exception as e:
             self.logger.error("Exception: {0}".format(e))
             self.producer.send_message(key=failed_key, message={'recordId': 0, 'userId': 0, 'message': e.__str__()})
-        finally:
-            executor.shutdown(wait=True)
-
-    def process_message(self, message):
-        key = str(message.key, 'utf-8')
-        is_json = isinstance(message.value, dict)
-        is_enough_data = "recordId" in message.value and "userId" in message.value
-        is_analyze = message.topic == self.topic and key == "analyze"
-
-        record_id = message.value["recordId"]
-        user_id = message.value["userId"]
+            return
 
         if is_json and is_enough_data and is_analyze:
             self.logger.info(f"In stt method recordId: {record_id} user_id: {user_id}")
