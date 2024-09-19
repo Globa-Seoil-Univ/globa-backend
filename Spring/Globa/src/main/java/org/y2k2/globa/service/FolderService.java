@@ -24,6 +24,7 @@ import org.y2k2.globa.repository.*;
 import org.y2k2.globa.util.JwtTokenProvider;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -56,7 +57,22 @@ public class FolderService {
 
 
         Pageable pageable = PageRequest.of(page-1, count);
-        Page<FolderEntity> folders = folderRepository.findAllByUserUserId(pageable, userId);
+//        Page<FolderEntity> folders = folderRepository.findAllByUserUserId(pageable, userId);
+
+        List<FolderShareEntity> folderShareEntities = folderShareRepository.findFolderShareEntitiesByTargetUserAndInvitationStatus(userEntity, "ACCEPT");
+
+        if(folderShareEntities == null)
+            throw new CustomException(ErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER);
+
+        List<Long> folderIds = new ArrayList<>();
+
+        for(FolderShareEntity folderShareEntity : folderShareEntities){
+            folderIds.add(folderShareEntity.getFolder().getFolderId());
+        }
+
+        Page<FolderEntity> folders = folderRepository.findAllByFolderId(pageable, folderIds);
+
+
 
 
 
