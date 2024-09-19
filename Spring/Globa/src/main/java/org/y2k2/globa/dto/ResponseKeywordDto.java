@@ -1,9 +1,6 @@
 package org.y2k2.globa.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -15,4 +12,10 @@ import java.util.Date;
 public class ResponseKeywordDto implements Serializable {
     private String word;
     private Double importance;
+
+    @Builder
+    public ResponseKeywordDto(String word, Double importance) {
+        this.word = word;
+        this.importance = importance;
+    }
 }

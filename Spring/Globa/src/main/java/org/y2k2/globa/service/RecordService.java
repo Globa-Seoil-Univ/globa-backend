@@ -52,6 +52,7 @@ public class RecordService {
     public final SummaryRepository summaryRepository;
     public final QuizRepository quizRepository;
     public final QuizAttemptRepository quizAttemptRepository;
+    public final KeywordRepository keywordRepository;
 
     @Autowired
     private Bucket bucket;
@@ -300,6 +301,54 @@ public class RecordService {
                 .toList(), recordEntities.getTotalElements());
     }
 
+    public ResponseAllRecordWithTotalDto getReceivingRecords(String accessToken, int page, int count) {
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+
+        Pageable pageable = PageRequest.of(page - 1, count);
+        Page<RecordEntity> records = recordRepository.findReceivingRecordsByUserId(pageable, userId);
+
+        return new ResponseAllRecordWithTotalDto(records.stream()
+                .map(record -> {
+                    List<KeywordEntity> keywords = keywordRepository.findAllByRecord(record);
+                    List<ResponseKeywordDto> responseKeywordDto = keywords.stream().map(keyword -> ResponseKeywordDto.builder()
+                            .word(keyword.getWord())
+                            .importance(keyword.getImportance().doubleValue())
+                            .build()
+                    ).toList();
+
+                    return RecordMapper.INSTANCE.toResponseAllRecordDto(record, recordRepository.findRecordEntityByRecordId(record.getRecordId()).getFolder().getFolderId(), responseKeywordDto);
+                })
+                .collect(Collectors.toList()), (int) records.getTotalElements());
+    }
+
+    public ResponseAllRecordWithTotalDto getSharingRecords(String accessToken, int page, int count) {
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+
+        Pageable pageable = PageRequest.of(page - 1, count);
+        Page<RecordEntity> records = recordRepository.findSharingRecordsByUserId(pageable, userId);
+
+        return new ResponseAllRecordWithTotalDto(records.stream()
+                .map(record -> {
+                    List<KeywordEntity> keywords = keywordRepository.findAllByRecord(record);
+                    List<ResponseKeywordDto> responseKeywordDto = keywords.stream().map(keyword -> ResponseKeywordDto.builder()
+                            .word(keyword.getWord())
+                            .importance(keyword.getImportance().doubleValue())
+                            .build()
+                    ).toList();
+
+                    return RecordMapper.INSTANCE.toResponseAllRecordDto(record, recordRepository.findRecordEntityByRecordId(record.getRecordId()).getFolder().getFolderId(), responseKeywordDto);
+                })
+                .collect(Collectors.toList()), (int) records.getTotalElements());
+    }
+
     public HttpStatus postQuiz(String accessToken, Long recordId, Long folderId, List<RequestQuizDto> quizs){
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity targetEntity = userRepository.findByUserId(userId);
@@ -465,12 +514,12 @@ public class RecordService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
         UserEntity user = userRepository.findByUserId(userId);
         RecordEntity record = recordRepository.findRecordEntityByRecordId(recordId);
+        Boolean existsByFolderShare = folderShareRepository.existsByFolderAndTargetUserOrOwnerUser(record.getFolder(), user, user);
 
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-        if (record == null) throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
         if (!record.getFolder().getFolderId().equals(folderId)) throw new CustomException(ErrorCode.MISMATCH_RECORD_FOLDER);
-        if (!record.getUser().getUserId().equals(userId)) throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
+        if (!existsByFolderShare) throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
 
         LocalDateTime dateTime = CustomTimestamp.toLocalDateTime(dto.getCreatedTime());
         StudyEntity study = studyRepository.findByCreatedTime(dateTime)

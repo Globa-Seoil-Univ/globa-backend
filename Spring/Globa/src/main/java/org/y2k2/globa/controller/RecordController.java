@@ -279,6 +279,80 @@ public class RecordController {
     }
 
     @Operation(
+            summary = "공유 받는 문서 조회",
+            description = "공유 받고 있는 문서를 조회합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "공유 받는 문서 가져오기 완료",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseAllRecordWithTotalDto.class))
+                    ),
+                    @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER, ref = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER, ref = SwaggerErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "500", ref = "500")
+            }
+    )
+    @GetMapping("/record/receiving")
+    public ResponseEntity<?> getReceivingRecord(
+            @Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int count) {
+        if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
+
+        return ResponseEntity.ok(recordService.getReceivingRecords(accessToken, page, count));
+    }
+
+    @Operation(
+            summary = "공유 하는 문서 조회",
+            description = "공유 하고 있는 문서를 조회합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "공유 하는 문서 가져오기 완료",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseAllRecordWithTotalDto.class))
+                    ),
+                    @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER, ref = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER, ref = SwaggerErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "500", ref = "500")
+            }
+    )
+    @GetMapping("/record/sharing")
+    public ResponseEntity<?> getSharingRecord(
+            @Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int count) {
+        if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
+
+        return ResponseEntity.ok(recordService.getSharingRecords(accessToken, page, count));
+    }
+
+    @Operation(
             summary = "문서 링크 공유",
             description = """
                     해당 문서를 다른 사용자에게 공유합니다. <br />
