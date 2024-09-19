@@ -33,4 +33,11 @@ public interface CommentMapper {
             dto.setContent("삭제된 댓글입니다");
         }
     }
+
+    @AfterMapping
+    static void handleDeletedContent(@MappingTarget ReplyDto dto, CommentEntity entity) {
+        if (entity.getDeletedTime() != null) {
+            dto.setContent("삭제된 답글입니다");
+        }
+    }
 }
