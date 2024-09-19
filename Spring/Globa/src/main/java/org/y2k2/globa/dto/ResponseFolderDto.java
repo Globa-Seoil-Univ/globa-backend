@@ -12,4 +12,13 @@ import java.util.List;
 public class ResponseFolderDto {
     private List<FolderDto> folders;
     private Long total;
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class FolderDto {
+        private Long folderId;
+        private String title;
+        private String createdTime;
+    }
 }

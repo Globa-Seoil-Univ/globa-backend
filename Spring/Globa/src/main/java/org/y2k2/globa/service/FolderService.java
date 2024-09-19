@@ -65,8 +65,8 @@ public class FolderService {
             throw new CustomException(ErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER);
 
         List<FolderEntity> folders = folderShareEntities.getContent().stream().map(FolderShareEntity::getFolder).toList();
-        List<FolderDto> dtos = folders.stream()
-                .map(FolderMapper.INSTANCE::toFolderDto)
+        List<ResponseFolderDto.FolderDto> dtos = folders.stream()
+                .map(FolderMapper.INSTANCE::toResponseInFolderDto)
                 .toList();
 
         return new ResponseFolderDto(dtos, folderShareEntities.getTotalElements());
