@@ -522,15 +522,17 @@ public class RecordService {
         if (!record.getFolder().getFolderId().equals(folderId)) throw new CustomException(ErrorCode.MISMATCH_RECORD_FOLDER);
         if (!existsByFolderShare) throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
 
-        LocalDateTime dateTime = CustomTimestamp.toLocalDateTime(dto.getCreatedTime());
-        StudyEntity study = studyRepository.findByCreatedTime(dateTime)
-                .orElseGet(() -> StudyEntity.builder()
+        StudyEntity study = studyRepository.findByCreatedTime(userId, recordId)
+                .orElse(StudyEntity.builder()
                         .user(user)
                         .record(record)
-                        .build()
-                );
+                        .build());
 
-        study.setStudyTime(dto.getStudyTime());
+        if (study.getStudyTime() != null) {
+            study.setStudyTime(study.getStudyTime() + dto.getStudyTime());
+        } else {
+            study.setStudyTime(dto.getStudyTime());
+        }
 
         studyRepository.save(study);
     }
