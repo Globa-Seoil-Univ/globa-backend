@@ -31,5 +31,5 @@ public interface FolderShareRepository extends JpaRepository<FolderShareEntity, 
     }, type = EntityGraph.EntityGraphType.LOAD)
     List<FolderShareEntity> findAllByFolderFolderId(long folderId);
 
-    Boolean existsByFolderAndTargetUserOrOwnerUser(FolderEntity folder, UserEntity targetUser, UserEntity ownerUser);
+    Boolean existsByFolderAndInvitationStatusAndTargetUserOrOwnerUser(FolderEntity folder, String status, UserEntity targetUser, UserEntity ownerUser);
 }

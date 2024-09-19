@@ -22,6 +22,7 @@ import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.mapper.QuizMapper;
 import org.y2k2.globa.mapper.RecordMapper;
 import org.y2k2.globa.repository.*;
+import org.y2k2.globa.type.InvitationStatus;
 import org.y2k2.globa.util.CustomTimestamp;
 import org.y2k2.globa.util.JwtTokenProvider;
 import org.y2k2.globa.util.KafkaProducer;
@@ -514,7 +515,7 @@ public class RecordService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
         UserEntity user = userRepository.findByUserId(userId);
         RecordEntity record = recordRepository.findRecordEntityByRecordId(recordId);
-        Boolean existsByFolderShare = folderShareRepository.existsByFolderAndTargetUserOrOwnerUser(record.getFolder(), user, user);
+        Boolean existsByFolderShare = folderShareRepository.existsByFolderAndInvitationStatusAndTargetUserOrOwnerUser(record.getFolder(), InvitationStatus.ACCEPT.toString(), user, user);
 
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
