@@ -36,4 +36,20 @@ public interface RecordRepository extends JpaRepository<RecordEntity, Long> {
             "ORDER BY (IF(r.title LIKE CONCAT(:keyword, '%'), 0, 1)), r.created_time DESC",
             nativeQuery = true)
     Page<RecordSearchProjection> findAllSharedOrOwnedRecords(Pageable pageable, @Param("userId") Long userId, @Param("keyword") String keyword);
+
+    @Query(
+            value = "SELECT r.record_id, r.folder_id, r.user_id, r.title, r.path, r.size, r.created_time, r.is_share FROM folder_share fs " +
+                    "INNER JOIN record r ON fs.folder_id = r.folder_id " +
+                    "WHERE (fs.target_id = :userId AND fs.owner_id != :userId) AND fs.invitation_status = 'ACCEPT'",
+            nativeQuery = true
+    )
+    Page<RecordEntity> findReceivingRecordsByUserId(Pageable pageable, @Param("userId") Long userId);
+
+    @Query(
+            value = "SELECT DISTINCT r.record_id, r.folder_id, r.user_id, r.title, r.path, r.size, r.created_time, r.is_share FROM folder_share fs " +
+                    "INNER JOIN record r ON fs.folder_id = r.folder_id " +
+                    "WHERE (target_id != :userId AND owner_id = :userId) AND invitation_status = 'ACCEPT'",
+            nativeQuery = true
+    )
+    Page<RecordEntity> findSharingRecordsByUserId(Pageable pageable, @Param("userId") Long userId);
 }

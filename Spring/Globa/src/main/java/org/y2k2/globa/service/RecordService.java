@@ -52,6 +52,7 @@ public class RecordService {
     public final SummaryRepository summaryRepository;
     public final QuizRepository quizRepository;
     public final QuizAttemptRepository quizAttemptRepository;
+    public final KeywordRepository keywordRepository;
 
     @Autowired
     private Bucket bucket;
@@ -298,6 +299,54 @@ public class RecordService {
                     return RecordMapper.INSTANCE.toResponseRecordSearch(record.getFolderId(), record, uploader);
                 })
                 .toList(), recordEntities.getTotalElements());
+    }
+
+    public ResponseAllRecordWithTotalDto getReceivingRecords(String accessToken, int page, int count) {
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+
+        Pageable pageable = PageRequest.of(page - 1, count);
+        Page<RecordEntity> records = recordRepository.findReceivingRecordsByUserId(pageable, userId);
+
+        return new ResponseAllRecordWithTotalDto(records.stream()
+                .map(record -> {
+                    List<KeywordEntity> keywords = keywordRepository.findAllByRecord(record);
+                    List<ResponseKeywordDto> responseKeywordDto = keywords.stream().map(keyword -> ResponseKeywordDto.builder()
+                            .word(keyword.getWord())
+                            .importance(keyword.getImportance().doubleValue())
+                            .build()
+                    ).toList();
+
+                    return RecordMapper.INSTANCE.toResponseAllRecordDto(record, recordRepository.findRecordEntityByRecordId(record.getRecordId()).getFolder().getFolderId(), responseKeywordDto);
+                })
+                .collect(Collectors.toList()), (int) records.getTotalElements());
+    }
+
+    public ResponseAllRecordWithTotalDto getSharingRecords(String accessToken, int page, int count) {
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        UserEntity userEntity = userRepository.findOneByUserId(userId);
+
+        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+
+        Pageable pageable = PageRequest.of(page - 1, count);
+        Page<RecordEntity> records = recordRepository.findSharingRecordsByUserId(pageable, userId);
+
+        return new ResponseAllRecordWithTotalDto(records.stream()
+                .map(record -> {
+                    List<KeywordEntity> keywords = keywordRepository.findAllByRecord(record);
+                    List<ResponseKeywordDto> responseKeywordDto = keywords.stream().map(keyword -> ResponseKeywordDto.builder()
+                            .word(keyword.getWord())
+                            .importance(keyword.getImportance().doubleValue())
+                            .build()
+                    ).toList();
+
+                    return RecordMapper.INSTANCE.toResponseAllRecordDto(record, recordRepository.findRecordEntityByRecordId(record.getRecordId()).getFolder().getFolderId(), responseKeywordDto);
+                })
+                .collect(Collectors.toList()), (int) records.getTotalElements());
     }
 
     public HttpStatus postQuiz(String accessToken, Long recordId, Long folderId, List<RequestQuizDto> quizs){

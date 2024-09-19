@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import org.y2k2.globa.dto.FolderDto;
 import org.y2k2.globa.dto.RequestFolderPostDto;
+import org.y2k2.globa.dto.ResponseFolderDto;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
@@ -40,7 +41,7 @@ public class FolderController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "폴더 목록 조회",
-                            content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = FolderDto.class)))
+                            content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ResponseFolderDto.class)))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
