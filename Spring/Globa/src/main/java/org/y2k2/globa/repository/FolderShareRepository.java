@@ -15,7 +15,11 @@ public interface FolderShareRepository extends JpaRepository<FolderShareEntity, 
     Page<FolderShareEntity> findByFolderOrderByCreatedTimeAsc(Pageable pageable, FolderEntity folder);
     FolderShareEntity findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(UserEntity user,Long folderId, String status);
     FolderShareEntity findFirstByShareId(Long folderId);
-    List<FolderShareEntity> findFolderShareEntitiesByTargetUserAndInvitationStatus(UserEntity user, String status);
+
+    @EntityGraph(value = "FolderShare.getFolderShareAndFolder", attributePaths = {
+            "folder"
+    }, type = EntityGraph.EntityGraphType.LOAD)
+    Page<FolderShareEntity> findFolderShareEntitiesByTargetUserAndInvitationStatus(UserEntity user, String status, Pageable pageable);
   
     FolderShareEntity findByFolderAndTargetUser(FolderEntity folder, UserEntity user);
     @EntityGraph(value = "FolderShare.getFolderShareAndUser", attributePaths = {

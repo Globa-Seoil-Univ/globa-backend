@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.dto.FolderDto;
+import org.y2k2.globa.dto.ResponseFolderDto;
 import org.y2k2.globa.type.InvitationStatus;
 import org.y2k2.globa.type.Role;
 import org.y2k2.globa.dto.ShareTarget;
@@ -49,7 +50,7 @@ public class FolderService {
     private String firebaseBucketPath;
 
 
-    public List<FolderDto> getFolders(String accessToken, int page, int count){
+    public ResponseFolderDto getFolders(String accessToken, int page, int count){
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
@@ -57,29 +58,18 @@ public class FolderService {
 
 
         Pageable pageable = PageRequest.of(page-1, count);
-//        Page<FolderEntity> folders = folderRepository.findAllByUserUserId(pageable, userId);
 
-        List<FolderShareEntity> folderShareEntities = folderShareRepository.findFolderShareEntitiesByTargetUserAndInvitationStatus(userEntity, "ACCEPT");
+        Page<FolderShareEntity> folderShareEntities = folderShareRepository.findFolderShareEntitiesByTargetUserAndInvitationStatus(userEntity, "ACCEPT", pageable);
 
         if(folderShareEntities == null)
             throw new CustomException(ErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER);
 
-        List<Long> folderIds = new ArrayList<>();
-
-        for(FolderShareEntity folderShareEntity : folderShareEntities){
-            folderIds.add(folderShareEntity.getFolder().getFolderId());
-        }
-
-        Page<FolderEntity> folders = folderRepository.findAllByFolderId(pageable, folderIds);
-
-
-
-
-
-        return folders.stream()
+        List<FolderEntity> folders = folderShareEntities.getContent().stream().map(FolderShareEntity::getFolder).toList();
+        List<FolderDto> dtos = folders.stream()
                 .map(FolderMapper.INSTANCE::toFolderDto)
-                .collect(Collectors.toList());
+                .toList();
 
+        return new ResponseFolderDto(dtos, folderShareEntities.getTotalElements());
     }
 
     public FolderDto postDefaultFolder(UserEntity userEntity){
