@@ -59,7 +59,7 @@ public class FolderService {
 
         Pageable pageable = PageRequest.of(page-1, count);
 
-        Page<FolderShareEntity> folderShareEntities = folderShareRepository.findFolderShareEntitiesByTargetUserAndInvitationStatus(userEntity, "ACCEPT", pageable);
+        Page<FolderShareEntity> folderShareEntities = folderShareRepository.findFolderShareEntitiesAndShareUserByTargetUserAndInvitationStatus(userEntity, "ACCEPT", pageable);
 
         if(folderShareEntities == null)
             throw new CustomException(ErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER);
