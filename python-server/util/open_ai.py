@@ -236,30 +236,36 @@ class OpenAIUtil:
 
         start_index = 0
         for section in sections:
-            current_str = ""  # 현재 섹션의 텍스트를 저장할 변수
+            current_str = ""  # 섹션의 텍스트를 저장할 변수
 
             if section:
                 for i in range(start_index, len(stt_origin)):
                     if stt_origin[i].start <= section.end_time:
                         current_str += stt_origin[i].text  # 시간 범위 내의 텍스트 추가
-                    elif current_str:  # 범위를 벗어나는 경우이며, current_str에 이미 텍스트가 있는 경우
-                        script_entity = Analysis(section_id=section.section_id, content=current_str)
-                        assign_text_list.append(script_entity)
-
-                        start_index = i
-                        current_str = ""
-                        break
                     else:
-                        script_entity = Analysis(section_id=section.section_id, content="")
-                        assign_text_list.append(script_entity)
+                        # current_str이 비어 있지 않은 경우에만 Analysis 객체 생성
+                        if current_str.strip():
+                            script_entity = Analysis(section_id=section.section_id, content=current_str.strip())
+                            assign_text_list.append(script_entity)
+                        else:
+                            # 섹션에 해당하는 텍스트가 없을 경우 빈 Analysis 생성
+                            script_entity = Analysis(section_id=section.section_id, content="")
+                            assign_text_list.append(script_entity)
 
+                        # 루프 바깥으로 나가기 전에 start_index 업데이트
                         start_index = i
-                        current_str = ""
-                if current_str:  # 마지막으로 범위 내 텍스트가 남아 있는 경우 출력
-                    script_entity = Analysis(section_id=section.section_id, content=current_str)
-                    assign_text_list.append(script_entity)
-        return assign_text_list
+                        break
 
+                # 마지막 섹션에 대한 처리 (루프가 끝난 후)
+                if current_str.strip():
+                    script_entity = Analysis(section_id=section.section_id, content=current_str.strip())
+                    assign_text_list.append(script_entity)
+                elif not any(stt.start <= section.end_time for stt in stt_origin[start_index:]):
+                    # 섹션에 해당하는 텍스트가 없으면 빈 문자열로 Analysis 생성
+                    script_entity = Analysis(section_id=section.section_id, content="")
+                    assign_text_list.append(script_entity)
+
+        return assign_text_list
     # section과 script를 불러와서 매칭시켜서, 요약하고, summary insert
     def get_summary(self, datas: List[Section]):
         summary_list = []
