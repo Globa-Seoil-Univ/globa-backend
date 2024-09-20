@@ -17,6 +17,5 @@ public interface StudyRepository extends JpaRepository<StudyEntity, Long> {
             nativeQuery = true
     )
     Optional<StudyEntity> findByCreatedTime(@Param("userId") Long userId, @Param("recordId") Long recordId);
-    List<StudyEntity> findAllByUserUserId(Long user);
     List<StudyEntity> findAllByUserUserIdAndRecordRecordId(Long user,Long recordId);
 }

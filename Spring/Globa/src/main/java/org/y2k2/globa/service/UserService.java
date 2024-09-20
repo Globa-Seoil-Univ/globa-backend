@@ -19,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
+import org.y2k2.globa.Projection.StudyTimeProjection;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.CustomException;
@@ -322,7 +323,7 @@ public class UserService {
             recordIds.add(recordEntity.getRecordId());
         }
 
-        List<StudyEntity> studyEntities = studyRepository.findAllByUserUserId(userId);
+        List<StudyTimeProjection> studyEntities = userRepository.findAllByUserUserId(userId);
         List<QuizGradeProjection> quizGradeProjectionList = userRepository.findQuizGradeByUser(userId);
         List<KeywordProjection> keywordProjectionList = userRepository.findKeywordByRecordIds(recordIds);
 
@@ -331,13 +332,10 @@ public class UserService {
         List<ResponseQuizGradeDto> quizGrades = new ArrayList<>();
         List<ResponseKeywordDto> keywords = new ArrayList<>();
 
-        for( StudyEntity studyEntitiy : studyEntities ){
-            CustomTimestamp timestamp = new CustomTimestamp();
-            timestamp.setTimestamp(studyEntitiy.getCreatedTime());
-
+        for( StudyTimeProjection studyTimeProjection : studyEntities ){
             ResponseStudyTimesDto responseStudyTimesDto = new ResponseStudyTimesDto();
-            responseStudyTimesDto.setStudyTime(studyEntitiy.getStudyTime());
-            responseStudyTimesDto.setCreatedTime(timestamp.toString());
+            responseStudyTimesDto.setStudyTime(studyTimeProjection.getTotalStudyTime());
+            responseStudyTimesDto.setCreatedTime(studyTimeProjection.getCreatedDate());
             studyTimes.add(responseStudyTimesDto);
         }
 
