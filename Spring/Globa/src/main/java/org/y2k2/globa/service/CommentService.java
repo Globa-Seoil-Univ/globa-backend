@@ -236,7 +236,7 @@ public class CommentService {
                 Message message = Message.builder()
                         .setToken(targetFolderShare.getTargetUser().getNotificationToken())
                         .setNotification(Notification.builder()
-                                .setTitle(user.getName() + "님이 댓글이 달았습니다!")
+                                .setTitle(user.getName() + "님이 댓글을 달았습니다!")
                                 .build())
                         .build();
                 messages.add(message);

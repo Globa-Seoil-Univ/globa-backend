@@ -97,7 +97,7 @@ public class NotificationController {
     )
     @GetMapping("/unread/check")
     public ResponseEntity<?> getHasUnreadNotifications(
-            @RequestHeader(value = "Authorization") String accessToken
+            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken
         ) {
         if (accessToken == null)
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
@@ -148,7 +148,7 @@ public class NotificationController {
     )
     @GetMapping("/unread/count")
     public ResponseEntity<?> getCountUnreadNotifications(
-            @RequestHeader(value = "Authorization") String accessToken
+            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken
     ) {
         if (accessToken == null)
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
