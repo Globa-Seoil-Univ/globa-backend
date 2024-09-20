@@ -177,7 +177,6 @@ public class FolderService {
 
         // 리스트를 순회하며 각 공유 타겟 수행
         for (ShareTarget target : shareTargets) {
-            System.out.println("Code: " + target.getCode() + ", Role: " + target.getRole());
             UserEntity targetEntity = userRepository.findOneByCode(target.getCode());
             if(targetEntity == null)
                 throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);

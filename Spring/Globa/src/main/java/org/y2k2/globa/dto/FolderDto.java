@@ -11,5 +11,5 @@ public class FolderDto {
     private Long folderId;
     private UserEntity user;
     private String title;
-    private LocalDateTime createdTime;
+    private String createdTime;
 }
