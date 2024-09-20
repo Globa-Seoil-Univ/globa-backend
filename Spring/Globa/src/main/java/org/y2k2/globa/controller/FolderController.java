@@ -94,8 +94,6 @@ public class FolderController {
     @PostMapping
     public ResponseEntity<?> postFolder(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
                                         @RequestBody RequestFolderPostDto request){
-
-
         if ( accessToken == null )
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( request.getTitle() == null  )
