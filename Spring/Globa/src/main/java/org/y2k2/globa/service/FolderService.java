@@ -128,6 +128,7 @@ public class FolderService {
 
         FolderShareEntity saveShareEntity = new FolderShareEntity();
         saveShareEntity.setFolder(savedEntity);
+        saveShareEntity.setInvitationStatus(String.valueOf(InvitationStatus.ACCEPT));
         saveShareEntity.setRoleId(folderRoleRepository.findByRoleName("소유자"));
         saveShareEntity.setOwnerUser(userEntity);
         saveShareEntity.setTargetUser(userEntity);
