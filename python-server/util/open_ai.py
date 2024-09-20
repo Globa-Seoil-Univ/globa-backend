@@ -236,33 +236,30 @@ class OpenAIUtil:
 
         start_index = 0
         for section in sections:
-            current_str = ""  # 섹션의 텍스트를 저장할 변수
+            current_str = ""  # 현재 섹션의 텍스트를 저장할 변수
+            text_assigned = False  # 해당 섹션에 텍스트가 할당되었는지 여부 확인
 
             if section:
                 for i in range(start_index, len(stt_origin)):
                     if stt_origin[i].start <= section.end_time:
                         current_str += stt_origin[i].text  # 시간 범위 내의 텍스트 추가
                     else:
-                        # current_str이 비어 있지 않은 경우에만 Analysis 객체 생성
-                        if current_str.strip():
+                        if current_str.strip():  # 텍스트가 있으면 저장
                             script_entity = Analysis(section_id=section.section_id, content=current_str.strip())
                             assign_text_list.append(script_entity)
+                            text_assigned = True  # 텍스트가 할당된 것으로 플래그 설정
                         else:
-                            # 섹션에 해당하는 텍스트가 없을 경우 빈 Analysis 생성
                             script_entity = Analysis(section_id=section.section_id, content="")
                             assign_text_list.append(script_entity)
+                            text_assigned = True  # 빈 텍스트가라도 할당된 것으로 플래그 설정
 
-                        # 루프 바깥으로 나가기 전에 start_index 업데이트
-                        start_index = i
-                        break
+                        start_index = i  # start_index 업데이트
+                        current_str = ""
+                        break  # 섹션 처리 완료 후 루프 탈출
 
-                # 마지막 섹션에 대한 처리 (루프가 끝난 후)
-                if current_str.strip():
+                # 루프가 끝난 후, 텍스트가 할당되지 않았으면 처리
+                if not text_assigned and current_str.strip():
                     script_entity = Analysis(section_id=section.section_id, content=current_str.strip())
-                    assign_text_list.append(script_entity)
-                elif not any(stt.start <= section.end_time for stt in stt_origin[start_index:]):
-                    # 섹션에 해당하는 텍스트가 없으면 빈 문자열로 Analysis 생성
-                    script_entity = Analysis(section_id=section.section_id, content="")
                     assign_text_list.append(script_entity)
 
         return assign_text_list
