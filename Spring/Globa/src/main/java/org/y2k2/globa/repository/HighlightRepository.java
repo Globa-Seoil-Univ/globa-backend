@@ -13,7 +13,7 @@ public interface HighlightRepository extends JpaRepository<HighlightEntity, Long
                         "FROM highlight h " +
                         "INNER JOIN comment c ON h.highlight_id = c.highlight_id " +
                         "WHERE h.section_id = :sectionId " +
-                            "AND (c.parent_id IS NULL OR (c.parent_id IS NOT NULL AND c.deleted = FALSE)) " +
+                            "AND (c.parent_id IS NULL OR (c.parent_id IS NOT NULL)) " +
                             "AND c.deleted = FALSE " +
                             "AND NOT EXISTS (" +
                                 "SELECT 1 FROM comment child " +
