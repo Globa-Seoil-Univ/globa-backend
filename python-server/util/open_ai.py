@@ -119,7 +119,7 @@ class OpenAIUtil:
 
             if len(chunks) == 1:
                 completion = self.client.chat.completions.create(
-                    model="gpt-3.5-turbo",
+                    model="gpt-4o-mini",
                     messages=[
                         {"role": "system",
                          "content": "너는 사용자가 보내주는 2번째 줄부터 시작하는 내용을 보고 O/X 퀴즈를 여러 개 만들어주는 QA 모델이야.\n"
@@ -142,7 +142,7 @@ class OpenAIUtil:
 
                     if i > 0:
                         completion = self.client.chat.completions.create(
-                            model="gpt-3.5-turbo",
+                            model="gpt-4o-mini",
                             messages=[
                                 {"role": "system", "content": "너는 사용자가 보내주는 내용을 보고 간단한 요약을 해주는 모델이야."},
                                 {"role": "user", "content": chunks[i - 1]}
@@ -154,7 +154,7 @@ class OpenAIUtil:
                         prev_text = completion.choices[0].message.content
 
                     completion = self.client.chat.completions.create(
-                        model="gpt-3.5-turbo",
+                        model="gpt-4o-mini",
                         messages=[
                             {"role": "system",
                              "content": "너는 사용자가 보내주는 2번째 줄부터 시작하는 내용을 보고 O/X 퀴즈를 여러 개 만들어주는 QA 모델이야.\n "
@@ -202,7 +202,7 @@ class OpenAIUtil:
                     break  # 반복 중단
 
             completion = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4o-mini",
                 messages=[
                     {
                         "role": "system",
@@ -271,7 +271,7 @@ class OpenAIUtil:
             if data:
                 if data.content:
                     completion = self.client.chat.completions.create(
-                        model="gpt-3.5-turbo",
+                        model="gpt-4o-mini",
                         messages=[
                             {
                                 "role": "system",
