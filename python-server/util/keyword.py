@@ -8,7 +8,7 @@ from kiwipiepy import Kiwi
 
 class KeywordUtil:
     def __init__(self):
-        self.model = BertModel.from_pretrained("google-bert/bert-base-uncased")
+        self.model = BertModel.from_pretrained("skt/kobert-base-v1")
         self.kw_model = KeyBERT(self.model)
         self.kiwi = Kiwi()
 
@@ -30,7 +30,7 @@ class KeywordUtil:
         for token, pos, _, _ in result[0][0]:
             # 체언과 알파벳만 추출 (일반, 고유, 의존 명사 or 수사 or 대명사 or 영단어)
             # 수사 : 체언에 속하면서 사물의 수량이나 순서를 나타내는 품사 ex) 하나, 둘
-            if len(token) != 1 and pos.startswith('N') or pos.startswith('SL'):
+            if len(token) != 1 and (pos == 'NNG' or pos == 'NNP' or pos == 'SL'):
                 results.append(token)
 
         return results
