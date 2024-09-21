@@ -74,7 +74,7 @@ public class CommentController {
             @PathVariable("sectionId") long sectionId,
             @PathVariable("highlightId") long highlightId,
             @RequestParam(required = false, defaultValue = "1", value = "page") int page,
-            @RequestParam(required = false, defaultValue = "10", value = "count") int count
+            @RequestParam(required = false, defaultValue = "100", value = "count") int count
     ) {
         if (accessToken == null) {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
@@ -126,7 +126,7 @@ public class CommentController {
             @PathVariable("highlightId") long highlightId,
             @PathVariable("parentId") long parentId,
             @RequestParam(required = false, defaultValue = "1", value = "page") int page,
-            @RequestParam(required = false, defaultValue = "10", value = "count") int count
+            @RequestParam(required = false, defaultValue = "100", value = "count") int count
     ) {
         if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 

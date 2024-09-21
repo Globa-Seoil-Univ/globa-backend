@@ -57,7 +57,7 @@ public class InquiryController {
     public ResponseEntity<?> getInquires(
             @RequestHeader(value = "Authorization") String accessToken,
             @RequestParam(required = false, value = "page", defaultValue = "1") int page,
-            @RequestParam(required = false, value = "count", defaultValue = "10") int count,
+            @RequestParam(required = false, value = "count", defaultValue = "100") int count,
             @RequestParam(required = false, value = "sort", defaultValue = "r") String sort
     ) {
         if (accessToken == null) {

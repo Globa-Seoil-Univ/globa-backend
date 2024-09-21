@@ -60,7 +60,7 @@ public class RecordController {
     public ResponseEntity<?> getRecordByFolderId(@Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
                                                  @PathVariable(value = "folder_id", required = false) Long folderId,
                                                  @RequestParam(required = false, defaultValue = "1", value = "page") int page,
-                                                 @RequestParam(required = false, defaultValue = "10", value = "count") int count) {
+                                                 @RequestParam(required = false, defaultValue = "100", value = "count") int count) {
         if ( accessToken == null )
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( folderId == null )
@@ -99,7 +99,7 @@ public class RecordController {
     )
     @GetMapping("/record")
     public ResponseEntity<?> getAllRecord(@Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
-                                                 @RequestParam(required = false, defaultValue = "10", value = "count") int count) {
+                                                 @RequestParam(required = false, defaultValue = "100", value = "count") int count) {
         if ( accessToken == null )
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
@@ -271,7 +271,7 @@ public class RecordController {
     public ResponseEntity<?> searchRecord(
             @Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
             @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "10") int count,
+            @RequestParam(required = false, defaultValue = "100") int count,
             @RequestParam(required = false) String keyword) {
         if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
@@ -309,7 +309,7 @@ public class RecordController {
     public ResponseEntity<?> getReceivingRecord(
             @Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
             @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "10") int count) {
+            @RequestParam(required = false, defaultValue = "100") int count) {
         if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
         return ResponseEntity.ok(recordService.getReceivingRecords(accessToken, page, count));
@@ -346,7 +346,7 @@ public class RecordController {
     public ResponseEntity<?> getSharingRecord(
             @Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
             @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "10") int count) {
+            @RequestParam(required = false, defaultValue = "100") int count) {
         if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
         return ResponseEntity.ok(recordService.getSharingRecords(accessToken, page, count));

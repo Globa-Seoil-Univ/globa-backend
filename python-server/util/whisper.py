@@ -19,7 +19,7 @@ class WhisperManager:
     logger = Logger(name="consumer").logger
 
     def __init__(self):
-        model_size = "medium"
+        model_size = "large-v3"
         self.model = WhisperModel(model_size, device="cuda", compute_type="float32")
 
     def stt(self, path: str):
@@ -39,6 +39,8 @@ class WhisperManager:
 
         results = []
         for segment in segments:
+            self.logger.debug(segment)
+
             result: STTResults = STTResults(
                 text=segment.text,
                 start=segment.start,

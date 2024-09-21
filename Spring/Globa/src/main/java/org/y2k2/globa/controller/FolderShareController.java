@@ -64,7 +64,7 @@ public class FolderShareController {
             @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable(value = "folderId") Long folderId,
             @RequestParam(required = false, defaultValue = "1", value = "page") int page,
-            @RequestParam(required = false, defaultValue = "10", value = "count") int count) {
+            @RequestParam(required = false, defaultValue = "100", value = "count") int count) {
         if (accessToken == null) {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         }

@@ -61,7 +61,7 @@ public class NotificationController {
     public ResponseEntity<?> getNotifications(
             @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
             @RequestParam(value = "type", defaultValue = "a") String type,
-            @RequestParam(value = "count", defaultValue = "10") int count,
+            @RequestParam(value = "count", defaultValue = "100") int count,
             @RequestParam(value = "page", defaultValue = "1") int page) {
         if (accessToken == null) {
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
