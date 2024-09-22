@@ -15,14 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.*;
+import org.y2k2.globa.repository.*;
 import org.y2k2.globa.mapper.CommentMapper;
 import org.y2k2.globa.mapper.NotificationMapper;
-import org.y2k2.globa.repository.*;
 import org.y2k2.globa.type.InvitationStatus;
 import org.y2k2.globa.type.NotificationType;
 import org.y2k2.globa.util.CustomTimestamp;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -169,14 +168,26 @@ public class CommentService {
         SectionEntity section = validateSection(request.getSectionId(), request.getRecordId(), request.getFolderId());
         validateFolderShare(section, user);
         validateHighlight(request.getHighlightId());
-        CommentEntity comment = validateComment(commentId);
-        LocalDateTime now = new CustomTimestamp().getTimestamp();
 
-        if (!user.getUserId().equals(comment.getUser().getUserId())) throw new CustomException(ErrorCode.MISMATCH_COMMENT_OWNER);
+        Long exists = commentRepository.existsSelfOrChildDeletedByCommentId(commentId);
 
-        comment.setDeleted(true);
-        comment.setDeletedTime(now);
-        commentRepository.save(comment);
+        if (exists == 1) {
+            List<CommentEntity> deletedComments = commentRepository.findAllSelfOrChildDeletedByCommentId(commentId);
+            if (deletedComments.isEmpty()) throw new CustomException(ErrorCode.NOT_FOUND_COMMENT);
+            long highlightId = deletedComments.get(0).getHighlight().getHighlightId();
+
+            commentRepository.deleteAll(deletedComments);
+
+            HighlightEntity highlight = highlightRepository.findByHighlightId(highlightId);
+            highlightRepository.delete(highlight);
+        } else {
+            CommentEntity comment = validateComment(commentId);
+            if (!user.getUserId().equals(comment.getUser().getUserId())) throw new CustomException(ErrorCode.MISMATCH_COMMENT_OWNER);
+
+            comment.setDeleted(true);
+            comment.setDeletedTime(new CustomTimestamp().getTimestamp());
+            commentRepository.save(comment);
+        }
     }
 
     private UserEntity validateUser(long userId) {

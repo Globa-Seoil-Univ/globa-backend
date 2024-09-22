@@ -12,10 +12,10 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.dto.ConsumerValidateDto;
+import org.y2k2.globa.repository.*;
 import org.y2k2.globa.type.NotificationType;
 import org.y2k2.globa.dto.ResponseKafkaDto;
 import org.y2k2.globa.entity.*;
-import org.y2k2.globa.repository.*;
 
 import java.util.ArrayList;
 import java.util.List;

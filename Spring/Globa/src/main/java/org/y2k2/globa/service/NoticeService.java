@@ -12,9 +12,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.*;
+import org.y2k2.globa.repository.*;
 import org.y2k2.globa.mapper.NoticeMapper;
 import org.y2k2.globa.mapper.NotificationMapper;
-import org.y2k2.globa.repository.*;
 import org.y2k2.globa.type.NotificationType;
 
 import java.util.ArrayList;

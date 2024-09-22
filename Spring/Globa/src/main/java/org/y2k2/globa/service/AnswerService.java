@@ -9,8 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.*;
-import org.y2k2.globa.mapper.NotificationMapper;
 import org.y2k2.globa.repository.*;
+import org.y2k2.globa.mapper.NotificationMapper;
 import org.y2k2.globa.type.NotificationType;
 
 @Service

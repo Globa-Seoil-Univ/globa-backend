@@ -8,8 +8,6 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -25,7 +23,6 @@ import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.repository.*;
-import org.y2k2.globa.util.CustomTimestamp;
 import org.y2k2.globa.util.JwtToken;
 import org.y2k2.globa.util.JwtTokenProvider;
 import org.y2k2.globa.util.JwtUtil;
@@ -90,58 +87,57 @@ public class UserService {
 
     public JwtToken postUser(RequestUserPostDTO requestUserPostDTO){
         // 1001 카카오 1004 구글
-        if (requestUserPostDTO.getToken() == null || requestUserPostDTO.getToken().isEmpty())
-            throw new CustomException(ErrorCode.REQUIRED_SNS_TOKEN);
-
-        switch (requestUserPostDTO.getSnsKind())
-        {
-            case "1001" :
-                try {
-                    RestTemplate restTemplate = new RestTemplate();
-
-                    // HTTP 요청 헤더에 Authorization 추가
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.set("Authorization", "Bearer " + requestUserPostDTO.getToken());
-
-                    HttpEntity<String> entity = new HttpEntity<>(headers);
-
-                        // 사용자 정보 요청
-                        ResponseEntity<String> response = restTemplate.exchange(
-                                KAKAO_USER_INFO_URL,
-                                HttpMethod.GET,
-                                entity,
-                                String.class);
-                        // JSON 응답을 JsonNode로 파싱
-                        ObjectMapper objectMapper = new ObjectMapper();
-                        JsonNode responseBody = objectMapper.readTree(response.getBody());
-                        String kakaoUid = String.valueOf(responseBody.get("id"));
-                    if(!requestUserPostDTO.getSnsId().equalsIgnoreCase(kakaoUid))
-                        throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
-
-                } catch (Exception e) {
-                    log.error("Failed to verify kakao token : " + e);
-                    throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
-                }
-                break;
-            case "1004" :
-                try {
-                    FirebaseToken token = firebaseAuth.verifyIdToken(requestUserPostDTO.getToken());
-
-                    if(!requestUserPostDTO.getSnsId().equalsIgnoreCase(token.getUid())){
-                        throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
-                    }
-
-                    System.out.println(token.getUid());
-                    System.out.println(token.getEmail());
-                    System.out.println(token.getName());
-                    System.out.println(token.getPicture());
-                } catch (FirebaseAuthException e) {
-                    log.error("Failed to verify firebase token : " + e);
-                    throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
-                }
-                break;
-        }
-
+//        if (requestUserPostDTO.getToken() == null || requestUserPostDTO.getToken().isEmpty())
+//            throw new CustomException(ErrorCode.REQUIRED_SNS_TOKEN);
+//
+//        switch (requestUserPostDTO.getSnsKind())
+//        {
+//            case "1001" :
+//                try {
+//                    RestTemplate restTemplate = new RestTemplate();
+//
+//                    // HTTP 요청 헤더에 Authorization 추가
+//                    HttpHeaders headers = new HttpHeaders();
+//                    headers.set("Authorization", "Bearer " + requestUserPostDTO.getToken());
+//
+//                    HttpEntity<String> entity = new HttpEntity<>(headers);
+//
+//                        // 사용자 정보 요청
+//                        ResponseEntity<String> response = restTemplate.exchange(
+//                                KAKAO_USER_INFO_URL,
+//                                HttpMethod.GET,
+//                                entity,
+//                                String.class);
+//                        // JSON 응답을 JsonNode로 파싱
+//                        ObjectMapper objectMapper = new ObjectMapper();
+//                        JsonNode responseBody = objectMapper.readTree(response.getBody());
+//                        String kakaoUid = String.valueOf(responseBody.get("id"));
+//                    if(!requestUserPostDTO.getSnsId().equalsIgnoreCase(kakaoUid))
+//                        throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
+//
+//                } catch (Exception e) {
+//                    log.error("Failed to verify kakao token : " + e);
+//                    throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
+//                }
+//                break;
+//            case "1004" :
+//                try {
+//                    FirebaseToken token = firebaseAuth.verifyIdToken(requestUserPostDTO.getToken());
+//
+//                    if(!requestUserPostDTO.getSnsId().equalsIgnoreCase(token.getUid())){
+//                        throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
+//                    }
+//
+//                    System.out.println(token.getUid());
+//                    System.out.println(token.getEmail());
+//                    System.out.println(token.getName());
+//                    System.out.println(token.getPicture());
+//                } catch (FirebaseAuthException e) {
+//                    log.error("Failed to verify firebase token : " + e);
+//                    throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
+//                }
+//                break;
+//        }
 
         UserEntity postUserEntity = userRepository.findBySnsId(requestUserPostDTO.getSnsId());
 

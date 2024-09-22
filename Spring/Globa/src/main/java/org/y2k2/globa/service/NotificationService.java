@@ -23,8 +23,6 @@ import org.y2k2.globa.repository.UserRepository;
 import org.y2k2.globa.type.NotificationSort;
 import org.y2k2.globa.type.NotificationType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Service
