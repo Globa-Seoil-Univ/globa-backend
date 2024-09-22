@@ -37,7 +37,6 @@ public class CommentService {
     private final UserRepository userRepository;
     private final HighlightRepository highlightRepository;
     private final NotificationRepository notificationRepository;
-    private final FolderShareEntity folderShareEntity;
 
     public ResponseCommentDto getComments(RequestCommentWithIdsDto request, int page, int count) {
         UserEntity user = validateUser(request.getUserId());
