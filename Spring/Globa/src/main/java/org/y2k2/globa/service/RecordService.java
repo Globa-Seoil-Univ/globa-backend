@@ -75,6 +75,10 @@ public class RecordService {
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if(userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
+        FolderEntity folderEntity = folderRepository.findFolderEntityByFolderId(folderId);
+
+        if(folderEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_FOLDER);
+
         FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity, folderId,"ACCEPT");
 
         if(folderShareEntity == null)
@@ -83,10 +87,11 @@ public class RecordService {
         Pageable pageable = PageRequest.of(page-1, count);
         Page<RecordEntity> records = recordRepository.findAllByFolderFolderId(pageable, folderId);
 
+        boolean isOwner = folderEntity.getUser().getUserId().equals(userId);
 
         return new ResponseRecordsByFolderDto(records.stream()
                 .map(RecordMapper.INSTANCE::toRequestRecordDto)
-                .collect(Collectors.toList()), (int) records.getTotalElements());
+                .collect(Collectors.toList()),isOwner , (int) records.getTotalElements());
 
     }
 

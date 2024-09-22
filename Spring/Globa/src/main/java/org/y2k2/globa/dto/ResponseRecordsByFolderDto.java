@@ -10,5 +10,6 @@ import java.util.List;
 @Getter
 public class ResponseRecordsByFolderDto {
     private List<RequestRecordDto> records;
+    private boolean isOwner;
     private int total;
 }
