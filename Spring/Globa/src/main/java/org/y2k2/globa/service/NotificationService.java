@@ -151,7 +151,7 @@ public class NotificationService {
         return new ResponseUnreadCountDto(
                 total,
                 notificationUnReadCount.getNoticeCount(),
-                notificationUnReadCount.getInviteCount(),
+                notificationUnReadCount.getInviteCount() + notificationUnReadCount.getShareCount(),
                 notificationUnReadCount.getRecordCount(),
                 notificationUnReadCount.getInquiryCount()
         );
