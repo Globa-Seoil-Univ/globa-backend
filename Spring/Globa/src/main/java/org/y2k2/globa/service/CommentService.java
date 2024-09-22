@@ -82,7 +82,7 @@ public class CommentService {
         UserEntity user = validateUser(request.getUserId());
 
         SectionEntity section = validateSection(request.getSectionId(), request.getRecordId(), request.getFolderId());
-        FolderShareEntity folderShare = validateFolderShare(section, user);
+        FolderShareEntity folderShare = validateFolderShareWithRole(section, user);
 
         Long isAlready = highlightRepository.existsBySectionAndInRange(section.getSectionId(), dto.getStartIdx(), dto.getEndIdx());
         if (isAlready == 1) throw new CustomException(ErrorCode.HIGHLIGHT_DUPLICATED);
@@ -109,7 +109,7 @@ public class CommentService {
         UserEntity user = validateUser(request.getUserId());
 
         SectionEntity section = validateSection(request.getSectionId(), request.getRecordId(), request.getFolderId());
-        FolderShareEntity folderShare = validateFolderShare(section, user);
+        FolderShareEntity folderShare = validateFolderShareWithRole(section, user);
         HighlightEntity highlight = validateHighlight(request.getHighlightId());
 
         CommentEntity comment = CommentEntity.create(user, highlight, dto.getContent());
@@ -129,7 +129,7 @@ public class CommentService {
         UserEntity user = validateUser(request.getUserId());
 
         SectionEntity section = validateSection(request.getSectionId(), request.getRecordId(), request.getFolderId());
-        FolderShareEntity folderShare = validateFolderShare(section, user);
+        FolderShareEntity folderShare = validateFolderShareWithRole(section, user);
         HighlightEntity highlight = validateHighlight(request.getHighlightId());
 
         CommentEntity parentComment = commentRepository.findByCommentId(request.getParentId());
@@ -152,7 +152,7 @@ public class CommentService {
         UserEntity user = validateUser(request.getUserId());
 
         SectionEntity section = validateSection(request.getSectionId(), request.getRecordId(), request.getFolderId());
-        validateFolderShare(section, user);
+        validateFolderShareWithRole(section, user);
         validateHighlight(request.getHighlightId());
         CommentEntity comment = validateComment(commentId);
 
@@ -167,7 +167,7 @@ public class CommentService {
         UserEntity user = validateUser(request.getUserId());
 
         SectionEntity section = validateSection(request.getSectionId(), request.getRecordId(), request.getFolderId());
-        validateFolderShare(section, user);
+        validateFolderShareWithRole(section, user);
         validateHighlight(request.getHighlightId());
 
         Long exists = commentRepository.existsSelfOrChildDeletedByCommentId(commentId);
@@ -209,6 +209,15 @@ public class CommentService {
     }
 
     private FolderShareEntity validateFolderShare(SectionEntity section, UserEntity user) {
+        FolderShareEntity folderShare = folderShareRepository.findByFolderAndTargetUser(section.getRecord().getFolder(), user);
+
+        if (folderShare == null || folderShare.getInvitationStatus().equals(String.valueOf(InvitationStatus.PENDING)))
+            throw new CustomException(ErrorCode.NOT_DESERVE_POST_COMMENT);
+
+        return folderShare;
+    }
+
+    private FolderShareEntity validateFolderShareWithRole(SectionEntity section, UserEntity user) {
         FolderShareEntity folderShare = folderShareRepository.findByFolderAndTargetUser(section.getRecord().getFolder(), user);
 
         if (folderShare == null || folderShare.getInvitationStatus().equals(String.valueOf(InvitationStatus.PENDING)) || folderShare.getRoleId().getRoleId().equals("3"))
