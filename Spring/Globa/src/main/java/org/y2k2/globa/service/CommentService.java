@@ -20,6 +20,7 @@ import org.y2k2.globa.mapper.CommentMapper;
 import org.y2k2.globa.mapper.NotificationMapper;
 import org.y2k2.globa.type.InvitationStatus;
 import org.y2k2.globa.type.NotificationType;
+import org.y2k2.globa.type.Role;
 import org.y2k2.globa.util.CustomTimestamp;
 
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ public class CommentService {
     private final UserRepository userRepository;
     private final HighlightRepository highlightRepository;
     private final NotificationRepository notificationRepository;
+    private final FolderShareEntity folderShareEntity;
 
     public ResponseCommentDto getComments(RequestCommentWithIdsDto request, int page, int count) {
         UserEntity user = validateUser(request.getUserId());
@@ -171,6 +173,9 @@ public class CommentService {
 
         Long exists = commentRepository.existsSelfOrChildDeletedByCommentId(commentId);
 
+        CommentEntity comment = validateComment(commentId);
+        if (!user.getUserId().equals(comment.getUser().getUserId())) throw new CustomException(ErrorCode.MISMATCH_COMMENT_OWNER);
+
         if (exists == 1) {
             List<CommentEntity> deletedComments = commentRepository.findAllSelfOrChildDeletedByCommentId(commentId);
             if (deletedComments.isEmpty()) throw new CustomException(ErrorCode.NOT_FOUND_COMMENT);
@@ -181,9 +186,6 @@ public class CommentService {
             HighlightEntity highlight = highlightRepository.findByHighlightId(highlightId);
             highlightRepository.delete(highlight);
         } else {
-            CommentEntity comment = validateComment(commentId);
-            if (!user.getUserId().equals(comment.getUser().getUserId())) throw new CustomException(ErrorCode.MISMATCH_COMMENT_OWNER);
-
             comment.setDeleted(true);
             comment.setDeletedTime(new CustomTimestamp().getTimestamp());
             commentRepository.save(comment);
@@ -209,7 +211,8 @@ public class CommentService {
 
     private FolderShareEntity validateFolderShare(SectionEntity section, UserEntity user) {
         FolderShareEntity folderShare = folderShareRepository.findByFolderAndTargetUser(section.getRecord().getFolder(), user);
-        if (folderShare == null || folderShare.getInvitationStatus().equals(String.valueOf(InvitationStatus.PENDING)))
+
+        if (folderShare == null || folderShare.getInvitationStatus().equals(String.valueOf(InvitationStatus.PENDING)) || folderShare.getRoleId().getRoleId().equals("3"))
             throw new CustomException(ErrorCode.NOT_DESERVE_POST_COMMENT);
 
         return folderShare;
