@@ -562,30 +562,24 @@ public class RecordService {
     public HttpStatus deleteRecord(String accessToken, Long recordId, Long folderId){
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
-        RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
-
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
-        if(recordEntity == null) {
-            throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
-        }
+        RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
+        if(recordEntity == null) { throw new CustomException(ErrorCode.NOT_FOUND_RECORD); }
 
-        if(!Objects.equals(folderId, recordEntity.getFolder().getFolderId()))
-            throw new CustomException(ErrorCode.MISMATCH_RECORD_FOLDER);
+        FolderShareEntity folderShareEntities = folderShareRepository.findByFolderAndTargetUser(recordEntity.getFolder(), userEntity);
+        if (folderShareEntities == null) { throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER); }
+        if (!folderShareEntities.getInvitationStatus().equals(InvitationStatus.ACCEPT.toString())) { throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER); }
 
-        if (!Objects.equals(userId, recordEntity.getUser().getUserId())){
-            throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
-        }
-
+        if(!Objects.equals(folderId, recordEntity.getFolder().getFolderId())) { throw new CustomException(ErrorCode.MISMATCH_RECORD_FOLDER); }
 
         Blob blob = bucket.get(recordEntity.getPath());
-        if( blob == null )
-            throw new CustomException(ErrorCode.NOT_FOUND_RECORD_FIREBASE);
-        else {
+        if( blob != null ) {
             blob.delete();
-            recordRepository.delete(recordEntity);
         }
+
+        recordRepository.delete(recordEntity);
 
         return HttpStatus.OK;
     }
