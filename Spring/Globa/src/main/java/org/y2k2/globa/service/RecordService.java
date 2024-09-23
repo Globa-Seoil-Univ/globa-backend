@@ -315,7 +315,7 @@ public class RecordService {
         if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         Pageable pageable = PageRequest.of(page - 1, count);
-        Page<RecordEntity> records = recordRepository.findReceivingRecordsByUserId(pageable, userId);
+        Page<RecordEntity> records = recordRepository.findReceivingRecordsByUserIdOrderByCreatedTimeDesc(pageable, userId);
 
         return new ResponseAllRecordWithTotalDto(records.stream()
                 .map(record -> {
@@ -339,7 +339,7 @@ public class RecordService {
         if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         Pageable pageable = PageRequest.of(page - 1, count);
-        Page<RecordEntity> records = recordRepository.findSharingRecordsByUserId(pageable, userId);
+        Page<RecordEntity> records = recordRepository.findSharingRecordsByUserIdOrderByCreatedTimeDesc(pageable, userId);
 
         return new ResponseAllRecordWithTotalDto(records.stream()
                 .map(record -> {
