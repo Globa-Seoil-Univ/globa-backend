@@ -25,7 +25,7 @@ public interface RecordRepository extends JpaRepository<RecordEntity, Long> {
   
     RecordEntity findByRecordId(Long recordId);
 
-    @Query(value = "SELECT u.user_id AS userId, u.name AS name, u.profile_path AS profilePath, " +
+    @Query(value = "SELECT DISTINCT u.user_id AS userId, u.name AS name, u.profile_path AS profilePath, " +
             "r.record_id AS recordId, f.folder_id AS folderId, r.title AS title, r.created_time AS createdTime " +
             "FROM record r " +
                 "JOIN folder f ON r.folder_id = f.folder_id " +
