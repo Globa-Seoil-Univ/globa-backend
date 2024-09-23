@@ -192,14 +192,30 @@ class OpenAIUtil:
         start_index = 0
 
         section_list = []
+        prev_str = ""
+        prev_text = ""
 
         while start_index < len(stt):  # 시작 인덱스가 stt 길이보다 작은 동안 계속 반복
             current_str = ""
+
             for i in range(start_index, len(stt)):  # start_index부터 시작
                 current_str += stt[i].text + "*" + str(stt[i].start) + "," + str(stt[i].end) + "*" + "\n"
 
                 if len(current_str) >= 10000:  # 현재 문자열 길이가 14000을 초과하면
                     break  # 반복 중단
+
+            if prev_str != "":
+                completion = self.client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": "너는 사용자가 보내주는 내용을 보고 간단한 요약을 해주는 모델이야."},
+                        {"role": "user", "content": prev_str}
+                    ],
+                    temperature=0.5,
+                    top_p=1
+                )
+
+                prev_text = completion.choices[0].message.content
 
             completion = self.client.chat.completions.create(
                 model="gpt-4o-mini",
@@ -217,6 +233,7 @@ class OpenAIUtil:
                                    "7.파트의 종료 시간은 다음 파트의 시작시간 이전이어야만해." +
                                    "8. 추임새가 반복되는 단어가 있으면 섹션 분리에서 제외시켜줘. 예시는 다음과 같아. ex) 하 하하 하하하 하  \n\n"
                     },
+                    {"role": "assistant", "content": prev_text},
                     {
                         "role": "user",
                         "content": "다음의 텍스트를 섹션으로 분리하고, 한 문장으로 주제를 만들고, 시작시간, 종료시간을 json형태로 반환해줘. \n\n" + current_str
@@ -237,6 +254,7 @@ class OpenAIUtil:
                     section_list.append(section_entity)
 
             start_index = i + 1  # 다음 시작 인덱스 업데이트
+            prev_text = current_str
 
         return section_list  # API 응답을 JSON 형태로 반환  #
 
