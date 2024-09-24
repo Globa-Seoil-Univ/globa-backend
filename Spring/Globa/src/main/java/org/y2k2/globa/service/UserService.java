@@ -87,57 +87,57 @@ public class UserService {
 
     public JwtToken postUser(RequestUserPostDTO requestUserPostDTO){
         // 1001 카카오 1004 구글
-//        if (requestUserPostDTO.getToken() == null || requestUserPostDTO.getToken().isEmpty())
-//            throw new CustomException(ErrorCode.REQUIRED_SNS_TOKEN);
-//
-//        switch (requestUserPostDTO.getSnsKind())
-//        {
-//            case "1001" :
-//                try {
-//                    RestTemplate restTemplate = new RestTemplate();
-//
-//                    // HTTP 요청 헤더에 Authorization 추가
-//                    HttpHeaders headers = new HttpHeaders();
-//                    headers.set("Authorization", "Bearer " + requestUserPostDTO.getToken());
-//
-//                    HttpEntity<String> entity = new HttpEntity<>(headers);
-//
-//                        // 사용자 정보 요청
-//                        ResponseEntity<String> response = restTemplate.exchange(
-//                                KAKAO_USER_INFO_URL,
-//                                HttpMethod.GET,
-//                                entity,
-//                                String.class);
-//                        // JSON 응답을 JsonNode로 파싱
-//                        ObjectMapper objectMapper = new ObjectMapper();
-//                        JsonNode responseBody = objectMapper.readTree(response.getBody());
-//                        String kakaoUid = String.valueOf(responseBody.get("id"));
-//                    if(!requestUserPostDTO.getSnsId().equalsIgnoreCase(kakaoUid))
-//                        throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
-//
-//                } catch (Exception e) {
-//                    log.error("Failed to verify kakao token : " + e);
-//                    throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
-//                }
-//                break;
-//            case "1004" :
-//                try {
-//                    FirebaseToken token = firebaseAuth.verifyIdToken(requestUserPostDTO.getToken());
-//
-//                    if(!requestUserPostDTO.getSnsId().equalsIgnoreCase(token.getUid())){
-//                        throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
-//                    }
-//
-//                    System.out.println(token.getUid());
-//                    System.out.println(token.getEmail());
-//                    System.out.println(token.getName());
-//                    System.out.println(token.getPicture());
-//                } catch (FirebaseAuthException e) {
-//                    log.error("Failed to verify firebase token : " + e);
-//                    throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
-//                }
-//                break;
-//        }
+        if (requestUserPostDTO.getToken() == null || requestUserPostDTO.getToken().isEmpty())
+            throw new CustomException(ErrorCode.REQUIRED_SNS_TOKEN);
+
+        switch (requestUserPostDTO.getSnsKind())
+        {
+            case "1001" :
+                try {
+                    RestTemplate restTemplate = new RestTemplate();
+
+                    // HTTP 요청 헤더에 Authorization 추가
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.set("Authorization", "Bearer " + requestUserPostDTO.getToken());
+
+                    HttpEntity<String> entity = new HttpEntity<>(headers);
+
+                        // 사용자 정보 요청
+                        ResponseEntity<String> response = restTemplate.exchange(
+                                KAKAO_USER_INFO_URL,
+                                HttpMethod.GET,
+                                entity,
+                                String.class);
+                        // JSON 응답을 JsonNode로 파싱
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        JsonNode responseBody = objectMapper.readTree(response.getBody());
+                        String kakaoUid = String.valueOf(responseBody.get("id"));
+                    if(!requestUserPostDTO.getSnsId().equalsIgnoreCase(kakaoUid))
+                        throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
+
+                } catch (Exception e) {
+                    log.error("Failed to verify kakao token : " + e);
+                    throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
+                }
+                break;
+            case "1004" :
+                try {
+                    FirebaseToken token = firebaseAuth.verifyIdToken(requestUserPostDTO.getToken());
+
+                    if(!requestUserPostDTO.getSnsId().equalsIgnoreCase(token.getUid())){
+                        throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
+                    }
+
+                    System.out.println(token.getUid());
+                    System.out.println(token.getEmail());
+                    System.out.println(token.getName());
+                    System.out.println(token.getPicture());
+                } catch (FirebaseAuthException e) {
+                    log.error("Failed to verify firebase token : " + e);
+                    throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
+                }
+                break;
+        }
 
         UserEntity postUserEntity = userRepository.findBySnsId(requestUserPostDTO.getSnsId());
 
@@ -165,6 +165,10 @@ public class UserService {
             userRoleRepository.save(userRoleEntity);
 
             folderService.postDefaultFolder(postUserEntity);
+        }
+
+        if (postUserEntity.getDeleted()) {
+            throw new CustomException(ErrorCode.DELETED_USER);
         }
 
         JwtToken jwtToken = jwtTokenProvider.generateToken(postUserEntity.getUserId());
@@ -429,7 +433,7 @@ public class UserService {
         userRepository.save(userEntity);
         surveyRepository.save(surveyEntity);
 
-        folderService.deleteDefaultFolder(userEntity);
+//        folderService.deleteDefaultFolder(userEntity);
 
         return HttpStatus.OK;
     }
