@@ -159,7 +159,7 @@ public class FolderShareService {
         folderShareEntity.setInvitationStatus(String.valueOf(InvitationStatus.ACCEPT));
         folderShareRepository.save(folderShareEntity);
 
-        NotificationEntity invitationNotification = notificationRepository.findByFolderFolderIdAndFolderShareShareIdAndToUserUserId(folderId, shareId, targetId);
+        NotificationEntity invitationNotification = notificationRepository.findByFolderFolderIdAndFolderShareShareIdAndReceiverUserId(folderId, shareId, targetId);
         if (invitationNotification != null) {
             notificationRepository.delete(invitationNotification);
         }

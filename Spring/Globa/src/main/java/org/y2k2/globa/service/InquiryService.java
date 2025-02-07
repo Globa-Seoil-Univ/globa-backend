@@ -33,9 +33,9 @@ public class InquiryService {
         Page<InquiryEntity> inquiryEntityPage;
 
         if (pagination.getSort().getValue().equals("s")) {
-            inquiryEntityPage = inquiryRepository.findAllBySolvedIsTrueOrderByCreatedTimeDesc(pageable);
+            inquiryEntityPage = inquiryRepository.findAllByIsSolvedIsTrueOrderByCreatedTimeDesc(pageable);
         } else if (pagination.getSort().getValue().equals("n")) {
-            inquiryEntityPage = inquiryRepository.findAllBySolvedIsFalseOrderByCreatedTimeDesc(pageable);
+            inquiryEntityPage = inquiryRepository.findAllByIsSolvedIsFalseOrderByCreatedTimeDesc(pageable);
         } else {
             inquiryEntityPage = inquiryRepository.findAllByOrderByCreatedTimeDesc(pageable);
         }
@@ -59,7 +59,7 @@ public class InquiryService {
 
         AnswerEntity answer = null;
 
-        if (inquiry.isSolved()) {
+        if (inquiry.getIsSolved()) {
             answer = answerRepository.findByInquiry(inquiry);
         }
 

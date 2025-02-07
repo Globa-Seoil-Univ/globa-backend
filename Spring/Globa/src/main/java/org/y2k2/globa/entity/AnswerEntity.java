@@ -11,25 +11,25 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Entity(name="answer")
+@Entity
 @Table(name="answer")
 public class AnswerEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "answer_id", columnDefinition = "INT UNSIGNED")
-    private long answerId;
+    private Long answerId;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JoinColumn(name = "user_id", columnDefinition = "INT UNSIGNED")
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "inquiry_id", referencedColumnName = "inquiry_id")
+    @JoinColumn(name = "inquiry_id", columnDefinition = "INT UNSIGNED")
     private InquiryEntity inquiry;
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "title", nullable = false, length = 80)
     private String title;
 
     @Lob
@@ -37,7 +37,7 @@ public class AnswerEntity {
     private String content;
 
     @CreationTimestamp
-    @Column(name = "created_time")
+    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 
     public static AnswerEntity create(UserEntity writer, InquiryEntity inquiry, String title, String content) {

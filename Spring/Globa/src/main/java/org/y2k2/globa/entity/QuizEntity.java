@@ -3,6 +3,7 @@ package org.y2k2.globa.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Entity(name="quiz")
+@Entity
 @Table(name="quiz")
 public class QuizEntity {
     @Id
@@ -20,15 +21,17 @@ public class QuizEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "record_id", referencedColumnName = "record_id")
+    @JoinColumn(name = "record_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private RecordEntity record;
 
-    @Column(name = "question")
+    @Lob
+    @Column(name = "question", nullable = false)
     private String question;
 
-    @Column(name = "answer")
-    private int answer;
+    @Column(name = "answer", nullable = false)
+    private Boolean answer;
 
-    @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @CreationTimestamp
+    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 }

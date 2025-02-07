@@ -16,53 +16,52 @@ public class NotificationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "notification_id", columnDefinition = "INT UNSIGNED")
-    private long notificationId;
+    private Long notificationId;
 
-    @Column(name = "type_id", nullable = false)
-    @Check(constraints = "CHECK (type_id >= 1 AND type_id <= 8)")
-    private char typeId;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "to_user_id", referencedColumnName = "user_id")
-    private UserEntity toUser;
+    @Column(name = "type_id", nullable = false, columnDefinition = "CHECK (type_id >= 1 AND type_id <= 8)")
+    private Character typeId;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "from_user_id", referencedColumnName = "user_id")
-    private UserEntity fromUser;
+    @JoinColumn(name = "receiver_id", columnDefinition = "INT UNSIGNED")
+    private UserEntity receiver;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "sender_id", columnDefinition = "INT UNSIGNED")
+    private UserEntity sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "share_id", referencedColumnName = "share_id")
+    @JoinColumn(name = "share_id", columnDefinition = "INT UNSIGNED")
     private FolderShareEntity folderShare;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "folder_id", referencedColumnName = "folder_id")
+    @JoinColumn(name = "folder_id", columnDefinition = "INT UNSIGNED")
     private FolderEntity folder;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "record_id", referencedColumnName = "record_id")
+    @JoinColumn(name = "record_id", columnDefinition = "INT UNSIGNED")
     private RecordEntity record;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "comment_id", referencedColumnName = "comment_id")
+    @JoinColumn(name = "comment_id", columnDefinition = "INT UNSIGNED")
     private CommentEntity comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "notice_id", referencedColumnName = "notice_id")
+    @JoinColumn(name = "notice_id", columnDefinition = "INT UNSIGNED")
     private NoticeEntity notice;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "inquiry_id", referencedColumnName = "inquiry_id")
+    @JoinColumn(name = "inquiry_id", columnDefinition = "INT UNSIGNED")
     private InquiryEntity inquiry;
 
     @CreationTimestamp
-    @Column(name = "created_time")
+    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 }

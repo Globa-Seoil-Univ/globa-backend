@@ -426,7 +426,7 @@ public class UserService {
         userEntity.setDeletedTime(LocalDateTime.now());
 
         SurveyEntity surveyEntity = new SurveyEntity();
-        surveyEntity.setSurveyType(String.valueOf(requestSurveyDto.getSurveyType()));
+        surveyEntity.setSurveyType(String.valueOf(requestSurveyDto.getSurveyType()).charAt(0));
         surveyEntity.setContent(requestSurveyDto.getContent());
         surveyEntity.setCreatedTime(LocalDateTime.now());
 

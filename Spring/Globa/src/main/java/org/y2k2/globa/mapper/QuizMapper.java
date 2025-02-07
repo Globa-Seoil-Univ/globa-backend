@@ -11,7 +11,7 @@ public interface QuizMapper {
 
     QuizMapper INSTANCE = Mappers.getMapper(QuizMapper.class);
 
-    @Mapping(source = "quizEntity.quizId", target = "quizId")
+    @Mapping(source = "quizId", target = "quizId")
     @Mapping(source = "question", target = "question")
     @Mapping(source = "answer", target = "answer")
     QuizDto toQuizDto(QuizEntity quizEntity);

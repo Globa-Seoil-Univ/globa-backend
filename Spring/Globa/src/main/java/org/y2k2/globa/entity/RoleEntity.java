@@ -11,9 +11,9 @@ import lombok.Setter;
 public class RoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "role_id", columnDefinition = "smallint")
-    private long roleId;
+    @Column(name = "role_id", columnDefinition = "SMALLINT")
+    private Integer roleId;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, length = 10)
     private String name;
 }

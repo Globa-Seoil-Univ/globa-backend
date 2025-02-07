@@ -3,13 +3,14 @@ package org.y2k2.globa.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 @Getter
 @Setter
-@Entity(name="quiz_attempt")
+@Entity
 @Table(name="quiz_attempt")
 public class QuizAttemptEntity {
     @Id
@@ -19,17 +20,18 @@ public class QuizAttemptEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JoinColumn(name = "user_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "quiz_id", referencedColumnName = "quiz_id")
+    @JoinColumn(name = "quiz_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private QuizEntity quiz;
 
-    @Column(name = "is_correct")
+    @Column(name = "is_correct", columnDefinition = "DEFAULT 0")
     private boolean isCorrect;
 
-    @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @CreationTimestamp
+    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 }

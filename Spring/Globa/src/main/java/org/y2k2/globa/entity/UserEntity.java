@@ -13,57 +13,51 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "app_user")
 public class UserEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", columnDefinition = "INT UNSIGNED")
     private Long userId;
 
-    @Column(name = "sns_kind", nullable = false)
+    @Column(name = "sns_kind", nullable = false, length = 4)
     private String snsKind;
 
-    @Column(name = "sns_id", nullable = false)
+    @Column(name = "sns_id", nullable = false, unique = true, length = 50)
     private String snsId;
 
-    @Column(name = "code", nullable = false)
+    @Column(name = "code", nullable = false, unique = true, length = 6)
     private String code;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @Column(name = "primary_nofi")
-    @ColumnDefault("true")
+    @Column(name = "primary_nofi", columnDefinition = "DEFAULT 0")
     private Boolean primaryNofi;
 
-    @Column(name = "upload_nofi")
-    @ColumnDefault("true")
+    @Column(name = "upload_nofi", columnDefinition = "DEFAULT 0")
     private Boolean uploadNofi;
 
-    @Column(name = "share_nofi")
-    @ColumnDefault("true")
+    @Column(name = "share_nofi", columnDefinition = "DEFAULT 0")
     private Boolean shareNofi;
 
-    @Column(name = "event_nofi")
-    @ColumnDefault("true")
+    @Column(name = "event_nofi", columnDefinition = "DEFAULT 0")
     private Boolean eventNofi;
 
-    @Column(name = "profile_size")
+    @Column(name = "profile_size", columnDefinition = "INT UNSIGNED")
     private Long profileSize;
 
-    @Column(name = "profile_type")
+    @Column(name = "profile_type", length = 20)
     private String profileType;
 
-    @Column(name = "profile_path")
+    @Column(name = "profile_path", length = 200)
     private String profilePath;
 
-    @Column(name = "notification_token", unique = true)
+    @Column(name = "notification_token", unique = true, length = 300)
     private String notificationToken;
 
     @Column(name = "notification_token_time")
     private LocalDateTime notificationTokenTime;
 
-    @Column(name = "deleted")
-    @ColumnDefault("false")
+    @Column(name = "deleted", columnDefinition = "DEFAULT 0")
     private Boolean deleted;
 
     @Column(name = "deleted_time")
@@ -71,26 +65,4 @@ public class UserEntity {
 
     @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
-
-    public static UserEntity toUserEntity(UserDTO userDTO){
-        UserEntity userEntity = new UserEntity();
-
-        userEntity.setUserId(userDTO.getUserId());
-        userEntity.setSnsKind(userDTO.getSnsKind());
-        userEntity.setSnsId(userDTO.getSnsId());
-        userEntity.setCode(userDTO.getCode());
-        userEntity.setName(userDTO.getName());
-        userEntity.setPrimaryNofi(userDTO.getPrimaryNofi());
-        userEntity.setUploadNofi(userDTO.getUploadNofi());
-        userEntity.setShareNofi(userDTO.getShareNofi());
-        userEntity.setEventNofi(userDTO.getEventNofi());;
-        userEntity.setProfilePath(userDTO.getProfilePath());;
-        userEntity.setProfileSize(userDTO.getProfileSize());;
-        userEntity.setProfileType(userDTO.getProfileType());;
-        userEntity.setDeleted(userDTO.getDeleted());;
-        userEntity.setDeletedTime(userDTO.getDeletedTime());
-        userEntity.setCreatedTime(userDTO.getCreatedTime());
-
-        return userEntity;
-    }
 }

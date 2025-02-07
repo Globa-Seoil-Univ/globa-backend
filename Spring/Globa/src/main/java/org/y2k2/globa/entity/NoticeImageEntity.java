@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Entity(name = "noticeImage")
+@Entity
 @Table(name = "notice_image")
 public class NoticeImageEntity {
     @Id
@@ -23,20 +23,20 @@ public class NoticeImageEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "notice_id", referencedColumnName = "notice_id")
+    @JoinColumn(name = "notice_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private NoticeEntity notice;
 
-    @Column(name = "image_path", nullable = false)
+    @Column(name = "image_path", nullable = false, length = 200)
     private String imagePath;
 
     @Column(name = "image_size", nullable = false, columnDefinition = "INT UNSIGNED")
     private Long imageSize;
 
-    @Column(name = "image_type", nullable = false)
+    @Column(name = "image_type", nullable = false, length = 20)
     private String imageType;
 
     @CreationTimestamp
-    @Column(name = "created_time")
+    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 
     public static NoticeImageEntity create(NoticeEntity notice, String path, long size, String type) {

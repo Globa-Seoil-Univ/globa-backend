@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@Entity(name="study")
+@Entity
 @Table(name="study")
 public class StudyEntity {
     @Id
@@ -23,19 +23,19 @@ public class StudyEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JoinColumn(name = "user_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "record_id", referencedColumnName = "record_id")
+    @JoinColumn(name = "record_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private RecordEntity record;
 
-    @Column(name = "study_time", columnDefinition = "INT UNSIGNED")
+    @Column(name = "study_time", columnDefinition = "INT UNSIGNED DEFAULT 0")
     private Long studyTime;
 
     @CreationTimestamp
-    @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 
     @Builder

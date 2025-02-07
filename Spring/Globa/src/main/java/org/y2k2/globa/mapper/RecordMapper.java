@@ -6,7 +6,7 @@ import org.mapstruct.factory.Mappers;
 import org.y2k2.globa.Projection.RecordSearchProjection;
 import org.y2k2.globa.dto.*;
 import org.y2k2.globa.entity.RecordEntity;
-import org.y2k2.globa.entity.RecordSearchDto;
+import org.y2k2.globa.dto.RecordSearchDto;
 
 import java.util.List;
 

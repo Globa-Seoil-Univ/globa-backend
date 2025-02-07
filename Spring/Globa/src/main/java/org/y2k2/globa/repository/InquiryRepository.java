@@ -8,6 +8,6 @@ import org.y2k2.globa.entity.InquiryEntity;
 public interface InquiryRepository extends JpaRepository<InquiryEntity, Long> {
     InquiryEntity findByInquiryId(long inquiryId);
     Page<InquiryEntity> findAllByOrderByCreatedTimeDesc(Pageable pageable);
-    Page<InquiryEntity> findAllBySolvedIsTrueOrderByCreatedTimeDesc(Pageable pageable);
-    Page<InquiryEntity> findAllBySolvedIsFalseOrderByCreatedTimeDesc(Pageable pageable);
+    Page<InquiryEntity> findAllByIsSolvedIsTrueOrderByCreatedTimeDesc(Pageable pageable);
+    Page<InquiryEntity> findAllByIsSolvedIsFalseOrderByCreatedTimeDesc(Pageable pageable);
 }

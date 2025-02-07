@@ -11,9 +11,9 @@ import org.hibernate.annotations.*;
 import java.time.LocalDateTime;
 
 
-@Entity
 @Getter
 @Setter
+@Entity
 @Table(name = "notification_read")
 @NoArgsConstructor
 public class NotificationReadEntity {
@@ -24,20 +24,19 @@ public class NotificationReadEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JoinColumn(name = "user_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "notification_id", referencedColumnName = "notification_id")
+    @JoinColumn(name = "notification_id", columnDefinition = "INT UNSIGNED")
     private NotificationEntity notification;
 
-    @Column(name = "is_deleted")
-    @ColumnDefault("false")
+    @Column(name = "is_deleted", columnDefinition = "DEFAULT 0")
     private Boolean isDeleted;
 
     @CreationTimestamp
-    @Column(name = "created_time")
+    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 
     @Builder

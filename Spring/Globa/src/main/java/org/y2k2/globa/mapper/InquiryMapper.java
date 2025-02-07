@@ -15,7 +15,7 @@ public interface InquiryMapper {
     @Mapping(source = "inquiryId", target = "inquiryId")
     @Mapping(source = "title", target = "title")
     @Mapping(source = "content", target = "content")
-    @Mapping(source = "solved", target = "solved")
+    @Mapping(source = "isSolved", target = "solved")
     @Mapping(source = "createdTime", target = "createdTime", qualifiedBy = { CustomTimestampTranslator.class, MapCreatedTime.class })
     InquiryDto toInquiryDto(InquiryEntity inquiry);
 

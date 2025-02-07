@@ -18,23 +18,22 @@ public class InquiryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "inquiry_id", columnDefinition = "INT UNSIGNED")
-    private long inquiryId;
+    private Long inquiryId;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JoinColumn(name = "user_id", columnDefinition = "INT UNSIGNED")
     private UserEntity user;
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "title", nullable = false, length = 80)
     private String title;
 
     @Lob
     @Column(name = "content", nullable = false)
     private String content;
 
-    @ColumnDefault("0")
-    @Column(name = "is_solved")
-    private boolean solved;
+    @Column(name = "is_solved", columnDefinition = "DEFAULT 0")
+    private Boolean isSolved;
 
     @CreationTimestamp
     @Column(name = "created_time")
@@ -46,7 +45,7 @@ public class InquiryEntity {
         entity.setUser(writer);
         entity.setTitle(title);
         entity.setContent(content);
-        entity.setSolved(false);
+        entity.setIsSolved(false);
 
         return entity;
     }

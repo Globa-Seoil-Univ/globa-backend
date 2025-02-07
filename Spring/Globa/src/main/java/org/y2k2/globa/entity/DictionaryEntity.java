@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@Entity(name="dictionary")
+@Entity
 @Table(name="dictionary")
 public class DictionaryEntity {
     @Id
@@ -20,20 +20,20 @@ public class DictionaryEntity {
     @Column(name = "dictionary_id", columnDefinition = "INT UNSIGNED")
     private Long dictionaryId;
 
-    @Column(name = "word", nullable = false)
+    @Column(name = "word", nullable = false, length = 100)
     private String word;
 
-    @Column(name = "eng_word")
+    @Column(name = "eng_word", length = 300)
     private String engWord;
 
     @Lob
     @Column(name = "description")
     private String description;
 
-    @Column(name = "category")
+    @Column(name = "category", length = 20)
     private String category;
 
-    @Column(name = "pronunciation")
+    @Column(name = "pronunciation", length = 300)
     private String pronunciation;
 
     @CreationTimestamp

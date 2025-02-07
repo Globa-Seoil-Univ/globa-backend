@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Entity(name="keyword")
+@Entity
 @Table(name="keyword")
 public class KeywordEntity {
     @Id
@@ -21,15 +21,15 @@ public class KeywordEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "record_id", referencedColumnName = "record_id")
+    @JoinColumn(name = "record_id", nullable = false)
     private RecordEntity record;
 
-    @Column(name = "word", nullable = false)
+    @Column(name = "word", nullable = false, length = 30)
     private String word;
 
     @Column(name = "importance", nullable = false, precision = 5, scale = 4)
     private BigDecimal importance;
 
-    @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 }

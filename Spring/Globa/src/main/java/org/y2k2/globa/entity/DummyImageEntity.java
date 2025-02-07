@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Entity(name = "dummyImage")
+@Entity
 @Table(name = "dummy_image")
 public class DummyImageEntity {
     @Id
@@ -19,17 +19,17 @@ public class DummyImageEntity {
     @Column(name = "image_id", columnDefinition = "INT UNSIGNED")
     private Long imageId;
 
-    @Column(name = "image_path", nullable = false)
+    @Column(name = "image_path", nullable = false, length = 200)
     private String imagePath;
 
     @Column(name = "image_size", nullable = false, columnDefinition = "INT UNSIGNED")
     private Long imageSize;
 
-    @Column(name = "image_type", nullable = false)
+    @Column(name = "image_type", nullable = false, length = 20)
     private String imageType;
 
     @CreationTimestamp
-    @Column(name = "created_time")
+    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 
     public static DummyImageEntity create(String path, long size, String type) {

@@ -162,8 +162,8 @@ public class KafkaService {
     private void addNotification(UserEntity user, RecordEntity record, char typeId) {
         NotificationEntity entity = new NotificationEntity();
         entity.setTypeId(typeId);
-        entity.setToUser(user);
-        entity.setFromUser(user);
+        entity.setReceiver(user);
+        entity.setSender(user);
         entity.setFolder(record.getFolder());
         entity.setRecord(record);
 

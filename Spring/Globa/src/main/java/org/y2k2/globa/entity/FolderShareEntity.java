@@ -19,38 +19,34 @@ public class FolderShareEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "share_id", columnDefinition = "INT UNSIGNED")
-    private long shareId;
+    private Long shareId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "folder_id", referencedColumnName = "folder_id", nullable = false, columnDefinition = "INT UNSIGNED")
+    @JoinColumn(name = "folder_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private FolderEntity folder;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "owner_id", referencedColumnName = "user_id", nullable = false, columnDefinition = "INT UNSIGNED")
+    @JoinColumn(name = "owner_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private UserEntity ownerUser;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "target_id", referencedColumnName = "user_id", nullable = false, columnDefinition = "INT UNSIGNED")
+    @JoinColumn(name = "target_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private UserEntity targetUser;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "role_id", referencedColumnName = "role_id")
+    @JoinColumn(name = "role_id")
     private FolderRoleEntity roleId;
 
-    @Column(name = "invitation_status")
+    @Column(name = "invitation_status", length = 7, columnDefinition = "DEFAULT 'PENDING'")
     @Check(constraints = "invitation_status IN ('PENDING', 'ACCEPT')")
     private String invitationStatus;
 
     @CreationTimestamp
-    @Column(name = "invitation_time")
-    private LocalDateTime invitationTime;
-
-    @CreationTimestamp
-    @Column(name = "created_time")
+    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 
     @PrePersist

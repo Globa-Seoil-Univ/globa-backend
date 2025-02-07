@@ -18,11 +18,11 @@ public class UserRoleEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true, columnDefinition = "INT UNSIGNED")
     private UserEntity user;
 
     @OneToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "role_id", referencedColumnName = "role_id")
+    @JoinColumn(name = "role_id", columnDefinition = "SMALLINT")
     private RoleEntity roleId;
 }

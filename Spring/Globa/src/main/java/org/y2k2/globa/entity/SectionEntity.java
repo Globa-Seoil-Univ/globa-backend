@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Entity(name="section")
+@Entity
 @Table(name="section")
 public class SectionEntity {
     @Id
@@ -22,19 +22,19 @@ public class SectionEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "record_id", referencedColumnName = "record_id")
+    @JoinColumn(name = "record_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private RecordEntity record;
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "title", nullable = false, length = 100)
     private String title;
 
-    @Column(name = "start_time", nullable = false)
+    @Column(name = "start_time", nullable = false, columnDefinition = "INT UNSIGNED")
     private Long startTime;
 
-    @Column(name = "end_time", nullable = false)
+    @Column(name = "end_time", nullable = false, columnDefinition = "INT UNSIGNED")
     private Long endTime;
 
     @CreationTimestamp
-    @Column(name = "created_time")
+    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 }

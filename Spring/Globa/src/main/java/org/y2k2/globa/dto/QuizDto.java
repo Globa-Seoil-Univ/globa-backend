@@ -10,5 +10,5 @@ import java.io.Serializable;
 public class QuizDto implements Serializable {
     private Long quizId;
     private String question;
-    private int answer;
+    private Boolean answer;
 }

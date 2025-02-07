@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Entity(name="comment")
+@Entity
 @Table(name="comment")
 public class CommentEntity {
     @Id
@@ -22,29 +22,28 @@ public class CommentEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "parent_id", referencedColumnName = "comment_id")
+    @JoinColumn(name = "parent_id", columnDefinition = "INT UNSIGNED")
     private CommentEntity parent;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "user_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "highlight_id", referencedColumnName = "highlight_id", nullable = false)
+    @JoinColumn(name = "highlight_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private HighlightEntity highlight;
 
     @Lob
     @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "deleted")
-    @ColumnDefault("0")
-    private boolean deleted;
+    @Column(name = "deleted", columnDefinition = "DEFAULT 0")
+    private Boolean deleted;
 
     @CreationTimestamp
-    @Column(name = "created_time")
+    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 
     @Column(name = "deleted_time")

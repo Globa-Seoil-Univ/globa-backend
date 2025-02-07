@@ -13,23 +13,23 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Entity(name = "folder")
+@Entity
 @Table(name = "folder")
 public class FolderEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "folder_id")
+    @Column(name = "folder_id", columnDefinition = "INT UNSIGNED")
     private Long folderId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JoinColumn(name = "user_id", columnDefinition = "INT UNSIGNED")
     private UserEntity user;
 
-    @Column(name = "title")
+    @Column(name = "title", length = 32)
     private String title;
 
     @CreationTimestamp
-    @Column(name = "created_time")
+    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 }

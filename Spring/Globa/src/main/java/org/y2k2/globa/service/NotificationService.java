@@ -67,7 +67,7 @@ public class NotificationService {
         }
 
         Pageable pageable = PageRequest.of(page - 1, count);
-        Page<NotificationProjection> notificationEntityPage = notificationRepository.findAllByToUserOrTypeIdInOrderByCreatedTimeDesc(
+        Page<NotificationProjection> notificationEntityPage = notificationRepository.findAllByReceiverOrTypeIdInOrderByCreatedTimeDesc(
                 pageable,
                 user.getUserId(),
                 includeNotice,
@@ -91,7 +91,7 @@ public class NotificationService {
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
-        Long hasUnread = notificationRepository.existsByToUser(userId);
+        Long hasUnread = notificationRepository.existsByReceiver(userId);
         return new ResponseUnreadNotificationDto(hasUnread != 0);
     }
 
@@ -141,7 +141,7 @@ public class NotificationService {
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
-        NotificationUnReadCount notificationUnReadCount = notificationRepository.countByToUserUserId(userId);
+        NotificationUnReadCount notificationUnReadCount = notificationRepository.countByReceiverUserId(userId);
         Long total = notificationUnReadCount.getNoticeCount() +
                 notificationUnReadCount.getInviteCount() +
                 notificationUnReadCount.getShareCount() +

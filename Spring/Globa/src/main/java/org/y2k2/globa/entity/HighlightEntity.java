@@ -22,22 +22,20 @@ public class HighlightEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "section_id", referencedColumnName = "section_id")
+    @JoinColumn(name = "section_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private SectionEntity section;
 
-    @Column(name = "start_index", nullable = false)
+    @Column(name = "start_index", nullable = false, columnDefinition = "INT UNSIGNED")
     private Long startIndex;
 
-    @Column(name = "end_index", nullable = false)
+    @Column(name = "end_index", nullable = false, columnDefinition = "INT UNSIGNED")
     private Long endIndex;
 
-    @Column(name = "type", nullable = false)
-    @ColumnDefault("1")
-    @Check(constraints = "type IN ('1', '2')")
+    @Column(name = "type", nullable = false, columnDefinition = "DEFAULT 1")
     private Character type;
 
     @CreationTimestamp
-    @Column(name = "created_time")
+    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 
     public static HighlightEntity create(SectionEntity section, long startIndex, long endIndex) {

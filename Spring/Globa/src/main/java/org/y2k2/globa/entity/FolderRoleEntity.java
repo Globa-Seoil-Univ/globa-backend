@@ -12,19 +12,19 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Entity(name = "folderRole")
+@Entity
 @Table(name = "folder_role")
 public class FolderRoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "role_id")
+    @Column(name = "role_id", nullable = false, length = 1)
     @Check(constraints = "role_id IN ('1', '2', '3')")
     private String roleId;
 
-    @Column(name = "role_name", unique = true)
+    @Column(name = "role_name", nullable = false, unique = true, length = 3)
     private String roleName;
 
     @CreationTimestamp
-    @Column(name = "created_time")
+    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 }
