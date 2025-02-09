@@ -9,10 +9,10 @@ import org.y2k2.globa.dto.common.user.UserIntroDto;
 @Setter
 @AllArgsConstructor
 public class CommentDto {
-    private long commentId;
+    private Long commentId;
     private String content;
     private UserIntroDto user;
     private String createdTime;
-    private boolean hasReply;
-    private boolean deleted;
+    private Boolean hasReply;
+    private Boolean deleted;
 }

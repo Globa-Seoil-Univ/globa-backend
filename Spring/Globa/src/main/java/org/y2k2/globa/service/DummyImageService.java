@@ -37,7 +37,7 @@ public class DummyImageService {
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity user = userRepository.findByUserId(userId);
         if (userId == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         long current = new Date().getTime();
         long size = file.getSize();

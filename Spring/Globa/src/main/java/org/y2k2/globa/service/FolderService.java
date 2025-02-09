@@ -52,7 +52,7 @@ public class FolderService {
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
 
         Pageable pageable = PageRequest.of(page-1, count);
@@ -73,7 +73,7 @@ public class FolderService {
     public FolderDto postDefaultFolder(UserEntity userEntity){
         FolderEntity saveFolderEntity = new FolderEntity();
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
         saveFolderEntity.setUser(userEntity);
         saveFolderEntity.setTitle(userEntity.getName() + "의 기본 폴더");
         saveFolderEntity.setCreatedTime(LocalDateTime.now());
@@ -113,7 +113,7 @@ public class FolderService {
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderEntity saveFolderEntity = new FolderEntity();
         saveFolderEntity.setUser(userEntity);
@@ -155,7 +155,7 @@ public class FolderService {
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderEntity saveFolderEntity = new FolderEntity();
         saveFolderEntity.setUser(userEntity);
@@ -209,7 +209,7 @@ public class FolderService {
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderEntity folderEntity = folderRepository.findFolderEntityByFolderId(folderId);
 
@@ -237,7 +237,7 @@ public class FolderService {
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderEntity folderEntity = folderRepository.findFolderEntityByFolderId(folderId);
         FolderEntity defaultFolderEntity = folderRepository.findFirstByUserUserIdOrderByCreatedTimeAsc(userEntity.getUserId());
@@ -271,7 +271,7 @@ public class FolderService {
 
     public HttpStatus deleteDefaultFolder(UserEntity userEntity){
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderEntity folderEntity = folderRepository.findFirstByUserUserIdOrderByCreatedTimeAsc(userEntity.getUserId());
 

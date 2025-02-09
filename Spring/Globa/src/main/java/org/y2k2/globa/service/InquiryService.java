@@ -31,7 +31,7 @@ public class InquiryService {
     public ResponseInquiryDto getInquiries(long userId, PaginationDto pagination) {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         Pageable pageable = PageRequest.of(pagination.getPage() - 1, pagination.getCount());
         Page<InquiryEntity> inquiryEntityPage;

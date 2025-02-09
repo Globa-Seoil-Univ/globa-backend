@@ -1,0 +1,19 @@
+package org.y2k2.globa.mapper;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
+import org.y2k2.globa.dto.response.user.ResponseUserDto;
+import org.y2k2.globa.entity.UserEntity;
+
+@Mapper()
+public interface UserMapper {
+    UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
+
+    @Mapping(source = "user.userId", target = "userId")
+    @Mapping(source = "user.profilePath", target = "profile")
+    @Mapping(source = "user.name", target = "name")
+    @Mapping(source = "user.code", target = "code")
+    @Mapping(source = "folderId", target = "publicFolderId")
+    ResponseUserDto toResponseUserDto(UserEntity user, Long folderId);
+}

@@ -200,7 +200,7 @@ public class CommentService {
     private UserEntity validateUser(long userId) {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         return user;
     }

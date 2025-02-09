@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @ToString
-public class ResponseUserDTO implements Serializable {
+public class ResponseUserDto implements Serializable {
     private String profile;
     private String name;
     private String code;

@@ -111,7 +111,7 @@ public class AnswerService {
     private UserEntity validateUser(long userId) {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.INVALID_TOKEN);
-        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         return user;
     }

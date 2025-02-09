@@ -1,6 +1,6 @@
 package org.y2k2.globa.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -12,9 +12,10 @@ import org.y2k2.globa.util.JwtTokenProvider;
 import org.y2k2.globa.util.PathMethod;
 
 @Configuration
+@RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
-    @Value("${jwt.secret}")
-    private String secretKey;
+    private final JwtTokenProvider jwtTokenProvider;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
@@ -33,7 +34,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     private HandlerInterceptor authenticationInterceptor() {
         final PathMatcherInterceptor interceptor =
-                new PathMatcherInterceptor(new AuthenticationInterceptor(new JwtTokenProvider(secretKey)));
+                new PathMatcherInterceptor(new AuthenticationInterceptor(jwtTokenProvider));
 
         return interceptor
                 .includePathPattern("/user/auth",PathMethod.POST)

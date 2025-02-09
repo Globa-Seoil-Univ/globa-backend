@@ -35,7 +35,7 @@ public class NotificationService {
     public ResponseNotificationDto getNotifications(long userId, int count, int page, NotificationSort sort) {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
         System.out.println(userId);
 
         boolean includeNotice = false;
@@ -89,7 +89,7 @@ public class NotificationService {
     public ResponseUnreadNotificationDto getHasUnreadNotification(long userId) {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         Long hasUnread = notificationRepository.existsByReceiver(userId);
         return new ResponseUnreadNotificationDto(hasUnread != 0);
@@ -98,7 +98,7 @@ public class NotificationService {
 //    public ResponseNotificationDto getUnreadNotification(long userId, String type) {
 //        UserEntity user = userRepository.findByUserId(userId);
 //        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-//        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+//        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 //
 //        List<NotificationEntity> notificationEntities = notificationRepository.findAllByToUserUserId(userId);
 //
@@ -139,7 +139,7 @@ public class NotificationService {
     public ResponseUnreadCountDto getCountUnreadNotification(long userId) {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         NotificationUnReadCount notificationUnReadCount = notificationRepository.countByReceiverUserId(userId);
         Long total = notificationUnReadCount.getNoticeCount() +
@@ -160,7 +160,7 @@ public class NotificationService {
     public void postNotificationRead(long userId, long notificationId) {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         NotificationReadEntity notificationRead = notificationReadRepository.findByNotificationNotificationId(notificationId);
         if(notificationRead != null) throw new CustomException(ErrorCode.NOTIFICATION_READ_DUPLICATED);
@@ -180,7 +180,7 @@ public class NotificationService {
     public void deleteNotification(long userId, long notificationId) {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         NotificationEntity notification = notificationRepository.findByNotificationId(notificationId);
         if(notification == null) throw new CustomException(ErrorCode.NOT_FOUND_NOTIFICATION);

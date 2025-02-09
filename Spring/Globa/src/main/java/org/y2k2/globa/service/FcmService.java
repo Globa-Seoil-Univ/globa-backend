@@ -34,7 +34,7 @@ public class FcmService {
         if (user == null) {
             throw new CustomException(ErrorCode.NOT_FOUND_USER);
         }
-        if (user.getDeleted()) {
+        if (user.getIsDeleted()) {
             throw new CustomException(ErrorCode.DELETED_USER);
         }
 

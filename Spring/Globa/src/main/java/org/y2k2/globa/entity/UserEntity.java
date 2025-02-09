@@ -55,8 +55,8 @@ public class UserEntity {
     @Column(name = "notification_token_time")
     private LocalDateTime notificationTokenTime;
 
-    @Column(name = "deleted", columnDefinition = "DEFAULT 0")
-    private Boolean deleted;
+    @Column(name = "is_deleted", columnDefinition = "DEFAULT 0")
+    private Boolean isDeleted;
 
     @Column(name = "deleted_time")
     private LocalDateTime deletedTime;

@@ -24,7 +24,7 @@ public class UserDTO implements Serializable {
     private Boolean uploadNofi;
     private Boolean shareNofi;
     private Boolean eventNofi;
-    private long profileSize;
+    private Long profileSize;
     private String profileType;
     private String profilePath;
     private Boolean deleted;
@@ -42,11 +42,11 @@ public class UserDTO implements Serializable {
         userDTO.setPrimaryNofi(userEntity.getPrimaryNofi());
         userDTO.setUploadNofi(userEntity.getUploadNofi());
         userDTO.setShareNofi(userEntity.getShareNofi());
-        userDTO.setEventNofi(userEntity.getEventNofi());;
-        userDTO.setProfilePath(userEntity.getProfilePath());;
-        userDTO.setProfileSize(userEntity.getProfileSize());;
-        userDTO.setProfileType(userEntity.getProfileType());;
-        userDTO.setDeleted(userEntity.getDeleted());;
+        userDTO.setEventNofi(userEntity.getEventNofi());
+        userDTO.setProfilePath(userEntity.getProfilePath());
+        userDTO.setProfileSize(userEntity.getProfileSize());
+        userDTO.setProfileType(userEntity.getProfileType());
+        userDTO.setDeleted(userEntity.getIsDeleted());
         userDTO.setDeletedTime(userEntity.getDeletedTime());
         userDTO.setCreatedTime(userEntity.getCreatedTime());
 

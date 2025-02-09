@@ -15,13 +15,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.y2k2.globa.annotation.VerifyUser;
 import org.y2k2.globa.dto.response.analysis.ResponseAnalysisDto;
 import org.y2k2.globa.dto.request.user.RequestNotificationSettingDto;
 import org.y2k2.globa.dto.request.fcm.RequestNotificationTokenDto;
 import org.y2k2.globa.dto.request.survey.RequestSurveyDto;
 import org.y2k2.globa.dto.request.user.RequestUserPostDTO;
-import org.y2k2.globa.dto.response.user.ResponseUserDTO;
+import org.y2k2.globa.dto.response.user.ResponseUserDto;
 import org.y2k2.globa.dto.response.user.ResponseUserSearchDto;
+import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
@@ -67,24 +69,25 @@ public class UserController {
     )
     @PostMapping
     public ResponseEntity<?> postUser(@RequestBody RequestUserPostDTO requestUserPostDTO) {
-
-        if ( requestUserPostDTO.getSnsKind() == null )
+        // TODO : snsId 1001 ~ 1004 사이의 값만 허용 (Enum으로 관리)
+        // TODO : Validation 사용
+        // TODO : Redis에 저장되는 Refresh Token TTL이 없음 (만료, 폐기, 재발급 로직 점검 필요)
+        if (requestUserPostDTO.getSnsKind() == null)
             throw new CustomException(ErrorCode.REQUIRED_SNS_KIND);
-        if ( requestUserPostDTO.getSnsId() == null )
+        if (requestUserPostDTO.getSnsId() == null)
             throw new CustomException(ErrorCode.REQUIRED_SNS_ID);
-        if ( requestUserPostDTO.getName() == null )
+        if (requestUserPostDTO.getName() == null)
             throw new CustomException(ErrorCode.REQUIRED_NAME);
 
-        if ( !ValidValues.validSnsKinds.contains(requestUserPostDTO.getSnsKind()) )
+        if (!ValidValues.validSnsKinds.contains(requestUserPostDTO.getSnsKind()))
             throw new CustomException(ErrorCode.SNS_KIND_BAD_REQUEST);
-        if ( requestUserPostDTO.getName().length() > 32 )
+        if (requestUserPostDTO.getName().length() > 32)
             throw new CustomException(ErrorCode.NAME_BAD_REQUEST);
 
-        if ( requestUserPostDTO.getNotification() == null )
+        if (requestUserPostDTO.getNotification() == null)
             requestUserPostDTO.setNotification(true);
 
         JwtToken jwtToken = userService.postUser(requestUserPostDTO);
-
         return ResponseEntity.status(HttpStatus.CREATED).body(jwtToken);
     }
 
@@ -138,7 +141,7 @@ public class UserController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "내 정보 가져오기 완료",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseUserDTO.class))
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseUserDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
@@ -156,12 +159,9 @@ public class UserController {
             }
     )
     @GetMapping
-    public ResponseEntity<?> getUser(@Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String accessToken) {
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        ResponseUserDTO result = userService.getUser(accessToken);
-
-        return ResponseEntity.ok(result);
+    @VerifyUser
+    public ResponseEntity<?> getUser(UserEntity user) {
+        return ResponseEntity.ok(userService.getUser(user));
     }
 
     @Operation(

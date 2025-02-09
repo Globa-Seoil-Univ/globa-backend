@@ -90,7 +90,7 @@ public class RecordService {
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if(userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderEntity folderEntity = folderRepository.findFolderEntityByFolderId(folderId);
 
@@ -118,7 +118,7 @@ public class RecordService {
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if(userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
         System.out.println(userId);
         List<FolderShareEntity> folderShareEntities = folderShareRepository.findFolderShareEntitiesByTargetUserAndInvitationStatus(userEntity, "ACCEPT");
 
@@ -158,7 +158,7 @@ public class RecordService {
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if(userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         RecordEntity record = recordRepository.findRecordEntityByRecordId(recordId);
 
@@ -243,7 +243,7 @@ public class RecordService {
         UserEntity targetEntity = userRepository.findByUserId(userId);
 
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(targetEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if(targetEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(targetEntity,folderId,"ACCEPT");
         if (folderShareEntity == null) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
@@ -293,7 +293,7 @@ public class RecordService {
         UserEntity targetEntity = userRepository.findByUserId(userId);
 
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(targetEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if(targetEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(targetEntity,folderId,"ACCEPT");
         if (folderShareEntity == null) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
@@ -312,7 +312,7 @@ public class RecordService {
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         Page<RecordSearchProjection> recordEntities = recordRepository.findAllSharedOrOwnedRecords(PageRequest.of(page - 1, count), userEntity.getUserId(), keyword);
 
@@ -329,7 +329,7 @@ public class RecordService {
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         Pageable pageable = PageRequest.of(page - 1, count);
         Page<RecordEntity> records = recordRepository.findReceivingRecordsByUserIdOrderByCreatedTimeDesc(pageable, userId);
@@ -353,7 +353,7 @@ public class RecordService {
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         Pageable pageable = PageRequest.of(page - 1, count);
         Page<RecordEntity> records = recordRepository.findSharingRecordsByUserIdOrderByCreatedTimeDesc(pageable, userId);
@@ -377,7 +377,7 @@ public class RecordService {
         UserEntity targetEntity = userRepository.findByUserId(userId);
 
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(targetEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if(targetEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(targetEntity,folderId,"ACCEPT");
         if (folderShareEntity == null) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
@@ -411,7 +411,7 @@ public class RecordService {
         UserEntity userEntity = userRepository.findByUserId(userId);
 
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if(userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId);
         if (folderEntity == null)
@@ -446,7 +446,7 @@ public class RecordService {
         RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
 
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if(userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity,folderId,"ACCEPT");
         if (folderShareEntity == null)
@@ -475,7 +475,7 @@ public class RecordService {
         RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
 
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderEntity folderEntity = folderRepository.findFolderEntityByFolderId(folderId);
         FolderEntity targetEntity = folderRepository.findFolderEntityByFolderId(targetId);
@@ -540,7 +540,7 @@ public class RecordService {
         Boolean existsByFolderShare = folderShareRepository.existsByFolderAndInvitationStatusAndTargetUserOrOwnerUser(record.getFolder(), InvitationStatus.ACCEPT.toString(), user, user);
 
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
         if (!record.getFolder().getFolderId().equals(folderId)) throw new CustomException(ErrorCode.MISMATCH_RECORD_FOLDER);
         if (!existsByFolderShare) throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
 
@@ -566,7 +566,7 @@ public class RecordService {
         RecordEntity record = recordRepository.findRecordEntityByRecordId(recordId);
 
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
         if (folder == null) throw new CustomException(ErrorCode.NOT_FOUND_FOLDER);
         if (record == null) throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
         if (!Objects.equals(folder.getUser().getUserId(), user.getUserId())) throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
@@ -580,7 +580,7 @@ public class RecordService {
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (userEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
         if(recordEntity == null) { throw new CustomException(ErrorCode.NOT_FOUND_RECORD); }

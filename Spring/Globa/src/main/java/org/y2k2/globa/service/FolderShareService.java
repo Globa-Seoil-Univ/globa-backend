@@ -43,7 +43,7 @@ public class FolderShareService {
 
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         if (folderEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_FOLDER);
         if (!folderEntity.getUser().getUserId().equals(userId)) throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
@@ -65,7 +65,7 @@ public class FolderShareService {
         UserEntity ownerEntity = userRepository.findByUserId(ownerId);
         UserEntity targetEntity = userRepository.findByUserId(targetId);
 
-        if (ownerEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (ownerEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         if (ownerId.equals(targetId)) throw new CustomException(ErrorCode.INVITE_BAD_REQUEST);
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
@@ -118,7 +118,7 @@ public class FolderShareService {
         UserEntity targetEntity = userRepository.findByUserId(targetId);
 
         UserEntity user = userRepository.findByUserId(ownerId);
-        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
 
         FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId);
@@ -137,7 +137,7 @@ public class FolderShareService {
     @Transactional
     public void deleteInviteShare(Long folderId, Long ownerId, Long targetId) {
         UserEntity user = userRepository.findByUserId(ownerId);
-        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         UserEntity targetEntity = userRepository.findByUserId(targetId);
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
@@ -214,7 +214,7 @@ public class FolderShareService {
         UserEntity targetEntity = folderShareEntity.getTargetUser();
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
         if (!targetEntity.getUserId().equals(targetId)) throw new CustomException(ErrorCode.NOT_DESERVE_MODIFY_INVITATION);
-        if (targetEntity.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (targetEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
     }
 
     private void checkValidation(FolderEntity folderEntity, Long ownerId, Long targetId, UserEntity targetEntity) {

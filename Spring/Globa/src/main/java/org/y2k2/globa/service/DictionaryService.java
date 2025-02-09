@@ -41,7 +41,7 @@ public class DictionaryService {
         UserEntity user = userRepository.findByUserId(userId);
 
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         List<DictionaryEntity> dtos = dictionaryRepository.findTop10ByWordStartingWithOrEngWordStartingWithOrderByCreatedTimeAsc(keyword, keyword);
         return new ResponseDictionaryDto(dtos.stream()
@@ -55,7 +55,7 @@ public class DictionaryService {
         UserEntity user = userRepository.findByUserId(userId);
 
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (user.getDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         UserRoleEntity userRole = userRoleRepository.findByUser(user);
         String roleName = userRole.getRoleId().getName();

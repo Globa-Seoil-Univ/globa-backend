@@ -1,11 +1,7 @@
 package org.y2k2.globa.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.auth.FirebaseToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +9,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
@@ -26,11 +21,12 @@ import org.y2k2.globa.dto.response.quiz.ResponseQuizGradeDto;
 import org.y2k2.globa.dto.response.study.ResponseStudyTimesDto;
 import org.y2k2.globa.dto.request.survey.RequestSurveyDto;
 import org.y2k2.globa.dto.request.user.RequestUserPostDTO;
-import org.y2k2.globa.dto.response.user.ResponseUserDTO;
+import org.y2k2.globa.dto.response.user.ResponseUserDto;
 import org.y2k2.globa.dto.response.user.ResponseUserSearchDto;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
+import org.y2k2.globa.mapper.UserMapper;
 import org.y2k2.globa.repository.*;
 import org.y2k2.globa.util.JwtToken;
 import org.y2k2.globa.util.JwtTokenProvider;
@@ -80,7 +76,7 @@ public class UserService {
                 throw new CustomException(ErrorCode.NOT_MATCH_REFRESH_TOKEN);
             }
 
-            jwtTokenProvider.getExpirationDateFromToken(redisRefreshToken);
+            jwtTokenProvider.checkExpiredTime(redisRefreshToken);
 
 
             JwtToken jwtToken = jwtTokenProvider.generateToken(userId);
@@ -99,54 +95,53 @@ public class UserService {
         if (requestUserPostDTO.getToken() == null || requestUserPostDTO.getToken().isEmpty())
             throw new CustomException(ErrorCode.REQUIRED_SNS_TOKEN);
 
-        switch (requestUserPostDTO.getSnsKind())
-        {
-            case "1001" :
-                try {
-                    RestTemplate restTemplate = new RestTemplate();
-
-                    // HTTP 요청 헤더에 Authorization 추가
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.set("Authorization", "Bearer " + requestUserPostDTO.getToken());
-
-                    HttpEntity<String> entity = new HttpEntity<>(headers);
-
-                        // 사용자 정보 요청
-                        ResponseEntity<String> response = restTemplate.exchange(
-                                KAKAO_USER_INFO_URL,
-                                HttpMethod.GET,
-                                entity,
-                                String.class);
-                        // JSON 응답을 JsonNode로 파싱
-                        ObjectMapper objectMapper = new ObjectMapper();
-                        JsonNode responseBody = objectMapper.readTree(response.getBody());
-                        String kakaoUid = String.valueOf(responseBody.get("id"));
-                    if(!requestUserPostDTO.getSnsId().equalsIgnoreCase(kakaoUid))
-                        throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
-
-                } catch (Exception e) {
-                    log.error("Failed to verify kakao token : " + e);
-                    throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
-                }
-                break;
-            case "1004" :
-                try {
-                    FirebaseToken token = firebaseAuth.verifyIdToken(requestUserPostDTO.getToken());
-
-                    if(!requestUserPostDTO.getSnsId().equalsIgnoreCase(token.getUid())){
-                        throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
-                    }
-
-                    System.out.println(token.getUid());
-                    System.out.println(token.getEmail());
-                    System.out.println(token.getName());
-                    System.out.println(token.getPicture());
-                } catch (FirebaseAuthException e) {
-                    log.error("Failed to verify firebase token : " + e);
-                    throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
-                }
-                break;
-        }
+//        switch (requestUserPostDTO.getSnsKind()) {
+//            case "1001" :
+//                try {
+//                    RestTemplate restTemplate = new RestTemplate();
+//
+//                    // HTTP 요청 헤더에 Authorization 추가
+//                    HttpHeaders headers = new HttpHeaders();
+//                    headers.set("Authorization", "Bearer " + requestUserPostDTO.getToken());
+//
+//                    HttpEntity<String> entity = new HttpEntity<>(headers);
+//
+//                        // 사용자 정보 요청
+//                        ResponseEntity<String> response = restTemplate.exchange(
+//                                KAKAO_USER_INFO_URL,
+//                                HttpMethod.GET,
+//                                entity,
+//                                String.class);
+//                        // JSON 응답을 JsonNode로 파싱
+//                        ObjectMapper objectMapper = new ObjectMapper();
+//                        JsonNode responseBody = objectMapper.readTree(response.getBody());
+//                        String kakaoUid = String.valueOf(responseBody.get("id"));
+//                    if(!requestUserPostDTO.getSnsId().equalsIgnoreCase(kakaoUid))
+//                        throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
+//
+//                } catch (Exception e) {
+//                    log.error("Failed to verify kakao token : " + e);
+//                    throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
+//                }
+//                break;
+//            case "1004" :
+//                try {
+//                    FirebaseToken token = firebaseAuth.verifyIdToken(requestUserPostDTO.getToken());
+//
+//                    if(!requestUserPostDTO.getSnsId().equalsIgnoreCase(token.getUid())){
+//                        throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
+//                    }
+//
+//                    System.out.println(token.getUid());
+//                    System.out.println(token.getEmail());
+//                    System.out.println(token.getName());
+//                    System.out.println(token.getPicture());
+//                } catch (FirebaseAuthException e) {
+//                    log.error("Failed to verify firebase token : " + e);
+//                    throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
+//                }
+//                break;
+//        }
 
         UserEntity postUserEntity = userRepository.findBySnsId(requestUserPostDTO.getSnsId());
 
@@ -163,7 +158,7 @@ public class UserService {
             userEntity.setUploadNofi(requestUserPostDTO.getNotification());
             userEntity.setEventNofi(requestUserPostDTO.getNotification());
             userEntity.setCreatedTime(LocalDateTime.now());
-            userEntity.setDeleted(false);
+            userEntity.setIsDeleted(false);
 
             postUserEntity = userRepository.save(userEntity);
 
@@ -176,7 +171,7 @@ public class UserService {
             folderService.postDefaultFolder(postUserEntity);
         }
 
-        if (postUserEntity.getDeleted()) {
+        if (postUserEntity.getIsDeleted()) {
             throw new CustomException(ErrorCode.DELETED_USER);
         }
 
@@ -186,30 +181,12 @@ public class UserService {
         return jwtToken;
     }
 
-    public ResponseUserDTO getUser(String accessToken){
-
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-
-        UserEntity userEntity = userRepository.findOneByUserId(userId);
-        FolderEntity folderEntity = folderRepository.findFirstByUserUserIdOrderByCreatedTimeAsc(userId);
-
-        if(userEntity == null)
-            throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(userEntity.getDeleted())
-            throw new CustomException(ErrorCode.DELETED_USER);
+    public ResponseUserDto getUser(UserEntity user){
+        FolderEntity folderEntity = folderRepository.findFirstByUserUserIdOrderByCreatedTimeAsc(user.getUserId());
         if(folderEntity == null)
             throw new CustomException(ErrorCode.NOT_FOUND_DEFAULT_FOLDER);
 
-        ResponseUserDTO responseUserDTO = new ResponseUserDTO();
-
-        responseUserDTO.setProfile(userEntity.getProfilePath());
-        responseUserDTO.setName(userEntity.getName());
-        responseUserDTO.setCode(userEntity.getCode());
-        responseUserDTO.setUserId(userEntity.getUserId());
-        responseUserDTO.setPublicFolderId(folderEntity.getFolderId());
-
-        return responseUserDTO;
-
+        return UserMapper.INSTANCE.toResponseUserDto(user, folderEntity.getFolderId());
     }
 
     public ResponseUserSearchDto getUser(String accessToken, String code){
@@ -221,7 +198,7 @@ public class UserService {
         if(userEntity == null)
             throw new CustomException(ErrorCode.NOT_FOUND_USER);
 
-        if(userEntity.getDeleted())
+        if(userEntity.getIsDeleted())
             throw new CustomException(ErrorCode.DELETED_USER);
 
 
@@ -250,7 +227,7 @@ public class UserService {
         if(userEntity == null)
             throw new CustomException(ErrorCode.NOT_FOUND_USER);
 
-        if(userEntity.getDeleted())
+        if(userEntity.getIsDeleted())
             throw new CustomException(ErrorCode.DELETED_USER);
 
         RequestNotificationSettingDto responseUserRequestNotificationSettingDto = new RequestNotificationSettingDto();
@@ -269,7 +246,7 @@ public class UserService {
         if (userEntity == null)
             throw new CustomException(ErrorCode.NOT_FOUND_USER);
 
-        if(userEntity.getDeleted())
+        if(userEntity.getIsDeleted())
             throw new CustomException(ErrorCode.DELETED_USER);
 
         long current = new Date().getTime();
@@ -314,7 +291,7 @@ public class UserService {
         if (userEntity == null)
             throw new CustomException(ErrorCode.NOT_FOUND_USER);
 
-        if(userEntity.getDeleted())
+        if(userEntity.getIsDeleted())
             throw new CustomException(ErrorCode.DELETED_USER);
 
         if (!Objects.equals(userId, pathUserId)){
@@ -380,7 +357,7 @@ public class UserService {
 
         if (userEntity == null)
             throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(userEntity.getDeleted())
+        if(userEntity.getIsDeleted())
             throw new CustomException(ErrorCode.DELETED_USER);
 
         userEntity.setUploadNofi(settingDto.getUploadNofi());
@@ -409,7 +386,7 @@ public class UserService {
 
         if (userEntity == null)
             throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(userEntity.getDeleted())
+        if(userEntity.getIsDeleted())
             throw new CustomException(ErrorCode.DELETED_USER);
 
         userEntity.setName(name);
@@ -428,10 +405,10 @@ public class UserService {
 
         if (userEntity == null)
             throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(userEntity.getDeleted())
+        if(userEntity.getIsDeleted())
             throw new CustomException(ErrorCode.DELETED_USER);
 
-        userEntity.setDeleted(true);
+        userEntity.setIsDeleted(true);
         userEntity.setDeletedTime(LocalDateTime.now());
 
         SurveyEntity surveyEntity = new SurveyEntity();
