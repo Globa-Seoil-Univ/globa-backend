@@ -30,7 +30,6 @@ import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.UserService;
 import org.y2k2.globa.util.JwtToken;
 import org.y2k2.globa.util.JwtTokenProvider;
-import org.y2k2.globa.util.ValidValues;
 
 import java.net.URI;
 import java.util.Map;
@@ -68,25 +67,10 @@ public class UserController {
             }
     )
     @PostMapping
-    public ResponseEntity<?> postUser(@RequestBody RequestUserPostDTO requestUserPostDTO) {
+    public ResponseEntity<?> postUser(@RequestBody @Valid RequestUserPostDTO requestUserPostDTO) {
         // TODO : snsId 1001 ~ 1004 사이의 값만 허용 (Enum으로 관리)
         // TODO : Validation 사용
         // TODO : Redis에 저장되는 Refresh Token TTL이 없음 (만료, 폐기, 재발급 로직 점검 필요)
-        if (requestUserPostDTO.getSnsKind() == null)
-            throw new CustomException(ErrorCode.REQUIRED_SNS_KIND);
-        if (requestUserPostDTO.getSnsId() == null)
-            throw new CustomException(ErrorCode.REQUIRED_SNS_ID);
-        if (requestUserPostDTO.getName() == null)
-            throw new CustomException(ErrorCode.REQUIRED_NAME);
-
-        if (!ValidValues.validSnsKinds.contains(requestUserPostDTO.getSnsKind()))
-            throw new CustomException(ErrorCode.SNS_KIND_BAD_REQUEST);
-        if (requestUserPostDTO.getName().length() > 32)
-            throw new CustomException(ErrorCode.NAME_BAD_REQUEST);
-
-        if (requestUserPostDTO.getNotification() == null)
-            requestUserPostDTO.setNotification(true);
-
         JwtToken jwtToken = userService.postUser(requestUserPostDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(jwtToken);
     }

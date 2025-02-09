@@ -3,6 +3,8 @@ package org.y2k2.globa.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.y2k2.globa.converter.SnsKindConverter;
+import org.y2k2.globa.type.SnsKind;
 
 import java.time.LocalDateTime;
 
@@ -16,8 +18,9 @@ public class UserEntity {
     @Column(name = "user_id", columnDefinition = "INT UNSIGNED")
     private Long userId;
 
+    @Convert(converter = SnsKindConverter.class)
     @Column(name = "sns_kind", nullable = false, length = 4)
-    private String snsKind;
+    private SnsKind snsKind;
 
     @Column(name = "sns_id", nullable = false, unique = true, length = 50)
     private String snsId;

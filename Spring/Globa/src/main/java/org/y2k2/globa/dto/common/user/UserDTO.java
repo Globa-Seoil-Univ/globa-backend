@@ -35,7 +35,7 @@ public class UserDTO implements Serializable {
         UserDTO userDTO = new UserDTO();
 
         userDTO.setUserId(userEntity.getUserId());
-        userDTO.setSnsKind(userEntity.getSnsKind());
+        userDTO.setSnsKind(userEntity.getSnsKind().getCode());
         userDTO.setSnsId(userEntity.getSnsId());
         userDTO.setCode(userEntity.getCode());
         userDTO.setName(userEntity.getName());

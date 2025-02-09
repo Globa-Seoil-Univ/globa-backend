@@ -28,6 +28,7 @@ import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.mapper.UserMapper;
 import org.y2k2.globa.repository.*;
+import org.y2k2.globa.type.SnsKind;
 import org.y2k2.globa.util.JwtToken;
 import org.y2k2.globa.util.JwtTokenProvider;
 import org.y2k2.globa.util.JwtUtil;
@@ -148,7 +149,7 @@ public class UserService {
         if(postUserEntity == null) {
             String USER_CODE = generateRandomCode(6);
             UserEntity userEntity = new UserEntity();
-            userEntity.setSnsKind(requestUserPostDTO.getSnsKind());
+            userEntity.setSnsKind(SnsKind.fromCode(requestUserPostDTO.getSnsKind()));
             userEntity.setSnsId(requestUserPostDTO.getSnsId());
             userEntity.setCode(USER_CODE);
             userEntity.setName(requestUserPostDTO.getName());
