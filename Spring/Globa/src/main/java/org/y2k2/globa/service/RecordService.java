@@ -15,7 +15,24 @@ import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.Projection.RecordSearchProjection;
-import org.y2k2.globa.dto.*;
+import org.y2k2.globa.dto.request.quiz.RequestQuizDto;
+import org.y2k2.globa.dto.response.analysis.ResponseAnalysisDto;
+import org.y2k2.globa.dto.response.analysis.ResponseRecordAnalysisDto;
+import org.y2k2.globa.dto.response.folder.ResponseDetailFolderDto;
+import org.y2k2.globa.dto.response.highlights.ResponseDetailHighlightDto;
+import org.y2k2.globa.dto.request.kafka.RequestKafkaDto;
+import org.y2k2.globa.dto.response.keyword.ResponseKeywordDto;
+import org.y2k2.globa.dto.common.quiz.QuizDto;
+import org.y2k2.globa.dto.response.quiz.ResponseQuizGradeDto;
+import org.y2k2.globa.dto.response.record.ResponseAllRecordWithTotalDto;
+import org.y2k2.globa.dto.response.record.ResponseRecordDetailDto;
+import org.y2k2.globa.dto.response.record.ResponseRecordSearchDto;
+import org.y2k2.globa.dto.response.record.ResponseRecordsByFolderDto;
+import org.y2k2.globa.dto.response.section.ResponseSectionDto;
+import org.y2k2.globa.dto.request.study.RequestStudyDto;
+import org.y2k2.globa.dto.response.study.ResponseStudyTimesDto;
+import org.y2k2.globa.dto.response.summary.ResponseDetailSummaryDto;
+import org.y2k2.globa.dto.common.user.UserIntroDto;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
@@ -355,7 +372,7 @@ public class RecordService {
                 .collect(Collectors.toList()), (int) records.getTotalElements());
     }
 
-    public HttpStatus postQuiz(String accessToken, Long recordId, Long folderId, List<RequestQuizDto> quizs){
+    public HttpStatus postQuiz(String accessToken, Long recordId, Long folderId, List<RequestQuizDto.Quiz> quizs){
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity targetEntity = userRepository.findByUserId(userId);
 
@@ -367,7 +384,7 @@ public class RecordService {
 
         RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
 
-        for(RequestQuizDto requestQuizDto : quizs){
+        for(RequestQuizDto.Quiz requestQuizDto : quizs){
 
             if( requestQuizDto.getQuizId() == null)
                 throw new CustomException(ErrorCode.REQUIRED_QUIZ_ID);
@@ -380,7 +397,7 @@ public class RecordService {
             QuizAttemptEntity quizAttemptEntity = new QuizAttemptEntity();
             quizAttemptEntity.setUser(targetEntity);
             quizAttemptEntity.setQuiz(quizRepository.findQuizEntityByQuizId(requestQuizDto.getQuizId()));
-            quizAttemptEntity.setCorrect(requestQuizDto.isCorrect());
+            quizAttemptEntity.setCorrect(requestQuizDto.getIsCorrect());
             quizAttemptEntity.setCreatedTime(LocalDateTime.now());
 
             quizAttemptRepository.save(quizAttemptEntity);

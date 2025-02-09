@@ -4,9 +4,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-import org.y2k2.globa.dto.RequestNoticeAddDto;
-import org.y2k2.globa.dto.ResponseNoticeDetailDto;
-import org.y2k2.globa.dto.ResponseNoticeIntroDto;
+import org.y2k2.globa.dto.request.notice.RequestNoticeAddDto;
+import org.y2k2.globa.dto.response.notice.ResponseNoticeDetailDto;
+import org.y2k2.globa.dto.response.notice.ResponseNoticeIntroDto;
 import org.y2k2.globa.entity.NoticeEntity;
 
 @Mapper(uses = CustomTimestampMapper.class)

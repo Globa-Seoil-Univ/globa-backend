@@ -3,12 +3,9 @@ package org.y2k2.globa.mapper;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 import org.y2k2.globa.Projection.NotificationProjection;
-import org.y2k2.globa.dto.*;
-import org.y2k2.globa.entity.FolderRoleEntity;
+import org.y2k2.globa.dto.common.notification.NotificationDto;
+import org.y2k2.globa.dto.request.notification.*;
 import org.y2k2.globa.entity.NotificationEntity;
-
-import java.util.Collection;
-import java.util.Map;
 
 @Mapper(uses = {CustomTimestampMapper.class})
 public interface NotificationMapper {

@@ -15,9 +15,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import org.y2k2.globa.dto.FolderDto;
-import org.y2k2.globa.dto.RequestFolderPostDto;
-import org.y2k2.globa.dto.ResponseFolderDto;
+import org.y2k2.globa.dto.common.folder.FolderDto;
+import org.y2k2.globa.dto.request.folder.RequestFolderPostDto;
+import org.y2k2.globa.dto.response.folder.ResponseFolderDto;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;

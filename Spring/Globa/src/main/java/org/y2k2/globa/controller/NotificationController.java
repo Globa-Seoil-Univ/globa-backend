@@ -11,19 +11,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.y2k2.globa.dto.ResponseInquiryDto;
-import org.y2k2.globa.dto.ResponseNotificationDto;
-import org.y2k2.globa.dto.ResponseUnreadCountDto;
-import org.y2k2.globa.dto.ResponseUnreadNotificationDto;
+import org.y2k2.globa.dto.response.notification.ResponseNotificationDto;
+import org.y2k2.globa.dto.response.notification.ResponseUnreadCountDto;
+import org.y2k2.globa.dto.response.notification.ResponseUnreadNotificationDto;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.NotificationService;
 import org.y2k2.globa.type.NotificationSort;
 import org.y2k2.globa.util.JwtTokenProvider;
-import org.y2k2.globa.util.ValidValues;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/notification")

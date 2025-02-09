@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-import org.y2k2.globa.dto.ResponseDummyImageDto;
+import org.y2k2.globa.dto.response.dummyimage.ResponseDummyImageDto;
 import org.y2k2.globa.entity.DummyImageEntity;
 
 @Mapper

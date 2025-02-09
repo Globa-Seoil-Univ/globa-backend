@@ -3,7 +3,7 @@ package org.y2k2.globa.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import org.y2k2.globa.dto.DictionaryDto;
+import org.y2k2.globa.dto.common.dictionary.DictionaryDto;
 import org.y2k2.globa.entity.DictionaryEntity;
 
 @Mapper

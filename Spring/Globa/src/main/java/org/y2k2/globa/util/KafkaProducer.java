@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
-import org.y2k2.globa.dto.RequestKafkaDto;
+import org.y2k2.globa.dto.request.kafka.RequestKafkaDto;
 
 @Slf4j
 @Component

@@ -3,8 +3,6 @@ package org.y2k2.globa.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
-import org.y2k2.globa.dto.UserDTO;
 
 import java.time.LocalDateTime;
 

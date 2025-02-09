@@ -13,7 +13,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.y2k2.globa.dto.*;
+import org.y2k2.globa.dto.request.record.RequestPostRecordDto;
+import org.y2k2.globa.dto.response.analysis.ResponseAnalysisDto;
+import org.y2k2.globa.dto.common.quiz.QuizDto;
+import org.y2k2.globa.dto.request.quiz.RequestQuizDto;
+import org.y2k2.globa.dto.response.record.ResponseAllRecordWithTotalDto;
+import org.y2k2.globa.dto.response.record.ResponseRecordDetailDto;
+import org.y2k2.globa.dto.response.record.ResponseRecordSearchDto;
+import org.y2k2.globa.dto.response.record.ResponseRecordsByFolderDto;
+import org.y2k2.globa.dto.request.study.RequestStudyDto;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
@@ -430,7 +438,7 @@ public class RecordController {
     public ResponseEntity<?> postQuiz(@Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
                                       @PathVariable(value = "folder_id", required = false) Long folderId,
                                      @PathVariable(value = "record_id", required = false) Long recordId,
-                                      @RequestBody RequestQuizWrapper quizs) {
+                                      @RequestBody RequestQuizDto quizs) {
 
         if ( accessToken == null )
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);

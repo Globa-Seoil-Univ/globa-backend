@@ -7,7 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
-import org.y2k2.globa.dto.ResponseKafkaDto;
+import org.y2k2.globa.dto.response.kafka.ResponseKafkaDto;
 import org.y2k2.globa.service.KafkaService;
 
 @Slf4j

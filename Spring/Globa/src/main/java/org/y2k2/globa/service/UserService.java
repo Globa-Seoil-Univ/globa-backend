@@ -18,7 +18,16 @@ import org.springframework.web.multipart.MultipartFile;
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.Projection.StudyTimeProjection;
-import org.y2k2.globa.dto.*;
+import org.y2k2.globa.dto.response.analysis.ResponseAnalysisDto;
+import org.y2k2.globa.dto.response.keyword.ResponseKeywordDto;
+import org.y2k2.globa.dto.request.user.RequestNotificationSettingDto;
+import org.y2k2.globa.dto.request.fcm.RequestNotificationTokenDto;
+import org.y2k2.globa.dto.response.quiz.ResponseQuizGradeDto;
+import org.y2k2.globa.dto.response.study.ResponseStudyTimesDto;
+import org.y2k2.globa.dto.request.survey.RequestSurveyDto;
+import org.y2k2.globa.dto.request.user.RequestUserPostDTO;
+import org.y2k2.globa.dto.response.user.ResponseUserDTO;
+import org.y2k2.globa.dto.response.user.ResponseUserSearchDto;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
@@ -227,7 +236,7 @@ public class UserService {
 
     }
 
-    public NotificationSettingDto getNotification(String accessToken, Long pathUserId){
+    public RequestNotificationSettingDto getNotification(String accessToken, Long pathUserId){
 
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
@@ -244,13 +253,13 @@ public class UserService {
         if(userEntity.getDeleted())
             throw new CustomException(ErrorCode.DELETED_USER);
 
-        NotificationSettingDto responseUserNotificationSettingDto = new NotificationSettingDto();
+        RequestNotificationSettingDto responseUserRequestNotificationSettingDto = new RequestNotificationSettingDto();
 
-        responseUserNotificationSettingDto.setUploadNofi(userEntity.getUploadNofi());
-        responseUserNotificationSettingDto.setShareNofi(userEntity.getShareNofi());
-        responseUserNotificationSettingDto.setEventNofi(userEntity.getEventNofi());
+        responseUserRequestNotificationSettingDto.setUploadNofi(userEntity.getUploadNofi());
+        responseUserRequestNotificationSettingDto.setShareNofi(userEntity.getShareNofi());
+        responseUserRequestNotificationSettingDto.setEventNofi(userEntity.getEventNofi());
 
-        return responseUserNotificationSettingDto;
+        return responseUserRequestNotificationSettingDto;
     }
 
     @Transactional
@@ -359,7 +368,7 @@ public class UserService {
         return responseAnalysisDto;
     }
 
-    public NotificationSettingDto putNotification(String accessToken, Long putUserId, NotificationSettingDto NotificationSettingDto){
+    public RequestNotificationSettingDto putNotification(String accessToken, Long putUserId, RequestNotificationSettingDto settingDto){
 
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
@@ -374,19 +383,19 @@ public class UserService {
         if(userEntity.getDeleted())
             throw new CustomException(ErrorCode.DELETED_USER);
 
-        userEntity.setUploadNofi(NotificationSettingDto.getUploadNofi());
-        userEntity.setShareNofi(NotificationSettingDto.getShareNofi());
-        userEntity.setEventNofi(NotificationSettingDto.getEventNofi());
+        userEntity.setUploadNofi(settingDto.getUploadNofi());
+        userEntity.setShareNofi(settingDto.getShareNofi());
+        userEntity.setEventNofi(settingDto.getEventNofi());
 
         UserEntity savedEntity = userRepository.save(userEntity);
 
-        NotificationSettingDto responseUserNotificationSettingDto = new NotificationSettingDto();
+        RequestNotificationSettingDto responseUserRequestNotificationSettingDto = new RequestNotificationSettingDto();
 
-        responseUserNotificationSettingDto.setUploadNofi(savedEntity.getUploadNofi());
-        responseUserNotificationSettingDto.setShareNofi(savedEntity.getShareNofi());
-        responseUserNotificationSettingDto.setEventNofi(savedEntity.getEventNofi());
+        responseUserRequestNotificationSettingDto.setUploadNofi(savedEntity.getUploadNofi());
+        responseUserRequestNotificationSettingDto.setShareNofi(savedEntity.getShareNofi());
+        responseUserRequestNotificationSettingDto.setEventNofi(savedEntity.getEventNofi());
 
-        return responseUserNotificationSettingDto;
+        return responseUserRequestNotificationSettingDto;
     }
 
     public HttpStatus patchUserName(String accessToken, Long putUserId, String name){

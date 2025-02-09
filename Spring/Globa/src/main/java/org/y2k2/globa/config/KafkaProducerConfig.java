@@ -8,7 +8,7 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import org.y2k2.globa.dto.RequestKafkaDto;
+import org.y2k2.globa.dto.request.kafka.RequestKafkaDto;
 
 import java.util.HashMap;
 import java.util.Map;

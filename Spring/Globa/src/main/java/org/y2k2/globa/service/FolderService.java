@@ -11,12 +11,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.y2k2.globa.dto.FolderDto;
-import org.y2k2.globa.dto.ResponseFolderDto;
+import org.y2k2.globa.dto.common.folder.FolderDto;
+import org.y2k2.globa.dto.request.folder.RequestFolderPostDto;
+import org.y2k2.globa.dto.response.folder.ResponseFolderDto;
 import org.y2k2.globa.repository.*;
 import org.y2k2.globa.type.InvitationStatus;
 import org.y2k2.globa.type.Role;
-import org.y2k2.globa.dto.ShareTarget;
 import org.y2k2.globa.entity.FolderEntity;
 import org.y2k2.globa.entity.FolderShareEntity;
 import org.y2k2.globa.entity.UserEntity;
@@ -151,7 +151,7 @@ public class FolderService {
     }
 
     @Transactional
-    public FolderDto postFolder(String accessToken, String title, List<ShareTarget> shareTargets){
+    public FolderDto postFolder(String accessToken, String title, List<RequestFolderPostDto.ShareTarget> shareTargets){
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
@@ -175,7 +175,7 @@ public class FolderService {
         FolderShareEntity savedOwnerShareEntity = folderShareRepository.save(saveOwnerShareEntity);
 
         // 리스트를 순회하며 각 공유 타겟 수행
-        for (ShareTarget target : shareTargets) {
+        for (RequestFolderPostDto.ShareTarget target : shareTargets) {
             UserEntity targetEntity = userRepository.findOneByCode(target.getCode());
             if(targetEntity == null)
                 throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);

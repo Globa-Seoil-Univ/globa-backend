@@ -13,12 +13,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import org.y2k2.globa.dto.ResponseDummyImageDto;
+import org.y2k2.globa.dto.response.dummyimage.ResponseDummyImageDto;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.DummyImageService;
-import org.y2k2.globa.util.JwtTokenProvider;
 
 @RestController
 @RequestMapping("/dummy")

@@ -15,7 +15,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.y2k2.globa.dto.*;
+import org.y2k2.globa.dto.response.analysis.ResponseAnalysisDto;
+import org.y2k2.globa.dto.request.user.RequestNotificationSettingDto;
+import org.y2k2.globa.dto.request.fcm.RequestNotificationTokenDto;
+import org.y2k2.globa.dto.request.survey.RequestSurveyDto;
+import org.y2k2.globa.dto.request.user.RequestUserPostDTO;
+import org.y2k2.globa.dto.response.user.ResponseUserDTO;
+import org.y2k2.globa.dto.response.user.ResponseUserSearchDto;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
@@ -205,7 +211,7 @@ public class UserController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "내 알림 정보 가져오기 완료",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = NotificationSettingDto.class))
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = RequestNotificationSettingDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
@@ -234,7 +240,7 @@ public class UserController {
         if ( userId == null )
             throw new CustomException(ErrorCode.REQUIRED_USER_ID);
 
-        NotificationSettingDto result = userService.getNotification(accessToken,userId);
+        RequestNotificationSettingDto result = userService.getNotification(accessToken,userId);
 
         return ResponseEntity.ok(result);
     }
@@ -288,7 +294,7 @@ public class UserController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "알림 정보 수정 완료",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = NotificationSettingDto.class))
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = RequestNotificationSettingDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
@@ -312,16 +318,16 @@ public class UserController {
             @Parameter(hidden = true)
             @RequestHeader(value = "Authorization", required = false) String accessToken,
             @PathVariable(value = "user_id", required = false) Long userId,
-            @RequestBody NotificationSettingDto NotificationSettingDto) {
+            @RequestBody RequestNotificationSettingDto settingDto) {
 
         if ( accessToken == null )
             throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( userId == null )
             throw new CustomException(ErrorCode.REQUIRED_USER_ID);
-        if ( NotificationSettingDto.getEventNofi() == null || NotificationSettingDto.getUploadNofi() == null  || NotificationSettingDto.getShareNofi() == null  )
+        if ( settingDto.getEventNofi() == null || settingDto.getUploadNofi() == null  || settingDto.getShareNofi() == null  )
             throw new CustomException(ErrorCode.NOFI_POST_BAD_REQUEST);
 
-        NotificationSettingDto result = userService.putNotification(accessToken,userId, NotificationSettingDto);
+        RequestNotificationSettingDto result = userService.putNotification(accessToken,userId, settingDto);
 
         return ResponseEntity.ok(result);
     }

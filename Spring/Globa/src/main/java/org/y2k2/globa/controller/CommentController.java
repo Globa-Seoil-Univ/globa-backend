@@ -15,7 +15,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import org.y2k2.globa.dto.*;
+import org.y2k2.globa.dto.request.comment.RequestCommentDto;
+import org.y2k2.globa.dto.request.comment.RequestCommentWithIdsDto;
+import org.y2k2.globa.dto.request.comment.RequestFirstCommentDto;
+import org.y2k2.globa.dto.response.comment.ResponseCommentDto;
+import org.y2k2.globa.dto.response.comment.ResponseReplyDto;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;

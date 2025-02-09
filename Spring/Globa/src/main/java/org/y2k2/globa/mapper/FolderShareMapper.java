@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
-import org.y2k2.globa.dto.FolderShareUserDto;
+import org.y2k2.globa.dto.response.foldershare.ResponseFolderShareUserDto;
 import org.y2k2.globa.entity.FolderRoleEntity;
 import org.y2k2.globa.entity.FolderShareEntity;
 
@@ -18,7 +18,7 @@ public interface FolderShareMapper {
     @Mapping(source = "shareEntity.targetUser.profilePath", target = "user.profile")
     @Mapping(source = "shareEntity.targetUser.name", target = "user.name")
     @Mapping(source = "shareEntity.invitationStatus", target = "invitationStatus")
-    FolderShareUserDto toShareUserDto(FolderShareEntity shareEntity);
+    ResponseFolderShareUserDto.FolderShareUserDto toShareUserDto(FolderShareEntity shareEntity);
 
     @Named("MapRoleId")
     default String mapRoleId(FolderRoleEntity folderRole) {

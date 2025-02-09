@@ -11,7 +11,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
-import org.y2k2.globa.dto.*;
+import org.y2k2.globa.dto.response.foldershare.ResponseFolderShareUserDto;
+import org.y2k2.globa.dto.request.notification.RequestNotificationWithFolderShareAddUserDto;
+import org.y2k2.globa.dto.request.notification.RequestNotificationWithInvitationDto;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.*;
 import org.y2k2.globa.repository.*;
@@ -51,7 +53,7 @@ public class FolderShareService {
 
         List<FolderShareEntity> shareEntities = folderShareEntityPage.getContent();
         Long total = folderShareEntityPage.getTotalElements();
-        List<FolderShareUserDto> folderShareUserDtos = shareEntities.stream()
+        List<ResponseFolderShareUserDto.FolderShareUserDto> folderShareUserDtos = shareEntities.stream()
                 .map(FolderShareMapper.INSTANCE::toShareUserDto)
                 .collect(Collectors.toList());
 

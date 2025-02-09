@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.Projection.StudyTimeProjection;
-import org.y2k2.globa.dto.ResponseQuizGradeDto;
 import org.y2k2.globa.entity.UserEntity;
 
 import java.util.List;

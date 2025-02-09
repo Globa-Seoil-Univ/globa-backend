@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import org.y2k2.globa.dto.ResponseDummyImageDto;
+import org.y2k2.globa.dto.response.dummyimage.ResponseDummyImageDto;
 import org.y2k2.globa.entity.DummyImageEntity;
 import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.exception.CustomException;

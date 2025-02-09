@@ -2,8 +2,8 @@ package org.y2k2.globa.mapper;
 
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
-import org.y2k2.globa.dto.CommentDto;
-import org.y2k2.globa.dto.ReplyDto;
+import org.y2k2.globa.dto.common.notification.comment.CommentDto;
+import org.y2k2.globa.dto.common.notification.comment.ReplyDto;
 import org.y2k2.globa.entity.CommentEntity;
 
 @Mapper(uses = CustomTimestampMapper.class)

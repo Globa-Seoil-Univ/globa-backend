@@ -18,7 +18,7 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.util.backoff.BackOff;
 import org.springframework.util.backoff.FixedBackOff;
-import org.y2k2.globa.dto.ResponseKafkaDto;
+import org.y2k2.globa.dto.response.kafka.ResponseKafkaDto;
 
 import java.net.SocketTimeoutException;
 import java.util.HashMap;

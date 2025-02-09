@@ -3,8 +3,8 @@ package org.y2k2.globa.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import org.y2k2.globa.dto.InquiryDto;
-import org.y2k2.globa.dto.ResponseInquiryDetailDto;
+import org.y2k2.globa.dto.common.inquiry.InquiryDto;
+import org.y2k2.globa.dto.response.inquiry.ResponseInquiryDetailDto;
 import org.y2k2.globa.entity.AnswerEntity;
 import org.y2k2.globa.entity.InquiryEntity;
 
@@ -15,7 +15,7 @@ public interface InquiryMapper {
     @Mapping(source = "inquiryId", target = "inquiryId")
     @Mapping(source = "title", target = "title")
     @Mapping(source = "content", target = "content")
-    @Mapping(source = "isSolved", target = "solved")
+    @Mapping(source = "isSolved", target = "isSolved")
     @Mapping(source = "createdTime", target = "createdTime", qualifiedBy = { CustomTimestampTranslator.class, MapCreatedTime.class })
     InquiryDto toInquiryDto(InquiryEntity inquiry);
 

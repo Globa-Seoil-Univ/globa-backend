@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.y2k2.globa.dto.ResponseFolderShareUserDto;
+import org.y2k2.globa.dto.response.foldershare.ResponseFolderShareUserDto;
 import org.y2k2.globa.type.Role;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
