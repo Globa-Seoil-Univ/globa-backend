@@ -50,7 +50,10 @@ public class VerifyUserAspect {
 
         // 마지막 인자 값에 추가
         Object[] args = joinPoint.getArgs();
-        args[args.length - 1] = user;
+
+        if (args.length > 0 && args[args.length - 1] instanceof UserEntity) {
+            args[args.length - 1] = user;
+        }
 
         return joinPoint.proceed(args);
     }

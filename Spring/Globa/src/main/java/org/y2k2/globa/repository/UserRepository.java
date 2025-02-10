@@ -17,7 +17,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Optional<UserEntity> findBySnsId(String snsId);
     UserEntity findOneByUserId(Long userId);
-    UserEntity findOneByCode(String code);
+    Optional<UserEntity> findOneByCode(String code);
     UserEntity findByUserId(Long userId);
 
     Page<UserEntity> findAll(Pageable pageable);

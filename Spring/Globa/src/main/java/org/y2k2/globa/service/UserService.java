@@ -183,32 +183,17 @@ public class UserService {
         return UserMapper.INSTANCE.toResponseUserDto(user, folderEntity.getFolderId());
     }
 
-    public ResponseUserSearchDto getUser(String accessToken, String code){
-
-        Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-
-        UserEntity userEntity = userRepository.findOneByCode(code);
-
-        if(userEntity == null)
-            throw new CustomException(ErrorCode.NOT_FOUND_USER);
+    public ResponseUserSearchDto searchUser(String code){
+        UserEntity userEntity = userRepository.findOneByCode(code)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
         if(userEntity.getIsDeleted())
             throw new CustomException(ErrorCode.DELETED_USER);
 
-
-        ResponseUserSearchDto responseUserSearchDto = new ResponseUserSearchDto();
-
-        responseUserSearchDto.setProfile(userEntity.getProfilePath());
-        responseUserSearchDto.setName(userEntity.getName());
-        responseUserSearchDto.setCode(userEntity.getCode());
-        responseUserSearchDto.setUserId(userEntity.getUserId());
-
-        return responseUserSearchDto;
-
+        return UserMapper.INSTANCE.toResponseUserSearchDto(userEntity);
     }
 
     public RequestNotificationSettingDto getNotification(String accessToken, Long pathUserId){
-
         Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         if (!Objects.equals(userId, pathUserId)){

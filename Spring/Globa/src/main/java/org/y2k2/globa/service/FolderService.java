@@ -176,9 +176,8 @@ public class FolderService {
 
         // 리스트를 순회하며 각 공유 타겟 수행
         for (RequestFolderPostDto.ShareTarget target : shareTargets) {
-            UserEntity targetEntity = userRepository.findOneByCode(target.getCode());
-            if(targetEntity == null)
-                throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
+            UserEntity targetEntity = userRepository.findOneByCode(target.getCode())
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_TARGET_USER));
 
             if (target.getRole().isEmpty())
                 throw new CustomException(ErrorCode.NOT_NULL_ROLE);

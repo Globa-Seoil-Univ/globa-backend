@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import org.y2k2.globa.dto.request.user.RequestUserPostDTO;
 import org.y2k2.globa.dto.response.user.ResponseUserDto;
+import org.y2k2.globa.dto.response.user.ResponseUserSearchDto;
 import org.y2k2.globa.entity.UserEntity;
 
 @Mapper()
@@ -28,4 +29,10 @@ public interface UserMapper {
     @Mapping(source = "dto.notification", target = "shareNofi")
     @Mapping(source = "dto.eventNotification", target = "eventNofi")
     UserEntity toEntity(String snsKind, String code, RequestUserPostDTO dto);
+
+    @Mapping(source = "user.userId", target = "userId")
+    @Mapping(source = "user.profilePath", target = "profile")
+    @Mapping(source = "user.name", target = "name")
+    @Mapping(source = "user.code", target = "code")
+    ResponseUserSearchDto toResponseUserSearchDto(UserEntity user);
 }
