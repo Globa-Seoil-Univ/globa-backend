@@ -11,7 +11,8 @@ whisper_manager = WhisperManager()
 
 def stt(path: str) -> List[STTResults]:
     url = storage_manager.getDownloadUrl(path=path)
-    stt_results = whisper_manager.stt(path=url)
+    # stt_results = whisper_manager.stt(path=url)
+    stt_results = whisper_manager.stt(path=url, lan="kr")
 
     return stt_results
 
