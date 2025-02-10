@@ -17,7 +17,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = { Exception.class })
     protected ResponseEntity<ErrorResponse> handleException(Exception e) {
-        log.error("handleException throw Exception : {}", e.getMessage());
+        log.error("handleException throw Exception = {}", e.getMessage());
+        log.error("Trace = {}", (Object) e.getStackTrace());
         return ErrorResponse.toResponseEntity(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 

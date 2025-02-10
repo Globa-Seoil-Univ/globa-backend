@@ -2,6 +2,7 @@ package org.y2k2.globa.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
@@ -9,22 +10,12 @@ public class SwaggerErrorCode {
     /* 400 BAD_REQUEST : 잘못된 요청 */
     public static final String EXPIRED_ACCESS_TOKEN = "EXPIRED_ACCESS_TOKEN";
     public static final String EXPIRED_ACCESS_TOKEN_VALUE = "40010";
-    public static final String ACTIVE_REFRESH_TOKEN = "ACTIVE_REFRESH_TOKEN";
-    public static final String ACTIVE_REFRESH_TOKEN_VALUE = "40011";
+    public static final String ACTIVE_ACCESS_TOKEN = "ACTIVE_ACCESS_TOKEN";
+    public static final String ACTIVE_ACCESS_TOKEN_VALUE = "40011";
     public static final String NOT_MATCH_REFRESH_TOKEN = "NOT_MATCH_REFRESH_TOKEN";
     public static final String NOT_MATCH_REFRESH_TOKEN_VALUE = "40012";
-    public static final String REQUIRED_ACCESS_TOKEN = "REQUIRED_ACCESS_TOKEN";
-    public static final String REQUIRED_ACCESS_TOKEN_VALUE = "40013";
-    public static final String REQUIRED_REQUEST_TOKEN = "REQUIRED_REQUEST_TOKEN";
-    public static final String REQUIRED_REQUEST_TOKEN_VALUE = "40014";
-    public static final String REQUIRED_USER_CODE = "REQUIRED_USER_CODE";
-    public static final String REQUIRED_USER_CODE_VALUE = "40015";
-    public static final String REQUIRED_USER_ID = "REQUIRED_USER_ID";
-    public static final String REQUIRED_USER_ID_VALUE = "40016";
     public static final String FOLDER_DELETE_BAD_REQUEST = "FOLDER_DELETE_BAD_REQUEST";
     public static final String FOLDER_DELETE_BAD_REQUEST_VALUE = "40020";
-    public static final String DELETED_USER = "DELETED_USER";
-    public static final String DELETED_USER_VALUE = "40030";
     public static final String REQUIRED_FOLDER_TITLE = "REQUIRED_FOLDER_TITLE";
     public static final String REQUIRED_FOLDER_TITLE_VALUE = "40040";
     public static final String REQUIRED_FOLDER_ID = "REQUIRED_FOLDER_ID";
@@ -65,16 +56,6 @@ public class SwaggerErrorCode {
     public static final String REQUIRED_ROLE_VALUE = "40080";
     public static final String ROLE_BAD_REQUEST = "ROLE_BAD_REQUEST";
     public static final String ROLE_BAD_REQUEST_VALUE = "40081";
-    public static final String REQUIRED_SNS_KIND = "REQUIRED_SNS_KIND";
-    public static final String REQUIRED_SNS_KIND_VALUE = "40090";
-    public static final String REQUIRED_SNS_ID = "REQUIRED_SNS_ID";
-    public static final String REQUIRED_SNS_ID_VALUE = "40091";
-    public static final String REQUIRED_NAME = "REQUIRED_NAME";
-    public static final String REQUIRED_NAME_VALUE = "40092";
-    public static final String SNS_KIND_BAD_REQUEST = "SNS_KIND_BAD_REQUEST";
-    public static final String SNS_KIND_BAD_REQUEST_VALUE = "40093";
-    public static final String NAME_BAD_REQUEST = "NAME_BAD_REQUEST";
-    public static final String NAME_BAD_REQUEST_VALUE = "40094";
     public static final String MISMATCH_FOLDER_ID = "MISMATCH_FOLDER_ID";
     public static final String MISMATCH_FOLDER_ID_VALUE = "40095";
 
@@ -85,6 +66,8 @@ public class SwaggerErrorCode {
     public static final String SIGNATURE_VALUE = "40120";
     public static final String EXPIRED_REFRESH_TOKEN = "EXPIRED_REFRESH_TOKEN";
     public static final String EXPIRED_REFRESH_TOKEN_VALUE = "40130";
+    public static final String INVALID_SNS_TOKEN = "INVALID_SNS_TOKEN";
+    public static final String INVALID_SNS_TOKEN_VALUE = "40140";
 
     /* 403 FORBIDDEN : 잘못된 접근 */
     public static final String NOT_NULL_ROLE = "NOT_NULL_ROLE";
@@ -121,8 +104,8 @@ public class SwaggerErrorCode {
     public static final String MISMATCH_RECORD_OWNER_VALUE = "40347";
     public static final String MISMATCH_RECORD_FOLDER = "MISMATCH_RECORD_FOLDER";
     public static final String MISMATCH_RECORD_FOLDER_VALUE = "40348";
-    public static final String MISMATCH_NOTIFICATION_OWNER = "MISMATCH_NOTIFICATION_OWNER";
-    public static final String MISMATCH_NOTIFICATION_OWNER_VALUE = "40349";
+    public static final String DELETED_USER = "DELETED_USER";
+    public static final String DELETED_USER_VALUE = "40350";
 
     /* 404 NOT_FOUND : 값이 없음 */
     public static final String NOT_FOUND = "NOT_FOUND";

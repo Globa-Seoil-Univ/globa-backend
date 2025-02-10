@@ -7,21 +7,11 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
-
     /* 400 BAD_REQUEST : 잘못된 요청 */
     EXPIRED_ACCESS_TOKEN(HttpStatus.BAD_REQUEST, "Access 토큰이 만료되었습니다. ", 40010),
-    ACTIVE_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "Refresh 토큰이 만료되지 않았습니다.", 40011),
+    ACTIVE_ACCESS_TOKEN(HttpStatus.BAD_REQUEST, "Access 토큰이 만료되지 않았습니다.", 40011),
     NOT_MATCH_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "Refresh 토큰이 일치하지 않습니다. ", 40012),
-    REQUIRED_ACCESS_TOKEN(HttpStatus.BAD_REQUEST, "인자로 Access 토큰이 필요합니다. ", 40013),
-    REQUIRED_REQUEST_TOKEN(HttpStatus.BAD_REQUEST, "인자로 Refresh 토큰이 필요합니다. ", 40014),
-    REQUIRED_USER_CODE(HttpStatus.BAD_REQUEST, "인자로 User Code가 필요합니다. ", 40015),
-    REQUIRED_USER_ID(HttpStatus.BAD_REQUEST, "인자로 User Id가 필요합니다. ", 40016),
-    REQUIRED_SNS_TOKEN(HttpStatus.BAD_REQUEST, "인자로 SNS 토큰이 필요합니다. ", 40017),
-
     FOLDER_DELETE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "기본 폴더는 삭제할 수 없습니다. ", 40020),
-
-    DELETED_USER(HttpStatus.BAD_REQUEST, "탈퇴된 유저입니다. ", 40030),
-
     REQUIRED_FOLDER_TITLE(HttpStatus.BAD_REQUEST, "인자로 Folder Title이 필요합니다. ", 40040),
     REQUIRED_FOLDER_ID(HttpStatus.BAD_REQUEST, "인자로 Folder Id가 필요합니다. ", 40041),
     REQUIRED_QUIZ_ID(HttpStatus.BAD_REQUEST, "인자로 Quiz Id가 필요합니다. ", 40042),
@@ -59,7 +49,6 @@ public enum ErrorCode {
     EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED,  "Refresh 토큰이 만료되었습니다. ", 40130),
     INVALID_SNS_TOKEN(HttpStatus.UNAUTHORIZED,  "유효하지 않은 Sns Token 입니다. ", 40140),
 
-
     /* 403 FORBIDDEN : 잘못된 접근 */
     NOT_NULL_ROLE(HttpStatus.FORBIDDEN,"Role은 Null 값이 허용되지 않습니다.",40310),
     NOT_DESERVE_ADD_NOTICE(HttpStatus.FORBIDDEN,"오직 admin 혹은 editor만 작성할 수 있습니다.",40320),
@@ -78,6 +67,7 @@ public enum ErrorCode {
     MISMATCH_QUIZ_RECORD_ID(HttpStatus.UNAUTHORIZED, "해당 문서의 퀴즈가 아닙니다.", 40346),
     MISMATCH_RECORD_OWNER(HttpStatus.UNAUTHORIZED, "해당 문서에 대한 소유권자가 아닙니다.", 40347),
     MISMATCH_RECORD_FOLDER(HttpStatus.UNAUTHORIZED, "해당 폴더의 문서가 아닙니다. ", 40348),
+    DELETED_USER(HttpStatus.BAD_REQUEST, "탈퇴된 유저입니다. ", 40350),
 
 
     /* 404 NOT_FOUND : 값이 없음 */

@@ -20,7 +20,7 @@ import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.NoticeService;
-import org.y2k2.globa.util.JwtTokenProvider;
+import org.y2k2.globa.util.jwt.JWTProvider;
 
 import java.net.URI;
 
@@ -31,7 +31,7 @@ import java.net.URI;
 @Tag(name = "Notice", description = "공지 관련 API입니다.")
 public class NoticeController {
     private final NoticeService noticeService;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JWTProvider jwtTokenProvider;
 
     @Operation(
             summary = "간단 공지사항 조회",
@@ -43,7 +43,6 @@ public class NoticeController {
                             content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = ResponseNoticeIntroDto.class)))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
@@ -54,10 +53,6 @@ public class NoticeController {
     )
     @GetMapping("/intro")
     public ResponseEntity<?> getIntroNotices(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken) {
-        if (accessToken == null) {
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        }
-
         return ResponseEntity.ok().body(noticeService.getIntroNotices());
     }
 
@@ -71,7 +66,6 @@ public class NoticeController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseNoticeDetailDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
@@ -85,9 +79,6 @@ public class NoticeController {
     )
     @GetMapping("/{noticeId}")
     public ResponseEntity<?> getNoticeDetail(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken, @PathVariable("noticeId") Long noticeId) {
-        if (accessToken == null) {
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        }
         if (noticeId == null) {
             throw new CustomException(ErrorCode.REQUIRED_NOTICE_ID);
         }
@@ -107,7 +98,6 @@ public class NoticeController {
                             description = "공지사항 추가 성공"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -126,9 +116,6 @@ public class NoticeController {
     )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> addNotice(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken, @Valid @ModelAttribute final RequestNoticeAddDto dto) {
-        if (accessToken == null) {
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        }
         long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
 
         Long noticeId = noticeService.addNotice(userId, dto);

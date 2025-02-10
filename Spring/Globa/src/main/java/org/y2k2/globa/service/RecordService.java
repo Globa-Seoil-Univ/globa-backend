@@ -41,7 +41,7 @@ import org.y2k2.globa.mapper.QuizMapper;
 import org.y2k2.globa.mapper.RecordMapper;
 import org.y2k2.globa.type.InvitationStatus;
 import org.y2k2.globa.util.CustomTimestamp;
-import org.y2k2.globa.util.JwtTokenProvider;
+import org.y2k2.globa.util.jwt.JWTProvider;
 import org.y2k2.globa.util.KafkaProducer;
 
 import java.time.LocalDateTime;
@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RecordService {
 
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JWTProvider jwtTokenProvider;
     private final KafkaProducer kafkaProducer;
 
     public final UserRepository userRepository;;

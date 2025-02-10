@@ -15,7 +15,7 @@ import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.repository.UserRepository;
 import org.y2k2.globa.repository.UserRoleRepository;
-import org.y2k2.globa.util.JwtTokenProvider;
+import org.y2k2.globa.util.jwt.JWTProvider;
 
 @Service
 @Slf4j
@@ -25,7 +25,7 @@ public class FcmService {
     private final UserRoleRepository userRoleRepository;
 
     private final FirebaseMessaging firebaseMessaging;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JWTProvider jwtTokenProvider;
 
     @Transactional
     public void sendTopicNotification(String accessToken, RequestFcmTopicDto dto) {

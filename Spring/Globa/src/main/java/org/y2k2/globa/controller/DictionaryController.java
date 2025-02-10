@@ -40,7 +40,6 @@ public class DictionaryController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDictionaryDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -55,10 +54,6 @@ public class DictionaryController {
     )
     @GetMapping
     public ResponseEntity<?> getDictionary(@Parameter(hidden = true) @RequestHeader(value = "Authorization") String accessToken, @RequestParam(value = "keyword") String keyword) {
-        if (accessToken == null) {
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        }
-
         return ResponseEntity.ok().body(dictionaryService.getDictionary(accessToken, keyword));
     }
 
@@ -75,7 +70,6 @@ public class DictionaryController {
                             description = "단어 추가 성공"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -93,10 +87,6 @@ public class DictionaryController {
     )
     @PostMapping
     public ResponseEntity<?> addDictionary(@Parameter(hidden = true) @RequestHeader(value = "Authorization") String accessToken) {
-        if (accessToken == null) {
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        }
-
         dictionaryService.saveDictionary(accessToken);
         return ResponseEntity.created(URI.create("/dictionary?keyword=테스트")).build();
     }

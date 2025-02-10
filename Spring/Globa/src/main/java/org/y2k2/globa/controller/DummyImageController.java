@@ -40,7 +40,6 @@ public class DummyImageController {
                             content = @Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ResponseDummyImageDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_IMAGE, ref = SwaggerErrorCode.REQUIRED_IMAGE_VALUE),
@@ -58,9 +57,6 @@ public class DummyImageController {
     )
     @PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> addDummyImage(@Parameter(hidden = true) @RequestHeader(value = "Authorization") String accessToken, @RequestParam("image") MultipartFile file) {
-        if (accessToken == null) {
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        }
         if (file.isEmpty()) throw new CustomException(ErrorCode.REQUIRED_IMAGE);
 
         ResponseDummyImageDto responseDto = dummyImageService.addDummyImage(accessToken, file);

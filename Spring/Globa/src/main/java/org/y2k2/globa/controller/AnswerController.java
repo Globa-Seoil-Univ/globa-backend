@@ -16,7 +16,7 @@ import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.AnswerService;
-import org.y2k2.globa.util.JwtTokenProvider;
+import org.y2k2.globa.util.jwt.JWTProvider;
 
 import java.net.URI;
 
@@ -27,7 +27,7 @@ import java.net.URI;
 @Tag(name = "Answer", description = "답변 관련 API입니다.")
 public class AnswerController {
     private final AnswerService answerService;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JWTProvider jwtTokenProvider;
 
     @Operation(
             summary = "답변 추가",
@@ -38,7 +38,6 @@ public class AnswerController {
                             description = "답변 추가 성공"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -61,7 +60,6 @@ public class AnswerController {
             @PathVariable("inquiryId") long inquiryId,
             @Valid @RequestBody RequestAnswerDto dto
     ) {
-        if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
         long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
@@ -78,7 +76,6 @@ public class AnswerController {
                             description = "답변 수정 성공"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -104,7 +101,6 @@ public class AnswerController {
             @PathVariable("answerId") long answerId,
             @Valid @RequestBody RequestAnswerDto dto
     ) {
-        if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
         long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
@@ -121,7 +117,6 @@ public class AnswerController {
                             description = "답변 삭제 성공"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -146,8 +141,6 @@ public class AnswerController {
             @PathVariable("inquiryId") long inquiryId,
             @PathVariable("answerId") long answerId
     ) {
-        if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-
         long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         answerService.deleteAnswer(userId, inquiryId, answerId);

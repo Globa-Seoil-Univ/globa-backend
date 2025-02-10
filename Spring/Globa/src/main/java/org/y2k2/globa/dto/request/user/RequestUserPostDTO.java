@@ -27,4 +27,5 @@ public class RequestUserPostDTO {
 
     private String profile;
     private Boolean notification = false;
+    private Boolean eventNotification = false;
 }

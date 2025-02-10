@@ -19,7 +19,7 @@ import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.NotificationService;
 import org.y2k2.globa.type.NotificationSort;
-import org.y2k2.globa.util.JwtTokenProvider;
+import org.y2k2.globa.util.jwt.JWTProvider;
 
 @RestController
 @RequestMapping("/notification")
@@ -28,7 +28,7 @@ import org.y2k2.globa.util.JwtTokenProvider;
 @Tag(name = "Notification", description = "알림 관련 API입니다.")
 public class NotificationController {
     private final NotificationService notificationService;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JWTProvider jwtTokenProvider;
 
     @Operation(
             summary = "알림 조회",
@@ -40,7 +40,6 @@ public class NotificationController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseNotificationDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -59,9 +58,6 @@ public class NotificationController {
             @RequestParam(value = "type", defaultValue = "a") String type,
             @RequestParam(value = "count", defaultValue = "100") int count,
             @RequestParam(value = "page", defaultValue = "1") int page) {
-        if (accessToken == null) {
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        }
         NotificationSort sort = NotificationSort.valueOfString(type);
         long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
@@ -78,7 +74,6 @@ public class NotificationController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseUnreadNotificationDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -95,8 +90,6 @@ public class NotificationController {
     public ResponseEntity<?> getHasUnreadNotifications(
             @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken
         ) {
-        if (accessToken == null)
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
 
         long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
@@ -129,7 +122,6 @@ public class NotificationController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseUnreadCountDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -146,11 +138,7 @@ public class NotificationController {
     public ResponseEntity<?> getCountUnreadNotifications(
             @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken
     ) {
-        if (accessToken == null)
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-
         long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-
         return ResponseEntity.ok().body(notificationService.getCountUnreadNotification(userId));
     }
 
@@ -163,7 +151,6 @@ public class NotificationController {
                             description = "알림 읽음 처리 성공"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -186,9 +173,6 @@ public class NotificationController {
             @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable(value="notification_id") Long notificationId
     ) {
-        if (accessToken == null)
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-
         if (notificationId == null || notificationId < 0)
             throw new CustomException(ErrorCode.REQUIRED_NOTIFICATION_ID);
 
@@ -212,7 +196,6 @@ public class NotificationController {
                             description = "알림 읽음 처리 성공"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -232,9 +215,6 @@ public class NotificationController {
             @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable(value="notification_id") Long notificationId
     ) {
-        if (accessToken == null)
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-
         if (notificationId == null || notificationId < 0)
             throw new CustomException(ErrorCode.REQUIRED_NOTIFICATION_ID);
 

@@ -47,7 +47,6 @@ public class RecordController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseRecordsByFolderDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_FOLDER_ID, ref = SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
@@ -69,8 +68,6 @@ public class RecordController {
                                                  @PathVariable(value = "folder_id", required = false) Long folderId,
                                                  @RequestParam(required = false, defaultValue = "1", value = "page") int page,
                                                  @RequestParam(required = false, defaultValue = "100", value = "count") int count) {
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( folderId == null )
             throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
 
@@ -88,7 +85,6 @@ public class RecordController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseAllRecordWithTotalDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -108,10 +104,6 @@ public class RecordController {
     @GetMapping("/record")
     public ResponseEntity<?> getAllRecord(@Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
                                                  @RequestParam(required = false, defaultValue = "100", value = "count") int count) {
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-
-
         return ResponseEntity.status(HttpStatus.OK).body(recordService.getAllRecords(accessToken, count));
     }
 
@@ -125,7 +117,6 @@ public class RecordController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseRecordDetailDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -147,9 +138,6 @@ public class RecordController {
     public ResponseEntity<?> getRecordDetail(@Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
                                                  @PathVariable(value = "folder_id", required = false) Long folderId,
                                                 @PathVariable(value = "record_id", required = false) Long recordId) {
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-
         if ( folderId == null )
             throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
         if ( recordId == null )
@@ -169,7 +157,6 @@ public class RecordController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseAnalysisDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_FOLDER_ID, ref = SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE),
@@ -191,9 +178,6 @@ public class RecordController {
     public ResponseEntity<?> getAnalysis(@Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
                                          @PathVariable(value = "folder_id", required = false) Long folderId,
                                          @PathVariable(value = "record_id", required = false) Long recordId) {
-
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( folderId == null )
             throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
         if ( recordId == null )
@@ -214,7 +198,6 @@ public class RecordController {
                             content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = QuizDto.class)))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_FOLDER_ID, ref = SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE),
@@ -237,9 +220,6 @@ public class RecordController {
     public ResponseEntity<?> getQuiz(@Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
                                          @PathVariable(value = "folder_id", required = false) Long folderId,
                                          @PathVariable(value = "record_id", required = false) Long recordId) {
-
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( folderId == null )
             throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
         if ( recordId == null )
@@ -260,7 +240,6 @@ public class RecordController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseRecordSearchDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_FOLDER_ID, ref = SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE),
@@ -281,8 +260,6 @@ public class RecordController {
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "100") int count,
             @RequestParam(required = false) String keyword) {
-        if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-
         return ResponseEntity.ok(recordService.searchRecord(accessToken, keyword, page, count));
     }
 
@@ -296,7 +273,6 @@ public class RecordController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseAllRecordWithTotalDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -318,8 +294,6 @@ public class RecordController {
             @Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "100") int count) {
-        if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-
         return ResponseEntity.ok(recordService.getReceivingRecords(accessToken, page, count));
     }
 
@@ -333,7 +307,6 @@ public class RecordController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseAllRecordWithTotalDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -355,8 +328,6 @@ public class RecordController {
             @Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "100") int count) {
-        if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-
         return ResponseEntity.ok(recordService.getSharingRecords(accessToken, page, count));
     }
 
@@ -372,7 +343,6 @@ public class RecordController {
                             description = "문서 링크 공유 완료"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_FOLDER_ID, ref = SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE),
@@ -397,7 +367,6 @@ public class RecordController {
     public ResponseEntity<?> addLinkShare(@Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
                                       @PathVariable(value = "folder_id", required = false) Long folderId,
                                       @PathVariable(value = "record_id", required = false) Long recordId) {
-        if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if (folderId == null) throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
         if (recordId == null) throw new CustomException(ErrorCode.REQUIRED_RECORD_ID);
 
@@ -414,7 +383,6 @@ public class RecordController {
                             description = "퀴즈 결과 추가 완료"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_FOLDER_ID, ref = SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE),
@@ -439,9 +407,6 @@ public class RecordController {
                                       @PathVariable(value = "folder_id", required = false) Long folderId,
                                      @PathVariable(value = "record_id", required = false) Long recordId,
                                       @RequestBody RequestQuizDto quizs) {
-
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( folderId == null )
             throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
         if ( recordId == null )
@@ -467,7 +432,6 @@ public class RecordController {
                             description = "문서 추가 및 분석 요청 완료"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_FOLDER_ID, ref = SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE),
@@ -491,9 +455,6 @@ public class RecordController {
     public ResponseEntity<?> postRecord(@Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
                                       @PathVariable(value = "folder_id", required = false) Long folderId,
                                       @RequestBody RequestPostRecordDto requestPostRecordDto) {
-
-        if (accessToken == null)
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( folderId == null )
             throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
         if ( requestPostRecordDto.getPath() == null || requestPostRecordDto.getTitle() == null || requestPostRecordDto.getSize() == null)
@@ -512,7 +473,6 @@ public class RecordController {
                             description = "문서 이름 수정 완료"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_RECORD_TITLE, ref = SwaggerErrorCode.REQUIRED_RECORD_TITLE_VALUE),
@@ -537,10 +497,6 @@ public class RecordController {
                                              @PathVariable(value = "folder_id", required = false) Long folderId,
                                         @PathVariable(value = "record_id", required = false) Long recordId,
                                         @RequestBody Map<String, String> titleMap){
-
-
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( titleMap.get("title") == null  )
             throw new CustomException(ErrorCode.REQUIRED_RECORD_TITLE);
         if ( recordId == null)
@@ -558,7 +514,6 @@ public class RecordController {
                             description = "문서 이동 완료"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_MOVE_ARRIVED_ID, ref = SwaggerErrorCode.REQUIRED_MOVE_ARRIVED_ID_VALUE),
@@ -588,10 +543,6 @@ public class RecordController {
                                              @PathVariable(value = "folder_id", required = false) Long folderId,
                                              @PathVariable(value = "record_id", required = false) Long recordId,
                                              @RequestBody Map<String, String> targetIdMap){
-
-
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( targetIdMap.get("targetId") == null  )
             throw new CustomException(ErrorCode.REQUIRED_MOVE_ARRIVED_ID);
         if ( recordId == null)
@@ -609,7 +560,6 @@ public class RecordController {
                             description = "공부 시간 수정 완료"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -633,9 +583,6 @@ public class RecordController {
                                             @PathVariable(value = "folder_id") Long folderId,
                                             @PathVariable(value = "record_id") Long recordId,
                                             @RequestBody RequestStudyDto dto) {
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-
         recordService.patchStudyTime(accessToken, recordId, folderId, dto);
 
         return ResponseEntity.noContent().build();
@@ -650,7 +597,6 @@ public class RecordController {
                             description = "문서 삭제 완료"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_FOLDER_ID, ref = SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE),
@@ -676,10 +622,6 @@ public class RecordController {
     public ResponseEntity<?> deleteFolder(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
                                           @PathVariable(value = "record_id") Long recordId,
                                           @PathVariable(value = "folder_id") Long folderId){
-
-
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( folderId == null)
             throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
         if ( recordId == null)
@@ -699,7 +641,6 @@ public class RecordController {
                             description = "문서 링크 공유 취소 완료"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_FOLDER_ID, ref = SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE),
@@ -722,7 +663,6 @@ public class RecordController {
     public ResponseEntity<?> deleteLinkShare(@Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
                                           @PathVariable(value = "folder_id", required = false) Long folderId,
                                           @PathVariable(value = "record_id", required = false) Long recordId) {
-        if (accessToken == null) throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if (folderId == null) throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
         if (recordId == null) throw new CustomException(ErrorCode.REQUIRED_RECORD_ID);
 

@@ -18,7 +18,7 @@ import org.y2k2.globa.repository.DictionaryRepository;
 import org.y2k2.globa.repository.UserRepository;
 import org.y2k2.globa.repository.UserRoleRepository;
 import org.y2k2.globa.util.Excel;
-import org.y2k2.globa.util.JwtTokenProvider;
+import org.y2k2.globa.util.jwt.JWTProvider;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -29,7 +29,7 @@ import java.util.List;
 public class DictionaryService {
     private final Excel excel;
     private final JdbcTemplate jdbcTemplate;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JWTProvider jwtTokenProvider;
 
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;

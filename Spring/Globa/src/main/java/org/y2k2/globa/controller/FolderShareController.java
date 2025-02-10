@@ -17,7 +17,7 @@ import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.FolderShareService;
-import org.y2k2.globa.util.JwtTokenProvider;
+import org.y2k2.globa.util.jwt.JWTProvider;
 
 import java.net.URI;
 import java.util.Map;
@@ -29,7 +29,7 @@ import java.util.Map;
 @Tag(name = "Folder Share", description = "공유 관련 API입니다.")
 public class FolderShareController {
     private final FolderShareService folderShareService;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JWTProvider jwtTokenProvider;
 
     @Operation(
             summary = "공유된 사용자 조회",
@@ -41,7 +41,6 @@ public class FolderShareController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseFolderShareUserDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.ROLE_BAD_REQUEST, ref = SwaggerErrorCode.ROLE_BAD_REQUEST_VALUE),
@@ -65,9 +64,6 @@ public class FolderShareController {
             @PathVariable(value = "folderId") Long folderId,
             @RequestParam(required = false, defaultValue = "1", value = "page") int page,
             @RequestParam(required = false, defaultValue = "100", value = "count") int count) {
-        if (accessToken == null) {
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        }
         long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         ResponseFolderShareUserDto folderShareUserResponseDto = folderShareService.getShares(folderId, userId, page, count);
         return ResponseEntity.ok().body(folderShareUserResponseDto);
@@ -82,7 +78,6 @@ public class FolderShareController {
                             description = "공유 초대 요청 완료"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_ROLE, ref = SwaggerErrorCode.REQUIRED_ROLE_VALUE),
@@ -112,9 +107,6 @@ public class FolderShareController {
             @RequestBody Map<String, String> body,
             @PathVariable(value = "folderId") Long folderId,
             @PathVariable(value = "userId") Long targetId) {
-        if (accessToken == null) {
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        }
         long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
         String role = body.get("role");
         checkRole(role);
@@ -132,7 +124,6 @@ public class FolderShareController {
                             description = "공유 초대 변경 완료"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_ROLE, ref = SwaggerErrorCode.REQUIRED_ROLE_VALUE),
@@ -161,9 +152,6 @@ public class FolderShareController {
             @RequestBody Map<String, String> body,
             @PathVariable(value = "folderId") Long folderId,
             @PathVariable(value = "userId") Long targetId) {
-        if (accessToken == null) {
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        }
         long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
         String role = body.get("role");
         checkRole(role);
@@ -181,7 +169,6 @@ public class FolderShareController {
                             description = "공유 초대 취소 완료"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.INVITE_BAD_REQUEST, ref = SwaggerErrorCode.INVITE_BAD_REQUEST_VALUE),
@@ -206,13 +193,10 @@ public class FolderShareController {
             @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable(value = "folderId") Long folderId,
             @PathVariable(value = "userId") Long targetId) {
-            if (accessToken == null) {
-                throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        }
         long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
-            folderShareService.deleteInviteShare(folderId, userId, targetId);
+        folderShareService.deleteInviteShare(folderId, userId, targetId);
 
-            return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(
@@ -224,7 +208,6 @@ public class FolderShareController {
                             description = "공유 초대 수락 완료"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.INVITE_ACCEPT_BAD_REQUEST, ref = SwaggerErrorCode.INVITE_ACCEPT_BAD_REQUEST_VALUE),
@@ -247,9 +230,6 @@ public class FolderShareController {
             @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable(value = "folderId") Long folderId,
             @PathVariable(value = "shareId") Long shareId) {
-        if (accessToken == null) {
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        }
         long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
         folderShareService.acceptShare(folderId, shareId, userId);
         return ResponseEntity.noContent().build();
@@ -264,7 +244,6 @@ public class FolderShareController {
                             description = "공유 초대 거절 완료"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.INVITE_ACCEPT_BAD_REQUEST, ref = SwaggerErrorCode.INVITE_ACCEPT_BAD_REQUEST_VALUE),
@@ -287,9 +266,6 @@ public class FolderShareController {
             @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable(value = "folderId") Long folderId,
             @PathVariable(value = "shareId") Long shareId) {
-        if (accessToken == null) {
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        }
         long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
         folderShareService.refuseShare(folderId, shareId, userId);
         return ResponseEntity.noContent().build();

@@ -54,12 +54,8 @@ public class SwaggerConfig {
         // 400 Errors
         components.addResponses("400", createApiResponse(exceptionSchema, "Bad Request", createExample("400", "~~~ 인자가 필요 또는 잘못되었습니다.")));
         components.addExamples(SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE, createExample(SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE, "만료된 인증 토큰입니다."));
-        components.addExamples(SwaggerErrorCode.ACTIVE_REFRESH_TOKEN_VALUE, createExample(SwaggerErrorCode.ACTIVE_REFRESH_TOKEN_VALUE, "갱신 토큰이 아직 만료되지 않았습니다."));
+        components.addExamples(SwaggerErrorCode.ACTIVE_ACCESS_TOKEN, createExample(SwaggerErrorCode.ACTIVE_ACCESS_TOKEN_VALUE, "액세스 토큰이 아직 만료되지 않았습니다."));
         components.addExamples(SwaggerErrorCode.NOT_MATCH_REFRESH_TOKEN_VALUE, createExample(SwaggerErrorCode.NOT_MATCH_REFRESH_TOKEN_VALUE, "갱신 토큰이 일치하지 않습니다."));
-        components.addExamples(SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE, createExample(SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE, "액세스 토큰은 필수입니다."));
-        components.addExamples(SwaggerErrorCode.REQUIRED_REQUEST_TOKEN_VALUE, createExample(SwaggerErrorCode.REQUIRED_REQUEST_TOKEN_VALUE, "요청 토큰은 필수입니다."));
-        components.addExamples(SwaggerErrorCode.REQUIRED_USER_CODE_VALUE, createExample(SwaggerErrorCode.REQUIRED_USER_CODE_VALUE, "사용자 코드는 필수입니다."));
-        components.addExamples(SwaggerErrorCode.REQUIRED_USER_ID_VALUE, createExample(SwaggerErrorCode.REQUIRED_USER_ID_VALUE, "사용자 ID는 필수입니다."));
         components.addExamples(SwaggerErrorCode.FOLDER_DELETE_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.FOLDER_DELETE_BAD_REQUEST_VALUE, "기본 폴더는 삭제할 수 없습니다."));
         components.addExamples(SwaggerErrorCode.DELETED_USER_VALUE, createExample(SwaggerErrorCode.DELETED_USER_VALUE, "삭제된 사용자입니다."));
         components.addExamples(SwaggerErrorCode.REQUIRED_FOLDER_TITLE_VALUE, createExample(SwaggerErrorCode.REQUIRED_FOLDER_TITLE_VALUE, "폴더 제목이 필요합니다."));
@@ -81,12 +77,7 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.REQUIRED_IMAGE_VALUE, createExample(SwaggerErrorCode.REQUIRED_IMAGE_VALUE, "이미지는 필수입니다."));
         components.addExamples(SwaggerErrorCode.REQUIRED_ROLE_VALUE, createExample(SwaggerErrorCode.REQUIRED_ROLE_VALUE, "초대하고자 하는 사용자의 권한 설정은 필수입니다."));
         components.addExamples(SwaggerErrorCode.ROLE_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.ROLE_BAD_REQUEST_VALUE, "role의 값은 r 또는 w 값이어야만 합니다."));
-        components.addExamples(SwaggerErrorCode.REQUIRED_SNS_KIND_VALUE, createExample(SwaggerErrorCode.REQUIRED_SNS_KIND_VALUE, "SNS 분류 ID는 필수입니다."));
-        components.addExamples(SwaggerErrorCode.REQUIRED_SNS_ID_VALUE, createExample(SwaggerErrorCode.REQUIRED_SNS_ID_VALUE, "SNS ID는 필수입니다."));
-        components.addExamples(SwaggerErrorCode.REQUIRED_NAME_VALUE, createExample(SwaggerErrorCode.REQUIRED_NAME_VALUE, "사용자 이름은 필수입니다."));
-        components.addExamples(SwaggerErrorCode.SNS_KIND_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.SNS_KIND_BAD_REQUEST_VALUE, "SNS 종류 ID는 1001 ~ 1004이어야 합니다."));
-        components.addExamples(SwaggerErrorCode.NAME_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.NAME_BAD_REQUEST_VALUE, "이름은 32글자 이하이어야 합니다."));
-        components.addExamples(SwaggerErrorCode.MISMATCH_FOLDER_ID_VALUE, createExample(SwaggerErrorCode.NAME_BAD_REQUEST_VALUE, "요청한 Folder Id와 DB의 정보가 일치하지 않습니다."));
+        components.addExamples(SwaggerErrorCode.MISMATCH_FOLDER_ID_VALUE, createExample(SwaggerErrorCode.MISMATCH_FOLDER_ID_VALUE, "요청한 Folder Id와 DB의 정보가 일치하지 않습니다."));
 
         // 401 Errors
         components.addExamples(SwaggerErrorCode.INVALID_TOKEN_VALUE, createExample(SwaggerErrorCode.INVALID_TOKEN_VALUE, "유효하지 않은 토큰입니다."));
@@ -111,7 +102,6 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.MISMATCH_QUIZ_RECORD_ID_VALUE, createExample(SwaggerErrorCode.MISMATCH_QUIZ_RECORD_ID_VALUE, "퀴즈의 음성 ID와 요청한 음성 ID 정보가 일치하지 않습니다."));
         components.addExamples(SwaggerErrorCode.MISMATCH_RECORD_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_RECORD_OWNER_VALUE, "음성 소유자만 요청할 수 있습니다."));
         components.addExamples(SwaggerErrorCode.MISMATCH_RECORD_FOLDER_VALUE, createExample(SwaggerErrorCode.MISMATCH_RECORD_FOLDER_VALUE, "요청한 음성 파일은 해당 폴더에 속해있지 않습니다."));
-        components.addExamples(SwaggerErrorCode.MISMATCH_NOTIFICATION_OWNER_VALUE , createExample(SwaggerErrorCode.MISMATCH_NOTIFICATION_OWNER_VALUE , "알림 소유자만 접근할 수 있습니다."));
 
 
         // 404 Errors

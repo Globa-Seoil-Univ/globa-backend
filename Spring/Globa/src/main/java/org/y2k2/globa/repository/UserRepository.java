@@ -11,10 +11,11 @@ import org.y2k2.globa.Projection.StudyTimeProjection;
 import org.y2k2.globa.entity.UserEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
-    UserEntity findBySnsId(String snsId);
+    Optional<UserEntity> findBySnsId(String snsId);
     UserEntity findOneByUserId(Long userId);
     UserEntity findOneByCode(String code);
     UserEntity findByUserId(Long userId);

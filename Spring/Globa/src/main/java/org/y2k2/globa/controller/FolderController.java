@@ -45,7 +45,6 @@ public class FolderController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
@@ -61,8 +60,6 @@ public class FolderController {
     public ResponseEntity<?> getFolders(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
                                         @RequestParam(required = false, defaultValue = "1", value = "page") int page,
                                         @RequestParam(required = false, defaultValue = "100", value = "count") int count) {
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         return ResponseEntity.status(HttpStatus.OK).body(folderService.getFolders(accessToken,page,count));
     }
 
@@ -77,7 +74,6 @@ public class FolderController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
@@ -94,8 +90,6 @@ public class FolderController {
     @PostMapping
     public ResponseEntity<?> postFolder(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
                                         @RequestBody RequestFolderPostDto request){
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( request.getTitle() == null  )
             throw new CustomException(ErrorCode.REQUIRED_FOLDER_TITLE);
         if ( request.getShareTarget() == null) {
@@ -119,7 +113,6 @@ public class FolderController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_FOLDER_ID, ref = SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE),
                     })),
@@ -140,10 +133,6 @@ public class FolderController {
     public ResponseEntity<?> patchFolder(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
                                         @PathVariable(value = "folder_id") Long folderId,
                                         @RequestBody Map<String, String> titleMap){
-
-
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( titleMap.get("title") == null  )
             throw new CustomException(ErrorCode.REQUIRED_FOLDER_TITLE);
         if ( folderId == null)
@@ -163,7 +152,6 @@ public class FolderController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_FOLDER_ID, ref = SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.FOLDER_DELETE_BAD_REQUEST, ref = SwaggerErrorCode.FOLDER_DELETE_BAD_REQUEST_VALUE),
@@ -186,8 +174,6 @@ public class FolderController {
     @DeleteMapping("/{folder_id}")
     public ResponseEntity<?> deleteFolder(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
                                         @PathVariable(value = "folder_id") Long folderId){
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if ( folderId == null)
             throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
 

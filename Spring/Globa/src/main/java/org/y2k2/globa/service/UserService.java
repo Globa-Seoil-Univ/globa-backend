@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.Projection.StudyTimeProjection;
+import org.y2k2.globa.dto.request.user.RequestRTRDto;
 import org.y2k2.globa.dto.response.analysis.ResponseAnalysisDto;
 import org.y2k2.globa.dto.response.keyword.ResponseKeywordDto;
 import org.y2k2.globa.dto.request.user.RequestNotificationSettingDto;
@@ -29,9 +30,9 @@ import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.mapper.UserMapper;
 import org.y2k2.globa.repository.*;
 import org.y2k2.globa.type.SnsKind;
-import org.y2k2.globa.util.JwtToken;
-import org.y2k2.globa.util.JwtTokenProvider;
-import org.y2k2.globa.util.JwtUtil;
+import org.y2k2.globa.util.jwt.JWT;
+import org.y2k2.globa.util.jwt.JWTProvider;
+import org.y2k2.globa.util.redis.RedisStore;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -48,8 +49,8 @@ public class UserService {
 
     private static final String KAKAO_USER_INFO_URL = "https://kapi.kakao.com/v2/user/me";
 
-    private final JwtTokenProvider jwtTokenProvider;
-    private final JwtUtil jwtUtil;
+    private final JWTProvider jwtProvider;
+    private final RedisStore redisStore;
 
     public final UserRepository userRepository;
     public final StudyRepository studyRepository;
@@ -61,41 +62,36 @@ public class UserService {
 
     public final FolderService folderService;
 
-    public JwtToken reloadRefreshToken(String refreshToken, String accessToken){
-        try {
-            Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-            Date expiredTime = jwtTokenProvider.getExpiredTimeByAccessTokenWithoutCheck(accessToken);
-            String redisRefreshToken = jwtUtil.getRefreshToken(userId);
+    public JWT reloadRefreshToken(String accessToken, String refreshToken) {
+        Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        String redisRefreshToken = redisStore.getValue(userId);
 
-            if(new Date().before(expiredTime)) {
-                jwtUtil.deleteValue(String.valueOf(userId));
-                throw new CustomException(ErrorCode.ACTIVE_REFRESH_TOKEN);
-            }
-
-            if (!redisRefreshToken.equals(refreshToken)) {
-                jwtUtil.deleteValue(String.valueOf(userId));
-                throw new CustomException(ErrorCode.NOT_MATCH_REFRESH_TOKEN);
-            }
-
-            jwtTokenProvider.checkExpiredTime(redisRefreshToken);
-
-
-            JwtToken jwtToken = jwtTokenProvider.generateToken(userId);
-
-            jwtUtil.insertRedisRefreshToken(userId, jwtToken.getRefreshToken());
-
-            return jwtToken;
+        if (!jwtProvider.isExpired(accessToken)) {
+            redisStore.deleteValue(String.valueOf(userId));
+            throw new CustomException(ErrorCode.ACTIVE_ACCESS_TOKEN);
         }
-        catch(Exception e){
-            throw e;
+
+        if (jwtProvider.isExpired(refreshToken)) {
+            redisStore.deleteValue(String.valueOf(userId));
+            throw new CustomException(ErrorCode.EXPIRED_REFRESH_TOKEN);
         }
+
+        if (!redisRefreshToken.equals(refreshToken)) {
+            redisStore.deleteValue(String.valueOf(userId));
+            throw new CustomException(ErrorCode.NOT_MATCH_REFRESH_TOKEN);
+        }
+
+        JWT jwt = jwtProvider.generateToken(userId);
+        redisStore.setValueExpire(
+                userId.toString(),
+                jwt.getRefreshToken(),
+                jwt.getRefreshTokenExpireTime()
+        );
+
+        return jwt;
     }
 
-    public JwtToken postUser(RequestUserPostDTO requestUserPostDTO){
-        // 1001 카카오 1004 구글
-        if (requestUserPostDTO.getToken() == null || requestUserPostDTO.getToken().isEmpty())
-            throw new CustomException(ErrorCode.REQUIRED_SNS_TOKEN);
-
+    public JWT signup(RequestUserPostDTO requestUserPostDTO){
 //        switch (requestUserPostDTO.getSnsKind()) {
 //            case "1001" :
 //                try {
@@ -144,42 +140,39 @@ public class UserService {
 //                break;
 //        }
 
-        UserEntity postUserEntity = userRepository.findBySnsId(requestUserPostDTO.getSnsId());
+        UserEntity user = userRepository.findBySnsId(requestUserPostDTO.getSnsId())
+                .orElseGet(() -> {
+                    String code = generateRandomCode(6);
 
-        if(postUserEntity == null) {
-            String USER_CODE = generateRandomCode(6);
-            UserEntity userEntity = new UserEntity();
-            userEntity.setSnsKind(SnsKind.fromCode(requestUserPostDTO.getSnsKind()));
-            userEntity.setSnsId(requestUserPostDTO.getSnsId());
-            userEntity.setCode(USER_CODE);
-            userEntity.setName(requestUserPostDTO.getName());
-            userEntity.setProfilePath(requestUserPostDTO.getProfile());
-            userEntity.setPrimaryNofi(requestUserPostDTO.getNotification());
-            userEntity.setShareNofi(requestUserPostDTO.getNotification());
-            userEntity.setUploadNofi(requestUserPostDTO.getNotification());
-            userEntity.setEventNofi(requestUserPostDTO.getNotification());
-            userEntity.setCreatedTime(LocalDateTime.now());
-            userEntity.setIsDeleted(false);
+                    while (userRepository.findOneByCode(code) != null) {
+                        code = generateRandomCode(6);
+                    }
 
-            postUserEntity = userRepository.save(userEntity);
+                    UserEntity userEntity = UserMapper.INSTANCE.toEntity(requestUserPostDTO.getSnsKind(), code, requestUserPostDTO);
+                    UserEntity newUser = userRepository.save(userEntity);
 
-            UserRoleEntity userRoleEntity = new UserRoleEntity();
-            RoleEntity roleEntity = roleRepository.findByRoleId(4);
-            userRoleEntity.setUser(postUserEntity);
-            userRoleEntity.setRoleId(roleEntity);
-            userRoleRepository.save(userRoleEntity);
+                    UserRoleEntity userRoleEntity = new UserRoleEntity();
+                    RoleEntity roleEntity = roleRepository.findByRoleId(4);
+                    userRoleEntity.setUser(newUser);
+                    userRoleEntity.setRoleId(roleEntity);
+                    userRoleRepository.save(userRoleEntity);
 
-            folderService.postDefaultFolder(postUserEntity);
-        }
+                    folderService.postDefaultFolder(newUser);
+                    return newUser;
+                });
 
-        if (postUserEntity.getIsDeleted()) {
+        if (user.getIsDeleted()) {
             throw new CustomException(ErrorCode.DELETED_USER);
         }
 
-        JwtToken jwtToken = jwtTokenProvider.generateToken(postUserEntity.getUserId());
-        jwtUtil.insertRedisRefreshToken(postUserEntity.getUserId(), jwtToken.getRefreshToken());
+        JWT jwt = jwtProvider.generateToken(user.getUserId());
+        redisStore.setValueExpire(
+                user.getUserId().toString(),
+                jwt.getRefreshToken(),
+                jwt.getRefreshTokenExpireTime()
+        );
 
-        return jwtToken;
+        return jwt;
     }
 
     public ResponseUserDto getUser(UserEntity user){
@@ -192,7 +185,7 @@ public class UserService {
 
     public ResponseUserSearchDto getUser(String accessToken, String code){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         UserEntity userEntity = userRepository.findOneByCode(code);
 
@@ -216,7 +209,7 @@ public class UserService {
 
     public RequestNotificationSettingDto getNotification(String accessToken, Long pathUserId){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         if (!Objects.equals(userId, pathUserId)){
             throw new CustomException(ErrorCode.MISMATCH_NOFI_OWNER);
@@ -285,7 +278,7 @@ public class UserService {
 
     public ResponseAnalysisDto getAnalysis(String accessToken, Long pathUserId){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
@@ -348,7 +341,7 @@ public class UserService {
 
     public RequestNotificationSettingDto putNotification(String accessToken, Long putUserId, RequestNotificationSettingDto settingDto){
 
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         if (!Objects.equals(userId, putUserId)){
             throw new CustomException(ErrorCode.MISMATCH_NOFI_OWNER);
@@ -377,7 +370,7 @@ public class UserService {
     }
 
     public HttpStatus patchUserName(String accessToken, Long putUserId, String name){
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         if (!Objects.equals(userId, putUserId)){
             throw new CustomException(ErrorCode.MISMATCH_RENAME_OWNER);
@@ -400,7 +393,7 @@ public class UserService {
 
 
     public HttpStatus deleteUser(String accessToken, RequestSurveyDto requestSurveyDto){
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         UserEntity userEntity = userRepository.findOneByUserId(userId);
 
@@ -434,7 +427,6 @@ public class UserService {
         for(int i = 0 ; i < length; ++i ){
             int index = random.nextInt(characters.length());
             code.append(characters.charAt(index));
-
         }
 
         return code.toString();

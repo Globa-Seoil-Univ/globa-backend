@@ -13,7 +13,7 @@ import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.repository.UserRepository;
-import org.y2k2.globa.util.JwtTokenProvider;
+import org.y2k2.globa.util.jwt.JWTProvider;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -21,7 +21,7 @@ import org.y2k2.globa.util.JwtTokenProvider;
 @Component
 public class VerifyUserAspect {
     private final HttpServletRequest request;
-    private final JwtTokenProvider provider;
+    private final JWTProvider provider;
     private final UserRepository userRepository;
 
     @Around("@annotation(org.y2k2.globa.annotation.VerifyUser)")

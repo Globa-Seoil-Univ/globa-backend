@@ -8,13 +8,13 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.y2k2.globa.interceptor.AuthenticationInterceptor;
 import org.y2k2.globa.interceptor.PathMatcherInterceptor;
-import org.y2k2.globa.util.JwtTokenProvider;
+import org.y2k2.globa.util.jwt.JWTProvider;
 import org.y2k2.globa.util.PathMethod;
 
 @Configuration
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JWTProvider jwtTokenProvider;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -37,7 +37,6 @@ public class WebConfig implements WebMvcConfigurer {
                 new PathMatcherInterceptor(new AuthenticationInterceptor(jwtTokenProvider));
 
         return interceptor
-                .includePathPattern("/user/auth",PathMethod.POST)
                 .includePathPattern("/user",PathMethod.GET)
                 .includePathPattern("/user/serach",PathMethod.GET)
                 .includePathPattern("/user/{_:[0-9]}/notification",PathMethod.GET)

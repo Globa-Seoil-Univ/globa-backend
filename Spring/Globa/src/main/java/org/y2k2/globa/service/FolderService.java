@@ -22,7 +22,7 @@ import org.y2k2.globa.entity.FolderShareEntity;
 import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.exception.*;
 import org.y2k2.globa.mapper.FolderMapper;
-import org.y2k2.globa.util.JwtTokenProvider;
+import org.y2k2.globa.util.jwt.JWTProvider;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,7 +31,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class FolderService {
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JWTProvider jwtTokenProvider;
     private final FolderShareService folderShareService;
 
     public final UserRepository userRepository;;

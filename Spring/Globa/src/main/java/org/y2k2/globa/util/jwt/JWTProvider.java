@@ -1,4 +1,4 @@
-package org.y2k2.globa.util;
+package org.y2k2.globa.util.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
@@ -9,19 +9,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.exception.*;
+import org.y2k2.globa.util.CustomTimestamp;
 
 import java.security.Key;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Slf4j
 @Component
-public class JwtTokenProvider {
+public class JWTProvider {
     private static final String grantType = "Bearer";
-    private static final long accessTokenExpirationTime = 86400000; // 86400000는 24시간, 1800000은 30분
-    private static final long refreshTokenExpirationTime = 604800000; // 일주일
+    private static final long accessTokenExpirationTime = 60 * 60 * 24;
+    private static final long refreshTokenExpirationTime = 60 * 60 * 24 * 7;
     private final Key key;
 
-    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
+    public JWTProvider(@Value("${jwt.secret}") String secretKey) {
         if (secretKey == null) {
             log.info("secretKey가 존재하지 않습니다.");
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
@@ -37,27 +40,31 @@ public class JwtTokenProvider {
      * UserId를 통해 AccessToken, RefreshToken 생성
      *
      * @param userId 사용자 ID
-     * @return {@link JwtToken}
+     * @return {@link JWT}
      */
-    public JwtToken generateToken(Long userId) {
+    public JWT generateToken(Long userId) {
         try {
-            long now = (new Date()).getTime();
+            CustomTimestamp customTimestamp = new CustomTimestamp();
+            LocalDateTime accessTokenExpireTime = customTimestamp.getTimestamp().plusSeconds(accessTokenExpirationTime);
+            LocalDateTime refreshTokenExpireTime = customTimestamp.getTimestamp().plusSeconds(refreshTokenExpirationTime);
 
             String accessToken = Jwts.builder()
                     .setSubject(String.valueOf(userId))
-                    .setExpiration(new Date(now + accessTokenExpirationTime))
+                    .setExpiration(Timestamp.valueOf(accessTokenExpireTime))
                     .signWith(key, SignatureAlgorithm.HS256)
                     .compact();
 
             String refreshToken = Jwts.builder()
-                    .setExpiration(new Date(now + refreshTokenExpirationTime))
+                    .setExpiration(Timestamp.valueOf(refreshTokenExpireTime))
                     .signWith(key, SignatureAlgorithm.HS256)
                     .compact();
 
-            return JwtToken.builder()
+            return JWT.builder()
                     .grantType(grantType)
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
+                    .accessTokenExpireTime(accessTokenExpireTime)
+                    .refreshTokenExpireTime(refreshTokenExpireTime)
                     .build();
         } catch (DnsNameResolverTimeoutException e){
             throw new CustomException(ErrorCode.REDIS_TIMEOUT);
@@ -71,6 +78,7 @@ public class JwtTokenProvider {
      * @return UserId
      */
     public Long getUserIdByAccessToken(String accessToken) {
+        log.info("getUserIdByAccessToken : {}", accessToken);
         Claims claims = parseClaims(accessToken, true);
         return Long.valueOf(claims.getSubject());
     }
@@ -82,44 +90,23 @@ public class JwtTokenProvider {
      * @return 만료 시간
      */
     public Long getUserIdByAccessTokenWithoutCheck(String accessToken){
+        log.info("getUserIdByAccessTokenWithoutCheck : {}", accessToken);
         Claims claims = parseClaims(accessToken, false);
         return Long.valueOf(claims.getSubject());
     }
 
     /**
-     * AccessToken을 통해 만료 시간 반환 (만료 시간 체크 X)
+     * token 만료 여부 확인
      *
-     * @param accessToken AccessToken
-     * @return 만료 시간
+     * @param token AccessToken
+     * @return 만료 여부
      */
-    public Date getExpiredTimeByAccessTokenWithoutCheck(String accessToken){
-        Claims claims = parseClaims(accessToken, false);
-        return claims.getExpiration();
-    }
-
-    /**
-     * RefreshToken을 통해 만료 시간을 검증
-     *
-     * @param refreshToken RefreshToken
-     */
-    public void checkExpiredTime(String refreshToken) {
-        try{
-            Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(refreshToken)
-                    .getBody();
-        } catch (ExpiredJwtException e) {
-            throw new CustomException(ErrorCode.EXPIRED_REFRESH_TOKEN);
-        } catch (SignatureException e){
-            throw new CustomException(ErrorCode.SIGNATURE);
-        }
+    public Boolean isExpired(String token){
+        Claims claims = parseClaims(token, false);
+        return claims.getExpiration().before(new Date());
     }
 
     private Claims parseClaims(String accessToken, boolean validate) {
-        if (accessToken == null) {
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        }
         if (accessToken.contains("Bearer")) {
             accessToken = accessToken.split(" ")[1].trim();
         }

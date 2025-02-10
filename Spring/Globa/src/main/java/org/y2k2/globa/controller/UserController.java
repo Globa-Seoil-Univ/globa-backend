@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.y2k2.globa.annotation.VerifyUser;
+import org.y2k2.globa.dto.request.user.RequestRTRDto;
 import org.y2k2.globa.dto.response.analysis.ResponseAnalysisDto;
 import org.y2k2.globa.dto.request.user.RequestNotificationSettingDto;
 import org.y2k2.globa.dto.request.fcm.RequestNotificationTokenDto;
@@ -28,8 +29,8 @@ import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.UserService;
-import org.y2k2.globa.util.JwtToken;
-import org.y2k2.globa.util.JwtTokenProvider;
+import org.y2k2.globa.util.jwt.JWT;
+import org.y2k2.globa.util.jwt.JWTProvider;
 
 import java.net.URI;
 import java.util.Map;
@@ -41,7 +42,7 @@ import java.util.Map;
 @Tag(name = "User", description = "사용자 관련 API입니다.")
 public class UserController {
     private final UserService userService;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JWTProvider jwtTokenProvider;
 
     @Operation(
             summary = "회원 가입과 로그인",
@@ -54,24 +55,20 @@ public class UserController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "회원 가입 또는 로그인 완료",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = JwtToken.class))
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = JWT.class))
                     ),
-                    @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_SNS_KIND, ref = SwaggerErrorCode.REQUIRED_SNS_KIND_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_SNS_ID, ref = SwaggerErrorCode.REQUIRED_SNS_ID_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_NAME, ref = SwaggerErrorCode.REQUIRED_NAME_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.SNS_KIND_BAD_REQUEST, ref = SwaggerErrorCode.SNS_KIND_BAD_REQUEST_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.NAME_BAD_REQUEST, ref = SwaggerErrorCode.NAME_BAD_REQUEST_VALUE),
+                    @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.INVALID_SNS_TOKEN, ref = SwaggerErrorCode.INVALID_SNS_TOKEN_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
     @PostMapping
-    public ResponseEntity<?> postUser(@RequestBody @Valid RequestUserPostDTO requestUserPostDTO) {
-        // TODO : snsId 1001 ~ 1004 사이의 값만 허용 (Enum으로 관리)
-        // TODO : Validation 사용
-        // TODO : Redis에 저장되는 Refresh Token TTL이 없음 (만료, 폐기, 재발급 로직 점검 필요)
-        JwtToken jwtToken = userService.postUser(requestUserPostDTO);
+    public ResponseEntity<?> signup(@Valid @RequestBody RequestUserPostDTO requestUserPostDTO) {
+        JWT jwtToken = userService.signup(requestUserPostDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(jwtToken);
     }
 
@@ -82,40 +79,24 @@ public class UserController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "Access Token 갱신 완료",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = JwtToken.class))
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = JWT.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.ACTIVE_REFRESH_TOKEN, ref = SwaggerErrorCode.ACTIVE_REFRESH_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.ACTIVE_ACCESS_TOKEN, ref = SwaggerErrorCode.ACTIVE_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.NOT_MATCH_REFRESH_TOKEN, ref = SwaggerErrorCode.NOT_MATCH_REFRESH_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_REQUEST_TOKEN, ref = SwaggerErrorCode.REQUIRED_REQUEST_TOKEN_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE)
+                            @ExampleObject(name = SwaggerErrorCode.EXPIRED_REFRESH_TOKEN, ref = SwaggerErrorCode.EXPIRED_REFRESH_TOKEN_VALUE)
                     })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
     @PostMapping("/auth")
-    public ResponseEntity<?> authUser(@RequestBody Map<String, String> requestTokenMap,
+    public ResponseEntity<?> reloadRefreshToken(@Valid @RequestBody RequestRTRDto dto,
                                       @Parameter(hidden = true)
                                       @RequestHeader(value = "Authorization", required = false) String accessToken) {
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        JwtToken jwtToken;
-
-        try {
-            if ( requestTokenMap.get("requestToken") == null )
-                throw new CustomException(ErrorCode.REQUIRED_REQUEST_TOKEN);
-            jwtToken = userService.reloadRefreshToken(requestTokenMap.get("requestToken"), accessToken);
-
-        } catch (Exception e) {
-            throw e;
-        }
-
-        return ResponseEntity.status(HttpStatus.OK).body(jwtToken);
+        JWT jwtToken = userService.reloadRefreshToken(accessToken, dto.refreshToken());
+        return ResponseEntity.ok(jwtToken);
     }
 
     @Operation(
@@ -129,7 +110,6 @@ public class UserController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
@@ -158,9 +138,6 @@ public class UserController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseUserSearchDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_USER_CODE, ref = SwaggerErrorCode.REQUIRED_USER_CODE_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_USER_CODE, ref = SwaggerErrorCode.REQUIRED_USER_CODE_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
@@ -178,11 +155,6 @@ public class UserController {
             @RequestHeader(value = "Authorization", required = false) String accessToken,
             @RequestParam(value = "code", required = false) String code) {
 
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        if ( code == null )
-            throw new CustomException(ErrorCode.REQUIRED_USER_CODE);
-
         ResponseUserSearchDto result = userService.getUser(accessToken,code);
 
         return ResponseEntity.ok(result);
@@ -199,8 +171,6 @@ public class UserController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_USER_ID, ref = SwaggerErrorCode.REQUIRED_USER_ID_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
@@ -219,11 +189,6 @@ public class UserController {
             @RequestHeader(value = "Authorization", required = false) String accessToken,
             @PathVariable(value = "user_id", required = false) Long userId) {
 
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        if ( userId == null )
-            throw new CustomException(ErrorCode.REQUIRED_USER_ID);
-
         RequestNotificationSettingDto result = userService.getNotification(accessToken,userId);
 
         return ResponseEntity.ok(result);
@@ -240,8 +205,6 @@ public class UserController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_USER_ID, ref = SwaggerErrorCode.REQUIRED_USER_ID_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
@@ -261,11 +224,6 @@ public class UserController {
             @RequestHeader(value = "Authorization", required = false) String accessToken,
             @PathVariable(value = "user_id", required = false) Long userId) {
 
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        if ( userId == null )
-            throw new CustomException(ErrorCode.REQUIRED_USER_ID);
-
         ResponseAnalysisDto result = userService.getAnalysis(accessToken,userId);
 
         return ResponseEntity.ok(result);
@@ -282,8 +240,6 @@ public class UserController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_USER_ID, ref = SwaggerErrorCode.REQUIRED_USER_ID_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.NOFI_POST_BAD_REQUEST, ref = SwaggerErrorCode.NOFI_POST_BAD_REQUEST_VALUE),
                     })),
@@ -303,11 +259,6 @@ public class UserController {
             @RequestHeader(value = "Authorization", required = false) String accessToken,
             @PathVariable(value = "user_id", required = false) Long userId,
             @RequestBody RequestNotificationSettingDto settingDto) {
-
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        if ( userId == null )
-            throw new CustomException(ErrorCode.REQUIRED_USER_ID);
         if ( settingDto.getEventNofi() == null || settingDto.getUploadNofi() == null  || settingDto.getShareNofi() == null  )
             throw new CustomException(ErrorCode.NOFI_POST_BAD_REQUEST);
 
@@ -327,10 +278,7 @@ public class UserController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_USER_ID, ref = SwaggerErrorCode.REQUIRED_USER_ID_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_NAME, ref = SwaggerErrorCode.REQUIRED_NAME_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
@@ -353,11 +301,6 @@ public class UserController {
                     )
             )
             @RequestBody Map<String, String> nameMap) {
-
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        if ( userId == null )
-            throw new CustomException(ErrorCode.REQUIRED_USER_ID);
         if ( nameMap.get("name") == null  )
             throw new CustomException(ErrorCode.REQUIRED_NAME);
 
@@ -377,8 +320,6 @@ public class UserController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_USER_ID, ref = SwaggerErrorCode.REQUIRED_USER_ID_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.SURVEY_POST_BAD_REQUEST, ref = SwaggerErrorCode.SURVEY_POST_BAD_REQUEST_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
@@ -395,8 +336,6 @@ public class UserController {
             @Parameter(hidden = true)
             @RequestHeader(value = "Authorization", required = false) String accessToken,
             @RequestBody RequestSurveyDto requestSurveyDto) {
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if( requestSurveyDto.getSurveyType() == null || requestSurveyDto.getContent() == null)
             throw new CustomException(ErrorCode.SURVEY_POST_BAD_REQUEST);
 
@@ -421,7 +360,6 @@ public class UserController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE)
@@ -440,9 +378,6 @@ public class UserController {
             @RequestHeader(value = "Authorization") String accessToken,
             @Valid @RequestBody RequestNotificationTokenDto dto,
             @PathVariable(value = "userId", required = false) long userId) {
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-
         long accessUserId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         if (accessUserId != userId)
             throw new CustomException(ErrorCode.INVALID_TOKEN_USER);
@@ -467,7 +402,6 @@ public class UserController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE)
@@ -487,9 +421,6 @@ public class UserController {
             @RequestHeader(value = "Authorization") String accessToken,
             @Valid @RequestBody RequestNotificationTokenDto dto,
             @PathVariable(value = "userId", required = false) long userId) {
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-
         long accessUserId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         if (accessUserId != userId)
             throw new CustomException(ErrorCode.INVALID_TOKEN_USER);
@@ -509,7 +440,6 @@ public class UserController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_IMAGE, ref = SwaggerErrorCode.REQUIRED_IMAGE_VALUE),
                     })),
@@ -533,8 +463,6 @@ public class UserController {
             @RequestHeader(value = "Authorization") String accessToken,
             @RequestParam("profile") MultipartFile file,
             @PathVariable(value = "userId", required = false) long userId) {
-        if ( accessToken == null )
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
         if (file.isEmpty()) throw new CustomException(ErrorCode.REQUIRED_IMAGE);
 
         long accessUserId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);

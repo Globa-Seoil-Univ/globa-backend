@@ -18,7 +18,7 @@ import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.mapper.DummyImageMapper;
 import org.y2k2.globa.repository.DummyImageRepository;
 import org.y2k2.globa.repository.UserRepository;
-import org.y2k2.globa.util.JwtTokenProvider;
+import org.y2k2.globa.util.jwt.JWTProvider;
 
 import java.util.Date;
 
@@ -27,7 +27,7 @@ import java.util.Date;
 public class DummyImageService {
     @Autowired
     private Bucket bucket;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JWTProvider jwtTokenProvider;
 
     private final UserRepository userRepository;
     private final DummyImageRepository dummyImageRepository;

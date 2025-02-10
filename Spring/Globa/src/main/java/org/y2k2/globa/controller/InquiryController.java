@@ -20,7 +20,7 @@ import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.InquiryService;
 import org.y2k2.globa.type.InquirySort;
-import org.y2k2.globa.util.JwtTokenProvider;
+import org.y2k2.globa.util.jwt.JWTProvider;
 
 import java.net.URI;
 
@@ -31,7 +31,7 @@ import java.net.URI;
 @Tag(name = "Inquiry", description = "문의 관련 API입니다.")
 public class InquiryController {
     private final InquiryService inquiryService;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JWTProvider jwtTokenProvider;
 
     @Operation(
             summary = "문의 조회",
@@ -43,7 +43,6 @@ public class InquiryController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseInquiryDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -63,9 +62,6 @@ public class InquiryController {
             @RequestParam(required = false, value = "count", defaultValue = "100") int count,
             @RequestParam(required = false, value = "sort", defaultValue = "r") String sort
     ) {
-        if (accessToken == null) {
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        }
         long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         InquirySort inquirySort = InquirySort.valueOfString(sort);
@@ -84,7 +80,6 @@ public class InquiryController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseInquiryDetailDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -103,9 +98,6 @@ public class InquiryController {
     )
     @GetMapping(value = "/{inquiryId}")
     public ResponseEntity<?> getInquiry(@RequestHeader(value = "Authorization") String accessToken, @PathVariable(name = "inquiryId") long inquiryId) {
-        if (accessToken == null) {
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        }
         long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         ResponseInquiryDetailDto dto = inquiryService.getInquiry(userId, inquiryId);
@@ -121,7 +113,6 @@ public class InquiryController {
                             description = "문의 등록 성공"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -136,9 +127,6 @@ public class InquiryController {
     )
     @PostMapping
     public ResponseEntity<?> addInquiry(@RequestHeader(value = "Authorization") String accessToken, @Valid @RequestBody RequestInquiryDto dto) {
-        if (accessToken == null) {
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        }
         long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
         long inquiryId = inquiryService.addInquiry(userId, dto);

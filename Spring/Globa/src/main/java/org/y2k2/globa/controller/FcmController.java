@@ -18,7 +18,7 @@ import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.FcmService;
-import org.y2k2.globa.util.JwtTokenProvider;
+import org.y2k2.globa.util.jwt.JWTProvider;
 
 @RestController
 @RequestMapping("/fcm")
@@ -27,7 +27,6 @@ import org.y2k2.globa.util.JwtTokenProvider;
 @Tag(name = "Fcm", description = "Firebase Cloud Messaging을 사용하여 알림을 보내는 API입니다.")
 public class FcmController {
     private final FcmService fcmService;
-    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/send")
     @Operation(
@@ -39,7 +38,6 @@ public class FcmController {
                             description = "알림 보내기 성공"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.REQUIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -63,10 +61,6 @@ public class FcmController {
             @RequestHeader(value = "Authorization") String accessToken,
             @RequestBody RequestFcmTopicDto requestFcmTopicDto
     ) {
-        if (accessToken == null) {
-            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-        }
-
         fcmService.sendTopicNotification(accessToken, requestFcmTopicDto);
         return ResponseEntity.noContent().build();
     }
