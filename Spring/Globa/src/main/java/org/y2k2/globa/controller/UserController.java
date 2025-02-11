@@ -166,11 +166,13 @@ public class UserController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.MISMATCH_NOFI_OWNER, ref = SwaggerErrorCode.MISMATCH_NOFI_OWNER_VALUE)
+                    })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.MISMATCH_NOFI_OWNER, ref = SwaggerErrorCode.MISMATCH_NOFI_OWNER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
@@ -178,15 +180,10 @@ public class UserController {
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
-    @GetMapping("/{user_id}/notification")
-    public ResponseEntity<?> getUserNotification(
-            @Parameter(hidden = true)
-            @RequestHeader(value = "Authorization", required = false) String accessToken,
-            @PathVariable(value = "user_id", required = false) Long userId) {
-
-        RequestNotificationSettingDto result = userService.getNotification(accessToken,userId);
-
-        return ResponseEntity.ok(result);
+    @GetMapping("/notification")
+    @VerifyUser
+    public ResponseEntity<?> getUserNotification(UserEntity user) {
+        return ResponseEntity.ok(userService.getNotification(user));
     }
 
     @Operation(
@@ -200,28 +197,24 @@ public class UserController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.MISMATCH_ANALYSIS_OWNER, ref = SwaggerErrorCode.MISMATCH_ANALYSIS_OWNER_VALUE)
+                    })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.MISMATCH_ANALYSIS_OWNER, ref = SwaggerErrorCode.MISMATCH_ANALYSIS_OWNER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_RECORD, ref = SwaggerErrorCode.NOT_FOUND_RECORD_VALUE),
                     })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
-    @GetMapping("/{user_id}/analysis")
-    public ResponseEntity<?> getAnalysis(
-            @Parameter(hidden = true)
-            @RequestHeader(value = "Authorization", required = false) String accessToken,
-            @PathVariable(value = "user_id", required = false) Long userId) {
-
-        ResponseAnalysisDto result = userService.getAnalysis(accessToken,userId);
-
-        return ResponseEntity.ok(result);
+    @GetMapping("/analysis")
+    @VerifyUser
+    public ResponseEntity<?> getAnalysis(UserEntity user) {
+        return ResponseEntity.ok(userService.getAnalysis(user));
     }
 
     @Operation(

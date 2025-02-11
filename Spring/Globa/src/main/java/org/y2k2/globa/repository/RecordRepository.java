@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.y2k2.globa.Projection.RecordSearchProjection;
 import org.y2k2.globa.entity.RecordEntity;
+import org.y2k2.globa.entity.UserEntity;
 
 import java.util.List;
 
@@ -15,7 +16,12 @@ public interface RecordRepository extends JpaRepository<RecordEntity, Long> {
     RecordEntity findRecordEntityByRecordId(Long recordId);
     Page<RecordEntity> findAllByFolderFolderId(Pageable page, Long folderId);
 
-    List<RecordEntity> findRecordEntitiesByUserUserId(Long userId);
+    @Query(
+            value = "SELECT r FROM RecordEntity r " +
+                    "JOIN FolderShareEntity fs ON r.folder = fs.folder " +
+                    "WHERE fs.ownerUser.userId = :userId OR fs.targetUser.userId = :userId "
+    )
+    List<RecordEntity> findAllByUser(Long userId);
 
     @Query(value = "SELECT * " +
             "FROM record " +

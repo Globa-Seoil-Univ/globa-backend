@@ -13,8 +13,7 @@ import java.util.Date;
 @Getter
 @Setter
 @NoArgsConstructor
-@ToString
-public class ResponseStudyTimesDto implements Serializable {
+public class ResponseStudyTimesDto {
     private Long studyTime;
     private String createdTime;
 }

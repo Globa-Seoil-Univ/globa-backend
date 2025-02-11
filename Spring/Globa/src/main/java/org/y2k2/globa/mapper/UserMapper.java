@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import org.y2k2.globa.dto.request.user.RequestUserPostDTO;
+import org.y2k2.globa.dto.response.user.ResponseNotificationSettingDto;
 import org.y2k2.globa.dto.response.user.ResponseUserDto;
 import org.y2k2.globa.dto.response.user.ResponseUserSearchDto;
 import org.y2k2.globa.entity.UserEntity;
@@ -35,4 +36,9 @@ public interface UserMapper {
     @Mapping(source = "user.name", target = "name")
     @Mapping(source = "user.code", target = "code")
     ResponseUserSearchDto toResponseUserSearchDto(UserEntity user);
+
+    @Mapping(source = "user.uploadNofi", target = "uploadNofi")
+    @Mapping(source = "user.shareNofi", target = "shareNofi")
+    @Mapping(source = "user.eventNofi", target = "eventNofi")
+    ResponseNotificationSettingDto toResponseNotificationSettingDto(UserEntity user);
 }

@@ -4,7 +4,6 @@ import com.google.cloud.storage.Bucket;
 import com.google.firebase.auth.FirebaseAuth;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.Projection.StudyTimeProjection;
-import org.y2k2.globa.dto.request.user.RequestRTRDto;
 import org.y2k2.globa.dto.response.analysis.ResponseAnalysisDto;
 import org.y2k2.globa.dto.response.keyword.ResponseKeywordDto;
 import org.y2k2.globa.dto.request.user.RequestNotificationSettingDto;
@@ -27,9 +25,11 @@ import org.y2k2.globa.dto.response.user.ResponseUserSearchDto;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
+import org.y2k2.globa.mapper.KeywordMapper;
+import org.y2k2.globa.mapper.QuizMapper;
+import org.y2k2.globa.mapper.StudyTimeMapper;
 import org.y2k2.globa.mapper.UserMapper;
 import org.y2k2.globa.repository.*;
-import org.y2k2.globa.type.SnsKind;
 import org.y2k2.globa.util.jwt.JWT;
 import org.y2k2.globa.util.jwt.JWTProvider;
 import org.y2k2.globa.util.redis.RedisStore;
@@ -41,10 +41,9 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class UserService {
-    @Autowired
     private final Bucket bucket;
-
     private final FirebaseAuth firebaseAuth;
 
     private static final String KAKAO_USER_INFO_URL = "https://kapi.kakao.com/v2/user/me";
@@ -52,13 +51,15 @@ public class UserService {
     private final JWTProvider jwtProvider;
     private final RedisStore redisStore;
 
-    public final UserRepository userRepository;
-    public final StudyRepository studyRepository;
-    public final SurveyRepository surveyRepository;
-    public final FolderRepository folderRepository;
-    public final RecordRepository recordRepository;
-    public final UserRoleRepository userRoleRepository;
-    public final RoleRepository roleRepository;
+    private final UserRepository userRepository;
+    private final StudyRepository studyRepository;
+    private final SurveyRepository surveyRepository;
+    private final FolderRepository folderRepository;
+    private final RecordRepository recordRepository;
+    private final UserRoleRepository userRoleRepository;
+    private final RoleRepository roleRepository;
+    private final QuizRepository quizRepository;
+    private final KeywordRepository keywordRepository;
 
     public final FolderService folderService;
 
@@ -91,6 +92,7 @@ public class UserService {
         return jwt;
     }
 
+    @Transactional
     public JWT signup(RequestUserPostDTO requestUserPostDTO){
 //        switch (requestUserPostDTO.getSnsKind()) {
 //            case "1001" :
@@ -142,10 +144,10 @@ public class UserService {
 
         UserEntity user = userRepository.findBySnsId(requestUserPostDTO.getSnsId())
                 .orElseGet(() -> {
-                    String code = generateRandomCode(6);
+                    String code = generateRandomCode();
 
                     while (userRepository.findOneByCode(code) != null) {
-                        code = generateRandomCode(6);
+                        code = generateRandomCode();
                     }
 
                     UserEntity userEntity = UserMapper.INSTANCE.toEntity(requestUserPostDTO.getSnsKind(), code, requestUserPostDTO);
@@ -193,29 +195,35 @@ public class UserService {
         return UserMapper.INSTANCE.toResponseUserSearchDto(userEntity);
     }
 
-    public RequestNotificationSettingDto getNotification(String accessToken, Long pathUserId){
-        Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+    public RequestNotificationSettingDto getNotification(UserEntity user){
+        return UserMapper.INSTANCE.toResponseNotificationSettingDto(user);
+    }
 
-        if (!Objects.equals(userId, pathUserId)){
-            throw new CustomException(ErrorCode.MISMATCH_NOFI_OWNER);
-        }
+    public ResponseAnalysisDto getAnalysis(UserEntity user) {
+        List<RecordEntity> records = recordRepository.findAllByUser(user.getUserId());
+        if(records.isEmpty())
+            return new ResponseAnalysisDto(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 
-        UserEntity userEntity = userRepository.findOneByUserId(userId);
+        List<Long> recordIds = records.stream().map(RecordEntity::getRecordId).toList();
+        List<StudyTimeProjection> studyTimeProjections = studyRepository.findStudyTimeByUserInWeek(user.getUserId());
+        List<QuizGradeProjection> quizGradeProjections = quizRepository.findQuizGradeByUserInWeek(user.getUserId());
+        List<KeywordProjection> keywordProjections = keywordRepository.findKeywordByRecordIds(recordIds);
 
+        List<ResponseStudyTimesDto> studyTimes = studyTimeProjections.stream().map(
+                StudyTimeMapper.INSTANCE::toResponseStudyTimesDto
+        ).toList();
+        List<ResponseQuizGradeDto> quizGrades = quizGradeProjections.stream().map(
+                QuizMapper.INSTANCE::toResponseQuizGradeDto
+        ).toList();
+        List<ResponseKeywordDto> keywords = keywordProjections.stream().map(
+                KeywordMapper.INSTANCE::toResponseKeywordDto
+        ).toList();
 
-        if(userEntity == null)
-            throw new CustomException(ErrorCode.NOT_FOUND_USER);
-
-        if(userEntity.getIsDeleted())
-            throw new CustomException(ErrorCode.DELETED_USER);
-
-        RequestNotificationSettingDto responseUserRequestNotificationSettingDto = new RequestNotificationSettingDto();
-
-        responseUserRequestNotificationSettingDto.setUploadNofi(userEntity.getUploadNofi());
-        responseUserRequestNotificationSettingDto.setShareNofi(userEntity.getShareNofi());
-        responseUserRequestNotificationSettingDto.setEventNofi(userEntity.getEventNofi());
-
-        return responseUserRequestNotificationSettingDto;
+        return new ResponseAnalysisDto(
+                keywords,
+                studyTimes,
+                quizGrades
+        );
     }
 
     @Transactional
@@ -261,69 +269,7 @@ public class UserService {
         }
     }
 
-    public ResponseAnalysisDto getAnalysis(String accessToken, Long pathUserId){
-
-        Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-
-        UserEntity userEntity = userRepository.findOneByUserId(userId);
-
-        if (userEntity == null)
-            throw new CustomException(ErrorCode.NOT_FOUND_USER);
-
-        if(userEntity.getIsDeleted())
-            throw new CustomException(ErrorCode.DELETED_USER);
-
-        if (!Objects.equals(userId, pathUserId)){
-            throw new CustomException(ErrorCode.MISMATCH_ANALYSIS_OWNER);
-        }
-
-        List<RecordEntity> recordEntities = recordRepository.findRecordEntitiesByUserUserId(userId);
-
-        if(recordEntities == null)
-            throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
-
-        List<Long> recordIds = new ArrayList<>();
-
-        for(RecordEntity recordEntity : recordEntities){
-            recordIds.add(recordEntity.getRecordId());
-        }
-
-        List<StudyTimeProjection> studyEntities = userRepository.findAllByUserUserId(userId);
-        List<QuizGradeProjection> quizGradeProjectionList = userRepository.findQuizGradeByUser(userId);
-        List<KeywordProjection> keywordProjectionList = userRepository.findKeywordByRecordIds(recordIds);
-
-        ResponseAnalysisDto responseAnalysisDto = new ResponseAnalysisDto();
-        List<ResponseStudyTimesDto> studyTimes = new ArrayList<>();
-        List<ResponseQuizGradeDto> quizGrades = new ArrayList<>();
-        List<ResponseKeywordDto> keywords = new ArrayList<>();
-
-        for( StudyTimeProjection studyTimeProjection : studyEntities ){
-            ResponseStudyTimesDto responseStudyTimesDto = new ResponseStudyTimesDto();
-            responseStudyTimesDto.setStudyTime(studyTimeProjection.getTotalStudyTime());
-            responseStudyTimesDto.setCreatedTime(studyTimeProjection.getCreatedDate());
-            studyTimes.add(responseStudyTimesDto);
-        }
-
-        for( QuizGradeProjection quizGradeProjection : quizGradeProjectionList ){
-            ResponseQuizGradeDto responseQuizGradeDto = new ResponseQuizGradeDto();
-            responseQuizGradeDto.setQuizGrade(quizGradeProjection.getQuizGrade());
-            responseQuizGradeDto.setCreatedTime(quizGradeProjection.getCreatedTime());
-            quizGrades.add(responseQuizGradeDto);
-        }
-
-        for( KeywordProjection keywordProjection : keywordProjectionList ){
-            ResponseKeywordDto responseKeywordDto = new ResponseKeywordDto();
-            responseKeywordDto.setWord(keywordProjection.getWord());
-            responseKeywordDto.setImportance(keywordProjection.getImportance());
-            keywords.add(responseKeywordDto);
-        }
-
-        responseAnalysisDto.setStudyTimes(studyTimes);
-        responseAnalysisDto.setQuizGrades(quizGrades);
-        responseAnalysisDto.setKeywords(keywords);
-        return responseAnalysisDto;
-    }
-
+    @Transactional
     public RequestNotificationSettingDto putNotification(String accessToken, Long putUserId, RequestNotificationSettingDto settingDto){
 
         Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
@@ -354,6 +300,7 @@ public class UserService {
         return responseUserRequestNotificationSettingDto;
     }
 
+    @Transactional
     public HttpStatus patchUserName(String accessToken, Long putUserId, String name){
         Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
@@ -376,7 +323,7 @@ public class UserService {
         return HttpStatus.OK;
     }
 
-
+    @Transactional
     public HttpStatus deleteUser(String accessToken, RequestSurveyDto requestSurveyDto){
         Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
 
@@ -402,21 +349,8 @@ public class UserService {
 
         return HttpStatus.OK;
     }
-  
-    public String generateRandomCode(int length){
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        Random random = new SecureRandom();
 
-        StringBuilder code = new StringBuilder();
-
-        for(int i = 0 ; i < length; ++i ){
-            int index = random.nextInt(characters.length());
-            code.append(characters.charAt(index));
-        }
-
-        return code.toString();
-    }
-
+    @Transactional
     public void addAndUpdateNotificationToken(RequestNotificationTokenDto requestNotificationTokenDto, Long userId){
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         if (userEntity == null)
@@ -425,5 +359,18 @@ public class UserService {
         userEntity.setNotificationToken(requestNotificationTokenDto.getToken());
         userEntity.setNotificationTokenTime(LocalDateTime.now());
         userRepository.save(userEntity);
+    }
+
+    private String generateRandomCode(){
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        Random random = new SecureRandom();
+        StringBuilder code = new StringBuilder();
+
+        for(int i = 0; i < 6; ++i ){
+            int index = random.nextInt(characters.length());
+            code.append(characters.charAt(index));
+        }
+
+        return code.toString();
     }
 }

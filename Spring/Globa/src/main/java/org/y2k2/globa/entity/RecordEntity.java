@@ -21,12 +21,12 @@ public class RecordEntity {
     @Column(name = "record_id", columnDefinition = "INT UNSIGNED")
     private Long recordId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "user_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private UserEntity user;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "folder_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private FolderEntity folder;

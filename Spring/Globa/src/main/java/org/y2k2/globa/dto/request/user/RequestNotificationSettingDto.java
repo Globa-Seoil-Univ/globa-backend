@@ -10,8 +10,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @NoArgsConstructor
-@ToString
-public class RequestNotificationSettingDto implements Serializable {
+public class RequestNotificationSettingDto {
     private Boolean uploadNofi;
     private Boolean shareNofi;
     private Boolean eventNofi;
