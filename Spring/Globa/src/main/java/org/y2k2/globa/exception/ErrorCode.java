@@ -24,7 +24,6 @@ public enum ErrorCode {
     INVITE_ACCEPT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "이미 수락된 초대입니다. ", 40049),
 
     REQUIRED_NOTICE_ID(HttpStatus.BAD_REQUEST, "인자로 Notice Id가 필요합니다. ", 40050),
-    SURVEY_POST_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Survey를 등록하기 위해선 빈칸이 허용되지 않습니다. ", 40052),
     NOFI_TYPE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Notification의 Type은 'a','n','s',r' 의 값만 가질 수 있습니다. ", 40053),
     REQUIRED_NOTIFICATION_ID(HttpStatus.BAD_REQUEST, "인자로 Notification Id가 필요합니다. ", 40054),
 

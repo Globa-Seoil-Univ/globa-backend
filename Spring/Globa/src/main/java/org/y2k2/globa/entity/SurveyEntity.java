@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.y2k2.globa.type.SurveyType;
 
 import java.time.LocalDateTime;
 
@@ -17,8 +18,9 @@ public class SurveyEntity {
     @Column(name = "survey_id", columnDefinition = "INT UNSIGNED")
     private Long surveyId;
 
-    @Column(name = "survey_type", columnDefinition = "CHAR(1)")
-    private Character surveyType;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "survey_type", nullable = false)
+    private SurveyType surveyType;
 
     @Lob
     @Column(name = "content")

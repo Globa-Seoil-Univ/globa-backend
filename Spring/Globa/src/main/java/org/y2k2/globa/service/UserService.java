@@ -24,17 +24,16 @@ import org.y2k2.globa.dto.response.quiz.ResponseQuizGradeDto;
 import org.y2k2.globa.dto.response.study.ResponseStudyTimesDto;
 import org.y2k2.globa.dto.request.survey.RequestSurveyDto;
 import org.y2k2.globa.dto.request.user.RequestUserPostDTO;
+import org.y2k2.globa.dto.response.user.ResponseNotificationSettingDto;
 import org.y2k2.globa.dto.response.user.ResponseUserDto;
 import org.y2k2.globa.dto.response.user.ResponseUserSearchDto;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.FileUploadException;
-import org.y2k2.globa.mapper.KeywordMapper;
-import org.y2k2.globa.mapper.QuizMapper;
-import org.y2k2.globa.mapper.StudyTimeMapper;
-import org.y2k2.globa.mapper.UserMapper;
+import org.y2k2.globa.mapper.*;
 import org.y2k2.globa.repository.*;
+import org.y2k2.globa.util.CustomTimestamp;
 import org.y2k2.globa.util.file.FileStore;
 import org.y2k2.globa.util.jwt.JWT;
 import org.y2k2.globa.util.jwt.JWTProvider;
@@ -86,7 +85,7 @@ public class UserService {
         return UserMapper.INSTANCE.toResponseUserSearchDto(userEntity);
     }
 
-    public RequestNotificationSettingDto getNotification(UserEntity user){
+    public ResponseNotificationSettingDto getNotification(UserEntity user){
         return UserMapper.INSTANCE.toResponseNotificationSettingDto(user);
     }
 
@@ -256,7 +255,7 @@ public class UserService {
     @FileCleanup
     public void modifyProfileImg(RequestProfileImageDto dto, UserEntity user) {
         String oldProfileImgPath = user.getProfilePath();
-        FileDto fileDto = fileStore.storeFile("users/" + user.getUserId() + "/profile/", dto.profile());
+        FileDto fileDto = fileStore.storeFile("profiles/", dto.profile());
 
         try {
             user.setProfilePath(fileDto.storePath());
@@ -273,30 +272,14 @@ public class UserService {
     }
 
     @Transactional
-    public HttpStatus deleteUser(String accessToken, RequestSurveyDto requestSurveyDto){
-        Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+    public void deleteUser(RequestSurveyDto dto, UserEntity user){
+        user.setIsDeleted(true);
+        user.setDeletedTime(new CustomTimestamp().getTimestamp());
+        user.setNotificationToken(null);
+        user.setNotificationTokenTime(null);
 
-        UserEntity userEntity = userRepository.findOneByUserId(userId);
-
-        if (userEntity == null)
-            throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(userEntity.getIsDeleted())
-            throw new CustomException(ErrorCode.DELETED_USER);
-
-        userEntity.setIsDeleted(true);
-        userEntity.setDeletedTime(LocalDateTime.now());
-
-        SurveyEntity surveyEntity = new SurveyEntity();
-        surveyEntity.setSurveyType(String.valueOf(requestSurveyDto.getSurveyType()).charAt(0));
-        surveyEntity.setContent(requestSurveyDto.getContent());
-        surveyEntity.setCreatedTime(LocalDateTime.now());
-
-        userRepository.save(userEntity);
-        surveyRepository.save(surveyEntity);
-
-//        folderService.deleteDefaultFolder(userEntity);
-
-        return HttpStatus.OK;
+        userRepository.save(user);
+        surveyRepository.save(SurveyMapper.INSTANCE.toEntity(dto));
     }
 
     private String generateRandomCode(){

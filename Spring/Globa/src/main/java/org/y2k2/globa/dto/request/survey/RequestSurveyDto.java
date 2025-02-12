@@ -1,18 +1,11 @@
 package org.y2k2.globa.dto.request.survey;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import org.y2k2.globa.annotation.EnumValue;
+import org.y2k2.globa.type.SurveyType;
 
-import java.io.Serializable;
-
-
-@Getter
-@Setter
-@NoArgsConstructor
-@ToString
-public class RequestSurveyDto implements Serializable {
-    private Integer surveyType;
-    private String content;
+public record RequestSurveyDto(
+        @EnumValue(enumClass = SurveyType.class, message = "설문 유형은 BSV, BAC, NEF, OBS 중 하나여야 합니다.")
+        String surveyType,
+        String content
+) {
 }

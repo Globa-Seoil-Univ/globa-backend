@@ -38,8 +38,6 @@ public class SwaggerErrorCode {
     public static final String INVITE_ACCEPT_BAD_REQUEST_VALUE = "40049";
     public static final String REQUIRED_NOTICE_ID = "REQUIRED_NOTICE_ID";
     public static final String REQUIRED_NOTICE_ID_VALUE = "40050";
-    public static final String SURVEY_POST_BAD_REQUEST = "SURVEY_POST_BAD_REQUEST";
-    public static final String SURVEY_POST_BAD_REQUEST_VALUE = "40052";
 
     public static final String NOFI_TYPE_BAD_REQUEST = "NOFI_TYPE_BAD_REQUEST";
     public static final String NOFI_TYPE_BAD_REQUEST_VALUE = "40053";

@@ -69,7 +69,6 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.INVITE_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.INVITE_BAD_REQUEST_VALUE, "자신을 초대할 수 없습니다."));
         components.addExamples(SwaggerErrorCode.INVITE_ACCEPT_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.INVITE_ACCEPT_BAD_REQUEST_VALUE, "이미 초대된 사용자입니다."));
         components.addExamples(SwaggerErrorCode.REQUIRED_NOTICE_ID_VALUE, createExample(SwaggerErrorCode.REQUIRED_NOTICE_ID_VALUE, "공지 ID는 필수입니다."));
-        components.addExamples(SwaggerErrorCode.SURVEY_POST_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.SURVEY_POST_BAD_REQUEST_VALUE, "설문 정보는 모두 필수입니다."));
         components.addExamples(SwaggerErrorCode.NOFI_TYPE_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.NOFI_TYPE_BAD_REQUEST_VALUE , "알림의 검색 타입은 'a', 's', 'r', 'i', 'n'만 선택할 수 있습니다."));
         components.addExamples(SwaggerErrorCode.REQUIRED_NOTIFICATION_ID_VALUE , createExample(SwaggerErrorCode.REQUIRED_NOTIFICATION_ID_VALUE , "알림 ID는 필수입니다."));
         components.addExamples(SwaggerErrorCode.NOT_PARENT_COMMENT_VALUE, createExample(SwaggerErrorCode.NOT_PARENT_COMMENT_VALUE, "부모 댓글 ID는 필수입니다."));
