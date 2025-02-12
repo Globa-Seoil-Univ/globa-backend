@@ -38,8 +38,6 @@ public class SwaggerErrorCode {
     public static final String INVITE_ACCEPT_BAD_REQUEST_VALUE = "40049";
     public static final String REQUIRED_NOTICE_ID = "REQUIRED_NOTICE_ID";
     public static final String REQUIRED_NOTICE_ID_VALUE = "40050";
-    public static final String NOFI_POST_BAD_REQUEST = "NOFI_POST_BAD_REQUEST";
-    public static final String NOFI_POST_BAD_REQUEST_VALUE = "40051";
     public static final String SURVEY_POST_BAD_REQUEST = "SURVEY_POST_BAD_REQUEST";
     public static final String SURVEY_POST_BAD_REQUEST_VALUE = "40052";
 
@@ -84,20 +82,14 @@ public class SwaggerErrorCode {
     public static final String NOT_DESERVE_FCM_VALUE = "40324";
     public static final String NOT_DESERVE_DICTIONARY  = "NOT_DESERVE_DICTIONARY ";
     public static final String NOT_DESERVE_DICTIONARY_VALUE = "40325";
-    public static final String INVALID_TOKEN_USER = "INVALID_TOKEN_USER";
-    public static final String INVALID_TOKEN_USER_VALUE = "40330";
     public static final String MISMATCH_INQUIRY_OWNER = "MISMATCH_INQUIRY_OWNER";
     public static final String MISMATCH_INQUIRY_OWNER_VALUE = "40340";
     public static final String MISMATCH_FOLDER_OWNER = "MISMATCH_FOLDER_OWNER";
     public static final String MISMATCH_FOLDER_OWNER_VALUE = "40341";
     public static final String MISMATCH_COMMENT_OWNER = "MISMATCH_COMMENT_OWNER";
     public static final String MISMATCH_COMMENT_OWNER_VALUE = "40342";
-    public static final String MISMATCH_NOFI_OWNER = "MISMATCH_NOFI_OWNER";
-    public static final String MISMATCH_NOFI_OWNER_VALUE = "40343";
     public static final String MISMATCH_ANALYSIS_OWNER = "MISMATCH_ANALYSIS_OWNER";
     public static final String MISMATCH_ANALYSIS_OWNER_VALUE = "40344";
-    public static final String MISMATCH_RENAME_OWNER = "MISMATCH_RENAME_OWNER";
-    public static final String MISMATCH_RENAME_OWNER_VALUE = "40345";
     public static final String MISMATCH_QUIZ_RECORD_ID = "MISMATCH_QUIZ_RECORD_ID";
     public static final String MISMATCH_QUIZ_RECORD_ID_VALUE = "40346";
     public static final String MISMATCH_RECORD_OWNER = "MISMATCH_RECORD_OWNER";

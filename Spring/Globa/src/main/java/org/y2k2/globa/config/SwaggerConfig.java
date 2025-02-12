@@ -69,7 +69,6 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.INVITE_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.INVITE_BAD_REQUEST_VALUE, "자신을 초대할 수 없습니다."));
         components.addExamples(SwaggerErrorCode.INVITE_ACCEPT_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.INVITE_ACCEPT_BAD_REQUEST_VALUE, "이미 초대된 사용자입니다."));
         components.addExamples(SwaggerErrorCode.REQUIRED_NOTICE_ID_VALUE, createExample(SwaggerErrorCode.REQUIRED_NOTICE_ID_VALUE, "공지 ID는 필수입니다."));
-        components.addExamples(SwaggerErrorCode.NOFI_POST_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.NOFI_POST_BAD_REQUEST_VALUE, "알림 정보는 모두 필수입니다."));
         components.addExamples(SwaggerErrorCode.SURVEY_POST_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.SURVEY_POST_BAD_REQUEST_VALUE, "설문 정보는 모두 필수입니다."));
         components.addExamples(SwaggerErrorCode.NOFI_TYPE_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.NOFI_TYPE_BAD_REQUEST_VALUE , "알림의 검색 타입은 'a', 's', 'r', 'i', 'n'만 선택할 수 있습니다."));
         components.addExamples(SwaggerErrorCode.REQUIRED_NOTIFICATION_ID_VALUE , createExample(SwaggerErrorCode.REQUIRED_NOTIFICATION_ID_VALUE , "알림 ID는 필수입니다."));
@@ -92,13 +91,9 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.NOT_DESERVE_POST_COMMENT_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_POST_COMMENT_VALUE, "댓글 작성 권한이 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_DESERVE_FCM_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_FCM , "관리자 또는 편집자만 요청할 수 있습니다."));
         components.addExamples(SwaggerErrorCode.NOT_DESERVE_FCM_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_DICTIONARY, "관리자 또는 편집자만 요청할 수 있습니다."));
-        components.addExamples(SwaggerErrorCode.INVALID_TOKEN_USER_VALUE, createExample(SwaggerErrorCode.INVALID_TOKEN_USER_VALUE, "잘못된 토큰 사용자입니다."));
         components.addExamples(SwaggerErrorCode.MISMATCH_INQUIRY_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_INQUIRY_OWNER_VALUE, "문의 작성자만 요청할 수 있습니다."));
         components.addExamples(SwaggerErrorCode.MISMATCH_FOLDER_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_FOLDER_OWNER_VALUE, "폴더 소유자만 요청할 수 있습니다."));
-        components.addExamples(SwaggerErrorCode.MISMATCH_COMMENT_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_COMMENT_OWNER_VALUE, "댓글 작성자만 요청할 수 있습니다."));
-        components.addExamples(SwaggerErrorCode.MISMATCH_NOFI_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_NOFI_OWNER_VALUE, "요청한 사용자와 토큰 정보가 일치하지 않습니다."));
         components.addExamples(SwaggerErrorCode.MISMATCH_ANALYSIS_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_ANALYSIS_OWNER_VALUE, "요청한 사용자와 토큰 정보가 일치하지 않습니다."));
-        components.addExamples(SwaggerErrorCode.MISMATCH_RENAME_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_RENAME_OWNER_VALUE, "이름 변경을 위한 사용자와 토큰 정보가 일치하지 않습니다."));
         components.addExamples(SwaggerErrorCode.MISMATCH_QUIZ_RECORD_ID_VALUE, createExample(SwaggerErrorCode.MISMATCH_QUIZ_RECORD_ID_VALUE, "퀴즈의 음성 ID와 요청한 음성 ID 정보가 일치하지 않습니다."));
         components.addExamples(SwaggerErrorCode.MISMATCH_RECORD_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_RECORD_OWNER_VALUE, "음성 소유자만 요청할 수 있습니다."));
         components.addExamples(SwaggerErrorCode.MISMATCH_RECORD_FOLDER_VALUE, createExample(SwaggerErrorCode.MISMATCH_RECORD_FOLDER_VALUE, "요청한 음성 파일은 해당 폴더에 속해있지 않습니다."));

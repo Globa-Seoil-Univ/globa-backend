@@ -12,6 +12,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.Projection.StudyTimeProjection;
+import org.y2k2.globa.annotation.FileCleanup;
+import org.y2k2.globa.dto.common.file.FileDto;
+import org.y2k2.globa.dto.request.user.RequestNameDto;
+import org.y2k2.globa.dto.request.user.RequestProfileImageDto;
 import org.y2k2.globa.dto.response.analysis.ResponseAnalysisDto;
 import org.y2k2.globa.dto.response.keyword.ResponseKeywordDto;
 import org.y2k2.globa.dto.request.user.RequestNotificationSettingDto;
@@ -25,11 +29,13 @@ import org.y2k2.globa.dto.response.user.ResponseUserSearchDto;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
+import org.y2k2.globa.exception.FileUploadException;
 import org.y2k2.globa.mapper.KeywordMapper;
 import org.y2k2.globa.mapper.QuizMapper;
 import org.y2k2.globa.mapper.StudyTimeMapper;
 import org.y2k2.globa.mapper.UserMapper;
 import org.y2k2.globa.repository.*;
+import org.y2k2.globa.util.file.FileStore;
 import org.y2k2.globa.util.jwt.JWT;
 import org.y2k2.globa.util.jwt.JWTProvider;
 import org.y2k2.globa.util.redis.RedisStore;
@@ -43,13 +49,11 @@ import java.util.*;
 @Slf4j
 @Transactional(readOnly = true)
 public class UserService {
-    private final Bucket bucket;
-    private final FirebaseAuth firebaseAuth;
-
     private static final String KAKAO_USER_INFO_URL = "https://kapi.kakao.com/v2/user/me";
 
     private final JWTProvider jwtProvider;
     private final RedisStore redisStore;
+    private final FileStore fileStore;
 
     private final UserRepository userRepository;
     private final StudyRepository studyRepository;
@@ -61,7 +65,57 @@ public class UserService {
     private final QuizRepository quizRepository;
     private final KeywordRepository keywordRepository;
 
+    // TODO : 의존성 제거 ?
     public final FolderService folderService;
+
+    public ResponseUserDto getUser(UserEntity user){
+        FolderEntity folderEntity = folderRepository.findFirstByUserUserIdOrderByCreatedTimeAsc(user.getUserId());
+        if(folderEntity == null)
+            throw new CustomException(ErrorCode.NOT_FOUND_DEFAULT_FOLDER);
+
+        return UserMapper.INSTANCE.toResponseUserDto(user, folderEntity.getFolderId());
+    }
+
+    public ResponseUserSearchDto searchUser(String code){
+        UserEntity userEntity = userRepository.findOneByCode(code)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        if(userEntity.getIsDeleted())
+            throw new CustomException(ErrorCode.DELETED_USER);
+
+        return UserMapper.INSTANCE.toResponseUserSearchDto(userEntity);
+    }
+
+    public RequestNotificationSettingDto getNotification(UserEntity user){
+        return UserMapper.INSTANCE.toResponseNotificationSettingDto(user);
+    }
+
+    public ResponseAnalysisDto getAnalysis(UserEntity user) {
+        List<RecordEntity> records = recordRepository.findAllByUser(user.getUserId());
+        if(records.isEmpty())
+            return new ResponseAnalysisDto(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+
+        List<Long> recordIds = records.stream().map(RecordEntity::getRecordId).toList();
+        List<StudyTimeProjection> studyTimeProjections = studyRepository.findStudyTimeByUserInWeek(user.getUserId());
+        List<QuizGradeProjection> quizGradeProjections = quizRepository.findQuizGradeByUserInWeek(user.getUserId());
+        List<KeywordProjection> keywordProjections = keywordRepository.findKeywordByRecordIds(recordIds);
+
+        List<ResponseStudyTimesDto> studyTimes = studyTimeProjections.stream().map(
+                StudyTimeMapper.INSTANCE::toResponseStudyTimesDto
+        ).toList();
+        List<ResponseQuizGradeDto> quizGrades = quizGradeProjections.stream().map(
+                QuizMapper.INSTANCE::toResponseQuizGradeDto
+        ).toList();
+        List<ResponseKeywordDto> keywords = keywordProjections.stream().map(
+                KeywordMapper.INSTANCE::toResponseKeywordDto
+        ).toList();
+
+        return new ResponseAnalysisDto(
+                keywords,
+                studyTimes,
+                quizGrades
+        );
+    }
 
     public JWT reloadRefreshToken(String accessToken, String refreshToken) {
         Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
@@ -177,150 +231,45 @@ public class UserService {
         return jwt;
     }
 
-    public ResponseUserDto getUser(UserEntity user){
-        FolderEntity folderEntity = folderRepository.findFirstByUserUserIdOrderByCreatedTimeAsc(user.getUserId());
-        if(folderEntity == null)
-            throw new CustomException(ErrorCode.NOT_FOUND_DEFAULT_FOLDER);
-
-        return UserMapper.INSTANCE.toResponseUserDto(user, folderEntity.getFolderId());
-    }
-
-    public ResponseUserSearchDto searchUser(String code){
-        UserEntity userEntity = userRepository.findOneByCode(code)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-
-        if(userEntity.getIsDeleted())
-            throw new CustomException(ErrorCode.DELETED_USER);
-
-        return UserMapper.INSTANCE.toResponseUserSearchDto(userEntity);
-    }
-
-    public RequestNotificationSettingDto getNotification(UserEntity user){
-        return UserMapper.INSTANCE.toResponseNotificationSettingDto(user);
-    }
-
-    public ResponseAnalysisDto getAnalysis(UserEntity user) {
-        List<RecordEntity> records = recordRepository.findAllByUser(user.getUserId());
-        if(records.isEmpty())
-            return new ResponseAnalysisDto(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-
-        List<Long> recordIds = records.stream().map(RecordEntity::getRecordId).toList();
-        List<StudyTimeProjection> studyTimeProjections = studyRepository.findStudyTimeByUserInWeek(user.getUserId());
-        List<QuizGradeProjection> quizGradeProjections = quizRepository.findQuizGradeByUserInWeek(user.getUserId());
-        List<KeywordProjection> keywordProjections = keywordRepository.findKeywordByRecordIds(recordIds);
-
-        List<ResponseStudyTimesDto> studyTimes = studyTimeProjections.stream().map(
-                StudyTimeMapper.INSTANCE::toResponseStudyTimesDto
-        ).toList();
-        List<ResponseQuizGradeDto> quizGrades = quizGradeProjections.stream().map(
-                QuizMapper.INSTANCE::toResponseQuizGradeDto
-        ).toList();
-        List<ResponseKeywordDto> keywords = keywordProjections.stream().map(
-                KeywordMapper.INSTANCE::toResponseKeywordDto
-        ).toList();
-
-        return new ResponseAnalysisDto(
-                keywords,
-                studyTimes,
-                quizGrades
-        );
+    @Transactional
+    public void upsertFcmToken(RequestNotificationTokenDto dto, UserEntity user){
+        user.setNotificationToken(dto.token());
+        user.setNotificationTokenTime(LocalDateTime.now());
+        userRepository.save(user);
     }
 
     @Transactional
-    public void updateProfile(MultipartFile file, long userId) {
-        UserEntity userEntity = userRepository.findOneByUserId(userId);
+    public void modifyNotification(RequestNotificationSettingDto settingDto, UserEntity user){
+        user.setUploadNofi(settingDto.uploadNofi());
+        user.setShareNofi(settingDto.shareNofi());
+        user.setEventNofi(settingDto.eventNofi());
+        userRepository.save(user);
+    }
 
-        if (userEntity == null)
-            throw new CustomException(ErrorCode.NOT_FOUND_USER);
+    @Transactional
+    public void modifyUsername(RequestNameDto dto, UserEntity user){
+        user.setName(dto.name());
+        userRepository.save(user);
+    }
 
-        if(userEntity.getIsDeleted())
-            throw new CustomException(ErrorCode.DELETED_USER);
-
-        long current = new Date().getTime();
-        long size = file.getSize();
-        String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());
-        String mimeType = file.getContentType();
-
-        String oldPath = userEntity.getProfilePath();
-        String newPath = "users/" + userId + "/profile/" + current + "." + extension;
+    @Transactional
+    @FileCleanup
+    public void modifyProfileImg(RequestProfileImageDto dto, UserEntity user) {
+        String oldProfileImgPath = user.getProfilePath();
+        FileDto fileDto = fileStore.storeFile("users/" + user.getUserId() + "/profile/", dto.profile());
 
         try {
-            bucket.create(newPath, file.getBytes());
-
-            userEntity.setProfilePath(newPath);
-            userEntity.setProfileType(mimeType);
-            userEntity.setProfileSize(size);
-            userRepository.save(userEntity);
-
-            if(oldPath != null && bucket.get(oldPath) != null) {
-                try {
-                    bucket.get(oldPath).delete();
-                } catch (Exception e) {
-                    log.error("Failed to delete old profile : " + e);
-                }
-            }
+            user.setProfilePath(fileDto.storePath());
+            user.setProfileType(fileDto.extension());
+            user.setProfileSize(fileDto.size());
+            userRepository.save(user);
         } catch (Exception e) {
-            if(bucket.get(newPath) != null) {
-                bucket.get(newPath).delete();
-            }
-
-            log.error("Failed to update profile : " + e);
-            throw new CustomException(ErrorCode.FAILED_FILE_UPLOAD);
-        }
-    }
-
-    @Transactional
-    public RequestNotificationSettingDto putNotification(String accessToken, Long putUserId, RequestNotificationSettingDto settingDto){
-
-        Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-
-        if (!Objects.equals(userId, putUserId)){
-            throw new CustomException(ErrorCode.MISMATCH_NOFI_OWNER);
+            throw new FileUploadException(fileDto.storePath());
         }
 
-        UserEntity userEntity = userRepository.findOneByUserId(userId);
-
-        if (userEntity == null)
-            throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(userEntity.getIsDeleted())
-            throw new CustomException(ErrorCode.DELETED_USER);
-
-        userEntity.setUploadNofi(settingDto.getUploadNofi());
-        userEntity.setShareNofi(settingDto.getShareNofi());
-        userEntity.setEventNofi(settingDto.getEventNofi());
-
-        UserEntity savedEntity = userRepository.save(userEntity);
-
-        RequestNotificationSettingDto responseUserRequestNotificationSettingDto = new RequestNotificationSettingDto();
-
-        responseUserRequestNotificationSettingDto.setUploadNofi(savedEntity.getUploadNofi());
-        responseUserRequestNotificationSettingDto.setShareNofi(savedEntity.getShareNofi());
-        responseUserRequestNotificationSettingDto.setEventNofi(savedEntity.getEventNofi());
-
-        return responseUserRequestNotificationSettingDto;
-    }
-
-    @Transactional
-    public HttpStatus patchUserName(String accessToken, Long putUserId, String name){
-        Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-
-        if (!Objects.equals(userId, putUserId)){
-            throw new CustomException(ErrorCode.MISMATCH_RENAME_OWNER);
+        if (!oldProfileImgPath.isEmpty()) {
+            fileStore.deleteFile(oldProfileImgPath);
         }
-
-        UserEntity userEntity = userRepository.findOneByUserId(userId);
-
-        if (userEntity == null)
-            throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(userEntity.getIsDeleted())
-            throw new CustomException(ErrorCode.DELETED_USER);
-
-        userEntity.setName(name);
-
-        userRepository.save(userEntity);
-
-
-        return HttpStatus.OK;
     }
 
     @Transactional
@@ -348,17 +297,6 @@ public class UserService {
 //        folderService.deleteDefaultFolder(userEntity);
 
         return HttpStatus.OK;
-    }
-
-    @Transactional
-    public void addAndUpdateNotificationToken(RequestNotificationTokenDto requestNotificationTokenDto, Long userId){
-        UserEntity userEntity = userRepository.findOneByUserId(userId);
-        if (userEntity == null)
-            throw new CustomException(ErrorCode.NOT_FOUND_USER);
-
-        userEntity.setNotificationToken(requestNotificationTokenDto.getToken());
-        userEntity.setNotificationTokenTime(LocalDateTime.now());
-        userRepository.save(userEntity);
     }
 
     private String generateRandomCode(){

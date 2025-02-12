@@ -1,17 +1,12 @@
 package org.y2k2.globa.dto.request.user;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import jakarta.validation.constraints.NotNull;
 
-import java.io.Serializable;
-
-@Getter
-@Setter
-@NoArgsConstructor
-public class RequestNotificationSettingDto {
-    private Boolean uploadNofi;
-    private Boolean shareNofi;
-    private Boolean eventNofi;
-}
+public record RequestNotificationSettingDto(
+        @NotNull(message = "uploadNofi는 필수입니다.")
+        Boolean uploadNofi,
+        @NotNull(message = "shareNofi는 필수입니다.")
+        Boolean shareNofi,
+        @NotNull(message = "eventNofi는 필수입니다.")
+        Boolean eventNofi
+) {}
