@@ -39,11 +39,11 @@ public class FolderShareEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "role_id")
-    private FolderRoleEntity roleId;
+    private FolderRoleEntity role;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "invitation_status", length = 7, columnDefinition = "DEFAULT 'PENDING'")
-    @Check(constraints = "invitation_status IN ('PENDING', 'ACCEPT')")
-    private String invitationStatus;
+    private InvitationStatus invitationStatus;
 
     @CreationTimestamp
     @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
@@ -51,7 +51,7 @@ public class FolderShareEntity {
 
     @PrePersist
     public void prePersist() {
-        if (this.invitationStatus == null) this.setInvitationStatus(String.valueOf(InvitationStatus.PENDING));
+        if (this.invitationStatus == null) this.setInvitationStatus(InvitationStatus.PENDING);
     }
 
     public static FolderShareEntity create(FolderEntity folder, UserEntity ownerUser, UserEntity targetUser, FolderRoleEntity folderRole) {
@@ -60,7 +60,7 @@ public class FolderShareEntity {
         entity.setFolder(folder);
         entity.setOwnerUser(ownerUser);
         entity.setTargetUser(targetUser);
-        entity.setRoleId(folderRole);
+        entity.setRole(folderRole);
 
         return entity;
     }

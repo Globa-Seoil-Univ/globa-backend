@@ -130,7 +130,7 @@ public class FolderShareService {
         checkValidation(folderShareEntity.getFolder(), ownerId, targetId, targetEntity);
 
         FolderRoleEntity folderRoleEntity = convertRole(role);
-        folderShareEntity.setRoleId(folderRoleEntity);
+        folderShareEntity.setRole(folderRoleEntity);
         folderShareRepository.save(folderShareEntity);
     }
 
@@ -158,7 +158,7 @@ public class FolderShareService {
         FolderShareEntity folderShareEntity = folderShareRepository.findFirstByShareId(shareId);
         checkValidation(folderShareEntity, folderId, targetId);
 
-        folderShareEntity.setInvitationStatus(String.valueOf(InvitationStatus.ACCEPT));
+        folderShareEntity.setInvitationStatus(InvitationStatus.ACCEPT);
         folderShareRepository.save(folderShareEntity);
 
         NotificationEntity invitationNotification = notificationRepository.findByFolderFolderIdAndFolderShareShareIdAndReceiverUserId(folderId, shareId, targetId);

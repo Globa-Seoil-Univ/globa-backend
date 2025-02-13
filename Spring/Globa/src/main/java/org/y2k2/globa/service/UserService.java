@@ -212,7 +212,7 @@ public class UserService {
                     userRoleEntity.setRoleId(roleEntity);
                     userRoleRepository.save(userRoleEntity);
 
-                    folderService.postDefaultFolder(newUser);
+                    folderService.createDefaultFolder(newUser);
                     return newUser;
                 });
 

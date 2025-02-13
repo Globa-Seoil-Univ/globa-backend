@@ -10,7 +10,9 @@ import org.y2k2.globa.dto.common.file.FileDto;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.UUID;
 
 @Slf4j
@@ -71,6 +73,19 @@ public class FileStore {
                 .size(size)
                 .extension(type)
                 .build();
+    }
+
+    public void storeEmptyFile(String path) {
+        byte[] content = new byte[0];
+
+        try {
+            bucket.create(path, content, "text/plain");
+        } catch (Exception e) {
+            log.error("Failed to store empty file because can not create file. [path = {}, reason = {}]", path, e.getMessage());
+            throw new CustomException(ErrorCode.FAILED_FILE_UPLOAD);
+        }
+
+        log.info("store file: [path = {}]", path);
     }
 
     public void deleteFile(String storePath) {

@@ -12,7 +12,6 @@ public enum ErrorCode {
     ACTIVE_ACCESS_TOKEN(HttpStatus.BAD_REQUEST, "Access 토큰이 만료되지 않았습니다.", 40011),
     NOT_MATCH_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "Refresh 토큰이 일치하지 않습니다. ", 40012),
     FOLDER_DELETE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "기본 폴더는 삭제할 수 없습니다. ", 40020),
-    REQUIRED_FOLDER_TITLE(HttpStatus.BAD_REQUEST, "인자로 Folder Title이 필요합니다. ", 40040),
     REQUIRED_FOLDER_ID(HttpStatus.BAD_REQUEST, "인자로 Folder Id가 필요합니다. ", 40041),
     REQUIRED_QUIZ_ID(HttpStatus.BAD_REQUEST, "인자로 Quiz Id가 필요합니다. ", 40042),
     REQUIRED_RECORD_ID(HttpStatus.BAD_REQUEST, "인자로 Record Id가 필요합니다. ", 40043),

@@ -1,4 +1,4 @@
-package org.y2k2.globa.dto.common.notification.comment;
+package org.y2k2.globa.dto.common.comment;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

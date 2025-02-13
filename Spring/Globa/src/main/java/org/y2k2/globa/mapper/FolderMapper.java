@@ -6,6 +6,7 @@ import org.mapstruct.factory.Mappers;
 import org.y2k2.globa.dto.common.folder.FolderDto;
 import org.y2k2.globa.dto.response.folder.ResponseFolderDto;
 import org.y2k2.globa.entity.FolderEntity;
+import org.y2k2.globa.entity.UserEntity;
 
 @Mapper(uses = CustomTimestampMapper.class)
 public interface FolderMapper {
@@ -20,5 +21,9 @@ public interface FolderMapper {
     @Mapping(source = "title", target = "title")
     @Mapping(source = "createdTime", target = "createdTime", qualifiedBy = { CustomTimestampTranslator.class, MapCreatedTime.class })
     ResponseFolderDto.FolderDto toResponseInFolderDto(FolderEntity folderEntity);
+
+    @Mapping(source = "user", target = "user")
+    @Mapping(source = "title", target = "title")
+    FolderEntity toEntity(UserEntity user, String title);
 }
 

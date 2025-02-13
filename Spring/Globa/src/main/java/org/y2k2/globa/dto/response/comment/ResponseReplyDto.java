@@ -3,7 +3,7 @@ package org.y2k2.globa.dto.response.comment;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.y2k2.globa.dto.common.notification.comment.ReplyDto;
+import org.y2k2.globa.dto.common.comment.ReplyDto;
 
 import java.util.List;
 

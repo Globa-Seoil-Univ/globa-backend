@@ -17,5 +17,5 @@ public @interface EnumValue {
     Class<?>[] groups() default { };
     Class<? extends Payload>[] payload() default { };
     Class<? extends Enum<?>> enumClass();
-    boolean ignoreCase() default false;
+    boolean ignoreCase() default true;
 }

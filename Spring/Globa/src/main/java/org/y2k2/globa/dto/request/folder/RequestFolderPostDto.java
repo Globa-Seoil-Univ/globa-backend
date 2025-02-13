@@ -1,22 +1,26 @@
 package org.y2k2.globa.dto.request.folder;
 
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
+import org.y2k2.globa.annotation.EnumValue;
+import org.y2k2.globa.type.Role;
 
 import java.util.List;
 
 @Getter
-@Setter
-@AllArgsConstructor
+@NoArgsConstructor
 public class RequestFolderPostDto {
-    @Getter
-    @AllArgsConstructor
-    public static class ShareTarget {
-        private String code;
-        private String role;  // "r" for read, "w" for write
-    }
+    public record ShareTarget(
+            @EnumValue(enumClass = Role.class, message = "R 또는 W만 가능합니다.")
+            String role,
+            @NotBlank(message = "사용자 코드는 필수입니다.")
+            String code
+    ) {}
 
+    @NotBlank(message = "제목은 필수입니다.")
     private String title;
-    private List<ShareTarget> shareTarget;
+
+    private List<ShareTarget> shareTargets;
 }

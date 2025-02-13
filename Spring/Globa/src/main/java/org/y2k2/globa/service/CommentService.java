@@ -12,8 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.y2k2.globa.dto.common.notification.comment.CommentDto;
-import org.y2k2.globa.dto.common.notification.comment.ReplyDto;
+import org.y2k2.globa.dto.common.comment.CommentDto;
+import org.y2k2.globa.dto.common.comment.ReplyDto;
 import org.y2k2.globa.dto.request.notification.RequestNotificationWithFolderShareCommentDto;
 import org.y2k2.globa.dto.request.comment.RequestCommentDto;
 import org.y2k2.globa.dto.request.comment.RequestCommentWithIdsDto;
@@ -226,7 +226,7 @@ public class CommentService {
     private FolderShareEntity validateFolderShareWithRole(SectionEntity section, UserEntity user) {
         FolderShareEntity folderShare = folderShareRepository.findByFolderAndTargetUser(section.getRecord().getFolder(), user);
 
-        if (folderShare == null || folderShare.getInvitationStatus().equals(String.valueOf(InvitationStatus.PENDING)) || folderShare.getRoleId().getRoleId().equals("3"))
+        if (folderShare == null || folderShare.getInvitationStatus().equals(String.valueOf(InvitationStatus.PENDING)) || folderShare.getRole().getRoleId().equals("3"))
             throw new CustomException(ErrorCode.NOT_DESERVE_POST_COMMENT);
 
         return folderShare;

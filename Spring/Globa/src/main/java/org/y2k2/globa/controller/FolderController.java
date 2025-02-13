@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
@@ -15,14 +16,17 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.y2k2.globa.annotation.VerifyUser;
 import org.y2k2.globa.dto.common.folder.FolderDto;
 import org.y2k2.globa.dto.request.folder.RequestFolderPostDto;
 import org.y2k2.globa.dto.response.folder.ResponseFolderDto;
+import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.FolderService;
 
+import java.net.URI;
 import java.util.Map;
 
 @RestController
@@ -45,10 +49,12 @@ public class FolderController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE)
+                    })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
@@ -57,11 +63,12 @@ public class FolderController {
             }
     )
     @GetMapping
-    public ResponseEntity<?> getFolders(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
-                                        @RequestParam(required = false, defaultValue = "1", value = "page") int page,
-                                        @RequestParam(required = false, defaultValue = "100", value = "count") int count) {
-        return ResponseEntity.status(HttpStatus.OK).body(folderService.getFolders(accessToken,page,count));
-    }
+    @VerifyUser
+    public ResponseEntity<?> getFolders(
+            @RequestParam(required = false, defaultValue = "1", value = "page") int page,
+            @RequestParam(required = false, defaultValue = "100", value = "count") int count,
+            UserEntity user
+    ) { return ResponseEntity.status(HttpStatus.OK).body(folderService.getFolders(page, count, user)); }
 
     @Operation(
             summary = "폴더 추가",
@@ -74,13 +81,17 @@ public class FolderController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE)
                     })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                    })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_TARGET_USER, ref = SwaggerErrorCode.NOT_FOUND_TARGET_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_FOLDER, ref = SwaggerErrorCode.NOT_FOUND_FOLDER_VALUE),
                     })),
                     @ApiResponse(responseCode = "500", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.FAILED_FOLDER_CREATE, ref = SwaggerErrorCode.FAILED_FOLDER_CREATE_VALUE),
@@ -88,18 +99,18 @@ public class FolderController {
             }
     )
     @PostMapping
-    public ResponseEntity<?> postFolder(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
-                                        @RequestBody RequestFolderPostDto request){
-        if ( request.getTitle() == null  )
-            throw new CustomException(ErrorCode.REQUIRED_FOLDER_TITLE);
-        if ( request.getShareTarget() == null) {
-            folderService.postFolder(accessToken, request.getTitle());
-            return ResponseEntity.status(HttpStatus.CREATED).body("");
+    @VerifyUser
+    public ResponseEntity<?> createFolder(
+            @Valid @RequestBody RequestFolderPostDto request,
+            UserEntity user
+    ) {
+        if (request.getShareTargets() == null) {
+            folderService.createFolder(request.getTitle(), user);
+        } else {
+            folderService.createFolder(request.getTitle(), request.getShareTargets(), user);
         }
-        else {
-            folderService.postFolder(accessToken, request.getTitle(), request.getShareTarget());
-            return ResponseEntity.status(HttpStatus.CREATED).body("");
-        }
+
+        return ResponseEntity.created(URI.create("/folder")).build();
     }
 
     @Operation(
@@ -133,8 +144,6 @@ public class FolderController {
     public ResponseEntity<?> patchFolder(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
                                         @PathVariable(value = "folder_id") Long folderId,
                                         @RequestBody Map<String, String> titleMap){
-        if ( titleMap.get("title") == null  )
-            throw new CustomException(ErrorCode.REQUIRED_FOLDER_TITLE);
         if ( folderId == null)
             throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
 

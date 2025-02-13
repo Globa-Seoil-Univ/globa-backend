@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.y2k2.globa.entity.FolderEntity;
 import org.y2k2.globa.entity.FolderShareEntity;
 import org.y2k2.globa.entity.UserEntity;
+import org.y2k2.globa.type.InvitationStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,8 +21,13 @@ public interface FolderShareRepository extends JpaRepository<FolderShareEntity, 
 
     @EntityGraph(value = "FolderShare.getFolderShareAndFolder", attributePaths = {
             "folder"
-    }, type = EntityGraph.EntityGraphType.LOAD)
-    Page<FolderShareEntity> findFolderShareEntitiesAndShareUserByTargetUserAndInvitationStatus(UserEntity user, String status, Pageable pageable);
+    }, type = EntityGraph.EntityGraphType.FETCH)
+    Page<FolderShareEntity> findAllByOwnerUserOrTargetUserAndInvitationStatus(
+            UserEntity ownerUser,
+            UserEntity targetUser,
+            InvitationStatus status,
+            Pageable pageable
+    );
 
     List<FolderShareEntity> findFolderShareEntitiesByTargetUserAndInvitationStatus(UserEntity user, String status);
   
