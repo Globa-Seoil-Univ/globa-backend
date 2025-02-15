@@ -6,6 +6,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Role {
-    R,
-    W
+    R("뷰어"),
+    W("편집자"),
+    ;
+
+    private final String roleName;
 }

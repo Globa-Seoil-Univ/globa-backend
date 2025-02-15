@@ -1,13 +1,17 @@
 package org.y2k2.globa.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.Projection.NotificationProjection;
 import org.y2k2.globa.Projection.NotificationUnReadCount;
+import org.y2k2.globa.dto.common.fcm.SendMessage;
 import org.y2k2.globa.dto.common.notification.NotificationDto;
+import org.y2k2.globa.dto.request.notification.*;
 import org.y2k2.globa.dto.response.notification.ResponseNotificationDto;
 import org.y2k2.globa.dto.response.notification.ResponseUnreadCountDto;
 import org.y2k2.globa.dto.response.notification.ResponseUnreadNotificationDto;
@@ -23,8 +27,10 @@ import org.y2k2.globa.repository.UserRepository;
 import org.y2k2.globa.type.NotificationSort;
 import org.y2k2.globa.type.NotificationType;
 
+import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
@@ -157,6 +163,39 @@ public class NotificationService {
         );
     }
 
+    @Transactional
+    public void saveNotification(SendMessage sendMessage) {
+        log.info("Save Notification userId = {}, name = {}", sendMessage.getReceiver().getUserId(), sendMessage.getReceiver().getName());
+
+        NotificationEntity notification = createNotification(sendMessage);
+
+        if (notification == null) {
+            log.warn("Notification is null. userId = {}, name = {}", sendMessage.getReceiver().getUserId(), sendMessage.getReceiver().getName());
+            return;
+        }
+
+        notificationRepository.save(notification);
+    }
+
+    @Transactional
+    public void saveNotifications(List<? extends SendMessage> sendMessages) {
+        log.info("Save Notifications count = {}", sendMessages.size());
+        List<NotificationEntity> notifications = new ArrayList<>();
+
+        for (SendMessage sendMessage : sendMessages) {
+            NotificationEntity notification = createNotification(sendMessage);
+
+            if (notification == null) {
+                log.warn("Notification is null. userId = {}, name = {}", sendMessage.getReceiver().getUserId(), sendMessage.getReceiver().getName());
+                continue;
+            }
+
+            notifications.add(notification);
+        }
+
+        notificationRepository.saveAll(notifications);
+    }
+
     public void postNotificationRead(long userId, long notificationId) {
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
@@ -174,7 +213,6 @@ public class NotificationService {
         readEntity.setIsDeleted(false);
 
         notificationReadRepository.save(readEntity);
-
     }
 
     public void deleteNotification(long userId, long notificationId) {
@@ -212,4 +250,46 @@ public class NotificationService {
         }
     }
 
+    private NotificationEntity createNotification(SendMessage sendMessage) {
+        NotificationEntity notification;
+
+        switch (sendMessage.getNotificationType()) {
+            case NOTICE:
+                notification = NotificationMapper.INSTANCE.toNotificationWithNotice((RequestNotificationWithNoticeDto) sendMessage);
+                notification.setTypeId(NotificationType.NOTICE.getTypeId());
+                break;
+            case SHARE_FOLDER_ADD_FILE:
+                notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareAddUser((RequestNotificationWithFolderShareAddUserDto) sendMessage);
+                notification.setTypeId(NotificationType.SHARE_FOLDER_ADD_FILE.getTypeId());
+                break;
+            case SHARE_FOLDER_ADD_USER:
+                notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareAddUser((RequestNotificationWithFolderShareAddUserDto) sendMessage);
+                notification.setTypeId(NotificationType.SHARE_FOLDER_ADD_USER.getTypeId());
+                break;
+            case SHARE_FOLDER_ADD_COMMENT:
+                notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareComment((RequestNotificationWithFolderShareCommentDto) sendMessage);
+                notification.setTypeId(NotificationType.SHARE_FOLDER_ADD_COMMENT.getTypeId());
+                break;
+            case UPLOAD_SUCCESS:
+                notification = NotificationMapper.INSTANCE.toNotificationWithNotice((RequestNotificationWithNoticeDto) sendMessage);
+                notification.setTypeId(NotificationType.UPLOAD_SUCCESS.getTypeId());
+                break;
+            case UPLOAD_FAILED:
+                notification = NotificationMapper.INSTANCE.toNotificationWithNotice((RequestNotificationWithNoticeDto) sendMessage);
+                notification.setTypeId(NotificationType.UPLOAD_FAILED.getTypeId());
+                break;
+            case INQUIRY:
+                notification = NotificationMapper.INSTANCE.toNotificationWithInquiry((RequestNotificationWithInquiryDto) sendMessage);
+                notification.setTypeId(NotificationType.INQUIRY.getTypeId());
+                break;
+            case SHARE_FOLDER_INVITE:
+                notification = NotificationMapper.INSTANCE.toNotificationWithInvitation((RequestNotificationWithInvitationDto) sendMessage);
+                notification.setTypeId(NotificationType.SHARE_FOLDER_INVITE.getTypeId());
+                break;
+            default:
+                return null;
+        }
+
+        return notification;
+    }
 }

@@ -120,7 +120,7 @@ public class RecordService {
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if(userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
         System.out.println(userId);
-        List<FolderShareEntity> folderShareEntities = folderShareRepository.findFolderShareEntitiesByTargetUserAndInvitationStatus(userEntity, "ACCEPT");
+        List<FolderShareEntity> folderShareEntities = folderShareRepository.findFolderShareEntitiesByTargetUserAndInvitationStatus(userEntity, InvitationStatus.ACCEPT);
 
         if(folderShareEntities == null)
             throw new CustomException(ErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER);
@@ -537,7 +537,7 @@ public class RecordService {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
         UserEntity user = userRepository.findByUserId(userId);
         RecordEntity record = recordRepository.findRecordEntityByRecordId(recordId);
-        Boolean existsByFolderShare = folderShareRepository.existsByFolderAndInvitationStatusAndTargetUserOrOwnerUser(record.getFolder(), InvitationStatus.ACCEPT.toString(), user, user);
+        Boolean existsByFolderShare = folderShareRepository.existsByFolderAndInvitationStatusAndTargetUserOrOwnerUser(record.getFolder(), InvitationStatus.ACCEPT, user, user);
 
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);

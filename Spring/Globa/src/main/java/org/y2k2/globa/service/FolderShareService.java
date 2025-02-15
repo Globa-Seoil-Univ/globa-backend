@@ -3,18 +3,24 @@ package org.y2k2.globa.service;
 import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
+import org.y2k2.globa.dto.common.fcm.SendMessage;
+import org.y2k2.globa.dto.request.folder.RequestFolderPostDto;
 import org.y2k2.globa.dto.response.foldershare.ResponseFolderShareUserDto;
 import org.y2k2.globa.dto.request.notification.RequestNotificationWithFolderShareAddUserDto;
 import org.y2k2.globa.dto.request.notification.RequestNotificationWithInvitationDto;
 import org.y2k2.globa.entity.*;
+import org.y2k2.globa.event.NotificationListener;
 import org.y2k2.globa.exception.*;
 import org.y2k2.globa.repository.*;
 import org.y2k2.globa.mapper.FolderShareMapper;
@@ -22,16 +28,20 @@ import org.y2k2.globa.mapper.NotificationMapper;
 import org.y2k2.globa.type.InvitationStatus;
 import org.y2k2.globa.type.NotificationType;
 import org.y2k2.globa.type.Role;
+import org.y2k2.globa.util.CustomTimestamp;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FolderShareService {
-    private final Logger log = LoggerFactory.getLogger(getClass());
-    private final FirebaseMessaging firebaseMessaging;
+    private final ApplicationEventPublisher publisher;
+
+    private final NotificationService notificationService;
+
     private final FolderShareRepository folderShareRepository;
     private final FolderRepository folderRepository;
     private final FolderRoleRepository folderRoleRepository;
@@ -81,36 +91,92 @@ public class FolderShareService {
         FolderShareEntity entity = FolderShareEntity.create(folderEntity, ownerEntity, targetEntity, folderRoleEntity);
         FolderShareEntity saveFolderShare = folderShareRepository.save(entity);
 
-        NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithInvitation(
-                new RequestNotificationWithInvitationDto(ownerEntity, targetEntity, folderEntity, saveFolderShare)
+        RequestNotificationWithInvitationDto notificationInfo = RequestNotificationWithInvitationDto.builder()
+                .sender(ownerEntity)
+                .receiver(targetEntity)
+                .folder(folderEntity)
+                .folderShare(saveFolderShare)
+                .notificationType(NotificationType.SHARE_FOLDER_INVITE)
+                .title("공유 초대를 보냈습니다!")
+                .body(ownerEntity.getName() + "님이 " + folderEntity.getTitle() + " 폴더를 공유하고 싶어합니다.")
+                .build();
+
+        notificationService.saveNotification(notificationInfo);
+        publisher.publishEvent(notificationInfo);
+    }
+
+    @Transactional
+    public void inviteShares(FolderEntity folder, UserEntity sender, List<RequestFolderPostDto.ShareTarget> shareTargets) {
+        if (!folder.getUser().getUserId().equals(sender.getUserId())) throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
+
+        List<RequestFolderPostDto.ShareTarget> targetWithoutMe = shareTargets.stream().filter(
+                shareTarget -> !shareTarget.code().equals(sender.getCode())
+        ).toList();
+
+        List<UserEntity> targets = userRepository.findAllByCodeIn(
+                targetWithoutMe.stream().map(RequestFolderPostDto.ShareTarget::code).toList()
         );
-        notification.setTypeId(NotificationType.SHARE_FOLDER_INVITE.getTypeId());
-        notificationRepository.save(notification);
 
-        if (!targetEntity.getShareNofi() || targetEntity.getNotificationToken() == null) return;
+        if (targets.isEmpty()) {
+            throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
+        }
 
-        try {
-            Message message = Message.builder()
-                    .setToken(targetEntity.getNotificationToken())
-                    .setNotification(Notification.builder()
-                            .setTitle("공유 초대를 보냈습니다!")
-                            .setBody(ownerEntity.getName() + "님이 " + folderEntity.getTitle() + " 폴더를 공유하고 싶어합니다.")
-                            .build())
-                    .build();
+        List<FolderShareEntity> alreadyTargets = folderShareRepository.findAllByFolderAndTargetUser_CodeIn(
+                folder,
+                targetWithoutMe.stream().map(RequestFolderPostDto.ShareTarget::code).toList()
+        );
 
-            firebaseMessaging.send(message);
-        } catch (FirebaseMessagingException e) {
-            if (e.getMessagingErrorCode() == MessagingErrorCode.INVALID_ARGUMENT || e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
-                targetEntity.setNotificationToken(null);
-                targetEntity.setNotificationTokenTime(null);
-                userRepository.save(targetEntity);
-                log.debug("Delete Notification Token : " + targetEntity.getUserId());
+        if (!alreadyTargets.isEmpty()) {
+            for (FolderShareEntity alreadyTarget : alreadyTargets) {
+                alreadyTarget.setCreatedTime(new CustomTimestamp().getTimestamp());
             }
 
-            log.debug("Failed to send invite notification : " + saveFolderShare.getShareId() + " : " + e.getMessage());
-        } catch (Exception e) {
-            log.debug("Failed to send invite notification : " + saveFolderShare.getShareId() + " : " + e.getMessage());
+            folderShareRepository.saveAll(alreadyTargets);
+            // TODO : 이미 초대된 사용자에게 다시 초대 보낼 때 알림 보내기
         }
+
+        List<UserEntity> newTargets = targets.stream()
+                .filter(shareTarget -> alreadyTargets.stream().noneMatch(
+                        alreadyTarget -> alreadyTarget.getTargetUser().getCode().equals(shareTarget.getCode())
+                ))
+                .toList();
+
+        FolderRoleEntity readRole = convertRole(Role.R);
+        FolderRoleEntity writeRole = convertRole(Role.W);
+
+        List<FolderShareEntity> newFolderShares = newTargets.stream().map(
+                target -> {
+                    String role = targetWithoutMe.stream()
+                            .filter(shareTarget -> shareTarget.code().equals(target.getCode()))
+                            .findFirst()
+                            .map(RequestFolderPostDto.ShareTarget::role)
+                            .orElse(null);
+
+                    if (role == null) {
+                        return null;
+                    }
+
+                    FolderRoleEntity folderRole = role.equalsIgnoreCase(Role.W.toString()) ? writeRole : readRole;
+
+                    return FolderShareEntity.create(folder, sender, target, folderRole);
+                }
+        ).toList();
+
+        List<FolderShareEntity> savedFolderShares = folderShareRepository.saveAll(newFolderShares);
+        List<RequestNotificationWithInvitationDto> notificationInfos = savedFolderShares.stream().map(
+                folderShare -> RequestNotificationWithInvitationDto.builder()
+                        .sender(sender)
+                        .receiver(folderShare.getTargetUser())
+                        .folder(folder)
+                        .folderShare(folderShare)
+                        .notificationType(NotificationType.SHARE_FOLDER_INVITE)
+                        .title("공유 초대를 보냈습니다!")
+                        .body(sender.getName() + "님이 " + folder.getTitle() + " 폴더를 공유하고 싶어합니다.")
+                        .build()
+        ).collect(Collectors.toList());
+
+        notificationService.saveNotifications(notificationInfos);
+        publisher.publishEvent(notificationInfos);
     }
 
     @Transactional
@@ -166,38 +232,27 @@ public class FolderShareService {
             notificationRepository.delete(invitationNotification);
         }
 
-        NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareAddUser(
-                new RequestNotificationWithFolderShareAddUserDto(folderShareEntity.getTargetUser(), folderShareEntity.getFolder(), folderShareEntity)
-        );
-        notification.setTypeId(NotificationType.SHARE_FOLDER_ADD_USER.getTypeId());
-        notificationRepository.save(notification);
+        RequestNotificationWithFolderShareAddUserDto notification = RequestNotificationWithFolderShareAddUserDto.builder()
+                .receiver(folderShareEntity.getTargetUser())
+                .folder(folderShareEntity.getFolder())
+                .folderShare(folderShareEntity)
+                .notificationType(NotificationType.SHARE_FOLDER_ADD_USER)
+                .build();
+        notificationService.saveNotification(notification);
 
         List<FolderShareEntity> targetFolderShares = folderShareRepository.findAllByFolderFolderId(folderId);
-        List<Message> messages = new ArrayList<>();
+        List<RequestNotificationWithFolderShareAddUserDto> notificationInfos = targetFolderShares.stream()
+                .map(targetFolderShare -> RequestNotificationWithFolderShareAddUserDto.builder()
+                        .receiver(targetFolderShare.getTargetUser())
+                        .folder(targetFolderShare.getFolder())
+                        .folderShare(targetFolderShare)
+                        .notificationType(NotificationType.SHARE_FOLDER_ADD_USER)
+                        .title("새로운 사용자가 추가되었습니다!")
+                        .body(folderShareEntity.getTargetUser().getName() + "님이 " + folderShareEntity.getFolder().getTitle() + " 폴더 공유를 수락했습니다.")
+                        .build()
+                ).collect(Collectors.toList());
 
-        try {
-            for (FolderShareEntity targetFolderShare : targetFolderShares) {
-                boolean isNotTarget = !targetFolderShare.getTargetUser().getShareNofi()
-                        || targetFolderShare.getTargetUser().getNotificationToken() == null
-                        || targetFolderShare.getTargetUser().getUserId().equals(targetId);
-                if (isNotTarget) {
-                    continue;
-                }
-
-                Message message = Message.builder()
-                        .setToken(targetFolderShare.getTargetUser().getNotificationToken())
-                        .setNotification(Notification.builder()
-                                .setTitle("새로운 사용자가 추가되었습니다!")
-                                .setBody(folderShareEntity.getTargetUser().getName() + "님이 " + folderShareEntity.getFolder().getTitle() + " 폴더 공유를 수락했습니다.")
-                                .build())
-                        .build();
-                messages.add(message);
-            }
-
-            firebaseMessaging.sendEach(messages, false);
-        }  catch (Exception e) {
-            log.debug("Failed to send invite notification : " + folderShareEntity.getShareId() + " : " + e.getMessage());
-        }
+        publisher.publishEvent(notificationInfos);
     }
     @Transactional
     public void refuseShare(Long folderId, Long shareId, Long targetId) {
@@ -228,9 +283,9 @@ public class FolderShareService {
         FolderRoleEntity folderRoleEntity;
 
         if (role.equals(Role.W)) {
-            folderRoleEntity = folderRoleRepository.findByRoleName("편집자");
+            folderRoleEntity = folderRoleRepository.findByRoleName(Role.W.getRoleName());
         } else {
-            folderRoleEntity = folderRoleRepository.findByRoleName("뷰어");
+            folderRoleEntity = folderRoleRepository.findByRoleName(Role.R.getRoleName());
         }
 
         return folderRoleEntity;

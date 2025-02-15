@@ -4,8 +4,10 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,12 +33,15 @@ import org.y2k2.globa.util.CustomTimestamp;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommentService {
-    private final Logger log = LoggerFactory.getLogger(getClass());
-    private final FirebaseMessaging firebaseMessaging;
+    private final NotificationService notificationService;
+    private final ApplicationEventPublisher publisher;
+
     private final CommentRepository commentRepository;
     private final FolderShareRepository folderShareRepository;
     private final SectionRepository sectionRepository;
@@ -99,13 +104,19 @@ public class CommentService {
         CommentEntity comment = CommentEntity.create(user, response, dto.getContent());
         CommentEntity addedComment = commentRepository.save(comment);
 
-        NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareComment(
-                new RequestNotificationWithFolderShareCommentDto(user, folderShare.getFolder(), folderShare, section.getRecord(),  addedComment)
-        );
-        notification.setTypeId(NotificationType.SHARE_FOLDER_ADD_COMMENT.getTypeId());
-        notificationRepository.save(notification);
+        RequestNotificationWithFolderShareCommentDto info = RequestNotificationWithFolderShareCommentDto.builder()
+                .sender(user)
+                .title(user.getName() + "님이 댓글을 달았습니다!")
+                .folder(section.getRecord().getFolder())
+                .folderShare(folderShare)
+                .record(section.getRecord())
+                .comment(addedComment)
+                .notificationType(NotificationType.SHARE_FOLDER_ADD_COMMENT)
+                .build();
 
-        notificationComment(user, folderShare);
+        notificationService.saveNotification(info);
+
+        notificationComment(user, section.getRecord().getFolder(), section.getRecord(), folderShare);
 
         return response.getHighlightId();
     }
@@ -121,13 +132,18 @@ public class CommentService {
         CommentEntity comment = CommentEntity.create(user, highlight, dto.getContent());
         CommentEntity addedComment = commentRepository.save(comment);
 
-        NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareComment(
-                new RequestNotificationWithFolderShareCommentDto(user, folderShare.getFolder(), folderShare, section.getRecord(), addedComment)
-        );
-        notification.setTypeId(NotificationType.SHARE_FOLDER_ADD_COMMENT.getTypeId());
-        notificationRepository.save(notification);
+        RequestNotificationWithFolderShareCommentDto info = RequestNotificationWithFolderShareCommentDto.builder()
+                .sender(user)
+                .title(user.getName() + "님이 댓글을 달았습니다!")
+                .folder(section.getRecord().getFolder())
+                .folderShare(folderShare)
+                .record(section.getRecord())
+                .comment(addedComment)
+                .notificationType(NotificationType.SHARE_FOLDER_ADD_COMMENT)
+                .build();
+        notificationService.saveNotification(info);
 
-        notificationComment(user, folderShare);
+        notificationComment(user, section.getRecord().getFolder(), section.getRecord(), folderShare);
     }
 
     @Transactional
@@ -145,13 +161,19 @@ public class CommentService {
         CommentEntity comment = CommentEntity.createReply(user, highlight, parentComment, dto.getContent());
         CommentEntity addedComment = commentRepository.save(comment);
 
-        NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareComment(
-                new RequestNotificationWithFolderShareCommentDto(user, folderShare.getFolder(), folderShare, section.getRecord(), addedComment)
-        );
-        notification.setTypeId(NotificationType.SHARE_FOLDER_ADD_COMMENT.getTypeId());
-        notificationRepository.save(notification);
+        RequestNotificationWithFolderShareCommentDto info = RequestNotificationWithFolderShareCommentDto.builder()
+                .sender(user)
+                .title(user.getName() + "님이 댓글을 달았습니다!")
+                .folder(section.getRecord().getFolder())
+                .folderShare(folderShare)
+                .record(section.getRecord())
+                .comment(addedComment)
+                .notificationType(NotificationType.SHARE_FOLDER_ADD_COMMENT)
+                .build();
 
-        notificationComment(user, folderShare);
+        notificationService.saveNotification(info);
+
+        notificationComment(user, section.getRecord().getFolder(), section.getRecord(), folderShare);
     }
 
     public void updateComment(RequestCommentWithIdsDto request, long commentId, RequestCommentDto dto) {
@@ -246,33 +268,19 @@ public class CommentService {
         return comment;
     }
 
-    private void notificationComment(UserEntity user, FolderShareEntity folderShareEntity) {
+    private void notificationComment(UserEntity user, FolderEntity folder, RecordEntity record, FolderShareEntity folderShareEntity) {
         List<FolderShareEntity> targetFolderShares = folderShareRepository.findAllByFolderFolderId(folderShareEntity.getFolder().getFolderId());
-        if (targetFolderShares.isEmpty()) return;
+        List<RequestNotificationWithFolderShareCommentDto> infos = targetFolderShares.stream()
+                .map(targetFolderShare -> RequestNotificationWithFolderShareCommentDto.builder()
+                        .sender(user)
+                        .title(user.getName() + "님이 댓글을 달았습니다!")
+                        .folder(folder)
+                        .folderShare(targetFolderShare)
+                        .record(record)
+                        .notificationType(NotificationType.SHARE_FOLDER_ADD_COMMENT)
+                        .build())
+                .collect(Collectors.toList());
 
-        List<Message> messages = new ArrayList<>();
-
-        try {
-            for (FolderShareEntity targetFolderShare : targetFolderShares) {
-                boolean isNotTarget = !targetFolderShare.getTargetUser().getShareNofi()
-                        || targetFolderShare.getTargetUser().getNotificationToken() == null
-                        || targetFolderShare.getTargetUser().getUserId().equals(user.getUserId());
-                if (isNotTarget) {
-                    continue;
-                }
-
-                Message message = Message.builder()
-                        .setToken(targetFolderShare.getTargetUser().getNotificationToken())
-                        .setNotification(Notification.builder()
-                                .setTitle(user.getName() + "님이 댓글을 달았습니다!")
-                                .build())
-                        .build();
-                messages.add(message);
-            }
-
-            firebaseMessaging.sendEach(messages, false);
-        }  catch (Exception e) {
-            log.debug("Failed to comment notification : " + folderShareEntity.getShareId() + " : " + e.getMessage());
-        }
+        publisher.publishEvent(infos);
     }
 }

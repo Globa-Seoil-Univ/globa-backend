@@ -1,9 +1,8 @@
 package org.y2k2.globa.service;
 
-import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.dto.common.answer.RequestAnswerDto;
@@ -12,19 +11,20 @@ import org.y2k2.globa.dto.common.role.UserRole;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.*;
 import org.y2k2.globa.repository.*;
-import org.y2k2.globa.mapper.NotificationMapper;
 import org.y2k2.globa.type.NotificationType;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AnswerService {
-    private final Logger log = LoggerFactory.getLogger(getClass());
-    private final FirebaseMessaging firebaseMessaging;
+    private final ApplicationEventPublisher publisher;
+
+    private final NotificationService notificationService;
+
     private final AnswerRepository answerRepository;
     private final InquiryRepository inquiryRepository;
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
-    private final NotificationRepository notificationRepository;
 
     @Transactional
     public void addAnswer(long userId, long inquiryId, RequestAnswerDto dto) {
@@ -41,36 +41,17 @@ public class AnswerService {
         inquiryRepository.save(inquiry);
         answerRepository.save(answer);
 
-        NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithInquiry(
-                new RequestNotificationWithInquiryDto(user, inquiry.getUser(), inquiry)
-        );
-        notification.setTypeId(NotificationType.INQUIRY.getTypeId());
-        notificationRepository.save(notification);
+        RequestNotificationWithInquiryDto info = RequestNotificationWithInquiryDto.builder()
+                .sender(user)
+                .receiver(user)
+                .title("문의 답변 도착!")
+                .body(inquiry.getTitle() + "에 대한 문의 답변이 도착했어요!")
+                .inquiry(inquiry)
+                .notificationType(NotificationType.INQUIRY)
+                .build();
 
-        if (!user.getPrimaryNofi() || user.getNotificationToken() == null) return;
-
-        try {
-            Message message = Message.builder()
-                    .setToken(user.getNotificationToken())
-                    .setNotification(Notification.builder()
-                            .setTitle("문의 답변 도착!")
-                            .setBody(inquiry.getTitle() + "에 대한 문의 답변이 도착했어요!")
-                            .build())
-                    .build();
-
-            firebaseMessaging.send(message);
-        } catch (FirebaseMessagingException e) {
-            if (e.getMessagingErrorCode() == MessagingErrorCode.INVALID_ARGUMENT || e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
-                user.setNotificationToken(null);
-                user.setNotificationTokenTime(null);
-                userRepository.save(user);
-                log.debug("Delete Notification Token : " + user.getUserId());
-            }
-
-            log.debug("Failed to send answer notification : " + answer.getAnswerId() + " : " + e.getMessage());
-        } catch (Exception e) {
-            log.debug("Failed to send answer notification : " + answer.getAnswerId() + " : " + e.getMessage());
-        }
+        notificationService.saveNotification(info);
+        publisher.publishEvent(info);
     }
 
     @Transactional

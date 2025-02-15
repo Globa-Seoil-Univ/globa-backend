@@ -80,7 +80,11 @@ public class NoticeService {
 
             if (dto.getImageIds() == null) {
                 NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithNotice(
-                        new RequestNotificationWithNoticeDto(user, noticeEntity)
+                        RequestNotificationWithNoticeDto.builder()
+                                .sender(user)
+                                .notice(noticeEntity)
+                                .title(noticeEntity.getTitle())
+                                .build()
                 );
                 notification.setTypeId(NotificationType.NOTICE.getTypeId());
                 notificationRepository.save(notification);
@@ -108,7 +112,11 @@ public class NoticeService {
             noticeImageRepository.saveAll(noticeImageEntities);
 
             NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithNotice(
-                    new RequestNotificationWithNoticeDto(user, noticeEntity)
+                    RequestNotificationWithNoticeDto.builder()
+                            .sender(user)
+                            .notice(noticeEntity)
+                            .title(noticeEntity.getTitle())
+                            .build()
             );
             notification.setTypeId(NotificationType.NOTICE.getTypeId());
             notificationRepository.save(notification);

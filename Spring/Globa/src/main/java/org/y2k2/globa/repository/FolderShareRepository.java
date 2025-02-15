@@ -29,13 +29,14 @@ public interface FolderShareRepository extends JpaRepository<FolderShareEntity, 
             Pageable pageable
     );
 
-    List<FolderShareEntity> findFolderShareEntitiesByTargetUserAndInvitationStatus(UserEntity user, String status);
+    List<FolderShareEntity> findFolderShareEntitiesByTargetUserAndInvitationStatus(UserEntity targetUser, InvitationStatus invitationStatus);
   
     FolderShareEntity findByFolderAndTargetUser(FolderEntity folder, UserEntity user);
+    List<FolderShareEntity> findAllByFolderAndTargetUser_CodeIn(FolderEntity folder, List<String> codes);
     @EntityGraph(value = "FolderShare.getFolderShareAndUser", attributePaths = {
             "targetUser"
     }, type = EntityGraph.EntityGraphType.LOAD)
     List<FolderShareEntity> findAllByFolderFolderId(long folderId);
 
-    Boolean existsByFolderAndInvitationStatusAndTargetUserOrOwnerUser(FolderEntity folder, String status, UserEntity targetUser, UserEntity ownerUser);
+    Boolean existsByFolderAndInvitationStatusAndTargetUserOrOwnerUser(FolderEntity folder, InvitationStatus invitationStatus, UserEntity targetUser, UserEntity ownerUser);
 }

@@ -110,14 +110,13 @@ public class FolderService {
             if (targetEntity == null) {
                 continue;
             }
-
-            folderShareService.inviteShare(
-                    share.getFolder().getFolderId(),
-                    user.getUserId(),
-                    targetEntity.getUserId(),
-                    Role.valueOf(target.role().toUpperCase())
-            );
         }
+
+        folderShareService.inviteShares(
+                share.getFolder(),
+                user,
+                shareTargets
+        );
     }
 
     public HttpStatus patchFolderName(String accessToken, Long folderId, String title){

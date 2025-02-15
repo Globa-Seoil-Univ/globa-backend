@@ -3,6 +3,7 @@ package org.y2k2.globa.mapper;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 import org.y2k2.globa.Projection.NotificationProjection;
+import org.y2k2.globa.dto.common.fcm.SendMessage;
 import org.y2k2.globa.dto.common.notification.NotificationDto;
 import org.y2k2.globa.dto.request.notification.*;
 import org.y2k2.globa.entity.NotificationEntity;
@@ -11,27 +12,27 @@ import org.y2k2.globa.entity.NotificationEntity;
 public interface NotificationMapper {
     NotificationMapper INSTANCE = Mappers.getMapper(NotificationMapper.class);
 
-    @Mapping(source = "fromUser", target = "sender")
+    @Mapping(source = "sender", target = "sender")
     @Mapping(source = "notice", target = "notice")
     NotificationEntity toNotificationWithNotice(RequestNotificationWithNoticeDto dto);
 
-    @Mapping(source = "fromUser", target = "sender")
-    @Mapping(source = "toUser", target = "receiver")
+    @Mapping(source = "sender", target = "sender")
+    @Mapping(source = "receiver", target = "receiver")
     @Mapping(source = "inquiry", target = "inquiry")
     NotificationEntity toNotificationWithInquiry(RequestNotificationWithInquiryDto dto);
 
-    @Mapping(source = "fromUser", target = "sender")
-    @Mapping(source = "toUser", target = "receiver")
+    @Mapping(source = "sender", target = "sender")
+    @Mapping(source = "receiver", target = "receiver")
     @Mapping(source = "folder", target = "folder")
     @Mapping(source = "folderShare", target = "folderShare")
     NotificationEntity toNotificationWithInvitation(RequestNotificationWithInvitationDto dto);
 
-    @Mapping(source = "fromUser", target = "sender")
+    @Mapping(source = "sender", target = "sender")
     @Mapping(source = "folder", target = "folder")
     @Mapping(source = "folderShare", target = "folderShare")
     NotificationEntity toNotificationWithFolderShareAddUser(RequestNotificationWithFolderShareAddUserDto dto);
 
-    @Mapping(source = "fromUser", target = "sender")
+    @Mapping(source = "sender", target = "sender")
     @Mapping(source = "folder", target = "folder")
     @Mapping(source = "folderShare", target = "folderShare")
     @Mapping(source = "record", target = "record")
