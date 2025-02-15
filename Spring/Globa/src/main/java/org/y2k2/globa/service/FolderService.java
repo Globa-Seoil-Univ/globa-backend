@@ -101,17 +101,6 @@ public class FolderService {
             throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
         }
 
-        for (RequestFolderPostDto.ShareTarget target : shareTargets) {
-            UserEntity targetEntity = targets.stream()
-                    .filter(t -> t.getCode().equals(target.code()))
-                    .findFirst()
-                    .orElse(null);
-
-            if (targetEntity == null) {
-                continue;
-            }
-        }
-
         folderShareService.inviteShares(
                 share.getFolder(),
                 user,
