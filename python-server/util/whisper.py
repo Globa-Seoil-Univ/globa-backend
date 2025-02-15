@@ -22,44 +22,7 @@ class WhisperManager:
         model_size = "large-v3"
         self.model = WhisperModel(model_size, device="cuda", compute_type="float32")
 
-    def stt(self, path: str, lan: str):# parameter language [ kr, jp, en ]
-        if lan == "kr":
-            language = "한국어"
-        elif lan == "jp":
-            language = "일본어"
-        else:
-            language = "영어"
-        segments, info = self.model.transcribe(
-            path,
-            initial_prompt="너는 이제부터" + language + "로 대화하는 회의, 강의, 모임 등 사람들과의 대화를 한글로 변환해야 하는 역할이야.",
-            beam_size=5,
-            language="ko",
-            temperature=0,
-            condition_on_previous_text=False,
-            max_new_tokens=128,
-            vad_filter=True,
-            repetition_penalty=1.2,
-            no_repeat_ngram_size=3,
-            vad_parameters=dict(min_silence_duration_ms=500)
-        )
-
-        results = []
-        for segment in segments:
-            self.logger.debug(segment)
-
-            result: STTResults = STTResults(
-                text=segment.text,
-                start=segment.start,
-                end=segment.end
-            )
-
-            results.append(result)
-
-        if os.path.isfile(path):
-            os.remove(path)
-
-        return results
-    def stt(self, path: str): # default korean
+    def stt(self, path: str):
         segments, info = self.model.transcribe(
             path,
             initial_prompt="너는 이제부터 한국어로 대화하는 회의, 강의, 모임 등 사람들과의 대화를 한글로 변환해야 하는 역할이야.",
