@@ -107,8 +107,14 @@ public class JWTProvider {
     }
 
     private Claims parseClaims(String accessToken, boolean validate) {
+        if (accessToken == null) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
+        }
+
         if (accessToken.contains("Bearer")) {
             accessToken = accessToken.split(" ")[1].trim();
+        } else {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
 
         try {
@@ -125,6 +131,8 @@ public class JWTProvider {
             return e.getClaims();
         } catch (SignatureException e) {
             throw new CustomException(ErrorCode.SIGNATURE);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
     }
 }

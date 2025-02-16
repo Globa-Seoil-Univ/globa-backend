@@ -13,34 +13,26 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.y2k2.globa.annotation.VerifyUser;
+import org.y2k2.globa.dto.common.auth.CustomUserDetails;
 import org.y2k2.globa.dto.request.user.*;
 import org.y2k2.globa.dto.response.analysis.ResponseAnalysisDto;
 import org.y2k2.globa.dto.request.fcm.RequestNotificationTokenDto;
 import org.y2k2.globa.dto.request.survey.RequestSurveyDto;
 import org.y2k2.globa.dto.response.user.ResponseUserDto;
 import org.y2k2.globa.dto.response.user.ResponseUserSearchDto;
-import org.y2k2.globa.entity.UserEntity;
-import org.y2k2.globa.exception.CustomException;
-import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.UserService;
 import org.y2k2.globa.util.jwt.JWT;
-import org.y2k2.globa.util.jwt.JWTProvider;
-
-import java.net.URI;
-import java.util.Map;
 
 @RestController
-@RequestMapping("user")
+@RequestMapping("/user")
 @ResponseBody
 @RequiredArgsConstructor
 @Tag(name = "User", description = "사용자 관련 API입니다.")
 public class UserController {
     private final UserService userService;
-    private final JWTProvider jwtTokenProvider;
 
     @Operation(
             summary = "내 정보 가져오기",
@@ -66,9 +58,8 @@ public class UserController {
             }
     )
     @GetMapping
-    @VerifyUser
-    public ResponseEntity<?> getUser(UserEntity user) {
-        return ResponseEntity.ok(userService.getUser(user));
+    public ResponseEntity<?> getUser(@AuthenticationPrincipal CustomUserDetails details) {
+        return ResponseEntity.ok(userService.getUser(details.getUser()));
     }
 
     @Operation(
@@ -93,7 +84,6 @@ public class UserController {
             }
     )
     @GetMapping("/search")
-    @VerifyUser
     public ResponseEntity<?> getUserSearch(@RequestParam(value = "code", required = false) String code) {
         return ResponseEntity.ok(userService.searchUser(code));
     }
@@ -123,9 +113,8 @@ public class UserController {
             }
     )
     @GetMapping("/notification")
-    @VerifyUser
-    public ResponseEntity<?> getUserNotification(UserEntity user) {
-        return ResponseEntity.ok(userService.getNotification(user));
+    public ResponseEntity<?> getUserNotification(@AuthenticationPrincipal CustomUserDetails details) {
+        return ResponseEntity.ok(userService.getNotification(details.getUser()));
     }
 
     @Operation(
@@ -154,9 +143,8 @@ public class UserController {
             }
     )
     @GetMapping("/analysis")
-    @VerifyUser
-    public ResponseEntity<?> getAnalysis(UserEntity user) {
-        return ResponseEntity.ok(userService.getAnalysis(user));
+    public ResponseEntity<?> getAnalysis(@AuthenticationPrincipal CustomUserDetails details) {
+        return ResponseEntity.ok(userService.getAnalysis(details.getUser()));
     }
 
     @Operation(
@@ -244,12 +232,11 @@ public class UserController {
             }
     )
     @RequestMapping(path = "/notification/token", method = { RequestMethod.POST, RequestMethod.PUT })
-    @VerifyUser
     public ResponseEntity<?> upsertFcmToken(
             @Valid @RequestBody RequestNotificationTokenDto dto,
-            UserEntity user
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        userService.upsertFcmToken(dto, user);
+        userService.upsertFcmToken(dto, details.getUser());
         return ResponseEntity.noContent().build();
     }
 
@@ -278,12 +265,11 @@ public class UserController {
             }
     )
     @PutMapping("/notification")
-    @VerifyUser
     public ResponseEntity<?> modifyNotification(
             @Valid @RequestBody RequestNotificationSettingDto settingDto,
-            UserEntity user
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        userService.modifyNotification(settingDto, user);
+        userService.modifyNotification(settingDto, details.getUser());
         return ResponseEntity.noContent().build();
     }
 
@@ -312,12 +298,11 @@ public class UserController {
             }
     )
     @PatchMapping("/name")
-    @VerifyUser
     public ResponseEntity<?> modifyUsername(
             @Valid @RequestBody RequestNameDto dto,
-            UserEntity user
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        userService.modifyUsername(dto, user);
+        userService.modifyUsername(dto, details.getUser());
         return ResponseEntity.noContent().build();
     }
 
@@ -348,12 +333,11 @@ public class UserController {
             }
     )
     @PatchMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @VerifyUser
     public ResponseEntity<?> modifyProfileImg(
             @Valid RequestProfileImageDto dto,
-            UserEntity user
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        userService.modifyProfileImg(dto, user);
+        userService.modifyProfileImg(dto, details.getUser());
         return ResponseEntity.noContent().build();
     }
 
@@ -382,12 +366,11 @@ public class UserController {
             }
     )
     @DeleteMapping
-    @VerifyUser
     public ResponseEntity<?> deleteUser(
             @Valid @RequestBody RequestSurveyDto dto,
-            UserEntity user
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        userService.deleteUser(dto, user);
+        userService.deleteUser(dto, details.getUser());
         return ResponseEntity.noContent().build();
     }
 }

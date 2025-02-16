@@ -75,6 +75,17 @@ public class UserService {
         return UserMapper.INSTANCE.toResponseUserDto(user, folderEntity.getFolderId());
     }
 
+    public UserEntity getUser(Long userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        if (user.getIsDeleted()) {
+            throw new CustomException(ErrorCode.DELETED_USER);
+        }
+
+        return user;
+    }
+
     public ResponseUserSearchDto searchUser(String code){
         UserEntity userEntity = userRepository.findOneByCode(code)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));

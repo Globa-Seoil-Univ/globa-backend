@@ -14,9 +14,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import org.y2k2.globa.annotation.VerifyUser;
+import org.y2k2.globa.dto.common.auth.CustomUserDetails;
 import org.y2k2.globa.dto.common.folder.FolderDto;
 import org.y2k2.globa.dto.request.folder.RequestFolderPostDto;
 import org.y2k2.globa.dto.response.folder.ResponseFolderDto;
@@ -63,12 +64,11 @@ public class FolderController {
             }
     )
     @GetMapping
-    @VerifyUser
     public ResponseEntity<?> getFolders(
             @RequestParam(required = false, defaultValue = "1", value = "page") int page,
             @RequestParam(required = false, defaultValue = "100", value = "count") int count,
-            UserEntity user
-    ) { return ResponseEntity.status(HttpStatus.OK).body(folderService.getFolders(page, count, user)); }
+            @AuthenticationPrincipal CustomUserDetails details
+            ) { return ResponseEntity.status(HttpStatus.OK).body(folderService.getFolders(page, count, details.getUser())); }
 
     @Operation(
             summary = "폴더 추가",
@@ -99,15 +99,14 @@ public class FolderController {
             }
     )
     @PostMapping
-    @VerifyUser
     public ResponseEntity<?> createFolder(
             @Valid @RequestBody RequestFolderPostDto request,
-            UserEntity user
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
         if (request.getShareTargets() == null) {
-            folderService.createFolder(request.getTitle(), user);
+            folderService.createFolder(request.getTitle(), details.getUser());
         } else {
-            folderService.createFolder(request.getTitle(), request.getShareTargets(), user);
+            folderService.createFolder(request.getTitle(), request.getShareTargets(), details.getUser());
         }
 
         return ResponseEntity.created(URI.create("/folder")).build();
