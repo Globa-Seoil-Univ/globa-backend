@@ -96,7 +96,7 @@ public class RecordService {
 
         if(folderEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_FOLDER);
 
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity, folderId,"ACCEPT");
+        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity, folderId,InvitationStatus.ACCEPT);
 
         if(folderShareEntity == null)
             throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
@@ -165,7 +165,7 @@ public class RecordService {
         if (record == null) throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
 
         if (!record.getIsShare()) {
-            FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity, folderId,"ACCEPT");
+            FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity, folderId,InvitationStatus.ACCEPT);
             if(folderShareEntity == null)
                 throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
         }
@@ -245,7 +245,7 @@ public class RecordService {
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if(targetEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(targetEntity,folderId,"ACCEPT");
+        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(targetEntity,folderId,InvitationStatus.ACCEPT);
         if (folderShareEntity == null) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
         List<StudyEntity> studyEntities = studyRepository.findAllByUserUserIdAndRecordRecordId(userId,recordId);
@@ -295,7 +295,7 @@ public class RecordService {
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if(targetEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(targetEntity,folderId,"ACCEPT");
+        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(targetEntity,folderId,InvitationStatus.ACCEPT);
         if (folderShareEntity == null) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
         List<QuizEntity> quizEntities = quizRepository.findAllByRecordRecordId(recordId);
@@ -379,7 +379,7 @@ public class RecordService {
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if(targetEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(targetEntity,folderId,"ACCEPT");
+        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(targetEntity,folderId,InvitationStatus.ACCEPT);
         if (folderShareEntity == null) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
         RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
@@ -417,7 +417,7 @@ public class RecordService {
         if (folderEntity == null)
             throw new CustomException(ErrorCode.NOT_FOUND_FOLDER);
 
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity,folderId,"ACCEPT");        if (folderShareEntity == null)
+        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity,folderId,InvitationStatus.ACCEPT);        if (folderShareEntity == null)
             throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
         RecordEntity recordEntity = new RecordEntity();
@@ -448,7 +448,7 @@ public class RecordService {
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if(userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity,folderId,"ACCEPT");
+        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity,folderId,InvitationStatus.ACCEPT);
         if (folderShareEntity == null)
             throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
@@ -480,8 +480,8 @@ public class RecordService {
         FolderEntity folderEntity = folderRepository.findFolderEntityByFolderId(folderId);
         FolderEntity targetEntity = folderRepository.findFolderEntityByFolderId(targetId);
 
-        FolderShareEntity folderShareEntity1 = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity,folderId,"ACCEPT");
-        FolderShareEntity folderShareEntity2 = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity,targetId,"ACCEPT");
+        FolderShareEntity folderShareEntity1 = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity,folderId,InvitationStatus.ACCEPT);
+        FolderShareEntity folderShareEntity2 = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity,targetId,InvitationStatus.ACCEPT);
 
         if (folderEntity == null)
             throw new CustomException(ErrorCode.NOT_FOUND_ORIGIN_FOLDER);

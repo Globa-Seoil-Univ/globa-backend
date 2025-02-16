@@ -68,9 +68,8 @@ public class UserService {
     public final FolderService folderService;
 
     public ResponseUserDto getUser(UserEntity user){
-        FolderEntity folderEntity = folderRepository.findFirstByUserUserIdOrderByCreatedTimeAsc(user.getUserId());
-        if(folderEntity == null)
-            throw new CustomException(ErrorCode.NOT_FOUND_DEFAULT_FOLDER);
+        FolderEntity folderEntity = folderRepository.findFirstByUserUserIdOrderByCreatedTimeAsc(user.getUserId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DEFAULT_FOLDER));
 
         return UserMapper.INSTANCE.toResponseUserDto(user, folderEntity.getFolderId());
     }

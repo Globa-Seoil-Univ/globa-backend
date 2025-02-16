@@ -47,15 +47,32 @@ public class FolderService {
     public final FolderRoleRepository folderRoleRepository;
 
     public ResponseFolderDto getFolders(int page, int count, UserEntity user){
-        Pageable pageable = PageRequest.of(page-1, count);
-        Page<FolderShareEntity> folderShareEntities = folderShareRepository.findAllByOwnerUserOrTargetUserAndInvitationStatus(
+        Pageable pageable;
+        List<FolderEntity> folders = new ArrayList<>();
+
+        if (page == 1) {
+            pageable = PageRequest.of(0, count - 1);
+
+            FolderEntity defaultFolder = folderRepository.findFirstByUserUserIdOrderByCreatedTimeAsc(user.getUserId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DEFAULT_FOLDER));
+
+            folders.add(defaultFolder);
+        } else {
+            pageable = PageRequest.of(page - 1, count);
+        }
+
+        Page<FolderShareEntity> folderShareEntities = folderShareRepository.findAllByOwnerUserOrTargetUserAndInvitationStatusOrderByShareIdDesc(
                 user,
                 user,
                 InvitationStatus.ACCEPT,
                 pageable
         );
 
-        List<FolderEntity> folders = folderShareEntities.getContent().stream().map(FolderShareEntity::getFolder).toList();
+        folders.addAll(folderShareEntities.stream()
+                .map(FolderShareEntity::getFolder)
+                .toList()
+        );
+
         List<ResponseFolderDto.FolderDto> dtos = folders.stream()
                 .map(FolderMapper.INSTANCE::toResponseInFolderDto)
                 .toList();
@@ -122,7 +139,7 @@ public class FolderService {
         if (!Objects.equals(userId, folderEntity.getUser().getUserId())){
             throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
         }
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity,folderId,"ACCEPT");
+        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity,folderId,InvitationStatus.ACCEPT);
 
         if(folderShareEntity == null)
             throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
@@ -143,11 +160,8 @@ public class FolderService {
         if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         FolderEntity folderEntity = folderRepository.findFolderEntityByFolderId(folderId);
-        FolderEntity defaultFolderEntity = folderRepository.findFirstByUserUserIdOrderByCreatedTimeAsc(userEntity.getUserId());
-
-        if(folderEntity == null) {
-            throw new CustomException(ErrorCode.NOT_FOUND_FOLDER);
-        }
+        FolderEntity defaultFolderEntity = folderRepository.findFirstByUserUserIdOrderByCreatedTimeAsc(userEntity.getUserId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DEFAULT_FOLDER));
 
         if (!Objects.equals(userId, folderEntity.getUser().getUserId())){
             throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);

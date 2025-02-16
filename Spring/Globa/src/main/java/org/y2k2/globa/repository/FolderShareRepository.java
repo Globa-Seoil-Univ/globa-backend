@@ -16,13 +16,26 @@ import java.util.Optional;
 
 public interface FolderShareRepository extends JpaRepository<FolderShareEntity, Long> {
     Page<FolderShareEntity> findByFolderOrderByCreatedTimeAsc(Pageable pageable, FolderEntity folder);
-    FolderShareEntity findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(UserEntity user,Long folderId, String status);
+    FolderShareEntity findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(UserEntity user,Long folderId, InvitationStatus status);
     FolderShareEntity findFirstByShareId(Long folderId);
 
     @EntityGraph(value = "FolderShare.getFolderShareAndFolder", attributePaths = {
             "folder"
     }, type = EntityGraph.EntityGraphType.FETCH)
-    Page<FolderShareEntity> findAllByOwnerUserOrTargetUserAndInvitationStatus(
+    @Query(
+            "SELECT fs FROM FolderShareEntity fs " +
+                    "WHERE (" +
+                        "fs.ownerUser = :ownerUser " +
+                        "OR fs.targetUser = :targetUser" +
+                    ") " +
+                    "AND fs.invitationStatus = :status " +
+                    "AND fs.folder.folderId != (" +
+                        "SELECT MIN(f.folderId) FROM FolderEntity f " +
+                        "WHERE f.user = :ownerUser" +
+                    ") " +
+                    "ORDER BY fs.shareId DESC"
+    )
+    Page<FolderShareEntity> findAllByOwnerUserOrTargetUserAndInvitationStatusOrderByShareIdDesc(
             UserEntity ownerUser,
             UserEntity targetUser,
             InvitationStatus status,
