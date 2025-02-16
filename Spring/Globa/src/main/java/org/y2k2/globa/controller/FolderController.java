@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import org.y2k2.globa.dto.common.auth.CustomUserDetails;
 import org.y2k2.globa.dto.common.folder.FolderDto;
+import org.y2k2.globa.dto.request.folder.RequestFolderNameDto;
 import org.y2k2.globa.dto.request.folder.RequestFolderPostDto;
 import org.y2k2.globa.dto.response.folder.ResponseFolderDto;
 import org.y2k2.globa.exception.CustomException;
@@ -122,15 +123,15 @@ public class FolderController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_FOLDER_ID, ref = SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER, ref = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_FOLDER_OWNER, ref = SwaggerErrorCode.MISMATCH_FOLDER_OWNER_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
@@ -139,13 +140,13 @@ public class FolderController {
             }
     )
     @PatchMapping("/{folder_id}/name")
-    public ResponseEntity<?> patchFolder(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
-                                        @PathVariable(value = "folder_id") Long folderId,
-                                        @RequestBody Map<String, String> titleMap){
-        if ( folderId == null)
-            throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
-
-        return ResponseEntity.status(folderService.patchFolderName(accessToken, folderId, titleMap.get("title"))).body("");
+    public ResponseEntity<?> patchFolder(
+            @PathVariable(value = "folder_id") Long folderId,
+            @Valid @RequestBody RequestFolderNameDto dto,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        folderService.modifyFolderName(folderId, dto.name(), details.getUser());
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(
@@ -159,31 +160,26 @@ public class FolderController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_FOLDER_ID, ref = SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.FOLDER_DELETE_BAD_REQUEST, ref = SwaggerErrorCode.FOLDER_DELETE_BAD_REQUEST_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
-                    @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER, ref = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.MISMATCH_FOLDER_OWNER, ref = SwaggerErrorCode.MISMATCH_FOLDER_OWNER_VALUE),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_FOLDER, ref = SwaggerErrorCode.NOT_FOUND_FOLDER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_FOLDER_FIREBASE, ref = SwaggerErrorCode.NOT_FOUND_FOLDER_FIREBASE_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_FOLDER, ref = SwaggerErrorCode.NOT_FOUND_FOLDER_VALUE)
                     })),
                     @ApiResponse(responseCode = "500", ref="500")
             }
     )
     @DeleteMapping("/{folder_id}")
-    public ResponseEntity<?> deleteFolder(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
-                                        @PathVariable(value = "folder_id") Long folderId){
-        if ( folderId == null)
-            throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
-
-        return ResponseEntity.status(folderService.deleteFolderName(accessToken, folderId)).body("");
+    public ResponseEntity<?> deleteFolder(
+            @PathVariable(value = "folder_id") Long folderId,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        folderService.deleteFolder(folderId, details.getUser());
+        return ResponseEntity.noContent().build();
     }
 }

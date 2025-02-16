@@ -1,7 +1,9 @@
 package org.y2k2.globa.util.file;
 
 import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.Storage;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -13,12 +15,14 @@ import org.y2k2.globa.exception.ErrorCode;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
 @Component
 @AllArgsConstructor
 public class FileStore {
+    private Storage storage;
     private Bucket bucket;
 
     private String getStoreFileName(String ext) {
@@ -75,19 +79,6 @@ public class FileStore {
                 .build();
     }
 
-    public void storeEmptyFile(String path) {
-        byte[] content = new byte[0];
-
-        try {
-            bucket.create(path, content, "text/plain");
-        } catch (Exception e) {
-            log.error("Failed to store empty file because can not create file. [path = {}, reason = {}]", path, e.getMessage());
-            throw new CustomException(ErrorCode.FAILED_FILE_UPLOAD);
-        }
-
-        log.info("store file: [path = {}]", path);
-    }
-
     public void deleteFile(String storePath) {
         log.info("delete file: [name = {}]", storePath);
 
@@ -103,5 +94,19 @@ public class FileStore {
         } catch (Exception e) {
             log.error("Failed to delete file because can not delete file. [path = {}, reason = {}]", storePath, e.getMessage());
         }
+    }
+
+    public void deleteFiles(List<String> storePaths) {
+        if (storePaths.isEmpty()) {
+            return;
+        }
+
+        log.info("delete files: [names = {}]", storePaths);
+
+        List<BlobId> blobIds = storePaths.stream()
+                .map(filePath -> BlobId.of(bucket.getName(), filePath))
+                .toList();
+
+        storage.delete(blobIds);
     }
 }

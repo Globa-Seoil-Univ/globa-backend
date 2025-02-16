@@ -49,13 +49,13 @@ public class FolderShareService {
     private final NotificationRepository notificationRepository;
 
     public ResponseFolderShareUserDto getShares(Long folderId, Long userId, int page, int count) {
-        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId);
+        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));;
 
         UserEntity user = userRepository.findByUserId(userId);
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
-        if (folderEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_FOLDER);
         if (!folderEntity.getUser().getUserId().equals(userId)) throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
 
         Pageable pageable = PageRequest.of(page - 1, count);
@@ -80,8 +80,8 @@ public class FolderShareService {
         if (ownerId.equals(targetId)) throw new CustomException(ErrorCode.INVITE_BAD_REQUEST);
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
 
-        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId);
-        if (folderEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_FOLDER);
+        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));;
         if (!folderEntity.getUser().getUserId().equals(ownerId)) throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
 
         FolderShareEntity folderShareEntity = folderShareRepository.findByFolderAndTargetUser(folderEntity, targetEntity);
@@ -187,8 +187,8 @@ public class FolderShareService {
         if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
 
-        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId);
-        if (folderEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_FOLDER);
+        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));
 
         FolderShareEntity folderShareEntity = folderShareRepository.findByFolderAndTargetUser(folderEntity, targetEntity);
         if (folderShareEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_SHARE);
@@ -208,8 +208,8 @@ public class FolderShareService {
         UserEntity targetEntity = userRepository.findByUserId(targetId);
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
 
-        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId);
-        if (folderEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_FOLDER);
+        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));;
 
         FolderShareEntity folderShareEntity = folderShareRepository.findByFolderAndTargetUser(folderEntity, targetEntity);
         if (folderShareEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_SHARE);

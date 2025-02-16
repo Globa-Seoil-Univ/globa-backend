@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.y2k2.globa.Projection.RecordSearchProjection;
+import org.y2k2.globa.entity.FolderEntity;
 import org.y2k2.globa.entity.RecordEntity;
 import org.y2k2.globa.entity.UserEntity;
 
@@ -28,6 +29,8 @@ public interface RecordRepository extends JpaRepository<RecordEntity, Long> {
             "WHERE folder_id IN (:folderIds) " +
             "ORDER BY created_time DESC ", nativeQuery = true)
     Page<RecordEntity> findRecordEntitiesByFolder(Pageable pageable, @Param("folderIds") List<Long> folderIds);
+
+    List<RecordEntity> findAllByFolder(FolderEntity folder);
   
     RecordEntity findByRecordId(Long recordId);
 
