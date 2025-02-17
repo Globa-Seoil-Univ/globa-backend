@@ -16,6 +16,7 @@ import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.Projection.RecordSearchProjection;
 import org.y2k2.globa.dto.request.quiz.RequestQuizDto;
+import org.y2k2.globa.dto.request.record.RequestRecordNameDto;
 import org.y2k2.globa.dto.response.analysis.ResponseAnalysisDto;
 import org.y2k2.globa.dto.response.analysis.ResponseRecordAnalysisDto;
 import org.y2k2.globa.dto.response.folder.ResponseDetailFolderDto;
@@ -194,19 +195,6 @@ public class RecordService {
         return new ResponseAnalysisDto(responseKeywords, responseStudyTimes, responseQuizGrades);
     }
 
-    public List<QuizDto> getQuiz(Long recordId, Long folderId, UserEntity user) {
-        boolean hasAccess = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(user, folderId, InvitationStatus.ACCEPT);
-        if (!hasAccess) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
-
-        List<QuizEntity> quizzes = quizRepository.findAllByRecordRecordId(recordId);
-        if(quizzes.isEmpty())
-            throw new CustomException(ErrorCode.NOT_FOUND_QUIZ);
-
-        return quizzes.stream()
-                .map(QuizMapper.INSTANCE::toQuizDto)
-                .toList();
-    }
-
     public ResponseRecordSearchDto searchRecord(String keyword, int page, int count, UserEntity user) {
         Page<RecordSearchProjection> recordEntities = recordRepository.findAllSharedOrOwnedRecords(
                 user,
@@ -260,57 +248,17 @@ public class RecordService {
     }
 
     @Transactional
-    public void changeLinkShare(String accessToken, Long folderId, Long recordId, boolean isShare){
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-        UserEntity user = userRepository.findByUserId(userId);
+    public void changeLinkShare(Long folderId, Long recordId, boolean isShare, UserEntity user){
         FolderEntity folder = folderRepository.findFirstByFolderId(folderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));
         RecordEntity record = recordRepository.findFirstByRecordId(recordId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
 
-        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-        if (!Objects.equals(folder.getUser().getUserId(), user.getUserId())) throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
-        if (!Objects.equals(record.getUser().getUserId(), user.getUserId())) throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
+        if (!folder.getUser().getUserId().equals(user.getUserId())) throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
+        if (!record.getUser().getUserId().equals(user.getUserId())) throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
 
         record.setIsShare(isShare);
         recordRepository.save(record);
-    }
-
-    @Transactional
-    public HttpStatus postQuiz(String accessToken, Long recordId, Long folderId, List<RequestQuizDto.Quiz> quizs){
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
-        UserEntity targetEntity = userRepository.findByUserId(userId);
-
-        if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(targetEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
-        boolean hasAccess = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(targetEntity, folderId, InvitationStatus.ACCEPT);
-        if (!hasAccess) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
-
-        RecordEntity recordEntity = recordRepository.findFirstByRecordId(recordId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
-
-        for(RequestQuizDto.Quiz requestQuizDto : quizs){
-
-            if( requestQuizDto.getQuizId() == null)
-                throw new CustomException(ErrorCode.REQUIRED_QUIZ_ID);
-
-            QuizEntity quizEntity = quizRepository.findQuizEntityByQuizId(requestQuizDto.getQuizId());
-
-            if(!Objects.equals(recordEntity.getRecordId(), quizEntity.getRecord().getRecordId()))
-                throw new CustomException(ErrorCode.MISMATCH_QUIZ_RECORD_ID);
-
-            QuizAttemptEntity quizAttemptEntity = new QuizAttemptEntity();
-            quizAttemptEntity.setUser(targetEntity);
-            quizAttemptEntity.setQuiz(quizRepository.findQuizEntityByQuizId(requestQuizDto.getQuizId()));
-            quizAttemptEntity.setCorrect(requestQuizDto.getIsCorrect());
-            quizAttemptEntity.setCreatedTime(LocalDateTime.now());
-
-            quizAttemptRepository.save(quizAttemptEntity);
-        }
-
-        return HttpStatus.CREATED;
     }
 
     @Transactional
@@ -348,29 +296,19 @@ public class RecordService {
     }
 
     @Transactional
-    public HttpStatus patchRecordName(String accessToken, Long recordId, Long folderId, String title){
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
-        UserEntity userEntity = userRepository.findOneByUserId(userId);
-        RecordEntity recordEntity = recordRepository.findFirstByRecordId(recordId)
+    public void modifyRecordName(Long folderId, Long recordId, RequestRecordNameDto dto, UserEntity user) {
+        RecordEntity record = recordRepository.findFirstByRecordId(recordId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
 
-        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
-        boolean hasAccess = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity, folderId, InvitationStatus.ACCEPT);
+        boolean hasAccess = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(user, folderId, InvitationStatus.ACCEPT);
         if (!hasAccess) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
-        if (!Objects.equals(userId, recordEntity.getUser().getUserId())){
+        if (!user.getUserId().equals(record.getUser().getUserId())) {
             throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
         }
 
-
-        recordEntity.setTitle(title);
-
-        recordRepository.save(recordEntity);
-
-
-        return HttpStatus.OK;
+        record.setTitle(dto.title());
+        recordRepository.save(record);
     }
 
     @Transactional

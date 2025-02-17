@@ -16,6 +16,7 @@ public interface QuizRepository extends JpaRepository<QuizEntity, Long> {
 
     QuizEntity findQuizEntityByQuizId(Long quizId);
     List<QuizEntity> findAllByRecordRecordId(Long recordId);
+    List<QuizEntity> findAllByRecordAndQuizIdIn(RecordEntity record, List<Long> quizIds);
     List<QuizEntity> findAllByRecord(RecordEntity record);
 
     @Query(

@@ -1,5 +1,6 @@
 package org.y2k2.globa.dto.request.folder;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -22,5 +23,6 @@ public class RequestFolderPostDto {
     @NotBlank(message = "제목은 필수입니다.")
     private String title;
 
+    @Valid
     private List<ShareTarget> shareTargets;
 }

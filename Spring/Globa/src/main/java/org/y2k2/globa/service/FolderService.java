@@ -82,7 +82,7 @@ public class FolderService {
 
     @Transactional
     public FolderShareEntity createFolder(String title, UserEntity user) {
-        FolderRoleEntity role = folderRoleRepository.findByRoleName("소유자");
+        FolderRoleEntity role = folderRoleRepository.findByRoleName(Role.O.getRoleName());
         FolderEntity folder = FolderMapper.INSTANCE.toEntity(user, title);
         FolderEntity createdFolder = folderRepository.save(folder);
 

@@ -29,7 +29,7 @@ public class QuizAttemptEntity {
     private QuizEntity quiz;
 
     @Column(name = "is_correct", columnDefinition = "DEFAULT 0")
-    private boolean isCorrect;
+    private Boolean isCorrect;
 
     @CreationTimestamp
     @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
