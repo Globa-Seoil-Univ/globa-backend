@@ -8,13 +8,13 @@ import org.y2k2.globa.dto.common.quiz.QuizDto;
 import org.y2k2.globa.dto.response.quiz.ResponseQuizGradeDto;
 import org.y2k2.globa.entity.QuizEntity;
 
-@Mapper
+@Mapper(uses = {CustomTimestampMapper.class})
 public interface QuizMapper {
 
     QuizMapper INSTANCE = Mappers.getMapper(QuizMapper.class);
 
     @Mapping(source = "quizGrade", target = "quizGrade")
-    @Mapping(source = "createdTime", target = "createdTime")
+    @Mapping(source = "createdTime", target = "createdTime", qualifiedBy = {CustomTimestampTranslator.class, MapCreatedTime.class})
     ResponseQuizGradeDto toResponseQuizGradeDto(QuizGradeProjection projection);
 
     @Mapping(source = "quizId", target = "quizId")

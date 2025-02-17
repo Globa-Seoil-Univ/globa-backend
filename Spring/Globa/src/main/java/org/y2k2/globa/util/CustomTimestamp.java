@@ -20,12 +20,6 @@ public class CustomTimestamp {
         this.timestamp = timestamp.atZone(ZoneId.of("Asia/Seoul")).toLocalDateTime();
     }
 
-    public static LocalDateTime toLocalDateTime(String dateTimeString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        return LocalDateTime.parse(dateTimeString, formatter);
-    }
-
     @Override
     public String toString() {
         return this.timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));

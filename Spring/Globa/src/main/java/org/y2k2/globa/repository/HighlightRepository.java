@@ -9,6 +9,8 @@ import org.y2k2.globa.entity.SectionEntity;
 import java.util.List;
 
 public interface HighlightRepository extends JpaRepository<HighlightEntity, Long> {
+    List<HighlightEntity> findAllBySectionIn(List<SectionEntity> sections);
+
     @Query(value = "SELECT h.highlight_id, h.section_id, h.start_index, h.end_index, h.type, h.created_time " +
                         "FROM highlight h " +
                         "INNER JOIN comment c ON h.highlight_id = c.highlight_id " +

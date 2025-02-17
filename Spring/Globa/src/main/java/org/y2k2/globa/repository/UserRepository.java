@@ -21,12 +21,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     List<UserEntity> findAllByCodeIn(List<String> code);
     UserEntity findByUserId(Long userId);
     Page<UserEntity> findAll(Pageable pageable);
-
-    @Query(value = "SELECT word, importance " +
-            "FROM keyword " +
-            "WHERE record_id = :recordId " +
-            "ORDER BY importance DESC " +
-            "LIMIT 10 ", nativeQuery = true)
-    List<KeywordProjection> findKeywordByRecordId(@Param("recordId") Long recordId);
 }
 

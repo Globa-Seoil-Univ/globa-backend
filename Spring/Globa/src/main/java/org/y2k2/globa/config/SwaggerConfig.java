@@ -107,7 +107,6 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.NOT_FOUND_NOTIFICATION_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_NOTIFICATION_VALUE, "알림을 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_ANSWER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_ANSWER_VALUE, "답변을 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_FOLDER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_FOLDER_VALUE, "폴더를 찾을 수 없습니다."));
-        components.addExamples(SwaggerErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER_VALUE, "접근 가능한 폴더를 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_ORIGIN_FOLDER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_ORIGIN_FOLDER_VALUE, "원본 폴더를 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_TARGET_FOLDER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_TARGET_FOLDER_VALUE, "대상 폴더를 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_SHARE_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_SHARE_VALUE, "공유 초대를 찾을 수 없습니다."));

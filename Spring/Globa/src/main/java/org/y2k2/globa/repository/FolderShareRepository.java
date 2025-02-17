@@ -16,7 +16,7 @@ import java.util.Optional;
 
 public interface FolderShareRepository extends JpaRepository<FolderShareEntity, Long> {
     Page<FolderShareEntity> findByFolderOrderByCreatedTimeAsc(Pageable pageable, FolderEntity folder);
-    FolderShareEntity findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(UserEntity user,Long folderId, InvitationStatus status);
+    Boolean existsByTargetUserAndFolderFolderIdAndInvitationStatus(UserEntity user, Long folderId, InvitationStatus status);
     FolderShareEntity findFirstByShareId(Long folderId);
 
     @EntityGraph(value = "FolderShare.getFolderShareAndFolder", attributePaths = {
@@ -50,6 +50,4 @@ public interface FolderShareRepository extends JpaRepository<FolderShareEntity, 
             "targetUser"
     }, type = EntityGraph.EntityGraphType.LOAD)
     List<FolderShareEntity> findAllByFolderFolderId(long folderId);
-
-    Boolean existsByFolderAndInvitationStatusAndTargetUserOrOwnerUser(FolderEntity folder, InvitationStatus invitationStatus, UserEntity targetUser, UserEntity ownerUser);
 }

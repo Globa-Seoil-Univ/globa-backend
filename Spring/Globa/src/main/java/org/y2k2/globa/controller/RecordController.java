@@ -12,16 +12,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.y2k2.globa.dto.common.auth.CustomUserDetails;
 import org.y2k2.globa.dto.request.record.RequestPostRecordDto;
 import org.y2k2.globa.dto.response.analysis.ResponseAnalysisDto;
 import org.y2k2.globa.dto.common.quiz.QuizDto;
 import org.y2k2.globa.dto.request.quiz.RequestQuizDto;
-import org.y2k2.globa.dto.response.record.ResponseAllRecordWithTotalDto;
 import org.y2k2.globa.dto.response.record.ResponseRecordDetailDto;
 import org.y2k2.globa.dto.response.record.ResponseRecordSearchDto;
 import org.y2k2.globa.dto.response.record.ResponseRecordsByFolderDto;
 import org.y2k2.globa.dto.request.study.RequestStudyDto;
+import org.y2k2.globa.dto.response.record.ResponseRecordsDto;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
@@ -33,29 +35,28 @@ import java.util.Map;
 @RestController
 @ResponseBody
 @RequiredArgsConstructor
-@Tag(name = "Record", description = "음성 관련 API입니다.")
+@Tag(name = "Record", description = "문서 관련 API입니다.")
 public class RecordController {
     private final RecordService recordService;
 
     @Operation(
-            summary = "폴더 내 녹음 파일 조회",
-            description = "폴더 내 녹음 파일을 조회합니다.",
+            summary = "폴더 내 문서 조회",
+            description = "폴더 내 문서를 조회합니다.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "폴더 내 녹음 파일 가져오기 완료",
+                            description = "폴더 내 문서 가져오기 완료",
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseRecordsByFolderDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_FOLDER_ID, ref = SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER, ref = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
@@ -64,92 +65,87 @@ public class RecordController {
             }
     )
     @GetMapping("/folder/{folder_id}/record")
-    public ResponseEntity<?> getRecordByFolderId(@Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
-                                                 @PathVariable(value = "folder_id", required = false) Long folderId,
-                                                 @RequestParam(required = false, defaultValue = "1", value = "page") int page,
-                                                 @RequestParam(required = false, defaultValue = "100", value = "count") int count) {
-        if ( folderId == null )
-            throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
-
-
-        return ResponseEntity.status(HttpStatus.OK).body(recordService.getRecords(accessToken, folderId, page, count));
+    public ResponseEntity<?> getRecordByFolderId(
+            @PathVariable(value = "folder_id") Long folderId,
+            @RequestParam(value = "page", defaultValue = "1", required = false) int page,
+            @RequestParam(value = "count", defaultValue = "10", required = false) int count,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        return ResponseEntity.ok(recordService.getRecords(folderId, page, count, details.getUser()));
     }
 
     @Operation(
-            summary = "모든 녹음 파일 조회",
-            description = "폴더와 상관 없이 모든 문서에서 검색을 합니다.",
+            summary = "최신 문서 조회",
+            description = "폴더와 상관 없이 최신 문서를 가져옵니다.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "녹음 파일 가져오기 완료",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseAllRecordWithTotalDto.class))
+                            description = "문서 목록 가져오기 완료",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseRecordsDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER, ref = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER, ref = SwaggerErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER_VALUE),
                     })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
     @GetMapping("/record")
-    public ResponseEntity<?> getAllRecord(@Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
-                                                 @RequestParam(required = false, defaultValue = "100", value = "count") int count) {
-        return ResponseEntity.status(HttpStatus.OK).body(recordService.getAllRecords(accessToken, count));
+    public ResponseEntity<?> getRecentRecords(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "count", defaultValue = "10") int count,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        return ResponseEntity.ok(recordService.getRecentRecords(page, count, details.getUser()));
     }
 
     @Operation(
-            summary = "녹음 파일 상세 조회",
-            description = "녹음 파일을 상세히 조회합니다.",
+            summary = "문서 상세 조회",
+            description = "문서를 상세히 조회합니다.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "폴더 내 녹음 파일 가져오기 완료",
+                            description = "폴더 내 문서 가져오기 완료",
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseRecordDetailDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER, ref = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_RECORD, ref = SwaggerErrorCode.NOT_FOUND_RECORD_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_ANALYSIS, ref = SwaggerErrorCode.NOT_FOUND_ANALYSIS_VALUE),
                     })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
     @GetMapping("/folder/{folder_id}/record/{record_id}")
-    public ResponseEntity<?> getRecordDetail(@Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
-                                                 @PathVariable(value = "folder_id", required = false) Long folderId,
-                                                @PathVariable(value = "record_id", required = false) Long recordId) {
-        if ( folderId == null )
-            throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
-        if ( recordId == null )
-            throw new CustomException(ErrorCode.REQUIRED_RECORD_ID);
-
-
-        return ResponseEntity.status(HttpStatus.OK).body(recordService.getRecordDetail(accessToken, folderId, recordId));
+    public ResponseEntity<?> getRecordDetail(
+            @PathVariable(value = "folder_id") Long folderId,
+            @PathVariable(value = "record_id") Long recordId,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        return ResponseEntity.ok(recordService.getRecordDetail(folderId, recordId, details.getUser()));
     }
 
     @Operation(
             summary = "문서 내 시각화 자료 조회",
-            description = "해당 폴더에 있는 녹음 파일에 대한 시각화 자료를 조회합니다.",
+            description = "해당 폴더에 있는 문서에 대한 시각화 자료를 조회합니다.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -158,15 +154,13 @@ public class RecordController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_FOLDER_ID, ref = SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_RECORD_ID, ref = SwaggerErrorCode.REQUIRED_RECORD_ID_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER, ref = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
@@ -175,18 +169,11 @@ public class RecordController {
             }
     )
     @GetMapping("/folder/{folder_id}/record/{record_id}/analysis")
-    public ResponseEntity<?> getAnalysis(@Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
-                                         @PathVariable(value = "folder_id", required = false) Long folderId,
-                                         @PathVariable(value = "record_id", required = false) Long recordId) {
-        if ( folderId == null )
-            throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
-        if ( recordId == null )
-            throw new CustomException(ErrorCode.REQUIRED_RECORD_ID);
-
-        ResponseAnalysisDto result = recordService.getAnalysis(accessToken,recordId, folderId);
-
-        return ResponseEntity.ok(result);
-    }
+    public ResponseEntity<?> getAnalysis(
+                    @PathVariable(value = "folder_id") Long folderId,
+                    @PathVariable(value = "record_id") Long recordId,
+                    @AuthenticationPrincipal CustomUserDetails details
+    ) { return ResponseEntity.ok(recordService.getAnalysis(recordId, folderId, details.getUser())); }
 
     @Operation(
             summary = "퀴즈 조회",
@@ -199,15 +186,13 @@ public class RecordController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_FOLDER_ID, ref = SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_RECORD_ID, ref = SwaggerErrorCode.REQUIRED_RECORD_ID_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER, ref = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
@@ -217,18 +202,11 @@ public class RecordController {
             }
     )
     @GetMapping("/folder/{folder_id}/record/{record_id}/quiz")
-    public ResponseEntity<?> getQuiz(@Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
-                                         @PathVariable(value = "folder_id", required = false) Long folderId,
-                                         @PathVariable(value = "record_id", required = false) Long recordId) {
-        if ( folderId == null )
-            throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
-        if ( recordId == null )
-            throw new CustomException(ErrorCode.REQUIRED_RECORD_ID);
-
-        List<QuizDto> result = recordService.getQuiz(accessToken,recordId, folderId);
-
-        return ResponseEntity.ok(result);
-    }
+    public ResponseEntity<?> getQuiz(
+            @PathVariable(value = "folder_id") Long folderId,
+            @PathVariable(value = "record_id") Long recordId,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) { return ResponseEntity.ok(recordService.getQuiz(recordId, folderId, details.getUser())); }
 
     @Operation(
             summary = "문서 검색",
@@ -241,12 +219,12 @@ public class RecordController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_FOLDER_ID, ref = SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_RECORD_ID, ref = SwaggerErrorCode.REQUIRED_RECORD_ID_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
@@ -256,11 +234,12 @@ public class RecordController {
     )
     @GetMapping("/record/search")
     public ResponseEntity<?> searchRecord(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "100") int count,
-            @RequestParam(required = false) String keyword) {
-        return ResponseEntity.ok(recordService.searchRecord(accessToken, keyword, page, count));
+            @RequestParam(value = "page", defaultValue = "1", required = false) int page,
+            @RequestParam(value = "count", defaultValue = "10", required = false) int count,
+            @RequestParam(required = false) String keyword,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        return ResponseEntity.ok(recordService.searchRecord(keyword, page, count, details.getUser()));
     }
 
     @Operation(
@@ -270,31 +249,30 @@ public class RecordController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "공유 받는 문서 가져오기 완료",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseAllRecordWithTotalDto.class))
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseRecordsDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER, ref = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER, ref = SwaggerErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER_VALUE),
                     })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
     @GetMapping("/record/receiving")
     public ResponseEntity<?> getReceivingRecord(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
             @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "100") int count) {
-        return ResponseEntity.ok(recordService.getReceivingRecords(accessToken, page, count));
+            @RequestParam(required = false, defaultValue = "10") int count,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        return ResponseEntity.ok(recordService.getReceivingRecords(page, count, details.getUser()));
     }
 
     @Operation(
@@ -304,31 +282,30 @@ public class RecordController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "공유 하는 문서 가져오기 완료",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseAllRecordWithTotalDto.class))
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseRecordsDto.class))
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER, ref = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER, ref = SwaggerErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER_VALUE),
                     })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
     @GetMapping("/record/sharing")
     public ResponseEntity<?> getSharingRecord(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
             @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "100") int count) {
-        return ResponseEntity.ok(recordService.getSharingRecords(accessToken, page, count));
+            @RequestParam(required = false, defaultValue = "10") int count,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        return ResponseEntity.ok(recordService.getSharingRecords(page, count, details.getUser()));
     }
 
     @Operation(
@@ -344,9 +321,6 @@ public class RecordController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_FOLDER_ID, ref = SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_RECORD_ID, ref = SwaggerErrorCode.REQUIRED_RECORD_ID_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
@@ -354,6 +328,7 @@ public class RecordController {
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_FOLDER_OWNER, ref = SwaggerErrorCode.MISMATCH_FOLDER_OWNER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_RECORD_OWNER, ref = SwaggerErrorCode.MISMATCH_RECORD_OWNER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),

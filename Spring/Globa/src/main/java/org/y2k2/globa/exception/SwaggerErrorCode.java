@@ -116,8 +116,6 @@ public class SwaggerErrorCode {
     public static final String NOT_FOUND_ANSWER_VALUE = "40440";
     public static final String NOT_FOUND_FOLDER = "NOT_FOUND_FOLDER";
     public static final String NOT_FOUND_FOLDER_VALUE = "40450";
-    public static final String NOT_FOUND_ACCESSIBLE_FOLDER = "NOT_FOUND_ACCESSIBLE_FOLDER";
-    public static final String NOT_FOUND_ACCESSIBLE_FOLDER_VALUE = "40451";
     public static final String NOT_FOUND_ORIGIN_FOLDER = "NOT_FOUND_ORIGIN_FOLDER";
     public static final String NOT_FOUND_ORIGIN_FOLDER_VALUE = "40452";
     public static final String NOT_FOUND_TARGET_FOLDER = "NOT_FOUND_TARGET_FOLDER";

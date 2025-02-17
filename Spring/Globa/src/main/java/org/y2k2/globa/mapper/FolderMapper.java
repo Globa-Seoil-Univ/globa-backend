@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import org.y2k2.globa.dto.common.folder.FolderDto;
+import org.y2k2.globa.dto.response.folder.ResponseDetailFolderDto;
 import org.y2k2.globa.dto.response.folder.ResponseFolderDto;
 import org.y2k2.globa.entity.FolderEntity;
 import org.y2k2.globa.entity.UserEntity;
@@ -12,15 +13,14 @@ import org.y2k2.globa.entity.UserEntity;
 public interface FolderMapper {
     FolderMapper INSTANCE = Mappers.getMapper(FolderMapper.class);
 
-    @Mapping(source = "folderEntity.folderId", target = "folderId")
-    @Mapping(source = "title", target = "title")
-    @Mapping(source = "createdTime", target = "createdTime", qualifiedBy = { CustomTimestampTranslator.class, MapCreatedTime.class })
-    FolderDto toFolderDto(FolderEntity folderEntity);
-
     @Mapping(source = "folderId", target = "folderId")
     @Mapping(source = "title", target = "title")
     @Mapping(source = "createdTime", target = "createdTime", qualifiedBy = { CustomTimestampTranslator.class, MapCreatedTime.class })
-    ResponseFolderDto.FolderDto toResponseInFolderDto(FolderEntity folderEntity);
+    ResponseFolderDto.FolderDto toResponseInFolderDto(FolderEntity folder);
+
+    @Mapping(source = "title", target = "title")
+    @Mapping(source = "createdTime", target = "createdTime", qualifiedBy = { CustomTimestampTranslator.class, MapCreatedTime.class })
+    ResponseDetailFolderDto toResponseDetailFolderDto(FolderEntity folder);
 
     @Mapping(source = "user", target = "user")
     @Mapping(source = "title", target = "title")

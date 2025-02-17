@@ -73,7 +73,6 @@ public enum ErrorCode {
     NOT_FOUND_NOTIFICATION(HttpStatus.NOT_FOUND, " 알림을 찾을 수 없습니다. ", 40431),
     NOT_FOUND_ANSWER(HttpStatus.NOT_FOUND, " 답변을 찾을 수 없습니다. ", 40440),
     NOT_FOUND_FOLDER(HttpStatus.NOT_FOUND, " 폴더를 찾을 수 없습니다. ", 40450),
-    NOT_FOUND_ACCESSIBLE_FOLDER(HttpStatus.NOT_FOUND, " 폴더에 대한 접근 권한을 찾을 수 없습니다. ", 40451),
     NOT_FOUND_ORIGIN_FOLDER(HttpStatus.NOT_FOUND, " 기존 폴더를 찾을 수 없습니다. ", 40452),
     NOT_FOUND_TARGET_FOLDER(HttpStatus.NOT_FOUND, " 대상 폴더를 찾을 수 없습니다. ", 40453),
     NOT_FOUND_SHARE(HttpStatus.NOT_FOUND, " 공유 이력을 찾을 수 없습니다. ", 40454),

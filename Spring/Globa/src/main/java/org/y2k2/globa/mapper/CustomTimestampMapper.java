@@ -13,8 +13,6 @@ import java.time.LocalDateTime;
 public class CustomTimestampMapper {
     @MapCreatedTime
     public String mapCreatedTime(LocalDateTime createdTime) {
-        CustomTimestamp timestamp = new CustomTimestamp();
-        timestamp.setTimestamp(createdTime);
-        return String.valueOf(timestamp);
+        return new CustomTimestamp(createdTime).toString();
     }
 }

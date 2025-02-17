@@ -11,7 +11,7 @@ import org.y2k2.globa.entity.SectionEntity;
 import java.util.List;
 
 public interface SectionRepository extends JpaRepository<SectionEntity, Long> {
-    List<SectionEntity> findAllByRecordRecordIdOrderByStartTimeAsc(Long recordId);
+    List<SectionEntity> findAllByRecordOrderByStartTimeAsc(RecordEntity record);
     @EntityGraph(value = "Section.getSectionAndRecordAndFolder", attributePaths = {
             "record",
             "record.folder"

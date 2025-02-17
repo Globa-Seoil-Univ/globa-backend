@@ -24,10 +24,10 @@ import org.y2k2.globa.dto.request.kafka.RequestKafkaDto;
 import org.y2k2.globa.dto.response.keyword.ResponseKeywordDto;
 import org.y2k2.globa.dto.common.quiz.QuizDto;
 import org.y2k2.globa.dto.response.quiz.ResponseQuizGradeDto;
-import org.y2k2.globa.dto.response.record.ResponseAllRecordWithTotalDto;
 import org.y2k2.globa.dto.response.record.ResponseRecordDetailDto;
 import org.y2k2.globa.dto.response.record.ResponseRecordSearchDto;
 import org.y2k2.globa.dto.response.record.ResponseRecordsByFolderDto;
+import org.y2k2.globa.dto.response.record.ResponseRecordsDto;
 import org.y2k2.globa.dto.response.section.ResponseSectionDto;
 import org.y2k2.globa.dto.request.study.RequestStudyDto;
 import org.y2k2.globa.dto.response.study.ResponseStudyTimesDto;
@@ -36,11 +36,9 @@ import org.y2k2.globa.dto.common.user.UserIntroDto;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
+import org.y2k2.globa.mapper.*;
 import org.y2k2.globa.repository.*;
-import org.y2k2.globa.mapper.QuizMapper;
-import org.y2k2.globa.mapper.RecordMapper;
 import org.y2k2.globa.type.InvitationStatus;
-import org.y2k2.globa.util.CustomTimestamp;
 import org.y2k2.globa.util.jwt.JWTProvider;
 import org.y2k2.globa.util.KafkaProducer;
 
@@ -48,12 +46,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class RecordService {
-
     private final JWTProvider jwtTokenProvider;
     private final KafkaProducer kafkaProducer;
 
@@ -82,295 +79,205 @@ public class RecordService {
     @Value("${kafka.topic.audio.key}")
     private String topicKey;
 
-
-    public ResponseRecordsByFolderDto getRecords(String accessToken, Long folderId, int page, int count){
-
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-
-        UserEntity userEntity = userRepository.findOneByUserId(userId);
-
-        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
-        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId)
+    public ResponseRecordsByFolderDto getRecords(Long folderId, int page, int count, UserEntity user) {
+        FolderEntity folder = folderRepository.findFirstByFolderId(folderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));
 
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity, folderId,InvitationStatus.ACCEPT);
+        boolean hasAccess = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(user, folder.getFolderId(), InvitationStatus.ACCEPT);
+        if (!hasAccess) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
-        if(folderShareEntity == null)
-            throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
+        Pageable pageable = PageRequest.of(page - 1, count);
+        Page<RecordEntity> records = recordRepository.findAllByFolderFolderId(folderId, pageable);
 
-        Pageable pageable = PageRequest.of(page-1, count);
-        Page<RecordEntity> records = recordRepository.findAllByFolderFolderId(pageable, folderId);
+        boolean isOwner = folder.getUser().getUserId().equals(user.getUserId());
 
-        boolean isOwner = folderEntity.getUser().getUserId().equals(userId);
-
-        return new ResponseRecordsByFolderDto(records.stream()
-                .map(RecordMapper.INSTANCE::toRequestRecordDto)
-                .collect(Collectors.toList()),isOwner , (int) records.getTotalElements());
-
+        return new ResponseRecordsByFolderDto(
+                records.stream().map(RecordMapper.INSTANCE::toRequestRecordDto).toList(),
+                isOwner,
+                records.getTotalElements()
+        );
     }
 
-    public ResponseAllRecordWithTotalDto getAllRecords(String accessToken, int count){
+    public ResponseRecordsDto getRecentRecords(int page, int count, UserEntity user) {
+        Pageable pageable = PageRequest.of(page - 1, count);
+        Page<RecordEntity> recordPages = recordRepository.findAllByAccessibleRecord(user, pageable);
 
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-        UserEntity userEntity = userRepository.findOneByUserId(userId);
-
-        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-        System.out.println(userId);
-        List<FolderShareEntity> folderShareEntities = folderShareRepository.findFolderShareEntitiesByTargetUserAndInvitationStatus(userEntity, InvitationStatus.ACCEPT);
-
-        if(folderShareEntities == null)
-            throw new CustomException(ErrorCode.NOT_FOUND_ACCESSIBLE_FOLDER);
-
-        List<Long> folderIds = new ArrayList<>();
-
-        for(FolderShareEntity folderShareEntity : folderShareEntities){
-            folderIds.add(folderShareEntity.getFolder().getFolderId());
+        if (recordPages == null || recordPages.getContent().isEmpty()) {
+            return new ResponseRecordsDto(new ArrayList<>(), 0L);
         }
 
-        Pageable pageable = PageRequest.of(0, count);
-        Page<RecordEntity> records = recordRepository.findRecordEntitiesByFolder(pageable,folderIds);
+        List<RecordEntity> records = recordPages.getContent();
+        List<KeywordProjection> keywords = keywordRepository.findAllByRecordInOrderByImportanceDesc(records);
 
-        return new ResponseAllRecordWithTotalDto(records.stream()
-                .map(record -> {
-                    List<KeywordProjection> keywordProjectionList = userRepository.findKeywordByRecordId(record.getRecordId());
-                    List<ResponseKeywordDto> keywords = new ArrayList<>();
-                    for( KeywordProjection keywordProjection : keywordProjectionList ){
-                        ResponseKeywordDto responseKeywordDto = new ResponseKeywordDto();
-                        responseKeywordDto.setWord(keywordProjection.getWord());
-                        responseKeywordDto.setImportance(keywordProjection.getImportance());
-                        keywords.add(responseKeywordDto);
-                    }
+        return new ResponseRecordsDto(
+                records.stream()
+                        .map(record -> {
+                            List<ResponseKeywordDto> responseKeywords = keywords.stream()
+                                    .filter(keyword -> keyword.getRecordId().equals(record.getRecordId()))
+                                    .map(keyword -> ResponseKeywordDto.builder()
+                                            .word(keyword.getWord())
+                                            .importance(keyword.getImportance())
+                                            .build()
+                                    ).toList();
 
-                   return RecordMapper.INSTANCE.toResponseAllRecordDto(record, recordRepository.findRecordEntityByRecordId(record.getRecordId()).getFolder().getFolderId(),keywords);
-
-                })
-                .collect(Collectors.toList()), (int) records.getTotalElements());
-
+                            return RecordMapper.INSTANCE.toResponseRecordDto(record, record.getFolder().getFolderId(), responseKeywords);
+                        }).toList(),
+                recordPages.getTotalElements());
     }
 
-    public ResponseRecordDetailDto getRecordDetail(String accessToken, Long folderId, Long recordId){
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-
-        UserEntity userEntity = userRepository.findOneByUserId(userId);
-
-        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
-        RecordEntity record = recordRepository.findRecordEntityByRecordId(recordId);
-
-        if (record == null) throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
-
+    public ResponseRecordDetailDto getRecordDetail(Long folderId, Long recordId, UserEntity user){
+        RecordEntity record = recordRepository.findFirstByRecordId(recordId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
+        
         if (!record.getIsShare()) {
-            FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity, folderId,InvitationStatus.ACCEPT);
-            if(folderShareEntity == null)
-                throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
+            boolean hasAccess = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(user, folderId, InvitationStatus.ACCEPT);
+            if (!hasAccess) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
         }
 
-        ResponseRecordDetailDto responseDto = new ResponseRecordDetailDto();
-
-        List<SectionEntity> sections = sectionRepository.findAllByRecordRecordIdOrderByStartTimeAsc(recordId);
+        /*
+         * 1. 문서 내 섹션 찾기
+         * 2. 섹션 내 분석 찾기
+         * 3. 섹션 내 하이라이트 찾기
+         * 4. 섹션 내 요약 찾기
+         * */
+        List<SectionEntity> sections = sectionRepository.findAllByRecordOrderByStartTimeAsc(record);
+        List<AnalysisEntity> analyses = analysisRepository.findALlBySectionIn(sections);
+        List<HighlightEntity> highlights = highlightRepository.findAllBySectionIn(sections);
+        List<SummaryEntity> summaries = summaryRepository.findAllBySectionIn(sections);
         List<ResponseSectionDto> responseSections = new ArrayList<>();
 
-        for(SectionEntity section : sections){
-            ResponseSectionDto responseSectionDto = new ResponseSectionDto();
+        for (SectionEntity section : sections) {
+            AnalysisEntity analysisToSection = analyses.stream()
+                    .filter(analysis -> analysis.getSection().getSectionId().equals(section.getSectionId()))
+                    .findFirst()
+                    .orElse(null);
+            List<HighlightEntity> highlightToSection = highlights.stream()
+                    .filter(highlight -> highlight.getSection().getSectionId().equals(section.getSectionId()))
+                    .toList();
+            List<SummaryEntity> summaryToSection = summaries.stream()
+                    .filter(summary -> summary.getSection().getSectionId().equals(section.getSectionId()))
+                    .toList();
 
-            responseSectionDto.setSectionId(section.getSectionId());
-            responseSectionDto.setTitle(section.getTitle());
-            responseSectionDto.setStartTime(section.getStartTime());
-            responseSectionDto.setEndTime(section.getEndTime());
-            responseSectionDto.setCreatedTime(section.getCreatedTime());
+            List<ResponseDetailHighlightDto> responseHighlights = highlightToSection.stream()
+                    .map(HighlightMapper.INSTANCE::toResponseDetailHighlightDto)
+                    .toList();
+            ResponseRecordAnalysisDto responseAnalysis = AnalysisMapper.INSTANCE.toResponseRecordAnalysisDto(analysisToSection, responseHighlights);
+            List<ResponseDetailSummaryDto> responseSummaries = summaryToSection.stream()
+                    .map(SummaryMapper.INSTANCE::toResponseDetailSummaryDto)
+                    .toList();
 
-            AnalysisEntity analysis = analysisRepository.findAllBySectionSectionId(section.getSectionId());
-
-            if(analysis == null)
-                throw new CustomException(ErrorCode.NOT_FOUND_ANALYSIS);
-
-            ResponseRecordAnalysisDto responseRecordAnalysisDto = new ResponseRecordAnalysisDto();
-            responseRecordAnalysisDto.setAnalysisId(analysis.getAnalysisId());
-            responseRecordAnalysisDto.setContent(analysis.getContent());
-            List<HighlightEntity> highlights = highlightRepository.findAllBySectionSectionId(section.getSectionId());
-            List<ResponseDetailHighlightDto> responseHighlights = new ArrayList<>();
-
-            for(HighlightEntity highlight : highlights){
-                ResponseDetailHighlightDto rdhd = new ResponseDetailHighlightDto();
-                rdhd.setHighlightId(highlight.getHighlightId());
-                rdhd.setType(highlight.getType());
-                rdhd.setStartIndex(highlight.getStartIndex());
-                rdhd.setEndIndex(highlight.getEndIndex());
-
-                responseHighlights.add(rdhd);
-            }
-
-            responseRecordAnalysisDto.setHighlights(responseHighlights);
-            responseSectionDto.setAnalysis(responseRecordAnalysisDto);
-
-            List<ResponseDetailSummaryDto> responseSummaries = new ArrayList<>();
-
-            for(SummaryEntity summaryEntity : summaryRepository.findAllBySectionSectionId(section.getSectionId())){
-                ResponseDetailSummaryDto rdsd = new ResponseDetailSummaryDto();
-                rdsd.setContent(summaryEntity.getContent());
-
-                responseSummaries.add(rdsd);
-            }
-
-            responseSectionDto.setSummary(responseSummaries);
-            responseSections.add(responseSectionDto);
+            responseSections.add(SectionMapper.INSTANCE.toResponseDetailSummaryDto(section, responseAnalysis, responseSummaries));
         }
 
-        ResponseDetailFolderDto rdfd = new ResponseDetailFolderDto();
-        rdfd.setTitle(record.getFolder().getTitle());
-        rdfd.setCreatedTime(record.getFolder().getCreatedTime());
-
-        responseDto.setRecordId(record.getRecordId());
-        responseDto.setTitle(record.getTitle());
-        responseDto.setPath(record.getPath());
-        responseDto.setSize(record.getSize());
-        responseDto.setFolder(rdfd);
-        responseDto.setSection(responseSections);
-        responseDto.setCreatedTime(record.getCreatedTime());
-
-        return responseDto;
-
+        ResponseDetailFolderDto folder = FolderMapper.INSTANCE.toResponseDetailFolderDto(record.getFolder());
+        return RecordMapper.INSTANCE.toResponseRecordDetailDto(record, folder, responseSections);
     }
 
-    public ResponseAnalysisDto getAnalysis(String accessToken, Long recordId, Long folderId){
+    public ResponseAnalysisDto getAnalysis(Long recordId, Long folderId, UserEntity user) {
+        boolean hasAccess = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(user, folderId, InvitationStatus.ACCEPT);
+        if (!hasAccess) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-        UserEntity targetEntity = userRepository.findByUserId(userId);
+        List<StudyEntity> studies = studyRepository.findAllByUserAndRecordRecordId(user, recordId);
+        List<QuizGradeProjection> quizzes = quizRepository.findQuizGradeByUserAndRecordRecordId(user, recordId);
+        List<KeywordProjection> keywords = keywordRepository.findAllByRecordId(recordId);
 
-        if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(targetEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        List<ResponseStudyTimesDto> responseStudyTimes = studies.stream()
+                .map(StudyTimeMapper.INSTANCE::toResponseStudyTimesDto)
+                .toList();
+        List<ResponseQuizGradeDto> responseQuizGrades = quizzes.stream()
+                .map(QuizMapper.INSTANCE::toResponseQuizGradeDto)
+                .toList();
+        List<ResponseKeywordDto> responseKeywords = keywords.stream()
+                .map(KeywordMapper.INSTANCE::toResponseKeywordDto)
+                .toList();
 
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(targetEntity,folderId,InvitationStatus.ACCEPT);
-        if (folderShareEntity == null) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
-
-        List<StudyEntity> studyEntities = studyRepository.findAllByUserUserIdAndRecordRecordId(userId,recordId);
-        List<QuizGradeProjection> quizGradeProjectionList = analysisRepository.findQuizGradeByUserUserIdAndRecordRecordId(userId, recordId);
-        List<KeywordProjection> keywordProjectionList = analysisRepository.findKeywordByRecordId(recordId);
-
-        ResponseAnalysisDto responseAnalysisDto = new ResponseAnalysisDto();
-        List<ResponseStudyTimesDto> studyTimes = new ArrayList<>();
-        List<ResponseQuizGradeDto> quizGrades = new ArrayList<>();
-        List<ResponseKeywordDto> keywords = new ArrayList<>();
-
-        for( StudyEntity studyEntitiy : studyEntities ){
-            CustomTimestamp timestamp = new CustomTimestamp();
-            timestamp.setTimestamp(studyEntitiy.getCreatedTime());
-
-            ResponseStudyTimesDto responseStudyTimesDto = new ResponseStudyTimesDto();
-            responseStudyTimesDto.setStudyTime(studyEntitiy.getStudyTime());
-            responseStudyTimesDto.setCreatedTime(timestamp.toString());
-            studyTimes.add(responseStudyTimesDto);
-        }
-
-        for( QuizGradeProjection quizGradeProjection : quizGradeProjectionList ){
-            ResponseQuizGradeDto responseQuizGradeDto = new ResponseQuizGradeDto();
-            responseQuizGradeDto.setQuizGrade(quizGradeProjection.getQuizGrade());
-            responseQuizGradeDto.setCreatedTime(quizGradeProjection.getCreatedTime());
-            quizGrades.add(responseQuizGradeDto);
-        }
-
-        for( KeywordProjection keywordProjection : keywordProjectionList ){
-            ResponseKeywordDto responseKeywordDto = new ResponseKeywordDto();
-            responseKeywordDto.setWord(keywordProjection.getWord());
-            responseKeywordDto.setImportance(keywordProjection.getImportance());
-            keywords.add(responseKeywordDto);
-        }
-
-        responseAnalysisDto.setStudyTimes(studyTimes);
-        responseAnalysisDto.setQuizGrades(quizGrades);
-        responseAnalysisDto.setKeywords(keywords);
-        return responseAnalysisDto;
+        return new ResponseAnalysisDto(responseKeywords, responseStudyTimes, responseQuizGrades);
     }
 
-    public List<QuizDto> getQuiz(String accessToken, Long recordId, Long folderId){
+    public List<QuizDto> getQuiz(Long recordId, Long folderId, UserEntity user) {
+        boolean hasAccess = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(user, folderId, InvitationStatus.ACCEPT);
+        if (!hasAccess) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
-        UserEntity targetEntity = userRepository.findByUserId(userId);
-
-        if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(targetEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(targetEntity,folderId,InvitationStatus.ACCEPT);
-        if (folderShareEntity == null) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
-
-        List<QuizEntity> quizEntities = quizRepository.findAllByRecordRecordId(recordId);
-        if(quizEntities.isEmpty())
+        List<QuizEntity> quizzes = quizRepository.findAllByRecordRecordId(recordId);
+        if(quizzes.isEmpty())
             throw new CustomException(ErrorCode.NOT_FOUND_QUIZ);
 
-        return quizEntities.stream()
+        return quizzes.stream()
                 .map(QuizMapper.INSTANCE::toQuizDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    public ResponseRecordSearchDto searchRecord(String accessToken, String keyword, int page, int count) {
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-        UserEntity userEntity = userRepository.findOneByUserId(userId);
-
-        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
-        Page<RecordSearchProjection> recordEntities = recordRepository.findAllSharedOrOwnedRecords(PageRequest.of(page - 1, count), userEntity.getUserId(), keyword);
+    public ResponseRecordSearchDto searchRecord(String keyword, int page, int count, UserEntity user) {
+        Page<RecordSearchProjection> recordEntities = recordRepository.findAllSharedOrOwnedRecords(
+                user,
+                keyword,
+                PageRequest.of(page - 1, count)
+        );
 
         return new ResponseRecordSearchDto(recordEntities.stream()
                 .map(record -> {
                     UserIntroDto uploader = new UserIntroDto(record.getUserId(), record.getProfilePath(), record.getName());
                     return RecordMapper.INSTANCE.toResponseRecordSearch(record.getFolderId(), record, uploader);
-                })
-                .toList(), recordEntities.getTotalElements());
+                }).toList(),
+                recordEntities.getTotalElements());
     }
 
-    public ResponseAllRecordWithTotalDto getReceivingRecords(String accessToken, int page, int count) {
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-        UserEntity userEntity = userRepository.findOneByUserId(userId);
-
-        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
+    public ResponseRecordsDto getReceivingRecords(int page, int count, UserEntity user) {
         Pageable pageable = PageRequest.of(page - 1, count);
-        Page<RecordEntity> records = recordRepository.findReceivingRecordsByUserIdOrderByCreatedTimeDesc(pageable, userId);
-
-        return new ResponseAllRecordWithTotalDto(records.stream()
-                .map(record -> {
-                    List<KeywordEntity> keywords = keywordRepository.findAllByRecord(record);
-                    List<ResponseKeywordDto> responseKeywordDto = keywords.stream().map(keyword -> ResponseKeywordDto.builder()
-                            .word(keyword.getWord())
-                            .importance(keyword.getImportance().doubleValue())
-                            .build()
-                    ).toList();
-
-                    return RecordMapper.INSTANCE.toResponseAllRecordDto(record, recordRepository.findRecordEntityByRecordId(record.getRecordId()).getFolder().getFolderId(), responseKeywordDto);
-                })
-                .collect(Collectors.toList()), (int) records.getTotalElements());
+        Page<RecordEntity> records = recordRepository.findReceivingRecordsByUserOrderByCreatedTimeDesc(user, pageable);
+        return getResponseRecordsDto(records.getContent(), records.getTotalElements());
     }
 
-    public ResponseAllRecordWithTotalDto getSharingRecords(String accessToken, int page, int count) {
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-        UserEntity userEntity = userRepository.findOneByUserId(userId);
-
-        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
+    public ResponseRecordsDto getSharingRecords(int page, int count, UserEntity user) {
         Pageable pageable = PageRequest.of(page - 1, count);
-        Page<RecordEntity> records = recordRepository.findSharingRecordsByUserIdOrderByCreatedTimeDesc(pageable, userId);
-
-        return new ResponseAllRecordWithTotalDto(records.stream()
-                .map(record -> {
-                    List<KeywordEntity> keywords = keywordRepository.findAllByRecord(record);
-                    List<ResponseKeywordDto> responseKeywordDto = keywords.stream().map(keyword -> ResponseKeywordDto.builder()
-                            .word(keyword.getWord())
-                            .importance(keyword.getImportance().doubleValue())
-                            .build()
-                    ).toList();
-
-                    return RecordMapper.INSTANCE.toResponseAllRecordDto(record, recordRepository.findRecordEntityByRecordId(record.getRecordId()).getFolder().getFolderId(), responseKeywordDto);
-                })
-                .collect(Collectors.toList()), (int) records.getTotalElements());
+        Page<RecordEntity> records = recordRepository.findSharingRecordsByUserOrderByCreatedTimeDesc(user, pageable);
+        return getResponseRecordsDto(records.getContent(), records.getTotalElements());
     }
 
+    private ResponseRecordsDto getResponseRecordsDto(List<RecordEntity> records, Long total) {
+        if (records.isEmpty()) {
+            return new ResponseRecordsDto(new ArrayList<>(), 0L);
+        }
+
+        List<KeywordProjection> keywords = keywordRepository.findAllByRecordInOrderByImportanceDesc(records);
+
+        return new ResponseRecordsDto(
+                records.stream()
+                        .map(record -> {
+                            List<ResponseKeywordDto> responseKeywords = keywords.stream()
+                                    .filter(keyword -> keyword.getRecordId().equals(record.getRecordId()))
+                                    .map(KeywordMapper.INSTANCE::toResponseKeywordDto)
+                                    .toList();
+
+                            return RecordMapper.INSTANCE.toResponseRecordDto(
+                                    record,
+                                    record.getFolder().getFolderId(),
+                                    responseKeywords
+                            );
+                        }).toList(),
+                total
+        );
+    }
+
+    @Transactional
+    public void changeLinkShare(String accessToken, Long folderId, Long recordId, boolean isShare){
+        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        UserEntity user = userRepository.findByUserId(userId);
+        FolderEntity folder = folderRepository.findFirstByFolderId(folderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));
+        RecordEntity record = recordRepository.findFirstByRecordId(recordId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
+
+        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (!Objects.equals(folder.getUser().getUserId(), user.getUserId())) throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
+        if (!Objects.equals(record.getUser().getUserId(), user.getUserId())) throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
+
+        record.setIsShare(isShare);
+        recordRepository.save(record);
+    }
+
+    @Transactional
     public HttpStatus postQuiz(String accessToken, Long recordId, Long folderId, List<RequestQuizDto.Quiz> quizs){
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity targetEntity = userRepository.findByUserId(userId);
@@ -378,10 +285,11 @@ public class RecordService {
         if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if(targetEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(targetEntity,folderId,InvitationStatus.ACCEPT);
-        if (folderShareEntity == null) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
+        boolean hasAccess = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(targetEntity, folderId, InvitationStatus.ACCEPT);
+        if (!hasAccess) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
-        RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
+        RecordEntity recordEntity = recordRepository.findFirstByRecordId(recordId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
 
         for(RequestQuizDto.Quiz requestQuizDto : quizs){
 
@@ -405,6 +313,7 @@ public class RecordService {
         return HttpStatus.CREATED;
     }
 
+    @Transactional
     public HttpStatus postRecord(String accessToken, Long folderId, String title, String path, String size){
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity userEntity = userRepository.findByUserId(userId);
@@ -415,8 +324,8 @@ public class RecordService {
         FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));;
 
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity,folderId,InvitationStatus.ACCEPT);        if (folderShareEntity == null)
-            throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
+        boolean hasAccess = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity, folderEntity.getFolderId(), InvitationStatus.ACCEPT);
+        if (!hasAccess) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
         RecordEntity recordEntity = new RecordEntity();
         recordEntity.setCreatedTime(LocalDateTime.now());
@@ -438,20 +347,18 @@ public class RecordService {
         return HttpStatus.CREATED;
     }
 
+    @Transactional
     public HttpStatus patchRecordName(String accessToken, Long recordId, Long folderId, String title){
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
         UserEntity userEntity = userRepository.findOneByUserId(userId);
-        RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
+        RecordEntity recordEntity = recordRepository.findFirstByRecordId(recordId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
 
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if(userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity,folderId,InvitationStatus.ACCEPT);
-        if (folderShareEntity == null)
-            throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
-
-        if(recordEntity == null)
-            throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
+        boolean hasAccess = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity, folderId, InvitationStatus.ACCEPT);
+        if (!hasAccess) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
         if (!Objects.equals(userId, recordEntity.getUser().getUserId())){
             throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
@@ -466,11 +373,12 @@ public class RecordService {
         return HttpStatus.OK;
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional
     public HttpStatus patchRecordMove(String accessToken, Long recordId, Long folderId, Long targetId){
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
-        RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
+        RecordEntity recordEntity = recordRepository.findFirstByRecordId(recordId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
 
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
@@ -480,17 +388,11 @@ public class RecordService {
         FolderEntity targetEntity = folderRepository.findFirstByFolderId(targetId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_TARGET_FOLDER));
 
-        FolderShareEntity folderShareEntity1 = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity,folderId,InvitationStatus.ACCEPT);
-        FolderShareEntity folderShareEntity2 = folderShareRepository.findFirstByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity,targetId,InvitationStatus.ACCEPT);
+        boolean hasAccessFromFolder = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity, folderId, InvitationStatus.ACCEPT);
+        if (!hasAccessFromFolder) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
-        if (folderShareEntity1 == null)
-            throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
-
-        if (folderShareEntity2 == null)
-            throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
-
-        if(recordEntity == null)
-            throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
+        boolean hasAccessToFolder = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity, targetId, InvitationStatus.ACCEPT);
+        if (!hasAccessToFolder) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
         if (!Objects.equals(userId, recordEntity.getUser().getUserId())){
             throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
@@ -527,11 +429,13 @@ public class RecordService {
         return HttpStatus.OK;
     }
 
+    @Transactional
     public void patchStudyTime(String accessToken, Long recordId, Long folderId, RequestStudyDto dto) {
         Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
         UserEntity user = userRepository.findByUserId(userId);
-        RecordEntity record = recordRepository.findRecordEntityByRecordId(recordId);
-        Boolean existsByFolderShare = folderShareRepository.existsByFolderAndInvitationStatusAndTargetUserOrOwnerUser(record.getFolder(), InvitationStatus.ACCEPT, user, user);
+        RecordEntity record = recordRepository.findFirstByRecordId(recordId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
+        Boolean existsByFolderShare = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(user, folderId, InvitationStatus.ACCEPT);
 
         if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
@@ -553,31 +457,15 @@ public class RecordService {
         studyRepository.save(study);
     }
 
-    public void changeLinkShare(String accessToken, Long folderId, Long recordId, boolean isShare){
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-        UserEntity user = userRepository.findByUserId(userId);
-        FolderEntity folder = folderRepository.findFirstByFolderId(folderId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));;
-        RecordEntity record = recordRepository.findRecordEntityByRecordId(recordId);
-
-        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-        if (record == null) throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
-        if (!Objects.equals(folder.getUser().getUserId(), user.getUserId())) throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
-        if (!Objects.equals(record.getUser().getUserId(), user.getUserId())) throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
-
-        record.setIsShare(isShare);
-        recordRepository.save(record);
-    }
-
+    @Transactional
     public HttpStatus deleteRecord(String accessToken, Long recordId, Long folderId){
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
         UserEntity userEntity = userRepository.findOneByUserId(userId);
         if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
-        RecordEntity recordEntity = recordRepository.findRecordEntityByRecordId(recordId);
-        if(recordEntity == null) { throw new CustomException(ErrorCode.NOT_FOUND_RECORD); }
+        RecordEntity recordEntity = recordRepository.findFirstByRecordId(recordId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
 
         FolderShareEntity folderShareEntities = folderShareRepository.findByFolderAndTargetUser(recordEntity.getFolder(), userEntity);
         if (folderShareEntities == null) { throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER); }

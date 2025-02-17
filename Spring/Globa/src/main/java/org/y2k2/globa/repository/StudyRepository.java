@@ -18,7 +18,7 @@ public interface StudyRepository extends JpaRepository<StudyEntity, Long> {
             nativeQuery = true
     )
     Optional<StudyEntity> findByCreatedTime(@Param("userId") Long userId, @Param("recordId") Long recordId);
-    List<StudyEntity> findAllByUserUserIdAndRecordRecordId(Long user,Long recordId);
+    List<StudyEntity> findAllByUserAndRecordRecordId(UserEntity user, Long recordId);
 
     @Query(value = "SELECT " +
             "SUM(study_time) AS totalStudyTime, " + // 각 날짜별 StudyTime 합산

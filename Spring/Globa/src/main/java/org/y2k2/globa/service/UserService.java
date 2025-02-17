@@ -110,7 +110,7 @@ public class UserService {
         List<KeywordProjection> keywordProjections = keywordRepository.findKeywordByRecordIds(recordIds);
 
         List<ResponseStudyTimesDto> studyTimes = studyTimeProjections.stream().map(
-                StudyTimeMapper.INSTANCE::toResponseStudyTimesDto
+                StudyTimeMapper.INSTANCE::toResponseTotalStudyTimesDto
         ).toList();
         List<ResponseQuizGradeDto> quizGrades = quizGradeProjections.stream().map(
                 QuizMapper.INSTANCE::toResponseQuizGradeDto

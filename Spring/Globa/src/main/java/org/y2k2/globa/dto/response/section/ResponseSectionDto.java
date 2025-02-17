@@ -1,23 +1,16 @@
 package org.y2k2.globa.dto.response.section;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.y2k2.globa.dto.response.summary.ResponseDetailSummaryDto;
 import org.y2k2.globa.dto.response.analysis.ResponseRecordAnalysisDto;
+import org.y2k2.globa.dto.response.summary.ResponseDetailSummaryDto;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-@NoArgsConstructor
-@Getter
-@Setter
-public class ResponseSectionDto {
-    private Long sectionId;
-    private String title;
-    private Long startTime;
-    private Long endTime;
-    private ResponseRecordAnalysisDto analysis;
-    private List<ResponseDetailSummaryDto> summary;
-    private LocalDateTime createdTime;
-}
+public record ResponseSectionDto(
+        Long sectionId,
+        String title,
+        Long startTime,
+        Long endTime,
+        ResponseRecordAnalysisDto analyses,
+        List<ResponseDetailSummaryDto> summaries,
+        String createdTime
+) {}
