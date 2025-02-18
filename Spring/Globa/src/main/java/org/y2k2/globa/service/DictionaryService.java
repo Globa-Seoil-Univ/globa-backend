@@ -38,9 +38,9 @@ public class DictionaryService {
     @Transactional
     public ResponseDictionaryDto getDictionary(String accessToken, String keyword) {
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-        UserEntity user = userRepository.findByUserId(userId);
+        UserEntity user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
-        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         List<DictionaryEntity> dtos = dictionaryRepository.findTop10ByWordStartingWithOrEngWordStartingWithOrderByCreatedTimeAsc(keyword, keyword);
@@ -52,9 +52,9 @@ public class DictionaryService {
     @Transactional
     public void saveDictionary(String accessToken) {
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-        UserEntity user = userRepository.findByUserId(userId);
+        UserEntity user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
-        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
         if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         UserRoleEntity userRole = userRoleRepository.findByUser(user);

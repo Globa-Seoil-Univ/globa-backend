@@ -88,8 +88,10 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE, "폴더 접근 권한이 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_DESERVE_MODIFY_INVITATION_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_MODIFY_INVITATION_VALUE, "초대 수정 권한이 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_DESERVE_POST_COMMENT_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_POST_COMMENT_VALUE, "댓글 작성 권한이 없습니다."));
-        components.addExamples(SwaggerErrorCode.NOT_DESERVE_FCM_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_FCM , "관리자 또는 편집자만 요청할 수 있습니다."));
-        components.addExamples(SwaggerErrorCode.NOT_DESERVE_FCM_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_DICTIONARY, "관리자 또는 편집자만 요청할 수 있습니다."));
+        components.addExamples(SwaggerErrorCode.NOT_DESERVE_FCM_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_FCM_VALUE, "관리자 또는 편집자만 요청할 수 있습니다."));
+        components.addExamples(SwaggerErrorCode.NOT_DESERVE_DICTIONARY, createExample(SwaggerErrorCode.NOT_DESERVE_DICTIONARY_VALUE, "관리자 또는 편집자만 요청할 수 있습니다."));
+        components.addExamples(SwaggerErrorCode.NOT_DESERVE_DICTIONARY, createExample(SwaggerErrorCode.NOT_DESERVE_ACCEPT_INVITATION_VALUE, "초대를 수락할 수 있는 권한이 없습니다."));
+
         components.addExamples(SwaggerErrorCode.MISMATCH_INQUIRY_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_INQUIRY_OWNER_VALUE, "문의 작성자만 요청할 수 있습니다."));
         components.addExamples(SwaggerErrorCode.MISMATCH_FOLDER_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_FOLDER_OWNER_VALUE, "폴더 소유자만 요청할 수 있습니다."));
         components.addExamples(SwaggerErrorCode.MISMATCH_ANALYSIS_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_ANALYSIS_OWNER_VALUE, "요청한 사용자와 토큰 정보가 일치하지 않습니다."));

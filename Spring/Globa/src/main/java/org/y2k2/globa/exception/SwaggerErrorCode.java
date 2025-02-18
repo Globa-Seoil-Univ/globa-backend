@@ -80,6 +80,8 @@ public class SwaggerErrorCode {
     public static final String NOT_DESERVE_FCM_VALUE = "40324";
     public static final String NOT_DESERVE_DICTIONARY  = "NOT_DESERVE_DICTIONARY ";
     public static final String NOT_DESERVE_DICTIONARY_VALUE = "40325";
+    public static final String NOT_DESERVE_ACCEPT_INVITATION  = "NOT_DESERVE_DICTIONARY ";
+    public static final String NOT_DESERVE_ACCEPT_INVITATION_VALUE = "40325";
     public static final String MISMATCH_INQUIRY_OWNER = "MISMATCH_INQUIRY_OWNER";
     public static final String MISMATCH_INQUIRY_OWNER_VALUE = "40340";
     public static final String MISMATCH_FOLDER_OWNER = "MISMATCH_FOLDER_OWNER";

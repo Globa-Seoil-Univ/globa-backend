@@ -8,16 +8,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.y2k2.globa.entity.FolderEntity;
 import org.y2k2.globa.entity.FolderShareEntity;
-import org.y2k2.globa.entity.RoleEntity;
 import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.type.InvitationStatus;
-import org.y2k2.globa.type.Role;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface FolderShareRepository extends JpaRepository<FolderShareEntity, Long> {
-    Page<FolderShareEntity> findByFolderOrderByCreatedTimeAsc(Pageable pageable, FolderEntity folder);
+    Page<FolderShareEntity> findByFolderOrderByCreatedTimeAsc(FolderEntity folder, Pageable pageable);
     Boolean existsByTargetUserAndFolderFolderIdAndInvitationStatus(UserEntity user, Long folderId, InvitationStatus status);
     Boolean existsByTargetUserAndFolderFolderIdAndInvitationStatusAndRole_RoleName(
             UserEntity user,
@@ -25,7 +23,7 @@ public interface FolderShareRepository extends JpaRepository<FolderShareEntity, 
             InvitationStatus status,
             String roleName
     );
-    FolderShareEntity findFirstByShareId(Long folderId);
+    Optional<FolderShareEntity> findFirstByShareId(Long folderId);
 
     @EntityGraph(value = "FolderShare.getFolderShareAndFolder", attributePaths = {
             "folder"
@@ -50,12 +48,17 @@ public interface FolderShareRepository extends JpaRepository<FolderShareEntity, 
             Pageable pageable
     );
   
-    FolderShareEntity findByFolderAndTargetUser(FolderEntity folder, UserEntity user);
+    Optional<FolderShareEntity> findByFolderAndTargetUser(FolderEntity folder, UserEntity user);
 
-    List<FolderShareEntity> findAllByFolderAndTargetUser_CodeIn(FolderEntity folder, List<String> codes);
+    Boolean existsByFolderAndTargetUser(FolderEntity folder, UserEntity user);
 
     @EntityGraph(value = "FolderShare.getFolderShareAndUser", attributePaths = {
             "targetUser"
     }, type = EntityGraph.EntityGraphType.LOAD)
-    List<FolderShareEntity> findAllByFolderFolderId(long folderId);
+    List<FolderShareEntity> findAllByFolderFolderId(Long folderId);
+
+    @EntityGraph(value = "FolderShare.getFolderShareAndUser", attributePaths = {
+            "targetUser"
+    }, type = EntityGraph.EntityGraphType.LOAD)
+    List<FolderShareEntity> findAllByFolderFolderIdAndTargetUser_UserIdNot(Long folderId, Long excludeId);
 }

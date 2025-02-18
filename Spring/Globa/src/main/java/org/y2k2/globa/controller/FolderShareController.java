@@ -7,11 +7,17 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.y2k2.globa.dto.common.auth.CustomUserDetails;
+import org.y2k2.globa.dto.request.foldershare.RequestInviteDto;
 import org.y2k2.globa.dto.response.foldershare.ResponseFolderShareUserDto;
+import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.type.Role;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
@@ -42,13 +48,13 @@ public class FolderShareController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.ROLE_BAD_REQUEST, ref = SwaggerErrorCode.ROLE_BAD_REQUEST_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_FOLDER_OWNER, ref = SwaggerErrorCode.MISMATCH_FOLDER_OWNER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
@@ -60,12 +66,12 @@ public class FolderShareController {
     )
     @GetMapping("/user")
     public ResponseEntity<?> getShareUsers(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable(value = "folderId") Long folderId,
-            @RequestParam(required = false, defaultValue = "1", value = "page") int page,
-            @RequestParam(required = false, defaultValue = "100", value = "count") int count) {
-        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-        ResponseFolderShareUserDto folderShareUserResponseDto = folderShareService.getShares(folderId, userId, page, count);
+            @RequestParam(value = "page", defaultValue = "1", required = false) int page,
+            @RequestParam(value = "count", defaultValue = "100", required = false) int count,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        ResponseFolderShareUserDto folderShareUserResponseDto = folderShareService.getShares(folderId, page, count, details.getUser());
         return ResponseEntity.ok().body(folderShareUserResponseDto);
     }
 
@@ -79,16 +85,13 @@ public class FolderShareController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ROLE, ref = SwaggerErrorCode.REQUIRED_ROLE_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.ROLE_BAD_REQUEST, ref = SwaggerErrorCode.ROLE_BAD_REQUEST_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.INVITE_BAD_REQUEST, ref = SwaggerErrorCode.INVITE_BAD_REQUEST_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.NOT_NULL_ROLE, ref = SwaggerErrorCode.NOT_NULL_ROLE_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
@@ -103,15 +106,12 @@ public class FolderShareController {
     )
     @PostMapping("/user/{userId}")
     public ResponseEntity<?> inviteShare(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
-            @RequestBody Map<String, String> body,
             @PathVariable(value = "folderId") Long folderId,
-            @PathVariable(value = "userId") Long targetId) {
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
-        String role = body.get("role");
-        checkRole(role);
-
-        folderShareService.inviteShare(folderId, userId, targetId, Role.valueOf(role.toUpperCase()));
+            @PathVariable(value = "userId") Long targetId,
+            @Valid @RequestBody RequestInviteDto dto,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        folderShareService.inviteShare(folderId, targetId, dto, details.getUser());
         return ResponseEntity.created(URI.create("/folder/" + folderId + "/share/user")).build();
     }
 
@@ -120,21 +120,17 @@ public class FolderShareController {
             description = "폴더에 사용자를 공유 초대를 변경합니다.",
             responses = {
                     @ApiResponse(
-                            responseCode = "200",
+                            responseCode = "204",
                             description = "공유 초대 변경 완료"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.REQUIRED_ROLE, ref = SwaggerErrorCode.REQUIRED_ROLE_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.ROLE_BAD_REQUEST, ref = SwaggerErrorCode.ROLE_BAD_REQUEST_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.INVITE_BAD_REQUEST, ref = SwaggerErrorCode.INVITE_BAD_REQUEST_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.NOT_NULL_ROLE, ref = SwaggerErrorCode.NOT_NULL_ROLE_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_FOLDER_OWNER, ref = SwaggerErrorCode.MISMATCH_FOLDER_OWNER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
@@ -148,15 +144,12 @@ public class FolderShareController {
     )
     @PatchMapping("/user/{userId}")
     public ResponseEntity<?> editShare(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
-            @RequestBody Map<String, String> body,
             @PathVariable(value = "folderId") Long folderId,
-            @PathVariable(value = "userId") Long targetId) {
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
-        String role = body.get("role");
-        checkRole(role);
-
-        folderShareService.editInviteShare(folderId, userId, targetId, Role.valueOf(role.toUpperCase()));
+            @PathVariable(value = "userId") Long targetId,
+            @Valid @RequestBody RequestInviteDto dto,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        folderShareService.editInviteShare(folderId, targetId, dto, details.getUser());
         return ResponseEntity.noContent().build();
     }
 
@@ -165,18 +158,17 @@ public class FolderShareController {
             description = "폴더에 사용자를 공유 초대를 취소합니다.",
             responses = {
                     @ApiResponse(
-                            responseCode = "200",
+                            responseCode = "204",
                             description = "공유 초대 취소 완료"
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.INVITE_BAD_REQUEST, ref = SwaggerErrorCode.INVITE_BAD_REQUEST_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_FOLDER_OWNER, ref = SwaggerErrorCode.MISMATCH_FOLDER_OWNER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
@@ -190,12 +182,11 @@ public class FolderShareController {
     )
     @DeleteMapping("/user/{userId}")
     public ResponseEntity<?> deleteShare(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable(value = "folderId") Long folderId,
-            @PathVariable(value = "userId") Long targetId) {
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
-        folderShareService.deleteInviteShare(folderId, userId, targetId);
-
+            @PathVariable(value = "userId") Long targetId,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        folderShareService.deleteInviteShare(folderId, targetId, details.getUser());
         return ResponseEntity.noContent().build();
     }
 
@@ -209,29 +200,30 @@ public class FolderShareController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.INVITE_ACCEPT_BAD_REQUEST, ref = SwaggerErrorCode.INVITE_ACCEPT_BAD_REQUEST_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_FOLDER_ID, ref = SwaggerErrorCode.MISMATCH_FOLDER_ID_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_MODIFY_INVITATION, ref = SwaggerErrorCode.NOT_DESERVE_MODIFY_INVITATION_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCEPT_INVITATION, ref = SwaggerErrorCode.NOT_DESERVE_ACCEPT_INVITATION_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_TARGET_USER, ref = SwaggerErrorCode.NOT_FOUND_TARGET_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_SHARE, ref = SwaggerErrorCode.NOT_FOUND_SHARE_VALUE),
                     })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
     @PostMapping("/{shareId}")
     public ResponseEntity<?> acceptShare(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable(value = "folderId") Long folderId,
-            @PathVariable(value = "shareId") Long shareId) {
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
-        folderShareService.acceptShare(folderId, shareId, userId);
+            @PathVariable(value = "shareId") Long shareId,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        folderShareService.acceptShare(folderId, shareId, details.getUser());
         return ResponseEntity.noContent().build();
     }
 
@@ -245,40 +237,29 @@ public class FolderShareController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.INVITE_ACCEPT_BAD_REQUEST, ref = SwaggerErrorCode.INVITE_ACCEPT_BAD_REQUEST_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_FOLDER_ID, ref = SwaggerErrorCode.MISMATCH_FOLDER_ID_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_MODIFY_INVITATION, ref = SwaggerErrorCode.NOT_DESERVE_MODIFY_INVITATION_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCEPT_INVITATION, ref = SwaggerErrorCode.NOT_DESERVE_ACCEPT_INVITATION_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_TARGET_USER, ref = SwaggerErrorCode.NOT_FOUND_TARGET_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
     @DeleteMapping("/{shareId}")
     public ResponseEntity<?> refuseShare(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable(value = "folderId") Long folderId,
-            @PathVariable(value = "shareId") Long shareId) {
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
-        folderShareService.refuseShare(folderId, shareId, userId);
+            @PathVariable(value = "shareId") Long shareId,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        folderShareService.refuseShare(folderId, shareId, details.getUser());
         return ResponseEntity.noContent().build();
     }
-
-
-    private void checkRole(String role) {
-        if (role == null) throw new CustomException(ErrorCode.NOT_NULL_ROLE);
-        if (role.isEmpty()) throw new CustomException(ErrorCode.REQUIRED_ROLE);
-        if (!role.toUpperCase().equals(Role.R.toString())
-                && !role.toUpperCase().equals(Role.W.toString())) {
-            throw new CustomException(ErrorCode.ROLE_BAD_REQUEST);
-        }
-    }
-
 }

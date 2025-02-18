@@ -30,10 +30,8 @@ public class FcmService {
     @Transactional
     public void sendTopicNotification(String accessToken, RequestFcmTopicDto dto) {
         Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-        UserEntity user = userRepository.findByUserId(userId);
-        if (user == null) {
-            throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        }
+        UserEntity user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
         if (user.getIsDeleted()) {
             throw new CustomException(ErrorCode.DELETED_USER);
         }

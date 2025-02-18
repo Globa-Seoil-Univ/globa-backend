@@ -29,8 +29,8 @@ public class InquiryService {
     private final UserRepository userRepository;
 
     public ResponseInquiryDto getInquiries(long userId, PaginationDto pagination) {
-        UserEntity user = userRepository.findByUserId(userId);
-        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        UserEntity user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
         if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         Pageable pageable = PageRequest.of(pagination.getPage() - 1, pagination.getCount());
@@ -54,8 +54,8 @@ public class InquiryService {
     }
 
     public ResponseInquiryDetailDto getInquiry(long userId, long inquiryId) {
-        UserEntity user = userRepository.findByUserId(userId);
-        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        UserEntity user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
         InquiryEntity inquiry = inquiryRepository.findByInquiryId(inquiryId);
         if (inquiry == null) throw new CustomException(ErrorCode.NOT_FOUND_INQUIRY);
@@ -75,8 +75,8 @@ public class InquiryService {
     }
 
     public long addInquiry(long userId, RequestInquiryDto dto) {
-        UserEntity user = userRepository.findByUserId(userId);
-        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        UserEntity user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
         InquiryEntity inquiry = InquiryEntity.create(user, dto.getTitle(), dto.getContent());
         InquiryEntity response = inquiryRepository.save(inquiry);

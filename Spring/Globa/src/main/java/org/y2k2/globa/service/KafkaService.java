@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.dto.response.kafka.ConsumerValidateDto;
+import org.y2k2.globa.exception.CustomException;
+import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.repository.*;
 import org.y2k2.globa.type.NotificationType;
 import org.y2k2.globa.dto.response.kafka.ResponseKafkaDto;
@@ -100,11 +102,11 @@ public class KafkaService {
     private ConsumerValidateDto validateRecord(long userId, long recordId) {
         boolean isValid = true;
 
-        UserEntity user = userRepository.findByUserId(userId);
-        if (user == null) {
-            log.warn("User not found and userId: {}, recordId: {}", userId, recordId);
-            return new ConsumerValidateDto(false, null, null);
-        }
+        UserEntity user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> {
+                    log.warn("User not found and userId: {}, recordId: {}", userId, recordId);
+                    return new CustomException(ErrorCode.NOT_FOUND_USER);
+                });
 
         RecordEntity record = recordRepository.findByRecordId(recordId);
         if (record == null) {

@@ -12,4 +12,14 @@ public enum Role {
     ;
 
     private final String roleName;
+
+    public static Role from(String roleName) {
+        for (Role role : values()) {
+            if (role.toString().equalsIgnoreCase(roleName)) {
+                return role;
+            }
+        }
+
+        return R;
+    }
 }

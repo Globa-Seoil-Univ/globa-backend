@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.dto.common.fcm.SendMessage;
 import org.y2k2.globa.dto.request.folder.RequestFolderPostDto;
+import org.y2k2.globa.dto.request.foldershare.RequestInviteDto;
 import org.y2k2.globa.dto.response.foldershare.ResponseFolderShareUserDto;
 import org.y2k2.globa.dto.request.notification.RequestNotificationWithFolderShareAddUserDto;
 import org.y2k2.globa.dto.request.notification.RequestNotificationWithInvitationDto;
@@ -32,6 +33,7 @@ import org.y2k2.globa.util.CustomTimestamp;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -48,18 +50,16 @@ public class FolderShareService {
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
 
-    public ResponseFolderShareUserDto getShares(Long folderId, Long userId, int page, int count) {
-        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));;
+    public ResponseFolderShareUserDto getShares(Long folderId, int page, int count, UserEntity user) {
+        FolderEntity folder = folderRepository.findFirstByFolderId(folderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));
 
-        UserEntity user = userRepository.findByUserId(userId);
-        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
-        if (!folderEntity.getUser().getUserId().equals(userId)) throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
+        if (!folder.getUser().getUserId().equals(user.getUserId())) {
+            throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
+        }
 
         Pageable pageable = PageRequest.of(page - 1, count);
-        Page<FolderShareEntity> folderShareEntityPage = folderShareRepository.findByFolderOrderByCreatedTimeAsc(pageable, folderEntity);
+        Page<FolderShareEntity> folderShareEntityPage = folderShareRepository.findByFolderOrderByCreatedTimeAsc(folder, pageable);
 
         List<FolderShareEntity> shareEntities = folderShareEntityPage.getContent();
         Long total = folderShareEntityPage.getTotalElements();
@@ -71,34 +71,33 @@ public class FolderShareService {
     }
 
     @Transactional
-    public void inviteShare(Long folderId, Long ownerId, Long targetId, Role role) {
-        UserEntity ownerEntity = userRepository.findByUserId(ownerId);
-        UserEntity targetEntity = userRepository.findByUserId(targetId);
+    public void inviteShare(Long folderId, Long targetId, RequestInviteDto dto, UserEntity owner) {
+        UserEntity target = userRepository.findByUserId(targetId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_TARGET_USER));
 
-        if (ownerEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        FolderEntity folder = folderRepository.findFirstByFolderId(folderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));
+        if (!folder.getUser().getUserId().equals(owner.getUserId())) {
+            throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
+        }
 
-        if (ownerId.equals(targetId)) throw new CustomException(ErrorCode.INVITE_BAD_REQUEST);
-        if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
+        Boolean isAlready = folderShareRepository.existsByFolderAndTargetUser(folder, target);
+        if (isAlready) {
+            throw new CustomException(ErrorCode.SHARE_USER_DUPLICATED);
+        }
 
-        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));;
-        if (!folderEntity.getUser().getUserId().equals(ownerId)) throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
-
-        FolderShareEntity folderShareEntity = folderShareRepository.findByFolderAndTargetUser(folderEntity, targetEntity);
-        if (folderShareEntity != null) throw new CustomException(ErrorCode.SHARE_USER_DUPLICATED);
-
-        FolderRoleEntity folderRoleEntity = convertRole(role);
-        FolderShareEntity entity = FolderShareEntity.create(folderEntity, ownerEntity, targetEntity, folderRoleEntity);
-        FolderShareEntity saveFolderShare = folderShareRepository.save(entity);
+        FolderRoleEntity folderRoleEntity = convertRole(Role.from(dto.role()));
+        FolderShareEntity folderShare = FolderShareMapper.INSTANCE.toEntity(folder, InvitationStatus.PENDING, folderRoleEntity, owner, target);
+        FolderShareEntity saveFolderShare = folderShareRepository.save(folderShare);
 
         RequestNotificationWithInvitationDto notificationInfo = RequestNotificationWithInvitationDto.builder()
-                .sender(ownerEntity)
-                .receiver(targetEntity)
-                .folder(folderEntity)
+                .sender(owner)
+                .receiver(target)
+                .folder(folder)
                 .folderShare(saveFolderShare)
                 .notificationType(NotificationType.SHARE_FOLDER_INVITE)
                 .title("공유 초대를 보냈습니다!")
-                .body(ownerEntity.getName() + "님이 " + folderEntity.getTitle() + " 폴더를 공유하고 싶어합니다.")
+                .body(owner.getName() + "님이 " + folder.getTitle() + " 폴더를 공유하고 싶어합니다.")
                 .build();
 
         notificationService.saveNotification(notificationInfo);
@@ -121,30 +120,10 @@ public class FolderShareService {
             throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
         }
 
-        List<FolderShareEntity> alreadyTargets = folderShareRepository.findAllByFolderAndTargetUser_CodeIn(
-                folder,
-                targetWithoutMe.stream().map(RequestFolderPostDto.ShareTarget::code).toList()
-        );
-
-        if (!alreadyTargets.isEmpty()) {
-            for (FolderShareEntity alreadyTarget : alreadyTargets) {
-                alreadyTarget.setCreatedTime(new CustomTimestamp().getTimestamp());
-            }
-
-            folderShareRepository.saveAll(alreadyTargets);
-            // TODO : 이미 초대된 사용자에게 다시 초대 보낼 때 알림 보내기
-        }
-
-        List<UserEntity> newTargets = targets.stream()
-                .filter(shareTarget -> alreadyTargets.stream().noneMatch(
-                        alreadyTarget -> alreadyTarget.getTargetUser().getCode().equals(shareTarget.getCode())
-                ))
-                .toList();
-
         FolderRoleEntity readRole = convertRole(Role.R);
         FolderRoleEntity writeRole = convertRole(Role.W);
 
-        List<FolderShareEntity> newFolderShares = newTargets.stream().map(
+        List<FolderShareEntity> newFolderShares = targets.stream().map(
                 target -> {
                     String role = targetWithoutMe.stream()
                             .filter(shareTarget -> shareTarget.code().equals(target.getCode()))
@@ -157,7 +136,6 @@ public class FolderShareService {
                     }
 
                     FolderRoleEntity folderRole = role.equalsIgnoreCase(Role.W.toString()) ? writeRole : readRole;
-
                     return FolderShareEntity.create(folder, sender, target, folderRole);
                 }
         ).toList();
@@ -180,67 +158,75 @@ public class FolderShareService {
     }
 
     @Transactional
-    public void editInviteShare(Long folderId, Long ownerId, Long targetId, Role role) {
-        UserEntity targetEntity = userRepository.findByUserId(targetId);
-
-        UserEntity user = userRepository.findByUserId(ownerId);
-        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-        if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
+    public void editInviteShare(Long folderId, Long targetId, RequestInviteDto dto, UserEntity owner) {
+        UserEntity targetEntity = userRepository.findByUserId(targetId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_TARGET_USER));
 
         FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));
 
-        FolderShareEntity folderShareEntity = folderShareRepository.findByFolderAndTargetUser(folderEntity, targetEntity);
-        if (folderShareEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_SHARE);
+        FolderShareEntity folderShareEntity = folderShareRepository.findByFolderAndTargetUser(folderEntity, targetEntity)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SHARE));
 
-        checkValidation(folderShareEntity.getFolder(), ownerId, targetId, targetEntity);
+        checkValidation(folderShareEntity.getFolder(), owner.getUserId(), targetId);
 
-        FolderRoleEntity folderRoleEntity = convertRole(role);
+        FolderRoleEntity folderRoleEntity = convertRole(Role.from(dto.role()));
         folderShareEntity.setRole(folderRoleEntity);
         folderShareRepository.save(folderShareEntity);
     }
 
     @Transactional
-    public void deleteInviteShare(Long folderId, Long ownerId, Long targetId) {
-        UserEntity user = userRepository.findByUserId(ownerId);
-        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
-        UserEntity targetEntity = userRepository.findByUserId(targetId);
-        if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
+    public void deleteInviteShare(Long folderId, Long targetId, UserEntity owner) {
+        UserEntity targetEntity = userRepository.findByUserId(targetId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_TARGET_USER));
 
         FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));;
 
-        FolderShareEntity folderShareEntity = folderShareRepository.findByFolderAndTargetUser(folderEntity, targetEntity);
-        if (folderShareEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_SHARE);
+        FolderShareEntity folderShareEntity = folderShareRepository.findByFolderAndTargetUser(folderEntity, targetEntity)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SHARE));
 
-        checkValidation(folderShareEntity.getFolder(), ownerId, targetId, targetEntity);
-
+        checkValidation(folderShareEntity.getFolder(), owner.getUserId(), targetId);
         folderShareRepository.delete(folderShareEntity);
     }
 
     @Transactional
-    public void acceptShare(Long folderId, Long shareId, Long targetId) {
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByShareId(shareId);
-        checkValidation(folderShareEntity, folderId, targetId);
+    public void acceptShare(Long folderId, Long shareId, UserEntity receiver) {
+        FolderShareEntity folderShare = folderShareRepository.findFirstByShareId(shareId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SHARE));
+        checkValidation(folderShare, folderId, receiver.getUserId());
 
-        folderShareEntity.setInvitationStatus(InvitationStatus.ACCEPT);
-        folderShareRepository.save(folderShareEntity);
+        folderShare.setInvitationStatus(InvitationStatus.ACCEPT);
+        folderShareRepository.save(folderShare);
 
-        NotificationEntity invitationNotification = notificationRepository.findByFolderFolderIdAndFolderShareShareIdAndReceiverUserId(folderId, shareId, targetId);
-        if (invitationNotification != null) {
-            notificationRepository.delete(invitationNotification);
-        }
+        notificationRepository.findByFolderFolderIdAndFolderShareShareIdAndReceiver(
+                folderId,
+                shareId,
+                receiver
+        ).ifPresent(notificationRepository::delete);
 
         RequestNotificationWithFolderShareAddUserDto notification = RequestNotificationWithFolderShareAddUserDto.builder()
-                .receiver(folderShareEntity.getTargetUser())
-                .folder(folderShareEntity.getFolder())
-                .folderShare(folderShareEntity)
+                .receiver(folderShare.getTargetUser())
+                .folder(folderShare.getFolder())
+                .folderShare(folderShare)
                 .notificationType(NotificationType.SHARE_FOLDER_ADD_USER)
                 .build();
         notificationService.saveNotification(notification);
 
-        List<FolderShareEntity> targetFolderShares = folderShareRepository.findAllByFolderFolderId(folderId);
+        sendNotification(receiver.getName(), folderShare.getFolder().getTitle(), folderId, receiver.getUserId());
+    }
+    @Transactional
+    public void refuseShare(Long folderId, Long shareId, UserEntity user) {
+        FolderShareEntity folderShare = folderShareRepository.findFirstByShareId(shareId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SHARE));
+        checkValidation(folderShare, folderId, user.getUserId());
+
+        folderShareRepository.delete(folderShare);
+    }
+
+    @Async
+    public void sendNotification(String username, String folderTitle, Long folderId, Long excludeId) {
+        List<FolderShareEntity> targetFolderShares = folderShareRepository.findAllByFolderFolderIdAndTargetUser_UserIdNot(folderId, excludeId);
         List<RequestNotificationWithFolderShareAddUserDto> notificationInfos = targetFolderShares.stream()
                 .map(targetFolderShare -> RequestNotificationWithFolderShareAddUserDto.builder()
                         .receiver(targetFolderShare.getTargetUser())
@@ -248,35 +234,22 @@ public class FolderShareService {
                         .folderShare(targetFolderShare)
                         .notificationType(NotificationType.SHARE_FOLDER_ADD_USER)
                         .title("새로운 사용자가 추가되었습니다!")
-                        .body(folderShareEntity.getTargetUser().getName() + "님이 " + folderShareEntity.getFolder().getTitle() + " 폴더 공유를 수락했습니다.")
+                        .body(username + "님이 " + folderTitle + " 폴더 공유를 수락했습니다.")
                         .build()
                 ).collect(Collectors.toList());
 
         publisher.publishEvent(notificationInfos);
     }
-    @Transactional
-    public void refuseShare(Long folderId, Long shareId, Long targetId) {
-        FolderShareEntity folderShareEntity = folderShareRepository.findFirstByShareId(shareId);
-        checkValidation(folderShareEntity, folderId, targetId);
-        folderShareRepository.delete(folderShareEntity);
+
+    private void checkValidation(FolderShareEntity folderShare, Long folderId, Long targetId) {
+        if (!folderShare.getTargetUser().getUserId().equals(targetId)) throw new CustomException(ErrorCode.NOT_DESERVE_ACCEPT_INVITATION);
+        if (!folderShare.getFolder().getFolderId().equals(folderId)) throw new CustomException(ErrorCode.MISMATCH_FOLDER_ID);
+        if (folderShare.getInvitationStatus().equals(InvitationStatus.ACCEPT)) throw new CustomException(ErrorCode.INVITE_ACCEPT_BAD_REQUEST);
     }
 
-    private void checkValidation(FolderShareEntity folderShareEntity, Long folderId, Long targetId) {
-        if (folderShareEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_SHARE);
-        if (!folderShareEntity.getFolder().getFolderId().equals(folderId)) throw new CustomException(ErrorCode.MISMATCH_FOLDER_ID);
-        if (folderShareEntity.getInvitationStatus().equals(String.valueOf(InvitationStatus.ACCEPT))) throw new CustomException(ErrorCode.INVITE_ACCEPT_BAD_REQUEST);
-
-        UserEntity targetEntity = folderShareEntity.getTargetUser();
-        if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
-        if (!targetEntity.getUserId().equals(targetId)) throw new CustomException(ErrorCode.NOT_DESERVE_MODIFY_INVITATION);
-        if (targetEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-    }
-
-    private void checkValidation(FolderEntity folderEntity, Long ownerId, Long targetId, UserEntity targetEntity) {
+    private void checkValidation(FolderEntity folderEntity, Long ownerId, Long targetId) {
         if (ownerId.equals(targetId)) throw new CustomException(ErrorCode.INVITE_BAD_REQUEST);
-        if (folderEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_FOLDER);
         if (!folderEntity.getUser().getUserId().equals(ownerId)) throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
-        if (targetEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
     }
 
     private FolderRoleEntity convertRole(Role role) {

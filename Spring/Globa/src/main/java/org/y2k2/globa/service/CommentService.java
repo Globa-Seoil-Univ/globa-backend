@@ -220,8 +220,8 @@ public class CommentService {
     }
 
     private UserEntity validateUser(long userId) {
-        UserEntity user = userRepository.findByUserId(userId);
-        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        UserEntity user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
         if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
         return user;
@@ -237,18 +237,20 @@ public class CommentService {
     }
 
     private FolderShareEntity validateFolderShare(SectionEntity section, UserEntity user) {
-        FolderShareEntity folderShare = folderShareRepository.findByFolderAndTargetUser(section.getRecord().getFolder(), user);
+        FolderShareEntity folderShare = folderShareRepository.findByFolderAndTargetUser(section.getRecord().getFolder(), user)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_DESERVE_POST_COMMENT));
 
-        if (folderShare == null || folderShare.getInvitationStatus().equals(String.valueOf(InvitationStatus.PENDING)))
+        if (folderShare.getInvitationStatus().equals(InvitationStatus.PENDING))
             throw new CustomException(ErrorCode.NOT_DESERVE_POST_COMMENT);
 
         return folderShare;
     }
 
     private FolderShareEntity validateFolderShareWithRole(SectionEntity section, UserEntity user) {
-        FolderShareEntity folderShare = folderShareRepository.findByFolderAndTargetUser(section.getRecord().getFolder(), user);
+        FolderShareEntity folderShare = folderShareRepository.findByFolderAndTargetUser(section.getRecord().getFolder(), user)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_DESERVE_POST_COMMENT));
 
-        if (folderShare == null || folderShare.getInvitationStatus().equals(String.valueOf(InvitationStatus.PENDING)) || folderShare.getRole().getRoleId().equals("3"))
+        if (folderShare.getInvitationStatus().equals(InvitationStatus.PENDING) || folderShare.getRole().getRoleId().equals("3"))
             throw new CustomException(ErrorCode.NOT_DESERVE_POST_COMMENT);
 
         return folderShare;

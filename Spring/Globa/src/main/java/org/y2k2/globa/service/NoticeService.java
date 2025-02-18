@@ -59,10 +59,8 @@ public class NoticeService {
 
     @Transactional
     public Long addNotice(Long userId, RequestNoticeAddDto dto) {
-        UserEntity user = userRepository.findByUserId(userId);
-        if (user == null) {
-            throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        }
+        UserEntity user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
         if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
