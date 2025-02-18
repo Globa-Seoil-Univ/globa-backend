@@ -1,10 +1,6 @@
 package org.y2k2.globa.service;
 
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.Bucket;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,15 +11,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.Projection.KeywordProjection;
 import org.y2k2.globa.Projection.QuizGradeProjection;
 import org.y2k2.globa.Projection.RecordSearchProjection;
-import org.y2k2.globa.dto.request.quiz.RequestQuizDto;
+import org.y2k2.globa.annotation.FileCleanup;
+import org.y2k2.globa.dto.request.record.RequestRecordMoveDto;
 import org.y2k2.globa.dto.request.record.RequestRecordNameDto;
 import org.y2k2.globa.dto.response.analysis.ResponseAnalysisDto;
 import org.y2k2.globa.dto.response.analysis.ResponseRecordAnalysisDto;
 import org.y2k2.globa.dto.response.folder.ResponseDetailFolderDto;
 import org.y2k2.globa.dto.response.highlights.ResponseDetailHighlightDto;
-import org.y2k2.globa.dto.request.kafka.RequestKafkaDto;
 import org.y2k2.globa.dto.response.keyword.ResponseKeywordDto;
-import org.y2k2.globa.dto.common.quiz.QuizDto;
 import org.y2k2.globa.dto.response.quiz.ResponseQuizGradeDto;
 import org.y2k2.globa.dto.response.record.ResponseRecordDetailDto;
 import org.y2k2.globa.dto.response.record.ResponseRecordSearchDto;
@@ -37,23 +32,21 @@ import org.y2k2.globa.dto.common.user.UserIntroDto;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
+import org.y2k2.globa.exception.FileUploadException;
 import org.y2k2.globa.mapper.*;
 import org.y2k2.globa.repository.*;
 import org.y2k2.globa.type.InvitationStatus;
-import org.y2k2.globa.util.jwt.JWTProvider;
-import org.y2k2.globa.util.KafkaProducer;
+import org.y2k2.globa.type.Role;
+import org.y2k2.globa.util.file.FileStore;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class RecordService {
-    private final JWTProvider jwtTokenProvider;
-    private final KafkaProducer kafkaProducer;
+    private final FileStore fileStore;
 
     public final UserRepository userRepository;;
     public final StudyRepository studyRepository;
@@ -69,16 +62,6 @@ public class RecordService {
     public final QuizRepository quizRepository;
     public final QuizAttemptRepository quizAttemptRepository;
     public final KeywordRepository keywordRepository;
-
-    @Autowired
-    private Bucket bucket;
-
-    @Value("${firebase.bucket-path}")
-    private String firebaseBucketPath;
-    @Value("${kafka.topic.audio}")
-    private String topic;
-    @Value("${kafka.topic.audio.key}")
-    private String topicKey;
 
     public ResponseRecordsByFolderDto getRecords(Long folderId, int page, int count, UserEntity user) {
         FolderEntity folder = folderRepository.findFirstByFolderId(folderId)
@@ -263,34 +246,34 @@ public class RecordService {
 
     @Transactional
     public HttpStatus postRecord(String accessToken, Long folderId, String title, String path, String size){
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
-        UserEntity userEntity = userRepository.findByUserId(userId);
-
-        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if(userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
-        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));;
-
-        boolean hasAccess = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity, folderEntity.getFolderId(), InvitationStatus.ACCEPT);
-        if (!hasAccess) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
-
-        RecordEntity recordEntity = new RecordEntity();
-        recordEntity.setCreatedTime(LocalDateTime.now());
-        recordEntity.setSize(size);
-        recordEntity.setPath(path);
-        recordEntity.setTitle(title);
-        recordEntity.setUser(userEntity);
-        recordEntity.setFolder(folderEntity);
-
-        Blob blob = bucket.get(path);
-        if( blob == null )
-            throw new CustomException(ErrorCode.NOT_FOUND_RECORD_FIREBASE);
-
-
-        recordRepository.save(recordEntity);
-
-        kafkaProducer.send(topic, topicKey, new RequestKafkaDto(recordEntity.getRecordId(), userEntity.getUserId()));
+//        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
+//        UserEntity userEntity = userRepository.findByUserId(userId);
+//
+//        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
+//        if(userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+//
+//        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId)
+//                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));;
+//
+//        boolean hasAccess = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity, folderEntity.getFolderId(), InvitationStatus.ACCEPT);
+//        if (!hasAccess) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
+//
+//        RecordEntity recordEntity = new RecordEntity();
+//        recordEntity.setCreatedTime(LocalDateTime.now());
+//        recordEntity.setSize(size);
+//        recordEntity.setPath(path);
+//        recordEntity.setTitle(title);
+//        recordEntity.setUser(userEntity);
+//        recordEntity.setFolder(folderEntity);
+//
+//        Blob blob = bucket.get(path);
+//        if( blob == null )
+//            throw new CustomException(ErrorCode.NOT_FOUND_RECORD_FIREBASE);
+//
+//
+//        recordRepository.save(recordEntity);
+//
+//        kafkaProducer.send(topic, topicKey, new RequestKafkaDto(recordEntity.getRecordId(), userEntity.getUserId()));
 
         return HttpStatus.CREATED;
     }
@@ -312,112 +295,85 @@ public class RecordService {
     }
 
     @Transactional
-    public HttpStatus patchRecordMove(String accessToken, Long recordId, Long folderId, Long targetId){
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-        UserEntity userEntity = userRepository.findOneByUserId(userId);
-        RecordEntity recordEntity = recordRepository.findFirstByRecordId(recordId)
+    @FileCleanup
+    public void moveRecord(Long folderId, Long recordId, RequestRecordMoveDto dto, UserEntity user) {
+        RecordEntity record = recordRepository.findFirstByRecordId(recordId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
-
-        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
-        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ORIGIN_FOLDER));
-        FolderEntity targetEntity = folderRepository.findFirstByFolderId(targetId)
+        FolderEntity target = folderRepository.findFirstByFolderId(dto.targetId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_TARGET_FOLDER));
 
-        boolean hasAccessFromFolder = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity, folderId, InvitationStatus.ACCEPT);
+        boolean hasAccessFromFolder = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(user, folderId, InvitationStatus.ACCEPT);
         if (!hasAccessFromFolder) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
-        boolean hasAccessToFolder = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity, targetId, InvitationStatus.ACCEPT);
+        boolean hasAccessToFolder = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(user, dto.targetId(), InvitationStatus.ACCEPT);
         if (!hasAccessToFolder) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
-        if (!Objects.equals(userId, recordEntity.getUser().getUserId())){
+        if (!record.getUser().getUserId().equals(user.getUserId())) {
             throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
+        } else if (!record.getFolder().getFolderId().equals(folderId)) {
+            throw new CustomException(ErrorCode.MISMATCH_RECORD_FOLDER);
         }
 
-        // Update local database
-        String oldPath = recordEntity.getPath();
-        String paramPath = "folders/" + folderId + oldPath.substring(oldPath.lastIndexOf("/"));
-        String newPath = "folders/" + targetId + oldPath.substring(oldPath.lastIndexOf("/"));
-        recordEntity.setFolder(targetEntity);
-        recordEntity.setPath(newPath);
-        recordRepository.save(recordEntity);
+        String oldPath = record.getPath();
+        String newPath = "folders/" + target.getFolderId() + oldPath.substring(oldPath.lastIndexOf("/"));
+        fileStore.moveFile(oldPath, newPath);
 
-        if(!oldPath.equals(paramPath))
-            throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
-
-        // Now move the file in Firebase
-        Blob blob = bucket.get(oldPath);
-        if (blob != null) {
-            try {
-                blob.copyTo(BlobId.of(firebaseBucketPath, newPath));
-                blob.delete();
-            } catch (Exception e) {
-                // Rollback local DB changes if Firebase operation fails
-                recordEntity.setFolder(folderEntity);
-                recordEntity.setPath(oldPath);
-                recordRepository.save(recordEntity);
-                throw new CustomException(ErrorCode.FAILED_FIREBASE);
-            }
-        } else {
-            throw new CustomException(ErrorCode.NOT_FOUND_RECORD_FIREBASE);
+        try {
+            record.setFolder(target);
+            record.setPath(newPath);
+            recordRepository.save(record);
+        } catch (Exception e) {
+            throw new FileUploadException(newPath);
         }
 
-        return HttpStatus.OK;
+        fileStore.deleteFile(oldPath);
     }
 
     @Transactional
-    public void patchStudyTime(String accessToken, Long recordId, Long folderId, RequestStudyDto dto) {
-        Long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
-        UserEntity user = userRepository.findByUserId(userId);
+    public void modifyStudyTime(Long folderId, Long recordId, RequestStudyDto dto, UserEntity user) {
         RecordEntity record = recordRepository.findFirstByRecordId(recordId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
-        Boolean existsByFolderShare = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(user, folderId, InvitationStatus.ACCEPT);
-
-        if (user == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
         if (!record.getFolder().getFolderId().equals(folderId)) throw new CustomException(ErrorCode.MISMATCH_RECORD_FOLDER);
+
+        Boolean existsByFolderShare = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(user, folderId, InvitationStatus.ACCEPT);
         if (!existsByFolderShare) throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
 
-        StudyEntity study = studyRepository.findByCreatedTime(userId, recordId)
-                .orElse(StudyEntity.builder()
-                        .user(user)
-                        .record(record)
-                        .build());
+        StudyEntity study = studyRepository.findByCreatedTime(user, record)
+                .orElse(
+                        StudyEntity.builder()
+                            .user(user)
+                            .record(record)
+                            .build()
+                );
 
         if (study.getStudyTime() != null) {
-            study.setStudyTime(study.getStudyTime() + dto.getStudyTime());
+            study.setStudyTime(study.getStudyTime() + dto.studyTime());
         } else {
-            study.setStudyTime(dto.getStudyTime());
+            study.setStudyTime(dto.studyTime());
         }
 
         studyRepository.save(study);
     }
 
     @Transactional
-    public HttpStatus deleteRecord(String accessToken, Long recordId, Long folderId){
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-        UserEntity userEntity = userRepository.findOneByUserId(userId);
-        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        if (userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
-        RecordEntity recordEntity = recordRepository.findFirstByRecordId(recordId)
+    public void deleteRecord(Long folderId, Long recordId, UserEntity user){
+        RecordEntity record = recordRepository.findFirstByRecordId(recordId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
 
-        FolderShareEntity folderShareEntities = folderShareRepository.findByFolderAndTargetUser(recordEntity.getFolder(), userEntity);
-        if (folderShareEntities == null) { throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER); }
-        if (!folderShareEntities.getInvitationStatus().equals(InvitationStatus.ACCEPT.toString())) { throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER); }
-
-        if(!Objects.equals(folderId, recordEntity.getFolder().getFolderId())) { throw new CustomException(ErrorCode.MISMATCH_RECORD_FOLDER); }
-
-        Blob blob = bucket.get(recordEntity.getPath());
-        if( blob != null ) {
-            blob.delete();
+        boolean hasAccess = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatusAndRole_RoleName(
+                user,
+                folderId,
+                InvitationStatus.ACCEPT,
+                Role.O.getRoleName()
+        );
+        if (!hasAccess) {
+            throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
+        }
+        if(!record.getFolder().getFolderId().equals(folderId)) {
+            throw new CustomException(ErrorCode.MISMATCH_RECORD_FOLDER);
         }
 
-        recordRepository.delete(recordEntity);
-
-        return HttpStatus.OK;
+        recordRepository.delete(record);
+        fileStore.deleteFile(record.getPath());
     }
 }

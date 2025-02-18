@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.y2k2.globa.Projection.StudyTimeProjection;
+import org.y2k2.globa.entity.RecordEntity;
 import org.y2k2.globa.entity.StudyEntity;
 import org.y2k2.globa.entity.UserEntity;
 
@@ -13,11 +14,11 @@ import java.util.Optional;
 
 public interface StudyRepository extends JpaRepository<StudyEntity, Long> {
     @Query(
-            value = "SELECT * FROM study " +
-                    "WHERE DATE(created_time) = DATE(NOW()) AND user_id = :userId AND record_id = :recordId",
-            nativeQuery = true
+            value = "SELECT s FROM StudyEntity s " +
+                    "WHERE s.user = :user AND s.record = :record " +
+                        "AND DATE(s.createdTime) = DATE(NOW())"
     )
-    Optional<StudyEntity> findByCreatedTime(@Param("userId") Long userId, @Param("recordId") Long recordId);
+    Optional<StudyEntity> findByCreatedTime(UserEntity user, RecordEntity record);
     List<StudyEntity> findAllByUserAndRecordRecordId(UserEntity user, Long recordId);
 
     @Query(value = "SELECT " +

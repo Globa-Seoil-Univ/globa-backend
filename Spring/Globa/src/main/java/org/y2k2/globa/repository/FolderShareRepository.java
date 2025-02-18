@@ -8,8 +8,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.y2k2.globa.entity.FolderEntity;
 import org.y2k2.globa.entity.FolderShareEntity;
+import org.y2k2.globa.entity.RoleEntity;
 import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.type.InvitationStatus;
+import org.y2k2.globa.type.Role;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +19,12 @@ import java.util.Optional;
 public interface FolderShareRepository extends JpaRepository<FolderShareEntity, Long> {
     Page<FolderShareEntity> findByFolderOrderByCreatedTimeAsc(Pageable pageable, FolderEntity folder);
     Boolean existsByTargetUserAndFolderFolderIdAndInvitationStatus(UserEntity user, Long folderId, InvitationStatus status);
+    Boolean existsByTargetUserAndFolderFolderIdAndInvitationStatusAndRole_RoleName(
+            UserEntity user,
+            Long folderId,
+            InvitationStatus status,
+            String roleName
+    );
     FolderShareEntity findFirstByShareId(Long folderId);
 
     @EntityGraph(value = "FolderShare.getFolderShareAndFolder", attributePaths = {
@@ -41,11 +49,11 @@ public interface FolderShareRepository extends JpaRepository<FolderShareEntity, 
             InvitationStatus status,
             Pageable pageable
     );
-
-    List<FolderShareEntity> findFolderShareEntitiesByTargetUserAndInvitationStatus(UserEntity targetUser, InvitationStatus invitationStatus);
   
     FolderShareEntity findByFolderAndTargetUser(FolderEntity folder, UserEntity user);
+
     List<FolderShareEntity> findAllByFolderAndTargetUser_CodeIn(FolderEntity folder, List<String> codes);
+
     @EntityGraph(value = "FolderShare.getFolderShareAndUser", attributePaths = {
             "targetUser"
     }, type = EntityGraph.EntityGraphType.LOAD)

@@ -35,6 +35,13 @@ public class FileStore {
         return originalFilename.substring(pos + 1);
     }
 
+    /**
+     * File을 Firebase Storage에 저장합니다.
+     *
+     * @param directoryPath 저장할 경로
+     * @param file 저장할 파일
+     * @return {@link FileDto} 저장된 파일 정보
+     */
     public FileDto storeFile(String directoryPath, MultipartFile file) {
         log.info("store file: [path = {}, name = {}]", directoryPath, file.getOriginalFilename());
 
@@ -79,6 +86,32 @@ public class FileStore {
                 .build();
     }
 
+    /**
+     * 기존 File을 새로운 경로에 저장합니다. <br />
+     * 단, 기존 파일은 삭제되지 않습니다.
+     *
+     * @param oldPath 저장된 파일 경로
+     * @param newPath 저장할 파일 경로
+     */
+    public void moveFile(String oldPath, String newPath) {
+        log.info("move file: [oldPath = {}, newPath = {}]", oldPath, newPath);
+
+        Blob oldFile = bucket.get(oldPath);
+
+        if (oldFile == null) {
+            log.error("Failed to move file because file not found. [oldPath = {}, newPath = {}]", oldPath, newPath);
+            throw new CustomException(ErrorCode.NOT_FOUND_RECORD_FIREBASE);
+        }
+
+        oldFile.copyTo(BlobId.of(bucket.getName(), newPath));
+    }
+
+    /**
+     * File을 삭제합니다. <br />
+     * File이 존재하지 않거나, 삭제하지 못했어도 에러를 발생시키지 않습니다.
+     *
+     * @param storePath 삭제할 파일 경로
+     */
     public void deleteFile(String storePath) {
         log.info("delete file: [name = {}]", storePath);
 
@@ -96,6 +129,12 @@ public class FileStore {
         }
     }
 
+    /**
+     * File들을 삭제합니다. <br />
+     * File이 존재하지 않거나, 삭제하지 못했어도 에러를 발생시키지 않습니다.
+     *
+     * @param storePaths 삭제할 파일 경로들
+     */
     public void deleteFiles(List<String> storePaths) {
         if (storePaths.isEmpty()) {
             return;
@@ -103,10 +142,14 @@ public class FileStore {
 
         log.info("delete files: [names = {}]", storePaths);
 
-        List<BlobId> blobIds = storePaths.stream()
-                .map(filePath -> BlobId.of(bucket.getName(), filePath))
-                .toList();
+        try {
+            List<BlobId> blobIds = storePaths.stream()
+                    .map(filePath -> BlobId.of(bucket.getName(), filePath))
+                    .toList();
 
-        storage.delete(blobIds);
+            storage.delete(blobIds);
+        } catch (Exception e) {
+            log.error("Failed to delete files because can not delete files. [path = {}, reason = {}]", storePaths, e.getMessage());
+        }
     }
 }
