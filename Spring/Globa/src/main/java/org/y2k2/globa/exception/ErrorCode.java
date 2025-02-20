@@ -27,6 +27,7 @@ public enum ErrorCode {
     REQUIRED_NOTIFICATION_ID(HttpStatus.BAD_REQUEST, "인자로 Notification Id가 필요합니다. ", 40054),
 
     NOT_PARENT_COMMENT(HttpStatus.BAD_REQUEST, "요청된 댓글에 부모 댓글이 존재합니다. ", 40060),
+    NOT_INCLUDE_HIGHLIGHT_COMMENT(HttpStatus.BAD_REQUEST, "해당 하이라이트 댓글이 아닙니다.", 40061),
 
     REQUIRED_IMAGE(HttpStatus.BAD_REQUEST, "인자로 Image가 필요합니다. ", 40070),
 

@@ -145,10 +145,10 @@ public class KafkaService {
 
         // 유효성 검사 실패하면 퀴즈, 키워드, 분석 데이터 등 삭제
         if (!isValid) {
-            quizRepository.deleteAll(quiz);
-            analysisRepository.deleteAll(analysis);
-            sectionRepository.deleteAll(sections);
-            keywordRepository.deleteAll(keywords);
+            quizRepository.deleteAllInBatch(quiz);
+            analysisRepository.deleteAllInBatch(analysis);
+            sectionRepository.deleteAllInBatch(sections);
+            keywordRepository.deleteAllInBatch(keywords);
             if (record != null) {
                 deleteRecordWithFirebase(record.getPath());
                 recordRepository.delete(record);

@@ -15,7 +15,7 @@ public interface CommentMapper {
     @Mapping(source = "entity.user.profilePath", target = "user.profile")
     @Mapping(source = "entity.user.name", target = "user.name")
     @Mapping(source = "entity.hasReply", target = "hasReply")
-    @Mapping(source = "entity.deleted", target = "deleted")
+    @Mapping(source = "entity.isDeleted", target = "deleted")
     @Mapping(source = "entity.createdTime", target = "createdTime", qualifiedBy = { CustomTimestampTranslator.class, MapCreatedTime.class })
     CommentDto toResponseCommentDto(CommentEntity entity);
 
@@ -23,7 +23,7 @@ public interface CommentMapper {
     @Mapping(source = "entity.content", target = "content")
     @Mapping(source = "entity.user.profilePath", target = "user.profile")
     @Mapping(source = "entity.user.name", target = "user.name")
-    @Mapping(source = "entity.deleted", target = "deleted")
+    @Mapping(source = "entity.isDeleted", target = "deleted")
     @Mapping(source = "entity.createdTime", target = "createdTime", qualifiedBy = { CustomTimestampTranslator.class, MapCreatedTime.class })
     ReplyDto toResponseReplyDto(CommentEntity entity);
 

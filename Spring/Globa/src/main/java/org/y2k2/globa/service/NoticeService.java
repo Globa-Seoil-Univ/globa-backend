@@ -106,7 +106,7 @@ public class NoticeService {
                 );
             }
 
-            dummyImageRepository.deleteAll(dummyImageEntities);
+            dummyImageRepository.deleteAllInBatch(dummyImageEntities);
             noticeImageRepository.saveAll(noticeImageEntities);
 
             NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithNotice(

@@ -39,8 +39,8 @@ public class CommentEntity {
     @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "deleted", columnDefinition = "DEFAULT 0")
-    private Boolean deleted;
+    @Column(name = "is_deleted", nullable = false, columnDefinition = "DEFAULT 0")
+    private Boolean isDeleted;
 
     @CreationTimestamp
     @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
@@ -58,9 +58,11 @@ public class CommentEntity {
         entity.setUser(writer);
         entity.setHighlight(highlight);
         entity.setContent(content);
+        entity.setIsDeleted(false);
 
         return entity;
     }
+
 
     public static CommentEntity createReply(UserEntity writer, HighlightEntity highlight, CommentEntity parent, String content) {
         CommentEntity entity = new CommentEntity();
@@ -69,6 +71,7 @@ public class CommentEntity {
         entity.setHighlight(highlight);
         entity.setParent(parent);
         entity.setContent(content);
+        entity.setIsDeleted(false);
 
         return entity;
     }

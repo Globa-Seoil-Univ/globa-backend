@@ -2,33 +2,29 @@ package org.y2k2.globa.dto.request.comment;
 
 import jakarta.validation.constraints.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import org.hibernate.validator.constraints.Length;
 
-@Getter
-@AllArgsConstructor
-public class RequestFirstCommentDto {
-    @NotNull(message = "You must request startIdx field")
-    @Min(value = -1, message = "You must greater equal than 0")
-    private final Long startIdx;
 
-    @NotNull(message = "You must request endIdx field")
-    @Min(value = -1, message = "You must greater equal than 0")
-    private final Long endIdx;
+public record RequestFirstCommentDto(
+        @NotNull(message = "시작 인덱스는 필수입니다.")
+        @Min(value = -1, message = "You must greater equal than 0")
+        Long startIdx,
 
-    @NotBlank(message = "You must request content field")
-    @Length(min = 1, message = "You must greater than 1 length")
-    private final String content;
+        @NotNull(message = "끝 인덱스는 필수입니다.")
+        @Min(value = -1, message = "You must greater equal than 0")
+        Long endIdx,
 
-    @AssertTrue(message = "You must different startIdx and endIdx")
+        @NotBlank(message = "내용은 필수입니다.")
+        @Length(min = 1, message = "You must greater than 1 length")
+        String content
+) {
+    @AssertTrue(message = "시작 인덱스와 끝 인덱스는 같을 수 없습니다.")
     private boolean isSame() {
-        return !getStartIdx().equals(getEndIdx());
+        return !startIdx().equals(endIdx());
     }
 
-    @AssertTrue(message = "You must startIdx greater than endIdx")
+    @AssertTrue(message = "시작 인덱스가 끝 인덱스보다 커야 합니다.")
     private boolean isGreater() {
-        return getStartIdx() < getEndIdx();
+        return startIdx() < endIdx();
     }
 }

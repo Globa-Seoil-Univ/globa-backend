@@ -1,7 +1,6 @@
 package org.y2k2.globa.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,22 +10,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.y2k2.globa.dto.common.auth.CustomUserDetails;
 import org.y2k2.globa.dto.request.foldershare.RequestInviteDto;
 import org.y2k2.globa.dto.response.foldershare.ResponseFolderShareUserDto;
-import org.y2k2.globa.entity.UserEntity;
-import org.y2k2.globa.type.Role;
-import org.y2k2.globa.exception.CustomException;
-import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.FolderShareService;
 import org.y2k2.globa.util.jwt.JWTProvider;
 
 import java.net.URI;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/folder/{folderId}/share")

@@ -1,7 +1,6 @@
 package org.y2k2.globa.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,15 +12,15 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import org.y2k2.globa.dto.common.auth.CustomUserDetails;
 import org.y2k2.globa.dto.request.comment.RequestCommentDto;
 import org.y2k2.globa.dto.request.comment.RequestCommentWithIdsDto;
 import org.y2k2.globa.dto.request.comment.RequestFirstCommentDto;
 import org.y2k2.globa.dto.response.comment.ResponseCommentDto;
 import org.y2k2.globa.dto.response.comment.ResponseReplyDto;
-import org.y2k2.globa.exception.CustomException;
-import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.CommentService;
 import org.y2k2.globa.util.jwt.JWTProvider;
@@ -35,13 +34,12 @@ import java.net.URI;
 @Tag(name = "Comment", description = "댓글 관련 API입니다.")
 public class CommentController {
     private final CommentService commentService;
-    private final JWTProvider jwtTokenProvider;
 
     @Operation(
             summary = "댓글 목록 조회",
             description = """
                     댓글 목록을 조회합니다. <br />
-                    단, 최상위 댓글만 조회합니다.
+                    단, 최상위 댓글만 조회합니다. (대댓글 X)
                     """,
             responses = {
                     @ApiResponse(
@@ -51,13 +49,13 @@ public class CommentController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_POST_COMMENT, ref = SwaggerErrorCode.NOT_DESERVE_POST_COMMENT_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
@@ -71,17 +69,21 @@ public class CommentController {
     )
     @GetMapping(value = "/section/{sectionId}/highlight/{highlightId}/comment")
     public ResponseEntity<?> getComments(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
-            @PathVariable("folderId") long folderId,
-            @PathVariable("recordId") long recordId,
-            @PathVariable("sectionId") long sectionId,
-            @PathVariable("highlightId") long highlightId,
-            @RequestParam(required = false, defaultValue = "1", value = "page") int page,
-            @RequestParam(required = false, defaultValue = "100", value = "count") int count
+            @PathVariable("folderId") Long folderId,
+            @PathVariable("recordId") Long recordId,
+            @PathVariable("sectionId") Long sectionId,
+            @PathVariable("highlightId") Long highlightId,
+            @RequestParam(value = "page", defaultValue = "1", required = false) int page,
+            @RequestParam(value = "count", defaultValue = "10", required = false) int count,
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-
-        RequestCommentWithIdsDto request = new RequestCommentWithIdsDto(userId, folderId, recordId, sectionId, highlightId);
+        RequestCommentWithIdsDto request = RequestCommentWithIdsDto.builder()
+                .folderId(folderId)
+                .recordId(recordId)
+                .sectionId(sectionId)
+                .highlightId(highlightId)
+                .user(details.getUser())
+                .build();
         ResponseCommentDto commentDto = commentService.getComments(request, page, count);
         return ResponseEntity.ok().body(commentDto);
     }
@@ -118,19 +120,23 @@ public class CommentController {
     )
     @GetMapping(value = "/section/{sectionId}/highlight/{highlightId}/comment/{parentId}")
     public ResponseEntity<?> getReply(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
-            @PathVariable("folderId") long folderId,
-            @PathVariable("recordId") long recordId,
-            @PathVariable("sectionId") long sectionId,
-            @PathVariable("highlightId") long highlightId,
-            @PathVariable("parentId") long parentId,
-            @RequestParam(required = false, defaultValue = "1", value = "page") int page,
-            @RequestParam(required = false, defaultValue = "100", value = "count") int count
+            @PathVariable("folderId") Long folderId,
+            @PathVariable("recordId") Long recordId,
+            @PathVariable("sectionId") Long sectionId,
+            @PathVariable("highlightId") Long highlightId,
+            @PathVariable("parentId") Long parentId,
+            @RequestParam(value = "page", defaultValue = "1", required = false) int page,
+            @RequestParam(value = "count", defaultValue = "10", required = false) int count,
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-
-        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-
-        RequestCommentWithIdsDto request = new RequestCommentWithIdsDto(userId, folderId, recordId, sectionId, highlightId, parentId);
+        RequestCommentWithIdsDto request = RequestCommentWithIdsDto.builder()
+                .folderId(folderId)
+                .recordId(recordId)
+                .sectionId(sectionId)
+                .highlightId(highlightId)
+                .parentId(parentId)
+                .user(details.getUser())
+                .build();
         ResponseReplyDto replyDto = commentService.getReply(request, page, count);
         return ResponseEntity.ok().body(replyDto);
     }
@@ -138,7 +144,7 @@ public class CommentController {
     @Operation(
             summary = "첫 댓글 추가",
             description = """
-                    첫 댓글을 추가합니다.
+                    첫 댓글을 추가합니다. <br />
                     하이라이트 내에서 최초 댓글을 작성할 때 사용합니다.
                     """,
             responses = {
@@ -148,13 +154,13 @@ public class CommentController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_POST_COMMENT, ref = SwaggerErrorCode.NOT_DESERVE_POST_COMMENT_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
@@ -170,16 +176,19 @@ public class CommentController {
     )
     @PostMapping(value = "/section/{sectionId}")
     public ResponseEntity<?> addFirstComment(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
-            @PathVariable("folderId") long folderId,
-            @PathVariable("recordId") long recordId,
-            @PathVariable("sectionId") long sectionId,
-            @Valid @RequestBody final RequestFirstCommentDto dto
+            @PathVariable("folderId") Long folderId,
+            @PathVariable("recordId") Long recordId,
+            @PathVariable("sectionId") Long sectionId,
+            @Valid @RequestBody RequestFirstCommentDto dto,
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-
-        RequestCommentWithIdsDto request = new RequestCommentWithIdsDto(userId, folderId, recordId, sectionId);
-        long highlightId = commentService.addFirstComment(request, dto);
+        RequestCommentWithIdsDto request = RequestCommentWithIdsDto.builder()
+                .folderId(folderId)
+                .recordId(recordId)
+                .sectionId(sectionId)
+                .user(details.getUser())
+                .build();
+        Long highlightId = commentService.addFirstComment(request, dto);
         return ResponseEntity.created(
                 URI.create("/folder/" + folderId + "/record/" + recordId + "/section/" + sectionId + "/highlight/" + highlightId  + "/comment")
         ).build();
@@ -215,16 +224,21 @@ public class CommentController {
     )
     @PostMapping(value = "/section/{sectionId}/highlight/{highlightId}/comment")
     public ResponseEntity<?> addComment(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
-            @PathVariable("folderId") long folderId,
-            @PathVariable("recordId") long recordId,
-            @PathVariable("sectionId") long sectionId,
-            @PathVariable("highlightId") long highlightId,
-            @Valid @RequestBody final RequestCommentDto dto
+            @PathVariable("folderId") Long folderId,
+            @PathVariable("recordId") Long recordId,
+            @PathVariable("sectionId") Long sectionId,
+            @PathVariable("highlightId") Long highlightId,
+            @Valid @RequestBody final RequestCommentDto dto,
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        RequestCommentWithIdsDto request = RequestCommentWithIdsDto.builder()
+                .folderId(folderId)
+                .recordId(recordId)
+                .sectionId(sectionId)
+                .highlightId(highlightId)
+                .user(details.getUser())
+                .build();
 
-        RequestCommentWithIdsDto request = new RequestCommentWithIdsDto(userId, folderId, recordId, sectionId, highlightId);
         commentService.addComment(request, dto);
         return ResponseEntity.created(
                 URI.create("/folder/" + folderId + "/record/" + recordId + "/section/" + sectionId + "/highlight/" + highlightId + "/comment")
@@ -262,17 +276,23 @@ public class CommentController {
     )
     @PostMapping(value = "/section/{sectionId}/highlight/{highlightId}/comment/{parentId}")
     public ResponseEntity<?> addReply(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
-            @PathVariable("folderId") long folderId,
-            @PathVariable("recordId") long recordId,
-            @PathVariable("sectionId") long sectionId,
-            @PathVariable("highlightId") long highlightId,
-            @PathVariable("parentId") long parentId,
-            @Valid @RequestBody final RequestCommentDto dto
+            @PathVariable("folderId") Long folderId,
+            @PathVariable("recordId") Long recordId,
+            @PathVariable("sectionId") Long sectionId,
+            @PathVariable("highlightId") Long highlightId,
+            @PathVariable("parentId") Long parentId,
+            @Valid @RequestBody final RequestCommentDto dto,
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        RequestCommentWithIdsDto request = RequestCommentWithIdsDto.builder()
+                .folderId(folderId)
+                .recordId(recordId)
+                .sectionId(sectionId)
+                .highlightId(highlightId)
+                .parentId(parentId)
+                .user(details.getUser())
+                .build();
 
-        RequestCommentWithIdsDto request = new RequestCommentWithIdsDto(userId, folderId, recordId, sectionId, highlightId, parentId);
         commentService.addReply(request, dto);
         return ResponseEntity.created(
                 URI.create("/folder/" + folderId + "/record/" + recordId + "/section/" + sectionId + "/highlight/" + highlightId + "/comment/" + parentId)
@@ -313,18 +333,23 @@ public class CommentController {
     )
     @PatchMapping(value = "/section/{sectionId}/highlight/{highlightId}/comment/{commentId}")
     public ResponseEntity<?> updateComment(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
-            @PathVariable("folderId") long folderId,
-            @PathVariable("recordId") long recordId,
-            @PathVariable("sectionId") long sectionId,
-            @PathVariable("highlightId") long highlightId,
-            @PathVariable("commentId") long commentId,
-            @Valid @RequestBody final RequestCommentDto dto
+            @PathVariable("folderId") Long folderId,
+            @PathVariable("recordId") Long recordId,
+            @PathVariable("sectionId") Long sectionId,
+            @PathVariable("highlightId") Long highlightId,
+            @PathVariable("commentId") Long commentId,
+            @Valid @RequestBody final RequestCommentDto dto,
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        RequestCommentWithIdsDto request = RequestCommentWithIdsDto.builder()
+                .folderId(folderId)
+                .recordId(recordId)
+                .sectionId(sectionId)
+                .highlightId(highlightId)
+                .user(details.getUser())
+                .build();
 
-        RequestCommentWithIdsDto requestCommentWithIdsDto = new RequestCommentWithIdsDto(userId, folderId, recordId, sectionId, highlightId);
-        commentService.updateComment(requestCommentWithIdsDto, commentId, dto);
+        commentService.updateComment(request, commentId, dto);
         return ResponseEntity.noContent().build();
     }
 
@@ -362,17 +387,22 @@ public class CommentController {
     )
     @DeleteMapping(value = "/section/{sectionId}/highlight/{highlightId}/comment/{commentId}")
     public ResponseEntity<?> deleteComment(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
-            @PathVariable("folderId") long folderId,
-            @PathVariable("recordId") long recordId,
-            @PathVariable("sectionId") long sectionId,
-            @PathVariable("highlightId") long highlightId,
-            @PathVariable("commentId") long commentId
+            @PathVariable("folderId") Long folderId,
+            @PathVariable("recordId") Long recordId,
+            @PathVariable("sectionId") Long sectionId,
+            @PathVariable("highlightId") Long highlightId,
+            @PathVariable("commentId") Long commentId,
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
+        RequestCommentWithIdsDto request = RequestCommentWithIdsDto.builder()
+                .folderId(folderId)
+                .recordId(recordId)
+                .sectionId(sectionId)
+                .highlightId(highlightId)
+                .user(details.getUser())
+                .build();
 
-        RequestCommentWithIdsDto requestCommentWithIdsDto = new RequestCommentWithIdsDto(userId, folderId, recordId, sectionId, highlightId);
-        commentService.deleteComment(requestCommentWithIdsDto, commentId);
+        commentService.deleteComment(request, commentId);
         return ResponseEntity.noContent().build();
     }
 

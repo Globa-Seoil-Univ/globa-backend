@@ -16,6 +16,4 @@ public interface DictionaryRepository extends JpaRepository<DictionaryEntity, Lo
             nativeQuery = true
     )
     List<DictionaryEntity> findTop10ByWordStartingWithOrEngWordStartingWithOrderByCreatedTimeAsc(String word, String engWord);
-
-    void deleteAllBy();
 }
