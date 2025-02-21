@@ -6,9 +6,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Role {
-    O("소유자"),
-    R("뷰어"),
-    W("편집자"),
+    OWNER("소유자"),
+    READER("뷰어"),
+    WRITER("편집자"),
     ;
 
     private final String roleName;
@@ -20,6 +20,6 @@ public enum Role {
             }
         }
 
-        return R;
+        return READER;
     }
 }

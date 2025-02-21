@@ -364,7 +364,7 @@ public class RecordService {
                 user,
                 folderId,
                 InvitationStatus.ACCEPT,
-                Role.O.getRoleName()
+                Role.OWNER.getRoleName()
         );
         if (!hasAccess) {
             throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);

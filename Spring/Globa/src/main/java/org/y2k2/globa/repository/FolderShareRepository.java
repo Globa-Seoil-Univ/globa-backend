@@ -50,15 +50,23 @@ public interface FolderShareRepository extends JpaRepository<FolderShareEntity, 
   
     Optional<FolderShareEntity> findByFolderAndTargetUser(FolderEntity folder, UserEntity user);
 
+    @Query(
+            "SELECT fs FROM FolderShareEntity fs " +
+                    "JOIN FETCH fs.role " +
+                    "WHERE fs.folder = :folder " +
+                    "AND fs.targetUser = :user"
+    )
+    Optional<FolderShareEntity> findByFolderAndTargetUserJoinRole(FolderEntity folder, UserEntity user);
+
     Boolean existsByFolderAndTargetUser(FolderEntity folder, UserEntity user);
 
     @EntityGraph(value = "FolderShare.getFolderShareAndUser", attributePaths = {
             "targetUser"
-    }, type = EntityGraph.EntityGraphType.LOAD)
+    }, type = EntityGraph.EntityGraphType.FETCH)
     List<FolderShareEntity> findAllByFolderFolderId(Long folderId);
 
     @EntityGraph(value = "FolderShare.getFolderShareAndUser", attributePaths = {
             "targetUser"
-    }, type = EntityGraph.EntityGraphType.LOAD)
+    }, type = EntityGraph.EntityGraphType.FETCH)
     List<FolderShareEntity> findAllByFolderFolderIdAndTargetUser_UserIdNot(Long folderId, Long excludeId);
 }

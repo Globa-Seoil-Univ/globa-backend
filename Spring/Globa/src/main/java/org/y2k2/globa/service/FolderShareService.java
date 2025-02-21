@@ -120,8 +120,8 @@ public class FolderShareService {
             throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
         }
 
-        FolderRoleEntity readRole = convertRole(Role.R);
-        FolderRoleEntity writeRole = convertRole(Role.W);
+        FolderRoleEntity readRole = convertRole(Role.READER);
+        FolderRoleEntity writeRole = convertRole(Role.WRITER);
 
         List<FolderShareEntity> newFolderShares = targets.stream().map(
                 target -> {
@@ -135,7 +135,7 @@ public class FolderShareService {
                         return null;
                     }
 
-                    FolderRoleEntity folderRole = role.equalsIgnoreCase(Role.W.toString()) ? writeRole : readRole;
+                    FolderRoleEntity folderRole = role.equalsIgnoreCase(Role.WRITER.toString()) ? writeRole : readRole;
                     return FolderShareEntity.create(folder, sender, target, folderRole);
                 }
         ).toList();
@@ -206,7 +206,7 @@ public class FolderShareService {
         ).ifPresent(notificationRepository::delete);
 
         RequestNotificationWithFolderShareAddUserDto notification = RequestNotificationWithFolderShareAddUserDto.builder()
-                .receiver(folderShare.getTargetUser())
+                .sender(folderShare.getTargetUser())
                 .folder(folderShare.getFolder())
                 .folderShare(folderShare)
                 .notificationType(NotificationType.SHARE_FOLDER_ADD_USER)
@@ -248,17 +248,17 @@ public class FolderShareService {
     }
 
     private void checkValidation(FolderEntity folderEntity, Long ownerId, Long targetId) {
-        if (ownerId.equals(targetId)) throw new CustomException(ErrorCode.INVITE_BAD_REQUEST);
         if (!folderEntity.getUser().getUserId().equals(ownerId)) throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
+        if (ownerId.equals(targetId)) throw new CustomException(ErrorCode.INVITE_BAD_REQUEST);
     }
 
     private FolderRoleEntity convertRole(Role role) {
         FolderRoleEntity folderRoleEntity;
 
-        if (role.equals(Role.W)) {
-            folderRoleEntity = folderRoleRepository.findByRoleName(Role.W.getRoleName());
+        if (role.equals(Role.WRITER)) {
+            folderRoleEntity = folderRoleRepository.findByRoleName(Role.WRITER.getRoleName());
         } else {
-            folderRoleEntity = folderRoleRepository.findByRoleName(Role.R.getRoleName());
+            folderRoleEntity = folderRoleRepository.findByRoleName(Role.READER.getRoleName());
         }
 
         return folderRoleEntity;

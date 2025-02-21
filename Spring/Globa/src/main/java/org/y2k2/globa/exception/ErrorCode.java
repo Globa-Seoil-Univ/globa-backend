@@ -19,7 +19,7 @@ public enum ErrorCode {
     RECORD_POST_BAD_REQUEST(HttpStatus.BAD_REQUEST, "Record를 등록하기 위해선 빈칸이 허용되지 않습니다. ", 40045),
     REQUIRED_RECORD_TITLE(HttpStatus.BAD_REQUEST, "인자로 Record Title이 필요합니다. ", 40046),
     REQUIRED_MOVE_ARRIVED_ID(HttpStatus.BAD_REQUEST, "인자로 Target Id가 필요합니다. ", 40047),
-    INVITE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "자기자신을 초대할 수 없습니다. ", 40048),
+    INVITE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "자기 자신을 초대할 수 없습니다. ", 40048),
     INVITE_ACCEPT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "이미 수락된 초대입니다. ", 40049),
 
     REQUIRED_NOTICE_ID(HttpStatus.BAD_REQUEST, "인자로 Notice Id가 필요합니다. ", 40050),

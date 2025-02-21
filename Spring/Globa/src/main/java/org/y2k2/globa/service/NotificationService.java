@@ -165,12 +165,12 @@ public class NotificationService {
 
     @Transactional
     public void saveNotification(SendMessage sendMessage) {
-        log.info("Save Notification userId = {}, name = {}", sendMessage.getSender().getUserId(), sendMessage.getSender().getName());
+        log.info("Save Notification = {}", sendMessage);
 
         NotificationEntity notification = createNotification(sendMessage);
 
         if (notification == null) {
-            log.warn("Notification is null. userId = {}, name = {}", sendMessage.getSender().getUserId(), sendMessage.getSender().getName());
+            log.warn("Notification is null = {}", sendMessage);
             return;
         }
 

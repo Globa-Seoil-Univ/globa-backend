@@ -23,6 +23,7 @@ import org.y2k2.globa.repository.*;
 import org.y2k2.globa.mapper.CommentMapper;
 import org.y2k2.globa.type.InvitationStatus;
 import org.y2k2.globa.type.NotificationType;
+import org.y2k2.globa.type.Role;
 import org.y2k2.globa.util.CustomTimestamp;
 
 import java.util.List;
@@ -167,19 +168,17 @@ public class CommentService {
 
     private void validateFolderShare(SectionEntity section, UserEntity user) {
         FolderShareEntity folderShare = folderShareRepository.findByFolderAndTargetUser(section.getRecord().getFolder(), user)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_DESERVE_POST_COMMENT));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER));
 
         if (folderShare.getInvitationStatus().equals(InvitationStatus.PENDING))
-            throw new CustomException(ErrorCode.NOT_DESERVE_POST_COMMENT);
+            throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
     }
 
     private FolderShareEntity validateFolderShareWithRole(SectionEntity section, UserEntity user) {
-        FolderShareEntity folderShare = folderShareRepository.findByFolderAndTargetUser(section.getRecord().getFolder(), user)
+        FolderShareEntity folderShare = folderShareRepository.findByFolderAndTargetUserJoinRole(section.getRecord().getFolder(), user)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_DESERVE_POST_COMMENT));
 
-        // TODO : Role Enum으로 변경
-        // TODO : Swagger 업데이트
-        if (folderShare.getInvitationStatus().equals(InvitationStatus.PENDING) || folderShare.getRole().getRoleId().equals("3"))
+        if (folderShare.getInvitationStatus().equals(InvitationStatus.PENDING) || folderShare.getRole().getRoleName().equals(Role.READER.getRoleName()))
             throw new CustomException(ErrorCode.NOT_DESERVE_POST_COMMENT);
 
         return folderShare;
