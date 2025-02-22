@@ -3,8 +3,10 @@ package org.y2k2.globa.util.fcm;
 import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.y2k2.globa.dto.common.fcm.SendMessage;
+import org.y2k2.globa.dto.common.notification.SendMessage;
+import org.y2k2.globa.dto.common.notification.RequestNotificationWithTopicDto;
 import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.repository.UserRepository;
 import org.y2k2.globa.type.NotificationType;
@@ -15,19 +17,21 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class MessageUtil {
+    @Value("${fcm.dry-run:true}")
+    private Boolean dryRun;
+
     private final FirebaseMessaging firebaseMessaging;
 
     private final UserRepository userRepository;
 
     private boolean deniedFcm(NotificationType type, UserEntity receiver) {
-        if (receiver.getNotificationToken() == null
-                || receiver.getNotificationToken().isEmpty()) {
+        if (receiver.getNotificationToken() == null || receiver.getNotificationToken().isEmpty()) {
             log.warn("Notification token is null. userId = {}, name = {}", receiver.getUserId(), receiver.getName());
             return true;
         }
 
         return switch (type) {
-            case NOTICE, INQUIRY -> receiver.getPrimaryNofi() == null || !receiver.getPrimaryNofi();
+            case INQUIRY -> receiver.getPrimaryNofi() == null || !receiver.getPrimaryNofi();
             case UPLOAD_SUCCESS, UPLOAD_FAILED -> receiver.getUploadNofi() == null || !receiver.getUploadNofi();
             case SHARE_FOLDER_INVITE, SHARE_FOLDER_ADD_FILE, SHARE_FOLDER_ADD_USER, SHARE_FOLDER_ADD_COMMENT ->
                     receiver.getShareNofi() == null || !receiver.getShareNofi();
@@ -49,7 +53,7 @@ public class MessageUtil {
                             .build())
                     .build();
 
-            firebaseMessaging.send(message);
+            firebaseMessaging.send(message, dryRun);
         } catch (FirebaseMessagingException e) {
             if (e.getMessagingErrorCode() == MessagingErrorCode.INVALID_ARGUMENT || e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
                 sendMessage.getReceiver().setNotificationToken(null);
@@ -89,7 +93,7 @@ public class MessageUtil {
                 .build();
 
         try {
-            BatchResponse response = firebaseMessaging.sendEachForMulticast(message);
+            BatchResponse response = firebaseMessaging.sendEachForMulticast(message, dryRun);
 
             for (int i = 0; i < response.getResponses().size(); i++) {
                 if (response.getResponses().get(i).isSuccessful()) {
@@ -111,6 +115,50 @@ public class MessageUtil {
             }
         } catch (FirebaseMessagingException e) {
             log.error("Failed to send FCM Trace = {} ", (Object) e.getStackTrace());
+        }
+    }
+
+    public void sendFcmMessageToTopic(RequestNotificationWithTopicDto dto) {
+        try {
+            Message message = Message.builder()
+                    .setTopic(dto.getTopic())
+                    .setNotification(Notification.builder()
+                            .setTitle(dto.getTitle())
+                            .setBody(dto.getBody())
+                            .build())
+                    .build();
+
+            firebaseMessaging.send(message, dryRun);
+        } catch (FirebaseMessagingException e) {
+            log.error("Failed to send FCM message = {}, Trace = {} ", dto.getTopic(), e.getMessage());
+        }
+    }
+
+    public void subscribeTopic(String token, String topic) {
+        if (token == null || token.isEmpty()) {
+            log.warn("Notification token is null. userId = {}", token);
+            return;
+        }
+
+        try {
+            TopicManagementResponse response = firebaseMessaging.subscribeToTopic(List.of(token), topic);
+            log.info("Successfully subscribed to topic: " + response.getSuccessCount());
+        } catch (FirebaseMessagingException e) {
+            log.error("Failed to subscribe to topic: " + e.getMessage());
+        }
+    }
+
+    public void unsubscribeTopic(String token, String topic) {
+        if (token == null || token.isEmpty()) {
+            log.warn("Notification token is null. userId = {}", token);
+            return;
+        }
+
+        try {
+            TopicManagementResponse response = firebaseMessaging.unsubscribeFromTopic(List.of(token), topic);
+            log.info("Successfully unsubscribed from topic: " + response.getSuccessCount());
+        } catch (FirebaseMessagingException e) {
+            log.error("Failed to unsubscribe from topic: " + e.getMessage());
         }
     }
 }

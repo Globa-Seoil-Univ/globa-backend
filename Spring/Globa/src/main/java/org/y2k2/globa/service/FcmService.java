@@ -1,61 +1,83 @@
 package org.y2k2.globa.service;
 
-import com.google.firebase.messaging.*;
-
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.y2k2.globa.dto.common.fcm.FcmSubscribeEvent;
+import org.y2k2.globa.dto.common.fcm.FcmSubscribeTopic;
+import org.y2k2.globa.dto.common.fcm.FcmUnSubscribeEvent;
 import org.y2k2.globa.dto.request.fcm.RequestFcmTopicDto;
-import org.y2k2.globa.type.UserRole;
+import org.y2k2.globa.dto.request.fcm.RequestSubscribeTopicDto;
+import org.y2k2.globa.dto.common.notification.RequestNotificationWithTopicDto;
 import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.entity.UserRoleEntity;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
-import org.y2k2.globa.repository.UserRepository;
 import org.y2k2.globa.repository.UserRoleRepository;
-import org.y2k2.globa.util.jwt.JWTProvider;
+import org.y2k2.globa.type.FcmTopic;
+
+import java.util.Optional;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class FcmService {
-    private final UserRepository userRepository;
+    private final ApplicationEventPublisher publisher;
+
+    private final UserRoleService userRoleService;
+
     private final UserRoleRepository userRoleRepository;
 
-    private final FirebaseMessaging firebaseMessaging;
-    private final JWTProvider jwtTokenProvider;
+    public void sendTopicNotification(RequestFcmTopicDto dto, UserEntity user) {
+        Optional<UserRoleEntity> userRole = userRoleRepository.findByUser(user);
 
-    @Transactional
-    public void sendTopicNotification(String accessToken, RequestFcmTopicDto dto) {
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-        UserEntity user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-        if (user.getIsDeleted()) {
-            throw new CustomException(ErrorCode.DELETED_USER);
+        if (userRole.isEmpty()) {
+            userRoleService.createUserRoleAndThrowException(user);
+        } else {
+            boolean isAdminOrEditor = userRoleService.isAdminOrEditor(userRole.get());
+            if (!isAdminOrEditor) throw new CustomException(ErrorCode.NOT_DESERVE_FCM);
         }
 
-        UserRoleEntity userRole = userRoleRepository.findByUser(user)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ROLE));
+        RequestNotificationWithTopicDto info = RequestNotificationWithTopicDto.builder()
+                .title(dto.title())
+                .body(dto.body())
+                .topic(dto.topic())
+                .build();
 
-        String roleName = userRole.getRoleId().getName();
-        boolean isValid = UserRole.ADMIN.getRoleName().equals(roleName) || UserRole.EDITOR.getRoleName().equals(roleName);
-        if (!isValid) throw new CustomException(ErrorCode.NOT_DESERVE_FCM);
+        publisher.publishEvent(info);
+    }
 
-
-        try {
-            Message message = Message.builder()
-                    .setNotification(Notification.builder()
-                            .setTitle(dto.getTitle())
-                            .setBody(dto.getBody())
-                            .build())
-                    .setTopic(dto.getTopic())
-                    .build();
-
-            firebaseMessaging.send(message, false);
-        }  catch (Exception e) {
-            throw new CustomException(ErrorCode.FAILED_FCM_SEND);
+    public void subscribeTopic(RequestSubscribeTopicDto dto, UserEntity user) {
+        if (dto.topic().equalsIgnoreCase(FcmTopic.NOTICE.getTopic()) && !user.getPrimaryNofi()) {
+            throw new CustomException(ErrorCode.NOT_ALLOW_NOTIFICATION_SETTING);
         }
+        if (dto.topic().equalsIgnoreCase(FcmTopic.EVENT.getTopic()) && !user.getEventNofi()) {
+            throw new CustomException(ErrorCode.NOT_ALLOW_NOTIFICATION_SETTING);
+        }
+        if (user.getNotificationToken() == null || user.getNotificationToken().isEmpty()) {
+            throw new CustomException(ErrorCode.NOT_FOUND_NOTIFICATION_TOKEN);
+        }
+
+        publisher.publishEvent(
+                FcmSubscribeEvent.builder()
+                        .topic(dto.topic())
+                        .token(user.getNotificationToken())
+                        .build()
+        );
+    }
+
+    public void unsubscribeTopic(RequestSubscribeTopicDto dto, UserEntity user) {
+        if (user.getNotificationToken() == null || user.getNotificationToken().isEmpty()) {
+            throw new CustomException(ErrorCode.NOT_FOUND_NOTIFICATION_TOKEN);
+        }
+
+        publisher.publishEvent(
+                FcmUnSubscribeEvent.builder()
+                        .topic(dto.topic())
+                        .token(user.getNotificationToken())
+                        .build()
+        );
     }
 }

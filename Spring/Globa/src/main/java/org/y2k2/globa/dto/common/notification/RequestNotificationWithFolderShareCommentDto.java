@@ -1,10 +1,7 @@
-package org.y2k2.globa.dto.request.notification;
+package org.y2k2.globa.dto.common.notification;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import org.y2k2.globa.dto.common.fcm.SendMessage;
 import org.y2k2.globa.entity.*;
 
 @Getter

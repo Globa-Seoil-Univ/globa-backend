@@ -7,26 +7,21 @@ import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 import org.y2k2.globa.annotation.FileCleanup;
 import org.y2k2.globa.dto.common.file.FileDto;
 import org.y2k2.globa.dto.request.notice.RequestNoticeAddDto;
+import org.y2k2.globa.dto.common.notification.RequestNotificationWithTopicDto;
 import org.y2k2.globa.dto.response.notice.ResponseNoticeDetailDto;
 import org.y2k2.globa.dto.response.notice.ResponseNoticeIntroDto;
-import org.y2k2.globa.dto.request.notification.RequestNotificationWithNoticeDto;
 import org.y2k2.globa.mapper.NoticeImageMapper;
-import org.y2k2.globa.type.UserRole;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.*;
 import org.y2k2.globa.repository.*;
 import org.y2k2.globa.mapper.NoticeMapper;
-import org.y2k2.globa.mapper.NotificationMapper;
+import org.y2k2.globa.type.FcmTopic;
 import org.y2k2.globa.type.NotificationType;
 import org.y2k2.globa.util.file.FileStore;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -94,11 +89,12 @@ public class NoticeService {
             throw new FileUploadException(fileDto.storePath());
         }
 
-        RequestNotificationWithNoticeDto info = RequestNotificationWithNoticeDto.builder()
+        RequestNotificationWithTopicDto info = RequestNotificationWithTopicDto.builder()
                 .sender(user)
                 .notice(createdNotice)
                 .title(createdNotice.getTitle())
                 .notificationType(NotificationType.NOTICE)
+                .topic(FcmTopic.NOTICE.getTopic())
                 .build();
 
         notificationService.saveNotification(info);

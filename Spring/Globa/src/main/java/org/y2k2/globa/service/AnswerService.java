@@ -6,7 +6,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.dto.common.answer.RequestAnswerDto;
-import org.y2k2.globa.dto.request.notification.RequestNotificationWithInquiryDto;
+import org.y2k2.globa.dto.common.notification.RequestNotificationWithInquiryDto;
 import org.y2k2.globa.type.UserRole;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.*;

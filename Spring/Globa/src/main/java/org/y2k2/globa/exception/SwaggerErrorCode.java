@@ -96,6 +96,8 @@ public class SwaggerErrorCode {
     public static final String MISMATCH_RECORD_FOLDER_VALUE = "40348";
     public static final String DELETED_USER = "DELETED_USER";
     public static final String DELETED_USER_VALUE = "40350";
+    public static final String NOT_ALLOW_NOTIFICATION_SETTING = "NOT_ALLOW_NOTIFICATION_SETTING";
+    public static final String NOT_ALLOW_NOTIFICATION_SETTING_VALUE = "40360";
 
     /* 404 NOT_FOUND : 값이 없음 */
     public static final String NOT_FOUND = "NOT_FOUND";
@@ -114,6 +116,8 @@ public class SwaggerErrorCode {
     public static final String NOT_FOUND_NOTICE_VALUE = "40430";
     public static final String NOT_FOUND_NOTIFICATION = "NOT_FOUND_NOTICE";
     public static final String NOT_FOUND_NOTIFICATION_VALUE = "40431";
+    public static final String NOT_FOUND_NOTIFICATION_TOKEN = "NOT_FOUND_NOTIFICATION_TOKEN";
+    public static final String NOT_FOUND_NOTIFICATION_TOKEN_VALUE = "40432";
     public static final String NOT_FOUND_ANSWER = "NOT_FOUND_ANSWER";
     public static final String NOT_FOUND_ANSWER_VALUE = "40440";
     public static final String NOT_FOUND_FOLDER = "NOT_FOUND_FOLDER";

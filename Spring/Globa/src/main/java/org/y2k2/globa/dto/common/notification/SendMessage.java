@@ -1,4 +1,4 @@
-package org.y2k2.globa.dto.common.fcm;
+package org.y2k2.globa.dto.common.notification;
 
 import lombok.Getter;
 import lombok.ToString;

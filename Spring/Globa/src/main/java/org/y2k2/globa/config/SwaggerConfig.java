@@ -57,7 +57,6 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.ACTIVE_ACCESS_TOKEN, createExample(SwaggerErrorCode.ACTIVE_ACCESS_TOKEN_VALUE, "액세스 토큰이 아직 만료되지 않았습니다."));
         components.addExamples(SwaggerErrorCode.NOT_MATCH_REFRESH_TOKEN_VALUE, createExample(SwaggerErrorCode.NOT_MATCH_REFRESH_TOKEN_VALUE, "갱신 토큰이 일치하지 않습니다."));
         components.addExamples(SwaggerErrorCode.FOLDER_DELETE_BAD_REQUEST_VALUE, createExample(SwaggerErrorCode.FOLDER_DELETE_BAD_REQUEST_VALUE, "기본 폴더는 삭제할 수 없습니다."));
-        components.addExamples(SwaggerErrorCode.DELETED_USER_VALUE, createExample(SwaggerErrorCode.DELETED_USER_VALUE, "삭제된 사용자입니다."));
         components.addExamples(SwaggerErrorCode.REQUIRED_FOLDER_TITLE_VALUE, createExample(SwaggerErrorCode.REQUIRED_FOLDER_TITLE_VALUE, "폴더 제목이 필요합니다."));
         components.addExamples(SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE, createExample(SwaggerErrorCode.REQUIRED_FOLDER_ID_VALUE, "폴더 ID는 필수입니다."));
         components.addExamples(SwaggerErrorCode.REQUIRED_QUIZ_ID_VALUE, createExample(SwaggerErrorCode.REQUIRED_QUIZ_ID_VALUE, "퀴즈 ID는 필수입니다."));
@@ -98,6 +97,8 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.MISMATCH_RECORD_OWNER_VALUE, createExample(SwaggerErrorCode.MISMATCH_RECORD_OWNER_VALUE, "음성 소유자만 요청할 수 있습니다."));
         components.addExamples(SwaggerErrorCode.MISMATCH_RECORD_FOLDER_VALUE, createExample(SwaggerErrorCode.MISMATCH_RECORD_FOLDER_VALUE, "요청한 음성 파일은 해당 폴더에 속해있지 않습니다."));
 
+        components.addExamples(SwaggerErrorCode.DELETED_USER_VALUE, createExample(SwaggerErrorCode.DELETED_USER_VALUE, "탈퇴된 사용자입니다."));
+        components.addExamples(SwaggerErrorCode.NOT_ALLOW_NOTIFICATION_SETTING_VALUE, createExample(SwaggerErrorCode.NOT_ALLOW_NOTIFICATION_SETTING_VALUE, "알림 설정이 허용되지 않았습니다."));
 
         // 404 Errors
         components.addExamples(SwaggerErrorCode.NOT_FOUND_USER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_USER_VALUE, "사용자를 찾을 수 없습니다."));
@@ -107,6 +108,7 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.NOT_FOUND_INQUIRY_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_INQUIRY_VALUE, "문의 사항을 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_NOTICE_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_NOTICE_VALUE, "공지를 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_NOTIFICATION_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_NOTIFICATION_VALUE, "알림을 찾을 수 없습니다."));
+        components.addExamples(SwaggerErrorCode.NOT_FOUND_NOTIFICATION_TOKEN_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_NOTIFICATION_TOKEN_VALUE, "알림 토큰을 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_ANSWER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_ANSWER_VALUE, "답변을 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_FOLDER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_FOLDER_VALUE, "폴더를 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_ORIGIN_FOLDER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_ORIGIN_FOLDER_VALUE, "원본 폴더를 찾을 수 없습니다."));

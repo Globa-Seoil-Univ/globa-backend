@@ -6,12 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.y2k2.globa.Projection.NotificationProjection;
 import org.y2k2.globa.Projection.NotificationUnReadCount;
-import org.y2k2.globa.dto.common.fcm.SendMessage;
-import org.y2k2.globa.entity.FolderShareEntity;
 import org.y2k2.globa.entity.NotificationEntity;
 import org.y2k2.globa.entity.UserEntity;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface NotificationRepository extends JpaRepository<NotificationEntity, Long> {

@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.y2k2.globa.dto.common.comment.CommentDto;
 import org.y2k2.globa.dto.common.comment.ReplyDto;
-import org.y2k2.globa.dto.request.notification.RequestNotificationWithFolderShareCommentDto;
+import org.y2k2.globa.dto.common.notification.RequestNotificationWithFolderShareCommentDto;
 import org.y2k2.globa.dto.request.comment.RequestCommentDto;
 import org.y2k2.globa.dto.request.comment.RequestCommentWithIdsDto;
 import org.y2k2.globa.dto.request.comment.RequestFirstCommentDto;

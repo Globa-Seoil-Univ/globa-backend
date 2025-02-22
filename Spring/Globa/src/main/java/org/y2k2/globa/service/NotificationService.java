@@ -9,9 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.Projection.NotificationProjection;
 import org.y2k2.globa.Projection.NotificationUnReadCount;
-import org.y2k2.globa.dto.common.fcm.SendMessage;
-import org.y2k2.globa.dto.common.notification.NotificationDto;
-import org.y2k2.globa.dto.request.notification.*;
+import org.y2k2.globa.dto.common.notification.*;
 import org.y2k2.globa.dto.response.notification.ResponseNotificationDto;
 import org.y2k2.globa.dto.response.notification.ResponseUnreadCountDto;
 import org.y2k2.globa.dto.response.notification.ResponseUnreadNotificationDto;
@@ -26,7 +24,6 @@ import org.y2k2.globa.repository.NotificationRepository;
 import org.y2k2.globa.repository.UserRepository;
 import org.y2k2.globa.type.NotificationSort;
 import org.y2k2.globa.type.NotificationType;
-import org.y2k2.globa.util.CustomTimestamp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -255,7 +252,7 @@ public class NotificationService {
 
         switch (sendMessage.getNotificationType()) {
             case NOTICE:
-                notification = NotificationMapper.INSTANCE.toNotificationWithNotice((RequestNotificationWithNoticeDto) sendMessage);
+                notification = NotificationMapper.INSTANCE.toNotificationWithNotice((RequestNotificationWithTopicDto) sendMessage);
                 notification.setTypeId(NotificationType.NOTICE.getTypeId());
                 break;
             case SHARE_FOLDER_ADD_FILE:
@@ -271,11 +268,11 @@ public class NotificationService {
                 notification.setTypeId(NotificationType.SHARE_FOLDER_ADD_COMMENT.getTypeId());
                 break;
             case UPLOAD_SUCCESS:
-                notification = NotificationMapper.INSTANCE.toNotificationWithNotice((RequestNotificationWithNoticeDto) sendMessage);
+                notification = NotificationMapper.INSTANCE.toNotificationWithNotice((RequestNotificationWithTopicDto) sendMessage);
                 notification.setTypeId(NotificationType.UPLOAD_SUCCESS.getTypeId());
                 break;
             case UPLOAD_FAILED:
-                notification = NotificationMapper.INSTANCE.toNotificationWithNotice((RequestNotificationWithNoticeDto) sendMessage);
+                notification = NotificationMapper.INSTANCE.toNotificationWithNotice((RequestNotificationWithTopicDto) sendMessage);
                 notification.setTypeId(NotificationType.UPLOAD_FAILED.getTypeId());
                 break;
             case INQUIRY:

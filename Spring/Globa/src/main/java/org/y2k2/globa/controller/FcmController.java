@@ -7,13 +7,17 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import org.y2k2.globa.dto.common.auth.CustomUserDetails;
 import org.y2k2.globa.dto.request.fcm.RequestFcmTopicDto;
+import org.y2k2.globa.dto.request.fcm.RequestSubscribeTopicDto;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
@@ -39,28 +43,88 @@ public class FcmController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_FCM, ref = SwaggerErrorCode.NOT_DESERVE_FCM_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
                     })),
-                    @ApiResponse(responseCode = "500", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.FAILED_FCM_SEND, ref = SwaggerErrorCode.FAILED_FCM_SEND_VALUE),
-                    }))
             }
     )
     public ResponseEntity<?> pushMessage(
-            @Parameter(hidden = true)
-            @RequestHeader(value = "Authorization") String accessToken,
-            @RequestBody RequestFcmTopicDto requestFcmTopicDto
+            @Valid @RequestBody RequestFcmTopicDto requestFcmTopicDto,
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        fcmService.sendTopicNotification(accessToken, requestFcmTopicDto);
+        fcmService.sendTopicNotification(requestFcmTopicDto, details.getUser());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/topic")
+    @Operation(
+            summary = "특정 토픽 가입",
+            description = "특정 토픽에 가입합니다. 해당 토픽에 알림을 받을 수 있습니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "204",
+                            description = "토픽 가입 성공"
+                    ),
+                    @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_ALLOW_NOTIFICATION_SETTING, ref = SwaggerErrorCode.NOT_ALLOW_NOTIFICATION_SETTING_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                    })),
+            }
+    )
+    public ResponseEntity<?> subscribeTopic(
+            @Valid @RequestBody RequestSubscribeTopicDto dto,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        fcmService.subscribeTopic(dto, details.getUser());
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/topic")
+    @Operation(
+            summary = "특정 토픽 탈퇴",
+            description = "특정 토픽에서 탈퇴합니다. 해당 토픽에 알림을 받지 않습니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "204",
+                            description = "토픽 탈퇴 성공"
+                    ),
+                    @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_NOTIFICATION_TOKEN, ref = SwaggerErrorCode.NOT_FOUND_NOTIFICATION_TOKEN_VALUE),
+                    })),
+            }
+    )
+    public ResponseEntity<?> unsubscribeTopic(
+            @Valid @RequestBody RequestSubscribeTopicDto dto,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        fcmService.unsubscribeTopic(dto, details.getUser());
         return ResponseEntity.noContent().build();
     }
 }
