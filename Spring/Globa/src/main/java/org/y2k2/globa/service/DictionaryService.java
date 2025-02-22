@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.y2k2.globa.dto.common.dictionary.DictionaryDto;
 import org.y2k2.globa.dto.response.dictionary.ResponseDictionaryDto;
-import org.y2k2.globa.dto.common.role.UserRole;
+import org.y2k2.globa.type.UserRole;
 import org.y2k2.globa.entity.DictionaryEntity;
 import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.entity.UserRoleEntity;
@@ -57,7 +57,8 @@ public class DictionaryService {
 
         if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
 
-        UserRoleEntity userRole = userRoleRepository.findByUser(user);
+        UserRoleEntity userRole = userRoleRepository.findByUser(user)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ROLE));
         String roleName = userRole.getRoleId().getName();
         boolean isAdminOrEditor = UserRole.ADMIN.getRoleName().equals(roleName) || UserRole.EDITOR.getRoleName().equals(roleName);
         if (!isAdminOrEditor) throw new CustomException(ErrorCode.NOT_DESERVE_DICTIONARY);

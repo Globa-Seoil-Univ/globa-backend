@@ -83,7 +83,6 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.EXPIRED_REFRESH_TOKEN_VALUE, createExample(SwaggerErrorCode.EXPIRED_REFRESH_TOKEN_VALUE, "만료된 갱신 토큰입니다."));
 
         // 403 Errors
-        components.addExamples(SwaggerErrorCode.NOT_NULL_ROLE_VALUE, createExample(SwaggerErrorCode.NOT_NULL_ROLE_VALUE, "사용자 권한이 존재하지 않습니다."));
         components.addExamples(SwaggerErrorCode.NOT_DESERVE_ADD_NOTICE_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_ADD_NOTICE_VALUE, "공지 추가 권한이 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE, "폴더 접근 권한이 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_DESERVE_MODIFY_INVITATION_VALUE, createExample(SwaggerErrorCode.NOT_DESERVE_MODIFY_INVITATION_VALUE, "초대 수정 권한이 없습니다."));
@@ -104,6 +103,7 @@ public class SwaggerConfig {
         components.addExamples(SwaggerErrorCode.NOT_FOUND_USER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_USER_VALUE, "사용자를 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_DEFAULT_FOLDER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_DEFAULT_FOLDER_VALUE, "기본 폴더를 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_TARGET_USER_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_TARGET_USER_VALUE, "대상 사용자를 찾을 수 없습니다."));
+        components.addExamples(SwaggerErrorCode.NOT_FOUND_ROLE_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_ROLE_VALUE, "권한을 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_INQUIRY_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_INQUIRY_VALUE, "문의 사항을 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_NOTICE_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_NOTICE_VALUE, "공지를 찾을 수 없습니다."));
         components.addExamples(SwaggerErrorCode.NOT_FOUND_NOTIFICATION_VALUE, createExample(SwaggerErrorCode.NOT_FOUND_NOTIFICATION_VALUE, "알림을 찾을 수 없습니다."));

@@ -1,11 +1,8 @@
 package org.y2k2.globa.service;
 
-import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,26 +11,20 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
-import org.y2k2.globa.dto.common.fcm.SendMessage;
 import org.y2k2.globa.dto.request.folder.RequestFolderPostDto;
 import org.y2k2.globa.dto.request.foldershare.RequestInviteDto;
 import org.y2k2.globa.dto.response.foldershare.ResponseFolderShareUserDto;
 import org.y2k2.globa.dto.request.notification.RequestNotificationWithFolderShareAddUserDto;
 import org.y2k2.globa.dto.request.notification.RequestNotificationWithInvitationDto;
 import org.y2k2.globa.entity.*;
-import org.y2k2.globa.event.NotificationListener;
 import org.y2k2.globa.exception.*;
 import org.y2k2.globa.repository.*;
 import org.y2k2.globa.mapper.FolderShareMapper;
-import org.y2k2.globa.mapper.NotificationMapper;
 import org.y2k2.globa.type.InvitationStatus;
 import org.y2k2.globa.type.NotificationType;
-import org.y2k2.globa.type.Role;
-import org.y2k2.globa.util.CustomTimestamp;
+import org.y2k2.globa.type.FolderRole;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -86,7 +77,7 @@ public class FolderShareService {
             throw new CustomException(ErrorCode.SHARE_USER_DUPLICATED);
         }
 
-        FolderRoleEntity folderRoleEntity = convertRole(Role.from(dto.role()));
+        FolderRoleEntity folderRoleEntity = convertRole(FolderRole.from(dto.role()));
         FolderShareEntity folderShare = FolderShareMapper.INSTANCE.toEntity(folder, InvitationStatus.PENDING, folderRoleEntity, owner, target);
         FolderShareEntity saveFolderShare = folderShareRepository.save(folderShare);
 
@@ -120,8 +111,8 @@ public class FolderShareService {
             throw new CustomException(ErrorCode.NOT_FOUND_TARGET_USER);
         }
 
-        FolderRoleEntity readRole = convertRole(Role.READER);
-        FolderRoleEntity writeRole = convertRole(Role.WRITER);
+        FolderRoleEntity readRole = convertRole(FolderRole.READER);
+        FolderRoleEntity writeRole = convertRole(FolderRole.WRITER);
 
         List<FolderShareEntity> newFolderShares = targets.stream().map(
                 target -> {
@@ -135,7 +126,7 @@ public class FolderShareService {
                         return null;
                     }
 
-                    FolderRoleEntity folderRole = role.equalsIgnoreCase(Role.WRITER.toString()) ? writeRole : readRole;
+                    FolderRoleEntity folderRole = role.equalsIgnoreCase(FolderRole.WRITER.toString()) ? writeRole : readRole;
                     return FolderShareEntity.create(folder, sender, target, folderRole);
                 }
         ).toList();
@@ -170,7 +161,7 @@ public class FolderShareService {
 
         checkValidation(folderShareEntity.getFolder(), owner.getUserId(), targetId);
 
-        FolderRoleEntity folderRoleEntity = convertRole(Role.from(dto.role()));
+        FolderRoleEntity folderRoleEntity = convertRole(FolderRole.from(dto.role()));
         folderShareEntity.setRole(folderRoleEntity);
         folderShareRepository.save(folderShareEntity);
     }
@@ -252,13 +243,13 @@ public class FolderShareService {
         if (ownerId.equals(targetId)) throw new CustomException(ErrorCode.INVITE_BAD_REQUEST);
     }
 
-    private FolderRoleEntity convertRole(Role role) {
+    private FolderRoleEntity convertRole(FolderRole folderRole) {
         FolderRoleEntity folderRoleEntity;
 
-        if (role.equals(Role.WRITER)) {
-            folderRoleEntity = folderRoleRepository.findByRoleName(Role.WRITER.getRoleName());
+        if (folderRole.equals(FolderRole.WRITER)) {
+            folderRoleEntity = folderRoleRepository.findByRoleName(FolderRole.WRITER.getRoleName());
         } else {
-            folderRoleEntity = folderRoleRepository.findByRoleName(Role.READER.getRoleName());
+            folderRoleEntity = folderRoleRepository.findByRoleName(FolderRole.READER.getRoleName());
         }
 
         return folderRoleEntity;

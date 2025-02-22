@@ -1,7 +1,6 @@
 package org.y2k2.globa.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,7 +35,7 @@ import org.y2k2.globa.exception.FileUploadException;
 import org.y2k2.globa.mapper.*;
 import org.y2k2.globa.repository.*;
 import org.y2k2.globa.type.InvitationStatus;
-import org.y2k2.globa.type.Role;
+import org.y2k2.globa.type.FolderRole;
 import org.y2k2.globa.util.file.FileStore;
 
 import java.util.ArrayList;
@@ -364,7 +363,7 @@ public class RecordService {
                 user,
                 folderId,
                 InvitationStatus.ACCEPT,
-                Role.OWNER.getRoleName()
+                FolderRole.OWNER.getRoleName()
         );
         if (!hasAccess) {
             throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);

@@ -12,7 +12,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.y2k2.globa.dto.common.auth.CustomUserDetails;
 import org.y2k2.globa.dto.request.notice.RequestNoticeAddDto;
 import org.y2k2.globa.dto.response.notice.ResponseNoticeDetailDto;
 import org.y2k2.globa.dto.response.notice.ResponseNoticeIntroDto;
@@ -48,11 +50,17 @@ public class NoticeController {
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                    })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
     @GetMapping("/intro")
-    public ResponseEntity<?> getIntroNotices(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken) {
+    public ResponseEntity<?> getIntroNotices() {
         return ResponseEntity.ok().body(noticeService.getIntroNotices());
     }
 
@@ -71,18 +79,18 @@ public class NoticeController {
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                    })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_NOTICE, ref = SwaggerErrorCode.NOT_FOUND_NOTICE_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
     @GetMapping("/{noticeId}")
-    public ResponseEntity<?> getNoticeDetail(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken, @PathVariable("noticeId") Long noticeId) {
-        if (noticeId == null) {
-            throw new CustomException(ErrorCode.REQUIRED_NOTICE_ID);
-        }
-
+    public ResponseEntity<?> getNoticeDetail(@PathVariable("noticeId") Long noticeId) {
         return ResponseEntity.ok().body(noticeService.getNoticeDetail(noticeId));
     }
 
@@ -99,26 +107,30 @@ public class NoticeController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
-                    @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ADD_NOTICE, ref = SwaggerErrorCode.NOT_DESERVE_ADD_NOTICE_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_ROLE, ref = SwaggerErrorCode.NOT_FOUND_ROLE_VALUE),
 
                     })),
-                    @ApiResponse(responseCode = "500", ref = "500")
+                    @ApiResponse(responseCode = "500", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.FAILED_FILE_UPLOAD, ref = SwaggerErrorCode.FAILED_FILE_UPLOAD_VALUE),
+                    }))
             }
     )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> addNotice(@Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken, @Valid @ModelAttribute final RequestNoticeAddDto dto) {
-        long userId = jwtTokenProvider.getUserIdByAccessToken(accessToken);
-
-        Long noticeId = noticeService.addNotice(userId, dto);
+    public ResponseEntity<?> addNotice(
+            @Valid @ModelAttribute final RequestNoticeAddDto dto,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        Long noticeId = noticeService.addNotice(dto, details.getUser());
         return ResponseEntity.created(URI.create("/" + noticeId)).build();
     }
 }

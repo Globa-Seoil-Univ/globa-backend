@@ -41,18 +41,20 @@ public class QuizAttemptService {
 
         List<QuizEntity> quizzes = quizRepository.findAllByRecordAndQuizIdIn(
                 record,
-            dto.getQuizzes().stream()
-                .map(RequestQuizDto.Quiz::quizId)
-                .toList()
+                dto.getQuizzes().stream()
+                    .map(RequestQuizDto.Quiz::quizId)
+                    .toList()
         );
 
         List<QuizAttemptEntity> attempts = new ArrayList<>();
 
-        for (QuizEntity quiz : quizzes) {
-            if (dto.getQuizzes().stream().noneMatch(q -> q.quizId().equals(quiz.getQuizId()))) {
-                throw new CustomException(ErrorCode.NOT_FOUND_QUIZ);
-            }
+        boolean isNotExists = dto.getQuizzes().stream().anyMatch(
+            q -> quizzes.stream().noneMatch(quiz -> quiz.getQuizId().equals(q.quizId()))
+        );
 
+        if (isNotExists) throw new CustomException(ErrorCode.MISMATCH_QUIZ_RECORD_ID);
+
+        for (QuizEntity quiz : quizzes) {
             RequestQuizDto.Quiz quizDto = dto.getQuizzes().stream()
                     .filter(q -> q.quizId().equals(quiz.getQuizId()))
                     .findFirst()

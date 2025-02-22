@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.dto.common.answer.RequestAnswerDto;
 import org.y2k2.globa.dto.request.notification.RequestNotificationWithInquiryDto;
-import org.y2k2.globa.dto.common.role.UserRole;
+import org.y2k2.globa.type.UserRole;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.*;
 import org.y2k2.globa.repository.*;
@@ -98,8 +98,8 @@ public class AnswerService {
     }
 
     private void validateRole(UserEntity user) {
-        UserRoleEntity role = userRoleRepository.findByUser(user);
-        if (role == null) throw new CustomException(ErrorCode.NOT_NULL_ROLE);
+        UserRoleEntity role = userRoleRepository.findByUser(user)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ROLE));
 
         String roleName = role.getRoleId().getName();
         boolean isValid = UserRole.ADMIN.getRoleName().equals(roleName) || UserRole.EDITOR.getRoleName().equals(roleName);

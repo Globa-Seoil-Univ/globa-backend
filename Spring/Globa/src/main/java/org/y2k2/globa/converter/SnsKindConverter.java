@@ -18,8 +18,8 @@ public class SnsKindConverter implements AttributeConverter<SnsKind, String> {
         }
 
         return switch (code) {
-            case "1001" -> SnsKind.KAKAO;
-            case "1004" -> SnsKind.GOOGLE;
+            case SnsKind.KAKAO_CODE -> SnsKind.KAKAO;
+            case SnsKind.GOOGLE_CODE -> SnsKind.GOOGLE;
             default -> throw new IllegalArgumentException("Unknown SnsKind code: " + code);
         };
     }

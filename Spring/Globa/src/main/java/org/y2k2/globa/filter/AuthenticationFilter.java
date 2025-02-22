@@ -50,6 +50,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                     ErrorResponse.toJson(ErrorCode.INVALID_TOKEN)
             );
             response.getWriter().flush();
+            return;
         }
 
         try {
@@ -62,6 +63,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                     ErrorResponse.toJson(e.getErrorCode())
             );
             response.getWriter().flush();
+            return;
         }
 
         filterChain.doFilter(request, response);

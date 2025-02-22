@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum Role {
+public enum FolderRole {
     OWNER("소유자"),
     READER("뷰어"),
     WRITER("편집자"),
@@ -13,10 +13,10 @@ public enum Role {
 
     private final String roleName;
 
-    public static Role from(String roleName) {
-        for (Role role : values()) {
-            if (role.toString().equalsIgnoreCase(roleName)) {
-                return role;
+    public static FolderRole from(String roleName) {
+        for (FolderRole folderRole : values()) {
+            if (folderRole.toString().equalsIgnoreCase(roleName)) {
+                return folderRole;
             }
         }
 

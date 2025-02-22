@@ -1,33 +1,25 @@
 package org.y2k2.globa.service;
 
-import com.google.cloud.storage.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.y2k2.globa.dto.common.file.FileDto;
-import org.y2k2.globa.dto.common.folder.FolderDto;
 import org.y2k2.globa.dto.request.folder.RequestFolderPostDto;
 import org.y2k2.globa.dto.response.folder.ResponseFolderDto;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.mapper.FolderShareMapper;
 import org.y2k2.globa.repository.*;
 import org.y2k2.globa.type.InvitationStatus;
-import org.y2k2.globa.type.Role;
+import org.y2k2.globa.type.FolderRole;
 import org.y2k2.globa.exception.*;
 import org.y2k2.globa.mapper.FolderMapper;
 import org.y2k2.globa.util.file.FileStore;
-import org.y2k2.globa.util.jwt.JWTProvider;
 
-import java.io.File;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -82,7 +74,7 @@ public class FolderService {
 
     @Transactional
     public FolderShareEntity createFolder(String title, UserEntity user) {
-        FolderRoleEntity role = folderRoleRepository.findByRoleName(Role.OWNER.getRoleName());
+        FolderRoleEntity role = folderRoleRepository.findByRoleName(FolderRole.OWNER.getRoleName());
         FolderEntity folder = FolderMapper.INSTANCE.toEntity(user, title);
         FolderEntity createdFolder = folderRepository.save(folder);
 

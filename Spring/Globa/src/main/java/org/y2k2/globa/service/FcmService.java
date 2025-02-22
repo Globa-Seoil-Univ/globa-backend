@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.dto.request.fcm.RequestFcmTopicDto;
-import org.y2k2.globa.dto.common.role.UserRole;
+import org.y2k2.globa.type.UserRole;
 import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.entity.UserRoleEntity;
 import org.y2k2.globa.exception.CustomException;
@@ -36,8 +36,8 @@ public class FcmService {
             throw new CustomException(ErrorCode.DELETED_USER);
         }
 
-        UserRoleEntity userRole = userRoleRepository.findByUser(user);
-        if (userRole == null) throw new CustomException(ErrorCode.NOT_NULL_ROLE);
+        UserRoleEntity userRole = userRoleRepository.findByUser(user)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ROLE));
 
         String roleName = userRole.getRoleId().getName();
         boolean isValid = UserRole.ADMIN.getRoleName().equals(roleName) || UserRole.EDITOR.getRoleName().equals(roleName);

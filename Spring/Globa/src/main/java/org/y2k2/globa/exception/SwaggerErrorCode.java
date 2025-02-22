@@ -66,8 +66,6 @@ public class SwaggerErrorCode {
     public static final String INVALID_SNS_TOKEN_VALUE = "40140";
 
     /* 403 FORBIDDEN : 잘못된 접근 */
-    public static final String NOT_NULL_ROLE = "NOT_NULL_ROLE";
-    public static final String NOT_NULL_ROLE_VALUE = "40310";
     public static final String NOT_DESERVE_ADD_NOTICE = "NOT_DESERVE_ADD_NOTICE";
     public static final String NOT_DESERVE_ADD_NOTICE_VALUE = "40320";
     public static final String NOT_DESERVE_ACCESS_FOLDER = "NOT_DESERVE_ACCESS_FOLDER";
@@ -108,6 +106,8 @@ public class SwaggerErrorCode {
     public static final String NOT_FOUND_DEFAULT_FOLDER_VALUE = "40411";
     public static final String NOT_FOUND_TARGET_USER = "NOT_FOUND_TARGET_USER";
     public static final String NOT_FOUND_TARGET_USER_VALUE = "40412";
+    public static final String NOT_FOUND_ROLE = "NOT_FOUND_ROLE";
+    public static final String NOT_FOUND_ROLE_VALUE = "40413";
     public static final String NOT_FOUND_INQUIRY = "NOT_FOUND_INQUIRY";
     public static final String NOT_FOUND_INQUIRY_VALUE = "40420";
     public static final String NOT_FOUND_NOTICE = "NOT_FOUND_NOTICE";

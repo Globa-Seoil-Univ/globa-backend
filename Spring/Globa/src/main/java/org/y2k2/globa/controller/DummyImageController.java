@@ -6,13 +6,17 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.y2k2.globa.dto.common.auth.CustomUserDetails;
+import org.y2k2.globa.dto.request.dummy.RequestDummyImageDto;
 import org.y2k2.globa.dto.response.dummyimage.ResponseDummyImageDto;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
@@ -41,11 +45,14 @@ public class DummyImageController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.REQUIRED_IMAGE, ref = SwaggerErrorCode.REQUIRED_IMAGE_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ADD_NOTICE, ref = SwaggerErrorCode.NOT_DESERVE_ADD_NOTICE_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
@@ -56,10 +63,11 @@ public class DummyImageController {
             }
     )
     @PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> addDummyImage(@Parameter(hidden = true) @RequestHeader(value = "Authorization") String accessToken, @RequestParam("image") MultipartFile file) {
-        if (file.isEmpty()) throw new CustomException(ErrorCode.REQUIRED_IMAGE);
-
-        ResponseDummyImageDto responseDto = dummyImageService.addDummyImage(accessToken, file);
+    public ResponseEntity<?> addDummyImage(
+            @Valid RequestDummyImageDto dto,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        ResponseDummyImageDto responseDto = dummyImageService.addDummyImage(dto, details.getUser());
         return ResponseEntity.ok().body(responseDto);
     }
 }

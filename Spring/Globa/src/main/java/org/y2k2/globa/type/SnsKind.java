@@ -12,6 +12,9 @@ public enum SnsKind {
     GOOGLE("1004"),
     ;
 
+    public static final String KAKAO_CODE = "1001";
+    public static final String GOOGLE_CODE = "1004";
+
     private final String code;
 
     @JsonValue

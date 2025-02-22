@@ -23,7 +23,7 @@ import org.y2k2.globa.repository.*;
 import org.y2k2.globa.mapper.CommentMapper;
 import org.y2k2.globa.type.InvitationStatus;
 import org.y2k2.globa.type.NotificationType;
-import org.y2k2.globa.type.Role;
+import org.y2k2.globa.type.FolderRole;
 import org.y2k2.globa.util.CustomTimestamp;
 
 import java.util.List;
@@ -178,7 +178,7 @@ public class CommentService {
         FolderShareEntity folderShare = folderShareRepository.findByFolderAndTargetUserJoinRole(section.getRecord().getFolder(), user)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_DESERVE_POST_COMMENT));
 
-        if (folderShare.getInvitationStatus().equals(InvitationStatus.PENDING) || folderShare.getRole().getRoleName().equals(Role.READER.getRoleName()))
+        if (folderShare.getInvitationStatus().equals(InvitationStatus.PENDING) || folderShare.getRole().getRoleName().equals(FolderRole.READER.getRoleName()))
             throw new CustomException(ErrorCode.NOT_DESERVE_POST_COMMENT);
 
         return folderShare;

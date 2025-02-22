@@ -45,7 +45,6 @@ public class FcmController {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.NOT_NULL_ROLE, ref = SwaggerErrorCode.NOT_NULL_ROLE_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_FCM, ref = SwaggerErrorCode.NOT_DESERVE_FCM_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {

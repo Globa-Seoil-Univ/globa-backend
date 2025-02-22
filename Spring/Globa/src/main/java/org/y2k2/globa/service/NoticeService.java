@@ -1,158 +1,109 @@
 package org.y2k2.globa.service;
 
-import com.google.cloud.storage.Bucket;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.y2k2.globa.annotation.FileCleanup;
+import org.y2k2.globa.dto.common.file.FileDto;
 import org.y2k2.globa.dto.request.notice.RequestNoticeAddDto;
 import org.y2k2.globa.dto.response.notice.ResponseNoticeDetailDto;
 import org.y2k2.globa.dto.response.notice.ResponseNoticeIntroDto;
 import org.y2k2.globa.dto.request.notification.RequestNotificationWithNoticeDto;
-import org.y2k2.globa.dto.common.role.UserRole;
+import org.y2k2.globa.mapper.NoticeImageMapper;
+import org.y2k2.globa.type.UserRole;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.*;
 import org.y2k2.globa.repository.*;
 import org.y2k2.globa.mapper.NoticeMapper;
 import org.y2k2.globa.mapper.NotificationMapper;
 import org.y2k2.globa.type.NotificationType;
+import org.y2k2.globa.util.file.FileStore;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class NoticeService {
-    private final UserRepository userRepository;
+    private final ApplicationEventPublisher publisher;
+    private final FileStore fileStore;
+
+    private final UserRoleService userRoleService;
+    private final NotificationService notificationService;
+
     private final UserRoleRepository userRoleRepository;
     private final NoticeRepository noticeRepository;
     private final NoticeImageRepository noticeImageRepository;
     private final DummyImageRepository dummyImageRepository;
-    private final NotificationRepository notificationRepository;
-
-    @Autowired
-    private Bucket bucket;
 
     public List<ResponseNoticeIntroDto> getIntroNotices() {
         List<NoticeEntity> noticeEntities = noticeRepository.findByOrderByCreatedTimeDesc(Limit.of(3));
 
         return noticeEntities.stream()
                 .map(NoticeMapper.INSTANCE::toIntroResponseDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public ResponseNoticeDetailDto getNoticeDetail(Long noticeId) {
-        NoticeEntity noticeEntity = noticeRepository.findByNoticeId(noticeId);
-
-        if (noticeEntity == null) {
-            throw new CustomException(ErrorCode.NOT_FOUND_NOTICE);
-        }
+        NoticeEntity noticeEntity = noticeRepository.findByNoticeId(noticeId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_NOTICE));
 
         return NoticeMapper.INSTANCE.toDetailResponseDto(noticeEntity);
     }
 
     @Transactional
-    public Long addNotice(Long userId, RequestNoticeAddDto dto) {
-        UserEntity user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+    @FileCleanup
+    public Long addNotice(RequestNoticeAddDto dto, UserEntity user) {
+        Optional<UserRoleEntity> optionalUserRole = userRoleRepository.findByUser(user);
 
-        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
+        if (optionalUserRole.isEmpty()) {
+            userRoleService.createUserRoleAndThrowException(user);
+        } else {
+            boolean isAdminOrEditor = userRoleService.isAdminOrEditor(optionalUserRole.get());
+            if (!isAdminOrEditor) throw new CustomException(ErrorCode.NOT_DESERVE_ADD_NOTICE);
+        }
 
-        UserRoleEntity userRole = userRoleRepository.findByUser(user);
-        String roleName = userRole.getRoleId().getName();
-        boolean isAdminOrEditor = UserRole.ADMIN.getRoleName().equals(roleName) || UserRole.EDITOR.getRoleName().equals(roleName);
-        if (!isAdminOrEditor) throw new CustomException(ErrorCode.NOT_DESERVE_ADD_NOTICE);
-
-        NoticeEntity requestEntity = NoticeMapper.INSTANCE.toEntity(dto);
-        requestEntity.setUser(user);
+        FileDto fileDto = fileStore.storeFile("notices/thumbnails/", dto.thumbnail());
+        NoticeEntity createdNotice;
 
         try {
-            uploadThumbnail(requestEntity, dto.getThumbnail());
-            NoticeEntity noticeEntity = noticeRepository.save(requestEntity);
+            NoticeEntity notice = NoticeMapper.INSTANCE.toEntity(dto, user, fileDto);
+            createdNotice = noticeRepository.save(notice);
 
-            if (dto.getImageIds() == null) {
-                NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithNotice(
-                        RequestNotificationWithNoticeDto.builder()
-                                .sender(user)
-                                .notice(noticeEntity)
-                                .title(noticeEntity.getTitle())
-                                .build()
-                );
-                notification.setTypeId(NotificationType.NOTICE.getTypeId());
-                notificationRepository.save(notification);
+            if (dto.imageIds() != null) {
+                List<DummyImageEntity> dummyImages = dummyImageRepository.findByImageIdIn(dto.imageIds());
+                List<NoticeImageEntity> noticeImages = dummyImages.stream().map(
+                        dummyImage -> NoticeImageMapper.INSTANCE.toEntity(createdNotice, dummyImage)
+                ).toList();
 
-                return noticeEntity.getNoticeId();
+                dummyImageRepository.deleteAllInBatch(dummyImages);
+                noticeImageRepository.saveAll(noticeImages);
             }
-
-            List<DummyImageEntity> dummyImageEntities = dummyImageRepository.findByImageIdIn(dto.getImageIds());
-            List<NoticeImageEntity> noticeImageEntities = new ArrayList<>();
-
-            if (dummyImageEntities.isEmpty()) return noticeEntity.getNoticeId();
-
-            for (DummyImageEntity dummyImageEntity : dummyImageEntities) {
-                noticeImageEntities.add(
-                        NoticeImageEntity.create(
-                                noticeEntity,
-                                dummyImageEntity.getImagePath(),
-                                dummyImageEntity.getImageSize(),
-                                dummyImageEntity.getImageType()
-                        )
-                );
-            }
-
-            dummyImageRepository.deleteAllInBatch(dummyImageEntities);
-            noticeImageRepository.saveAll(noticeImageEntities);
-
-            NotificationEntity notification = NotificationMapper.INSTANCE.toNotificationWithNotice(
-                    RequestNotificationWithNoticeDto.builder()
-                            .sender(user)
-                            .notice(noticeEntity)
-                            .title(noticeEntity.getTitle())
-                            .build()
-            );
-            notification.setTypeId(NotificationType.NOTICE.getTypeId());
-            notificationRepository.save(notification);
-
-            return noticeEntity.getNoticeId();
         } catch (Exception e) {
-            if (bucket.get(requestEntity.getThumbnailPath()) != null) {
-                bucket.get(requestEntity.getThumbnailPath()).delete();
-            }
-
-            throw new CustomException(ErrorCode.FAILED_FILE_UPLOAD  );
+            log.error("Failed to add notice = ", e);
+            throw new FileUploadException(fileDto.storePath());
         }
-    }
 
-    private void uploadThumbnail(NoticeEntity notice, MultipartFile file) {
-        long current = new Date().getTime();
-        long size = file.getSize();
-        String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());
-        String mimeType = file.getContentType();
+        RequestNotificationWithNoticeDto info = RequestNotificationWithNoticeDto.builder()
+                .sender(user)
+                .notice(createdNotice)
+                .title(createdNotice.getTitle())
+                .notificationType(NotificationType.NOTICE)
+                .build();
 
-        String path = "notices/thumbnails/" + current + "." + extension;
+        notificationService.saveNotification(info);
+        publisher.publishEvent(info);
 
-        try {
-            if (bucket.get(path) != null) {
-                bucket.get(path).delete();
-            }
-
-            bucket.create(path, file.getBytes());
-
-            notice.setThumbnailPath(path);
-            notice.setThumbnailSize(size);
-            notice.setThumbnailType(mimeType);
-        } catch (Exception e) {
-            if (bucket.get(path) != null) {
-                bucket.get(path).delete();
-            }
-
-            throw new CustomException(ErrorCode.FAILED_FILE_UPLOAD);
-        }
+        return createdNotice.getNoticeId();
     }
 }
