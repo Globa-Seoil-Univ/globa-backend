@@ -6,7 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.y2k2.globa.dto.common.inquiry.InquiryDto;
-import org.y2k2.globa.dto.request.inquiry.PaginationDto;
+import org.y2k2.globa.dto.request.inquiry.InquiryPaginationDto;
 import org.y2k2.globa.dto.request.inquiry.RequestInquiryDto;
 import org.y2k2.globa.dto.response.inquiry.ResponseInquiryDetailDto;
 import org.y2k2.globa.dto.response.inquiry.ResponseInquiryDto;
@@ -18,6 +18,7 @@ import org.y2k2.globa.mapper.InquiryMapper;
 import org.y2k2.globa.repository.AnswerRepository;
 import org.y2k2.globa.repository.InquiryRepository;
 import org.y2k2.globa.repository.UserRepository;
+import org.y2k2.globa.type.InquirySort;
 
 import java.util.List;
 
@@ -26,61 +27,47 @@ import java.util.List;
 public class InquiryService {
     private final InquiryRepository inquiryRepository;
     private final AnswerRepository answerRepository;
-    private final UserRepository userRepository;
 
-    public ResponseInquiryDto getInquiries(long userId, PaginationDto pagination) {
-        UserEntity user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
-        Pageable pageable = PageRequest.of(pagination.getPage() - 1, pagination.getCount());
+    public ResponseInquiryDto getInquiries(InquiryPaginationDto pagination, UserEntity user) {
+        Pageable pageable = PageRequest.of(pagination.page() - 1, pagination.count());
         Page<InquiryEntity> inquiryEntityPage;
 
-        if (pagination.getSort().getValue().equals("s")) {
-            inquiryEntityPage = inquiryRepository.findAllByIsSolvedIsTrueOrderByCreatedTimeDesc(pageable);
-        } else if (pagination.getSort().getValue().equals("n")) {
-            inquiryEntityPage = inquiryRepository.findAllByIsSolvedIsFalseOrderByCreatedTimeDesc(pageable);
+        if (pagination.sort().equals(InquirySort.S)) {
+            inquiryEntityPage = inquiryRepository.findAllByUserAndIsSolvedIsTrueOrderByCreatedTimeDesc(user, pageable);
+        } else if (pagination.sort().equals(InquirySort.N)) {
+            inquiryEntityPage = inquiryRepository.findAllByUserAndIsSolvedIsFalseOrderByCreatedTimeDesc(user, pageable);
         } else {
-            inquiryEntityPage = inquiryRepository.findAllByOrderByCreatedTimeDesc(pageable);
+            inquiryEntityPage = inquiryRepository.findAllByUserOrderByCreatedTimeDesc(user, pageable);
         }
 
         List<InquiryEntity> inquiryEntities = inquiryEntityPage.getContent();
         List<InquiryDto> dtos = inquiryEntities.stream()
                 .map(InquiryMapper.INSTANCE::toInquiryDto)
                 .toList();
-        long total = inquiryEntityPage.getTotalElements();
 
-        return new ResponseInquiryDto(dtos, total);
+        return new ResponseInquiryDto(dtos, inquiryEntityPage.getTotalElements());
     }
 
-    public ResponseInquiryDetailDto getInquiry(long userId, long inquiryId) {
-        UserEntity user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-
-        InquiryEntity inquiry = inquiryRepository.findByInquiryId(inquiryId);
-        if (inquiry == null) throw new CustomException(ErrorCode.NOT_FOUND_INQUIRY);
-        else if (!inquiry.getUser().getUserId().equals(userId)) throw new CustomException(ErrorCode.MISMATCH_INQUIRY_OWNER);
-
-        AnswerEntity answer = null;
+    public ResponseInquiryDetailDto getInquiry(long inquiryId, UserEntity user) {
+        InquiryEntity inquiry = inquiryRepository.findByInquiryId(inquiryId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_INQUIRY));
+        if (!inquiry.getUser().getUserId().equals(user.getUserId())) {
+            throw new CustomException(ErrorCode.MISMATCH_INQUIRY_OWNER);
+        }
 
         if (inquiry.getIsSolved()) {
-            answer = answerRepository.findByInquiry(inquiry);
-        }
+            AnswerEntity answer = answerRepository.findByInquiry(inquiry)
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ANSWER));
 
-        if (answer == null) {
-            return InquiryMapper.INSTANCE.toResponseInquiryDetailDto(inquiry);
-        } else {
             return InquiryMapper.INSTANCE.toResponseInquiryDetailDto(inquiry, answer);
         }
+
+        return InquiryMapper.INSTANCE.toResponseInquiryDetailDto(inquiry);
     }
 
-    public long addInquiry(long userId, RequestInquiryDto dto) {
-        UserEntity user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-
-        InquiryEntity inquiry = InquiryEntity.create(user, dto.getTitle(), dto.getContent());
+    public long addInquiry(RequestInquiryDto dto, UserEntity user) {
+        InquiryEntity inquiry = InquiryEntity.create(user, dto.title(), dto.content());
         InquiryEntity response = inquiryRepository.save(inquiry);
-
         return response.getInquiryId();
     }
 }

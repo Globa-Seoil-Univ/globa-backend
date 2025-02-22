@@ -4,10 +4,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.y2k2.globa.entity.InquiryEntity;
+import org.y2k2.globa.entity.UserEntity;
+
+import java.util.Optional;
 
 public interface InquiryRepository extends JpaRepository<InquiryEntity, Long> {
-    InquiryEntity findByInquiryId(long inquiryId);
-    Page<InquiryEntity> findAllByOrderByCreatedTimeDesc(Pageable pageable);
-    Page<InquiryEntity> findAllByIsSolvedIsTrueOrderByCreatedTimeDesc(Pageable pageable);
-    Page<InquiryEntity> findAllByIsSolvedIsFalseOrderByCreatedTimeDesc(Pageable pageable);
+    Optional<InquiryEntity> findByInquiryId(long inquiryId);
+    Page<InquiryEntity> findAllByUserOrderByCreatedTimeDesc(UserEntity user, Pageable pageable);
+    Page<InquiryEntity> findAllByUserAndIsSolvedIsTrueOrderByCreatedTimeDesc(UserEntity user, Pageable pageable);
+    Page<InquiryEntity> findAllByUserAndIsSolvedIsFalseOrderByCreatedTimeDesc(UserEntity user, Pageable pageable);
 }

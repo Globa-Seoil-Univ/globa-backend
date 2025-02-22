@@ -14,7 +14,7 @@ public enum InquirySort {
         this.value = value;
     }
 
-    public static InquirySort valueOfString(String s) {
+    public static InquirySort from(String s) {
         if (s.equals("s")) {
             return InquirySort.S;
         } else if (s.equals("n")) {

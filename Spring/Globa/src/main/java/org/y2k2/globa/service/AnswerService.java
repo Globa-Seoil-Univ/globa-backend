@@ -31,8 +31,8 @@ public class AnswerService {
         UserEntity user = validateUser(userId);
         validateRole(user);
 
-        InquiryEntity inquiry = inquiryRepository.findByInquiryId(inquiryId);
-        if (inquiry == null) throw new CustomException(ErrorCode.NOT_FOUND_INQUIRY);
+        InquiryEntity inquiry = inquiryRepository.findByInquiryId(inquiryId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_INQUIRY));
         if (inquiry.getIsSolved()) throw new CustomException(ErrorCode.INQUIRY_ANSWER_DUPLICATED);
 
         inquiry.setIsSolved(true);
@@ -59,8 +59,8 @@ public class AnswerService {
         UserEntity user = validateUser(userId);
         validateRole(user);
 
-        InquiryEntity inquiry = inquiryRepository.findByInquiryId(inquiryId);
-        if (inquiry == null) throw new CustomException(ErrorCode.NOT_FOUND_INQUIRY);
+        InquiryEntity inquiry = inquiryRepository.findByInquiryId(inquiryId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_INQUIRY));
 
         AnswerEntity answer = validateAnswer(answerId);
 
@@ -78,8 +78,8 @@ public class AnswerService {
         UserEntity user = validateUser(userId);
         validateRole(user);
 
-        InquiryEntity inquiry = inquiryRepository.findByInquiryId(inquiryId);
-        if (inquiry == null) throw new CustomException(ErrorCode.NOT_FOUND_INQUIRY);
+        InquiryEntity inquiry = inquiryRepository.findByInquiryId(inquiryId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_INQUIRY));
 
         AnswerEntity answer = validateAnswer(answerId);
 
