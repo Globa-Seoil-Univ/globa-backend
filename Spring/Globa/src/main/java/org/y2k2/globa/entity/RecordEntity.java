@@ -40,10 +40,10 @@ public class RecordEntity {
     @Column(name = "size", nullable = false, length = 100)
     private String size;
 
-    @Column(name = "is_share", nullable = false, columnDefinition = "DEFAULT 0")
+    @Column(name = "is_share", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isShare;
 
     @CreationTimestamp
-    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 }

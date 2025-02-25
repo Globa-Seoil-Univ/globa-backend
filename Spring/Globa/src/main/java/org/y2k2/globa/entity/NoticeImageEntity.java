@@ -36,7 +36,7 @@ public class NoticeImageEntity {
     private String imageType;
 
     @CreationTimestamp
-    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 
     public static NoticeImageEntity create(NoticeEntity notice, String path, long size, String type) {

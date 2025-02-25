@@ -55,6 +55,7 @@ public enum ErrorCode {
     NOT_DESERVE_FCM(HttpStatus.FORBIDDEN,"관리자 또는 편집자만 요청할 수 있습니다.",40324),
     NOT_DESERVE_DICTIONARY(HttpStatus.FORBIDDEN,"관리자 또는 편집자만 요청할 수 있습니다.",40325),
     NOT_DESERVE_ACCEPT_INVITATION(HttpStatus.FORBIDDEN,"초대를 수락할 수 있는 권한이 없습니다.",40326),
+    NOT_DESERVE_ACCESS_NOTIFICATION(HttpStatus.FORBIDDEN,"알림에 대한 접근 권한이 없습니다. ",40327),
     MISMATCH_INQUIRY_OWNER(HttpStatus.FORBIDDEN, "해당 문의에 대한 소유권자가 아닙니다.", 40340),
     MISMATCH_FOLDER_OWNER(HttpStatus.FORBIDDEN, "해당 폴더에 대한 소유권자가 아닙니다.", 40341),
     MISMATCH_COMMENT_OWNER(HttpStatus.FORBIDDEN, "해당 댓글에 대한 소유권자가 아닙니다.", 40342),

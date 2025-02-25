@@ -30,6 +30,6 @@ public class KeywordEntity {
     @Column(name = "importance", nullable = false, precision = 5, scale = 4)
     private BigDecimal importance;
 
-    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 }

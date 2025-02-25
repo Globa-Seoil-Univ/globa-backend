@@ -39,11 +39,11 @@ public class CommentEntity {
     @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "is_deleted", nullable = false, columnDefinition = "DEFAULT 0")
+    @Column(name = "is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT 0")
     private Boolean isDeleted;
 
     @CreationTimestamp
-    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 
     @Column(name = "deleted_time")
@@ -62,7 +62,6 @@ public class CommentEntity {
 
         return entity;
     }
-
 
     public static CommentEntity createReply(UserEntity writer, HighlightEntity highlight, CommentEntity parent, String content) {
         CommentEntity entity = new CommentEntity();

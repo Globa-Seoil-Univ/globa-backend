@@ -9,10 +9,14 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum SnsKind {
     KAKAO("1001"),
+    NAVER("1002"),
+    TWITTER("1003"),
     GOOGLE("1004"),
     ;
 
     public static final String KAKAO_CODE = "1001";
+    public static final String NAVER_CODE = "1002";
+    public static final String TWITTER_CODE = "1003";
     public static final String GOOGLE_CODE = "1004";
 
     private final String code;

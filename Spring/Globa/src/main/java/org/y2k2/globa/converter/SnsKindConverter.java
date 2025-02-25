@@ -8,7 +8,11 @@ import org.y2k2.globa.type.SnsKind;
 public class SnsKindConverter implements AttributeConverter<SnsKind, String> {
     @Override
     public String convertToDatabaseColumn(SnsKind snsKind) {
-        return snsKind != null ? snsKind.getCode() : null;
+        if (snsKind == null) {
+            throw new IllegalArgumentException("SnsKind cannot be null");
+        }
+
+        return snsKind.getCode();
     }
 
     @Override
@@ -19,6 +23,8 @@ public class SnsKindConverter implements AttributeConverter<SnsKind, String> {
 
         return switch (code) {
             case SnsKind.KAKAO_CODE -> SnsKind.KAKAO;
+            case SnsKind.NAVER_CODE -> SnsKind.NAVER;
+            case SnsKind.TWITTER_CODE -> SnsKind.TWITTER;
             case SnsKind.GOOGLE_CODE -> SnsKind.GOOGLE;
             default -> throw new IllegalArgumentException("Unknown SnsKind code: " + code);
         };

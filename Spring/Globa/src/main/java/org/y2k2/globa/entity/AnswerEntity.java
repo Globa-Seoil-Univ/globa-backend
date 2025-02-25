@@ -19,12 +19,12 @@ public class AnswerEntity {
     @Column(name = "answer_id", columnDefinition = "INT UNSIGNED")
     private Long answerId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "user_id", columnDefinition = "INT UNSIGNED")
     private UserEntity user;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "inquiry_id", columnDefinition = "INT UNSIGNED")
     private InquiryEntity inquiry;
@@ -37,6 +37,6 @@ public class AnswerEntity {
     private String content;
 
     @CreationTimestamp
-    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 }

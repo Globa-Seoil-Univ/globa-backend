@@ -31,11 +31,11 @@ public class HighlightEntity {
     @Column(name = "end_index", nullable = false, columnDefinition = "INT UNSIGNED")
     private Long endIndex;
 
-    @Column(name = "type", nullable = false, columnDefinition = "DEFAULT 1")
+    @Column(name = "type", nullable = false, columnDefinition = "CHAR(1) DEFAULT 1")
     private Character type;
 
     @CreationTimestamp
-    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 
     public static HighlightEntity create(SectionEntity section, long startIndex, long endIndex) {

@@ -1,7 +1,6 @@
 package org.y2k2.globa.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,16 +9,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.y2k2.globa.dto.common.auth.CustomUserDetails;
 import org.y2k2.globa.dto.response.notification.ResponseNotificationDto;
 import org.y2k2.globa.dto.response.notification.ResponseUnreadCountDto;
 import org.y2k2.globa.dto.response.notification.ResponseUnreadNotificationDto;
-import org.y2k2.globa.exception.CustomException;
-import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.NotificationService;
 import org.y2k2.globa.type.NotificationSort;
-import org.y2k2.globa.util.jwt.JWTProvider;
 
 @RestController
 @RequestMapping("/notification")
@@ -28,7 +26,6 @@ import org.y2k2.globa.util.jwt.JWTProvider;
 @Tag(name = "Notification", description = "알림 관련 API입니다.")
 public class NotificationController {
     private final NotificationService notificationService;
-    private final JWTProvider jwtTokenProvider;
 
     @Operation(
             summary = "알림 조회",
@@ -41,10 +38,12 @@ public class NotificationController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
@@ -54,14 +53,13 @@ public class NotificationController {
     )
     @GetMapping
     public ResponseEntity<?> getNotifications(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
             @RequestParam(value = "type", defaultValue = "a") String type,
-            @RequestParam(value = "count", defaultValue = "100") int count,
-            @RequestParam(value = "page", defaultValue = "1") int page) {
+            @RequestParam(value = "count", defaultValue = "10") int count,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
         NotificationSort sort = NotificationSort.valueOfString(type);
-        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-
-        return ResponseEntity.ok().body(notificationService.getNotifications(userId, count, page, sort));
+        return ResponseEntity.ok().body(notificationService.getNotifications(count, page, sort, details.getUser()));
     }
 
     @Operation(
@@ -75,10 +73,12 @@ public class NotificationController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
@@ -88,29 +88,10 @@ public class NotificationController {
     )
     @GetMapping("/unread/check")
     public ResponseEntity<?> getHasUnreadNotifications(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken
-        ) {
-
-        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-
-        return ResponseEntity.ok().body(notificationService.getHasUnreadNotification(userId));
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        return ResponseEntity.ok().body(notificationService.getHasUnreadNotification(details.getUser()));
     }
-
-//    @GetMapping("/unread")
-//    public ResponseEntity<?> getUnreadNotifications(
-//            @RequestHeader(value = "Authorization") String accessToken,
-//            @RequestParam(value="type", defaultValue = "a") String type
-//    ) {
-//        if (accessToken == null)
-//            throw new CustomException(ErrorCode.REQUIRED_ACCESS_TOKEN);
-//
-//        if ( !ValidValues.validNotificationTypes.contains(type))
-//            throw new CustomException(ErrorCode.NOFI_TYPE_BAD_REQUEST);
-//
-//        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-//
-//        return ResponseEntity.ok().body(notificationService.getUnreadNotification(userId, type));
-//    }
 
     @Operation(
             summary = "안 읽은 알림 개수 조회",
@@ -123,10 +104,12 @@ public class NotificationController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
@@ -136,10 +119,9 @@ public class NotificationController {
     )
     @GetMapping("/unread/count")
     public ResponseEntity<?> getCountUnreadNotifications(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-        return ResponseEntity.ok().body(notificationService.getCountUnreadNotification(userId));
+        return ResponseEntity.ok().body(notificationService.getCountUnreadNotification(details.getUser()));
     }
 
     @Operation(
@@ -152,15 +134,18 @@ public class NotificationController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCESS_NOTIFICATION, ref = SwaggerErrorCode.NOT_DESERVE_ACCESS_NOTIFICATION_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER, ref = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE),
+                    })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_NOTIFICATION, ref = SwaggerErrorCode.NOT_FOUND_NOTIFICATION_VALUE),
-
                     })),
                     @ApiResponse(responseCode = "409", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOTIFICATION_READ_DUPLICATED, ref = SwaggerErrorCode.NOTIFICATION_READ_DUPLICATED_VALUE),
@@ -169,17 +154,11 @@ public class NotificationController {
             }
     )
     @PostMapping("/{notification_id}")
-    public ResponseEntity<?> postNotificationRead(
-            @RequestHeader(value = "Authorization") String accessToken,
-            @PathVariable(value="notification_id") Long notificationId
+    public ResponseEntity<?> readNotification(
+            @PathVariable(value="notification_id") Long notificationId,
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        if (notificationId == null || notificationId < 0)
-            throw new CustomException(ErrorCode.REQUIRED_NOTIFICATION_ID);
-
-        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-
-        notificationService.postNotificationRead(userId,notificationId);
-
+        notificationService.readNotification(notificationId, details.getUser());
         return ResponseEntity.noContent().build();
     }
 
@@ -197,10 +176,14 @@ public class NotificationController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCESS_NOTIFICATION, ref = SwaggerErrorCode.NOT_DESERVE_ACCESS_NOTIFICATION_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER, ref = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
@@ -212,19 +195,10 @@ public class NotificationController {
     )
     @DeleteMapping("/{notification_id}")
     public ResponseEntity<?> deleteNotification(
-            @RequestHeader(value = "Authorization") String accessToken,
-            @PathVariable(value="notification_id") Long notificationId
+            @PathVariable(value="notification_id") Long notificationId,
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        if (notificationId == null || notificationId < 0)
-            throw new CustomException(ErrorCode.REQUIRED_NOTIFICATION_ID);
-
-        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-
-        notificationService.deleteNotification(userId,notificationId);
-
+        notificationService.deleteNotification(notificationId, details.getUser());
         return ResponseEntity.noContent().build();
     }
-
-
-
 }

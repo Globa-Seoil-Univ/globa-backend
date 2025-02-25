@@ -1,6 +1,7 @@
 package org.y2k2.globa.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,15 +19,15 @@ public class NotificationEntity {
     @Column(name = "notification_id", columnDefinition = "INT UNSIGNED")
     private Long notificationId;
 
-    @Column(name = "type_id", nullable = false, columnDefinition = "CHECK (type_id >= 1 AND type_id <= 8)")
+    @Column(name = "type_id", nullable = false)
     private Character typeId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "receiver_id", columnDefinition = "INT UNSIGNED")
     private UserEntity receiver;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "sender_id", columnDefinition = "INT UNSIGNED")
     private UserEntity sender;

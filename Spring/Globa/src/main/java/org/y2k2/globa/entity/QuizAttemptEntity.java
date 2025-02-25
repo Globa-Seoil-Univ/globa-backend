@@ -28,10 +28,10 @@ public class QuizAttemptEntity {
     @JoinColumn(name = "quiz_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private QuizEntity quiz;
 
-    @Column(name = "is_correct", columnDefinition = "DEFAULT 0")
+    @Column(name = "is_correct", columnDefinition = "BOOLEAN DEFAULT 0")
     private Boolean isCorrect;
 
     @CreationTimestamp
-    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 }

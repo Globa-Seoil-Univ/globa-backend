@@ -42,11 +42,11 @@ public class FolderShareEntity {
     private FolderRoleEntity role;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "invitation_status", length = 7, columnDefinition = "DEFAULT 'PENDING'")
+    @Column(name = "invitation_status", length = 7, columnDefinition = "ENUM('PENDING', 'ACCEPT') DEFAULT 'PENDING'")
     private InvitationStatus invitationStatus;
 
     @CreationTimestamp
-    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 
     @PrePersist

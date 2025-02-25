@@ -31,16 +31,16 @@ public class UserEntity {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @Column(name = "primary_nofi", columnDefinition = "DEFAULT 0")
+    @Column(name = "primary_nofi", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean primaryNofi;
 
-    @Column(name = "upload_nofi", columnDefinition = "DEFAULT 0")
+    @Column(name = "upload_nofi", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean uploadNofi;
 
-    @Column(name = "share_nofi", columnDefinition = "DEFAULT 0")
+    @Column(name = "share_nofi", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean shareNofi;
 
-    @Column(name = "event_nofi", columnDefinition = "DEFAULT 0")
+    @Column(name = "event_nofi", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean eventNofi;
 
     @Column(name = "profile_size", columnDefinition = "INT UNSIGNED")
@@ -58,7 +58,7 @@ public class UserEntity {
     @Column(name = "notification_token_time")
     private LocalDateTime notificationTokenTime;
 
-    @Column(name = "is_deleted", columnDefinition = "DEFAULT 0")
+    @Column(name = "is_deleted", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isDeleted;
 
     @Column(name = "deleted_time")

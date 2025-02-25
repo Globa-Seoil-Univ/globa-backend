@@ -20,7 +20,7 @@ public class InquiryEntity {
     @Column(name = "inquiry_id", columnDefinition = "INT UNSIGNED")
     private Long inquiryId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "user_id", columnDefinition = "INT UNSIGNED")
     private UserEntity user;
@@ -32,7 +32,7 @@ public class InquiryEntity {
     @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "is_solved", columnDefinition = "DEFAULT 0")
+    @Column(name = "is_solved", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isSolved;
 
     @CreationTimestamp

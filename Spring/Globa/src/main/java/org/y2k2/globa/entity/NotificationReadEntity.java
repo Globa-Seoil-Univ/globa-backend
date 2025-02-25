@@ -27,22 +27,15 @@ public class NotificationReadEntity {
     @JoinColumn(name = "user_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private UserEntity user;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "notification_id", columnDefinition = "INT UNSIGNED")
     private NotificationEntity notification;
 
-    @Column(name = "is_deleted", columnDefinition = "DEFAULT 0")
+    @Column(name = "is_deleted", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isDeleted;
 
     @CreationTimestamp
-    @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
-
-    @Builder
-    public NotificationReadEntity(UserEntity user, NotificationEntity notification, Boolean isDeleted) {
-        this.user = user;
-        this.notification = notification;
-        this.isDeleted = isDeleted;
-    }
 }
