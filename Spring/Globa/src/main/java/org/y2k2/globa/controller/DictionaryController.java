@@ -10,7 +10,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.y2k2.globa.dto.common.auth.CustomUserDetails;
 import org.y2k2.globa.dto.response.dictionary.ResponseDictionaryDto;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
@@ -41,10 +43,10 @@ public class DictionaryController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
@@ -53,8 +55,10 @@ public class DictionaryController {
             }
     )
     @GetMapping
-    public ResponseEntity<?> getDictionary(@Parameter(hidden = true) @RequestHeader(value = "Authorization") String accessToken, @RequestParam(value = "keyword") String keyword) {
-        return ResponseEntity.ok().body(dictionaryService.getDictionary(accessToken, keyword));
+    public ResponseEntity<?> getDictionary(
+            @RequestParam(value = "keyword") String keyword
+    ) {
+        return ResponseEntity.ok().body(dictionaryService.getDictionary(keyword));
     }
 
     @Operation(
@@ -71,23 +75,28 @@ public class DictionaryController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_DICTIONARY, ref = SwaggerErrorCode.NOT_DESERVE_DICTIONARY_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_KEYWORD_EXCEL, ref = SwaggerErrorCode.NOT_FOUND_KEYWORD_EXCEL_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE)
                     })),
-                    @ApiResponse(responseCode = "500", ref = "500")
+                    @ApiResponse(responseCode = "500", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.FAILED_EXCEL, ref = SwaggerErrorCode.FAILED_EXCEL_VALUE),
+                    }))
             }
     )
     @PostMapping
-    public ResponseEntity<?> addDictionary(@Parameter(hidden = true) @RequestHeader(value = "Authorization") String accessToken) {
-        dictionaryService.saveDictionary(accessToken);
+    public ResponseEntity<?> addDictionary(
+            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        dictionaryService.addDictionary(details.getUser());
         return ResponseEntity.created(URI.create("/dictionary?keyword=테스트")).build();
     }
 }

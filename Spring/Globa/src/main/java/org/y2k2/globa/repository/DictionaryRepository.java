@@ -8,12 +8,11 @@ import java.util.List;
 
 public interface DictionaryRepository extends JpaRepository<DictionaryEntity, Long> {
     @Query(
-            value = "SELECT * FROM dictionary " +
-                    "WHERE word LIKE CONCAT(:word, '%') " +
-                    "OR eng_word LIKE CONCAT(:engWord, '%') " +
-                    "ORDER BY LENGTH(word), created_time ASC " +
-                    "LIMIT 10",
-            nativeQuery = true
+            value = "SELECT d FROM DictionaryEntity d " +
+                    "WHERE d.word LIKE CONCAT(:word, '%') " +
+                        "OR d.engWord LIKE CONCAT(:engWord, '%') " +
+                    "ORDER BY LENGTH(d.word), d.createdTime ASC " +
+                    "LIMIT 10 "
     )
     List<DictionaryEntity> findTop10ByWordStartingWithOrEngWordStartingWithOrderByCreatedTimeAsc(String word, String engWord);
 }

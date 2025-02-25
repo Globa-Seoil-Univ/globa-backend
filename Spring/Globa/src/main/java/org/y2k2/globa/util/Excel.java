@@ -26,20 +26,18 @@ public class Excel {
     private String dictionaryPath;
 
     private List<File> getExcelList() {
-        List<File> excelFiles = new ArrayList<>();
-
         File directory = new File(dictionaryPath);
         if (directory.exists() && directory.isDirectory()) {
             File[] files = directory.listFiles((dir, name) -> name.toLowerCase().endsWith(".xls"));
             if (files != null) {
-                excelFiles.addAll(Arrays.asList(files));
+                return Arrays.asList(files);
             }
+
+            return new ArrayList<>();
         } else {
             log.error("Not found keyword excel files %s".formatted(dictionaryPath));
             throw new CustomException(ErrorCode.NOT_FOUND_KEYWORD_EXCEL);
         }
-
-        return excelFiles;
     }
 
     public List<DictionaryDto> getDictionaryDto() {
@@ -85,7 +83,15 @@ public class Excel {
                                 ? null
                                 : descriptionCell.getStringCellValue().trim();
 
-                        dictionaryDtos.add(new DictionaryDto(word, otherWord, description, category, pronunciation));
+                        dictionaryDtos.add(
+                                DictionaryDto.builder()
+                                        .word(word)
+                                        .engWord(otherWord)
+                                        .description(description)
+                                        .category(category)
+                                        .pronunciation(pronunciation)
+                                        .build()
+                        );
                     }
                 }
             }

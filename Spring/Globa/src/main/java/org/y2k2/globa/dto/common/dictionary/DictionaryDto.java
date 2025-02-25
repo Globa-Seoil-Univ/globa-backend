@@ -1,16 +1,12 @@
 package org.y2k2.globa.dto.common.dictionary;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
 
-@Getter
-@Setter
-@AllArgsConstructor
-public class DictionaryDto {
-    private String word;
-    private String engWord;
-    private String description;
-    private String category;
-    private String pronunciation;
-}
+@Builder
+public record DictionaryDto(
+        String word,
+        String engWord,
+        String description,
+        String category,
+        String pronunciation
+) {}

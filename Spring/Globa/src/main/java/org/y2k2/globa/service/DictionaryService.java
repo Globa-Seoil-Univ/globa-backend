@@ -23,48 +23,40 @@ import org.y2k2.globa.util.jwt.JWTProvider;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class DictionaryService {
     private final Excel excel;
     private final JdbcTemplate jdbcTemplate;
-    private final JWTProvider jwtTokenProvider;
 
-    private final UserRepository userRepository;
+    private final UserRoleService userRoleService;
+
     private final UserRoleRepository userRoleRepository;
     private final DictionaryRepository dictionaryRepository;
 
     @Transactional
-    public ResponseDictionaryDto getDictionary(String accessToken, String keyword) {
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-        UserEntity user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-
-        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
+    public ResponseDictionaryDto getDictionary(String keyword) {
         List<DictionaryEntity> dtos = dictionaryRepository.findTop10ByWordStartingWithOrEngWordStartingWithOrderByCreatedTimeAsc(keyword, keyword);
+
         return new ResponseDictionaryDto(dtos.stream()
                 .map(DictionaryMapper.INSTANCE::toDictionaryDto)
                 .toList());
     }
 
     @Transactional
-    public void saveDictionary(String accessToken) {
-        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-        UserEntity user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+    public void addDictionary(UserEntity user) {
+        Optional<UserRoleEntity> optionalUserRole = userRoleRepository.findByUser(user);
 
-        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
-        UserRoleEntity userRole = userRoleRepository.findByUser(user)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ROLE));
-        String roleName = userRole.getRoleId().getName();
-        boolean isAdminOrEditor = UserRole.ADMIN.getRoleName().equals(roleName) || UserRole.EDITOR.getRoleName().equals(roleName);
-        if (!isAdminOrEditor) throw new CustomException(ErrorCode.NOT_DESERVE_DICTIONARY);
+        if (optionalUserRole.isEmpty()) {
+            userRoleService.createUserRoleAndThrowException(user);
+        } else {
+            boolean isAdminOrEditor = userRoleService.isAdminOrEditor(optionalUserRole.get());
+            if (!isAdminOrEditor) throw new CustomException(ErrorCode.NOT_DESERVE_DICTIONARY);
+        }
 
         List<DictionaryDto> dtos = excel.getDictionaryDto();
-
         dictionaryRepository.deleteAllInBatch();
 
         final long[] num = {1};
@@ -75,11 +67,11 @@ public class DictionaryService {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
                         ps.setLong(1, num[0]);
-                        ps.setString(2, dtos.get(i).getWord());
-                        ps.setString(3, dtos.get(i).getEngWord());
-                        ps.setString(4, dtos.get(i).getDescription());
-                        ps.setString(5, dtos.get(i).getCategory());
-                        ps.setString(6, dtos.get(i).getPronunciation());
+                        ps.setString(2, dtos.get(i).word());
+                        ps.setString(3, dtos.get(i).engWord());
+                        ps.setString(4, dtos.get(i).description());
+                        ps.setString(5, dtos.get(i).category());
+                        ps.setString(6, dtos.get(i).pronunciation());
 
                         num[0] += 1L;
                     }
