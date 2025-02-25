@@ -14,6 +14,10 @@ load_dotenv()
 
 api_key = os.environ.get("openai-api-key")
 
+client = OpenAI()
+
+# 벡터 스토어 생성 (경로는 임의로 해놨음 바꿔야함)
+vector_store = client.beta.vector_stores.create(name="meeting_transcript_store")
 
 def chunk_string(text, chunk_size=15000):
     chunks = [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
@@ -188,13 +192,14 @@ class OpenAIUtil:
         except Exception as e:
             raise e
 
+
     def get_section(self, record_id: int, stt: List[STTResults]):
         start_index = 0
 
         section_list = []
         prev_str = ""
         prev_text = ""
-        prev_summary = ""  # 이전 요약 담아놓을 칸임
+        # prev_summary = ""  # 이전 요약 담아놓을 칸임
 
         while start_index < len(stt):  # 시작 인덱스가 stt 길이보다 작은 동안 계속 반복
             current_str = ""
@@ -215,6 +220,8 @@ class OpenAIUtil:
                 )
 
                 prev_text = completion.choices[0].message.content
+            # 이전 섹션 요약을 벡터 스토어에서 검색하는 건데, vector_store가 요청마다 새로 생기므로 id가 다를거임 -> 기존의 쓰레기 데이터를 처리해주는 로직이 추가로 필요할듯?
+            related_context = client.beta.vector_stores.retrieve(vector_store_id=vector_store.id)
 
             completion = self.client.chat.completions.create(
                 model="gpt-4o-mini",
@@ -233,6 +240,7 @@ class OpenAIUtil:
                                    "8. 추임새가 반복되는 단어가 있으면 섹션 분리에서 제외시켜줘. 예시는 다음과 같아. ex) 하 하하 하하하 하  \n\n"
                     },
                     {"role": "assistant", "content": prev_text},
+                    {"role": "user", "content": f"참고할 내용: {related_context}"}, # user를 하나 더 넣어도 되낭?
                     {
                         "role": "user",
                         "content": "다음의 텍스트를 섹션으로 분리하고, 한 문장으로 주제를 만들고, 시작시간, 종료시간을 json형태로 반환해줘. \n\n" + current_str
@@ -253,7 +261,14 @@ class OpenAIUtil:
                     section_list.append(section_entity)
 
             start_index = i + 1  # 다음 시작 인덱스 업데이트
-            prev_text = current_str
+            # prev_text = current_str
+            prev_str = current_str # 새로운 코드
+
+            client.beta.vector_stores.files.create(
+                vector_store_id=vector_store.id,
+                file=open("summary_memory.txt", "w").write(completion_json['summary'])
+            )
+
 
         return section_list  # API 응답을 JSON 형태로 반환  #
 

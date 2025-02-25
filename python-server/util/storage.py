@@ -4,6 +4,7 @@ import firebase_admin
 from dotenv import load_dotenv
 from firebase_admin import credentials
 from firebase_admin import storage
+from firebase_admin import messaging
 
 from exception.NotFoundException import NotFoundException
 
@@ -36,3 +37,19 @@ class FirebaseStorageManager:
         blob.download_to_filename(local_file_path)
 
         return local_file_path
+
+    def send_fcm_notification(token, title, body):
+        """
+        token: FCM 디바이스 토큰임
+        """
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title=title,
+                body=body
+            ),
+            token=token  # 푸시 알림을 받을 FCM 토큰
+        )
+
+        # 🔥 메시지 전송
+        response = messaging.send(message)
+        print(f"✅ FCM 메시지 전송 성공: {response}")
