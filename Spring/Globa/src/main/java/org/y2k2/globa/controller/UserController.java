@@ -293,6 +293,7 @@ public class UserController {
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_DEFAULT_FOLDER, ref = SwaggerErrorCode.NOT_FOUND_DEFAULT_FOLDER_VALUE),
                     })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }

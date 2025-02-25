@@ -69,7 +69,7 @@ public class FolderService {
     }
 
     public void createDefaultFolder(UserEntity user) {
-        createFolder(user.getName() + "님의 기본 폴더", user);
+        createFolder(user.getName(), user);
     }
 
     @Transactional

@@ -255,7 +255,13 @@ public class UserService {
 
     @Transactional
     public void modifyUsername(RequestNameDto dto, UserEntity user){
+        FolderEntity folder = folderRepository.findByDefaultFolder(user)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DEFAULT_FOLDER));
+
+        folder.setTitle(dto.name());
         user.setName(dto.name());
+
+        folderRepository.save(folder);
         userRepository.save(user);
     }
 
