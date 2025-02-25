@@ -10,8 +10,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.y2k2.globa.dto.common.answer.RequestAnswerDto;
+import org.y2k2.globa.dto.common.auth.CustomUserDetails;
 import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
@@ -47,22 +49,23 @@ public class AnswerController {
                             @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ADD_NOTICE, ref = SwaggerErrorCode.NOT_DESERVE_ADD_NOTICE_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
+                    @ApiResponse(responseCode = "409", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.INQUIRY_ANSWER_DUPLICATED, ref = SwaggerErrorCode.INQUIRY_ANSWER_DUPLICATED_VALUE),
+                    })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_INQUIRY, ref = SwaggerErrorCode.NOT_FOUND_INQUIRY_VALUE),
                     })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
     @PostMapping(value = "/answer")
     public ResponseEntity<?> addAnswer(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable("inquiryId") long inquiryId,
-            @Valid @RequestBody RequestAnswerDto dto
+            @Valid @RequestBody RequestAnswerDto dto,
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-
-        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-
-        answerService.addAnswer(userId, inquiryId, dto);
+        answerService.addAnswer(inquiryId, dto, details.getUser());
         return ResponseEntity.created(URI.create("/inquiry/" + inquiryId)).build();
     }
 
@@ -94,15 +97,12 @@ public class AnswerController {
     )
     @PatchMapping(value = "/answer/{answerId}")
     public ResponseEntity<?> editAnswer(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable("inquiryId") long inquiryId,
             @PathVariable("answerId") long answerId,
-            @Valid @RequestBody RequestAnswerDto dto
+            @Valid @RequestBody RequestAnswerDto dto,
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-
-        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-
-        answerService.editAnswer(userId, inquiryId, answerId, dto);
+        answerService.editAnswer(inquiryId, answerId, dto, details.getUser());
         return ResponseEntity.noContent().build();
     }
 
@@ -134,13 +134,11 @@ public class AnswerController {
     )
     @DeleteMapping(value = "/answer/{answerId}")
     public ResponseEntity<?> deleteAnswer(
-            @Parameter(hidden=true) @RequestHeader(value = "Authorization") String accessToken,
             @PathVariable("inquiryId") long inquiryId,
-            @PathVariable("answerId") long answerId
+            @PathVariable("answerId") long answerId,
+            @AuthenticationPrincipal CustomUserDetails details
     ) {
-        long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken);
-
-        answerService.deleteAnswer(userId, inquiryId, answerId);
+        answerService.deleteAnswer(inquiryId, answerId, details.getUser());
         return ResponseEntity.noContent().build();
     }
 }

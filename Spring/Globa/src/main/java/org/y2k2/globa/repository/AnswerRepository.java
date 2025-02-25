@@ -7,6 +7,6 @@ import org.y2k2.globa.entity.InquiryEntity;
 import java.util.Optional;
 
 public interface AnswerRepository extends JpaRepository<AnswerEntity, Long> {
-    AnswerEntity findByAnswerId(long answerId);
+    Optional<AnswerEntity> findByAnswerId(long answerId);
     Optional<AnswerEntity> findByInquiry(InquiryEntity inquiry);
 }

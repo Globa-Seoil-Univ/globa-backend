@@ -39,15 +39,4 @@ public class AnswerEntity {
     @CreationTimestamp
     @Column(name = "created_time", columnDefinition = "DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
-
-    public static AnswerEntity create(UserEntity writer, InquiryEntity inquiry, String title, String content) {
-        AnswerEntity entity = new AnswerEntity();
-
-        entity.setUser(writer);
-        entity.setInquiry(inquiry);
-        entity.setTitle(title);
-        entity.setContent(content);
-
-        return entity;
-    }
 }

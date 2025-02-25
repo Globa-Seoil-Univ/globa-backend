@@ -7,36 +7,38 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.dto.common.answer.RequestAnswerDto;
 import org.y2k2.globa.dto.common.notification.RequestNotificationWithInquiryDto;
-import org.y2k2.globa.type.UserRole;
+import org.y2k2.globa.mapper.AnswerMapper;
 import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.*;
 import org.y2k2.globa.repository.*;
 import org.y2k2.globa.type.NotificationType;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AnswerService {
     private final ApplicationEventPublisher publisher;
+
+    private final UserRoleService userRoleService;
 
     private final NotificationService notificationService;
 
     private final AnswerRepository answerRepository;
     private final InquiryRepository inquiryRepository;
-    private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
 
-    @Transactional
-    public void addAnswer(long userId, long inquiryId, RequestAnswerDto dto) {
-        UserEntity user = validateUser(userId);
+    public void addAnswer(long inquiryId, RequestAnswerDto dto, UserEntity user) {
         validateRole(user);
 
         InquiryEntity inquiry = inquiryRepository.findByInquiryId(inquiryId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_INQUIRY));
         if (inquiry.getIsSolved()) throw new CustomException(ErrorCode.INQUIRY_ANSWER_DUPLICATED);
-
         inquiry.setIsSolved(true);
-        AnswerEntity answer = AnswerEntity.create(user, inquiry, dto.getTitle(), dto.getContent());
+
+        AnswerEntity answer = AnswerMapper.INSTANCE.toEntity(user, inquiry, dto);
 
         inquiryRepository.save(inquiry);
         answerRepository.save(answer);
@@ -54,17 +56,19 @@ public class AnswerService {
         publisher.publishEvent(info);
     }
 
-    @Transactional
-    public void editAnswer(long userId, long inquiryId, long answerId, RequestAnswerDto dto) {
-        UserEntity user = validateUser(userId);
+    public void editAnswer(long inquiryId, long answerId, RequestAnswerDto dto, UserEntity user) {
         validateRole(user);
 
         InquiryEntity inquiry = inquiryRepository.findByInquiryId(inquiryId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_INQUIRY));
 
-        AnswerEntity answer = validateAnswer(answerId);
+        AnswerEntity answer = answerRepository.findByAnswerId(answerId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ANSWER));
 
-        if (!inquiry.getIsSolved()) inquiry.setIsSolved(true);
+        if (!inquiry.getIsSolved()) {
+            inquiry.setIsSolved(true);
+        }
+
         answer.setUser(user);
         answer.setTitle(dto.getTitle());
         answer.setContent(dto.getContent());
@@ -73,44 +77,31 @@ public class AnswerService {
         answerRepository.save(answer);
     }
 
-    @Transactional
-    public void deleteAnswer(long userId, long inquiryId, long answerId) {
-        UserEntity user = validateUser(userId);
+    public void deleteAnswer(long inquiryId, long answerId, UserEntity user) {
         validateRole(user);
 
         InquiryEntity inquiry = inquiryRepository.findByInquiryId(inquiryId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_INQUIRY));
 
-        AnswerEntity answer = validateAnswer(answerId);
+        AnswerEntity answer = answerRepository.findByAnswerId(answerId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ANSWER));
 
-        if (inquiry.getIsSolved()) inquiry.setIsSolved(false);
+        if (inquiry.getIsSolved()) {
+            inquiry.setIsSolved(false);
+        }
 
         inquiryRepository.save(inquiry);
         answerRepository.delete(answer);
     }
 
-    private UserEntity validateUser(long userId) {
-        UserEntity user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-        if (user.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-
-        return user;
-    }
-
     private void validateRole(UserEntity user) {
-        UserRoleEntity role = userRoleRepository.findByUser(user)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ROLE));
+        Optional<UserRoleEntity> optionalUserRole = userRoleRepository.findByUser(user);
 
-        String roleName = role.getRoleId().getName();
-        boolean isValid = UserRole.ADMIN.getRoleName().equals(roleName) || UserRole.EDITOR.getRoleName().equals(roleName);
-        if (!isValid) throw new CustomException(ErrorCode.NOT_DESERVE_ADD_NOTICE);
-
-    }
-
-    private AnswerEntity validateAnswer(long answerId) {
-        AnswerEntity answer = answerRepository.findByAnswerId(answerId);
-        if (answer == null) throw new CustomException(ErrorCode.NOT_FOUND_ANSWER);
-
-        return answer;
+        if (optionalUserRole.isEmpty()) {
+            userRoleService.createUserRoleAndThrowException(user);
+        } else {
+            boolean isAdminOrEditor = userRoleService.isAdminOrEditor(optionalUserRole.get());
+            if (!isAdminOrEditor) throw new CustomException(ErrorCode.NOT_DESERVE_ADD_NOTICE);
+        }
     }
 }
