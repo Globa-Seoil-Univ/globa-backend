@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.y2k2.globa.dto.common.notification.SendMessage;
-import org.y2k2.globa.dto.common.notification.RequestNotificationWithTopicDto;
+import org.y2k2.globa.dto.common.fcm.FcmData;
+import org.y2k2.globa.dto.common.notification.*;
 import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.repository.UserRepository;
 import org.y2k2.globa.type.NotificationType;
@@ -39,14 +39,39 @@ public class MessageUtil {
         };
     }
 
+    private FcmData extractFcmData(SendMessage sendMessage) {
+        if (sendMessage instanceof RequestNotificationWithFolderShareAddUserDto) {
+            return FcmData.builder()
+                    .folderId(((RequestNotificationWithFolderShareAddUserDto) sendMessage).getFolder().getFolderId())
+                    .build();
+        } else if (sendMessage instanceof RequestNotificationWithFolderShareCommentDto) {
+            return FcmData.builder()
+                    .folderId(((RequestNotificationWithFolderShareCommentDto) sendMessage).getFolder().getFolderId())
+                    .recordId(((RequestNotificationWithFolderShareCommentDto) sendMessage).getRecord().getRecordId())
+                    .build();
+        } else if (sendMessage instanceof RequestNotificationWithInquiryDto) {
+            return FcmData.builder()
+                    .inquiryId(((RequestNotificationWithInquiryDto) sendMessage).getInquiry().getInquiryId())
+                    .build();
+        } else {
+            return FcmData.builder().build();
+        }
+    }
+
     public void sendFcmMessage(SendMessage sendMessage) {
         if (deniedFcm(sendMessage.getNotificationType(), sendMessage.getReceiver())) {
             return;
         }
 
         try {
+            FcmData data = extractFcmData(sendMessage);
+
             Message message = Message.builder()
                     .setToken(sendMessage.getReceiver().getNotificationToken())
+                    .putData("recordId", data.recordId().toString())
+                    .putData("folderId", data.folderId().toString())
+                    .putData("inquiryId", data.inquiryId().toString())
+                    .putData("notificationType", sendMessage.getNotificationType().toStringType())
                     .setNotification(Notification.builder()
                             .setTitle(sendMessage.getTitle())
                             .setBody(sendMessage.getBody())
@@ -77,8 +102,10 @@ public class MessageUtil {
                 .filter(s -> !deniedFcm(s.getNotificationType(), s.getReceiver()))
                 .toList();
 
+        FcmData data = extractFcmData(accessTarget.get(0));
         String title = accessTarget.get(0).getTitle();
         String body = accessTarget.get(0).getBody();
+        String type = accessTarget.get(0).getNotificationType().toStringType();
 
         MulticastMessage message = MulticastMessage.builder()
                 .addAllTokens(
@@ -86,6 +113,10 @@ public class MessageUtil {
                                 s -> s.getReceiver().getNotificationToken()
                         ).toList()
                 )
+                .putData("recordId", data.recordId().toString())
+                .putData("folderId", data.folderId().toString())
+                .putData("inquiryId", data.inquiryId().toString())
+                .putData("notificationType", type)
                 .setNotification(Notification.builder()
                         .setTitle(title)
                         .setBody(body)

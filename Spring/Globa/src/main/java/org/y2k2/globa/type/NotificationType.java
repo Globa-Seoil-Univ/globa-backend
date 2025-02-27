@@ -20,4 +20,7 @@ public enum NotificationType {
         this.typeId = typeId;
     }
 
+    public String toStringType() {
+        return String.valueOf(typeId);
+    }
 }
