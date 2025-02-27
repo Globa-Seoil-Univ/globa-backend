@@ -4,8 +4,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.y2k2.globa.Projection.NotificationProjection;
-import org.y2k2.globa.Projection.NotificationUnReadCount;
+import org.y2k2.globa.projection.NotificationProjection;
+import org.y2k2.globa.projection.NotificationUnReadCount;
 import org.y2k2.globa.entity.NotificationEntity;
 import org.y2k2.globa.entity.UserEntity;
 

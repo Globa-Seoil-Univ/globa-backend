@@ -1,15 +1,12 @@
 package org.y2k2.globa.service;
 
-import com.google.cloud.storage.Bucket;
-import com.google.firebase.auth.FirebaseAuth;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.y2k2.globa.Projection.KeywordProjection;
-import org.y2k2.globa.Projection.QuizGradeProjection;
-import org.y2k2.globa.Projection.StudyTimeProjection;
+import org.y2k2.globa.projection.KeywordProjection;
+import org.y2k2.globa.projection.QuizGradeProjection;
+import org.y2k2.globa.projection.StudyTimeProjection;
 import org.y2k2.globa.annotation.FileCleanup;
 import org.y2k2.globa.dto.common.file.FileDto;
 import org.y2k2.globa.dto.request.user.RequestNameDto;
