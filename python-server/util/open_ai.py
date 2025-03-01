@@ -14,7 +14,7 @@ load_dotenv()
 
 api_key = os.environ.get("openai-api-key")
 
-client = OpenAI()
+client = OpenAI(api_key=api_key)
 
 # 벡터 스토어 생성 (경로는 임의로 해놨음 바꿔야함)
 vector_store = client.beta.vector_stores.create(name="meeting_transcript_store")
