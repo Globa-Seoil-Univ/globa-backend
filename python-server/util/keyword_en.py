@@ -4,9 +4,11 @@ from transformers import BertModel
 from keybert import KeyBERT
 from textblob import TextBlob
 
+from util.log import Logger
 
 class KeywordUtilEn:
     def __init__(self):
+        self.logger = Logger(name="keyword_en").logger
         self.model = BertModel.from_pretrained("sentence-transformers/paraphrase-MiniLM-L6-v2") # 모델 유명한거 넣어놓기는 했는데 잘 돌아가려나
         self.kw_model = KeyBERT(self.model)
 
@@ -40,11 +42,15 @@ class KeywordUtilEn:
         return [text.replace("\n", " ")], [self.__preprocess(text)]
 
     def get_keywords(self, text: str):
+        self.logger.info("keyword in ")
         sentences, pre_sentences = self.__split_into_sentences(text)
         keywords = self.kw_model.extract_keywords(
             pre_sentences[0], keyphrase_ngram_range=(1, 1), stop_words="english",
             use_maxsum=True, use_mmr=True, diversity=0.3, top_n=10
         )
+
+        for keyword in keywords:
+            self.logger.info("keyword result " + keyword[0]+ " :: " + f"{keyword[1]}")
         return keywords
 
 

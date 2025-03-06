@@ -15,9 +15,10 @@ def stt(path: str) -> List[STTResults]:
     stt_results = whisper_manager.stt(path=url, lan="kr")
     return stt_results
 
-def stt(path: str, lan: str) -> List[STTResults]:
-    url = storage_manager.getDownloadUrl(path=path)
-    stt_results = whisper_manager.stt(path=url, lan=lan)
+def stt2(path: str, lan: str) -> List[STTResults]:
+    # url = storage_manager.getDownloadUrl(path=path)
+    url = "./test3.wav" # 임시 로컬
+    stt_results = whisper_manager.stt(path=url, lan="jp")
     return stt_results
 
 

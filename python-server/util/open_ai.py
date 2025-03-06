@@ -16,9 +16,6 @@ api_key = os.environ.get("openai-api-key")
 
 client = OpenAI(api_key=api_key)
 
-# 벡터 스토어 생성 (경로는 임의로 해놨음 바꿔야함)
-vector_store = client.beta.vector_stores.create(name="meeting_transcript_store")
-
 def chunk_string(text, chunk_size=15000):
     chunks = [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
     return chunks
@@ -140,6 +137,7 @@ class OpenAIUtil:
                 )
 
                 results.append(json.loads(completion.choices[0].message.function_call.arguments))
+                self.logger.info(f"qa : {results[0]}")
             else:
                 for i in range(0, len(chunks)):
                     prev_text = ""
@@ -199,29 +197,47 @@ class OpenAIUtil:
         section_list = []
         prev_str = ""
         prev_text = ""
-        # prev_summary = ""  # 이전 요약 담아놓을 칸임
-
+        prev_summary = ""  # 이전 요약 저장
+        all_sections = []  # 모든 섹션을 저장할 리스트
+        self.logger.info("get_1")
+        # 벡터 스토어 생성 (함수 시작 시 한 번만 생성)
+        vector_store = self.client.beta.vector_stores.create(
+            name=f"record_{record_id}_summary_store"
+        )
+        self.logger.info("get_2")
         while start_index < len(stt):  # 시작 인덱스가 stt 길이보다 작은 동안 계속 반복
             current_str = ""
-            for i in range(start_index, len(stt)):
-                current_str += stt[i].text + "*" + str(stt[i].start) + "," + str(stt[i].end) + "*" + "\n"
-                if len(current_str) >= 10000:
-                    break
 
+            for i in range(start_index, len(stt)):
+                next_text = stt[i].text + "*" + str(stt[i].start) + "," + str(stt[i].end) + "*" + "\n"
+                if len(current_str) + len(next_text) >= 10000:
+                    break
+                current_str += next_text
+            self.logger.info("get_3")
             if prev_str != "":
                 completion = self.client.chat.completions.create(
                     model="gpt-4o-mini",
                     messages=[
                         {"role": "system", "content": "너는 사용자가 보내주는 내용을 보고 간단한 요약을 해주는 모델이야."},
-                        {"role": "user", "content": prev_str}
+                        {"role": "user", "content": f"이전 내용 요약 : {prev_summary}" if prev_summary else "이전 내용 없음"},
+                        {"role": "user", "content": "\n추가로 요약할 내용 : " + prev_str},
                     ],
                     temperature=0.5,
                     top_p=1
                 )
 
                 prev_text = completion.choices[0].message.content
-            # 이전 섹션 요약을 벡터 스토어에서 검색하는 건데, vector_store가 요청마다 새로 생기므로 id가 다를거임 -> 기존의 쓰레기 데이터를 처리해주는 로직이 추가로 필요할듯?
-            related_context = client.beta.vector_stores.retrieve(vector_store_id=vector_store.id)
+                prev_summary = completion.choices[0].message.content
+
+                # 이전 요약을 벡터 스토어에 저장
+                with open("prev_summary.txt", "w", encoding="utf-8") as f:
+                    f.write(prev_summary)
+
+                self.client.beta.vector_stores.files.create(
+                    vector_store_id=vector_store.id,
+                    file=open("prev_summary.txt", "rb")
+                )
+            self.logger.info("get_4")
 
             completion = self.client.chat.completions.create(
                 model="gpt-4o-mini",
@@ -240,7 +256,7 @@ class OpenAIUtil:
                                    "8. 추임새가 반복되는 단어가 있으면 섹션 분리에서 제외시켜줘. 예시는 다음과 같아. ex) 하 하하 하하하 하  \n\n"
                     },
                     {"role": "assistant", "content": prev_text},
-                    {"role": "user", "content": f"참고할 내용: {related_context}"}, # user를 하나 더 넣어도 되낭?
+                    {"role": "user", "content": f"이전 내용 요약: {prev_summary}" if prev_summary else "이전 내용 없음"},
                     {
                         "role": "user",
                         "content": "다음의 텍스트를 섹션으로 분리하고, 한 문장으로 주제를 만들고, 시작시간, 종료시간을 json형태로 반환해줘. \n\n" + current_str
@@ -253,23 +269,45 @@ class OpenAIUtil:
                 top_p=1
             )
 
+            self.logger.info(f"get_4-2 :: {completion.choices[0].message.content}")
+            
             completion_json = json.loads(completion.choices[0].message.function_call.arguments)
 
-            for section in completion_json['sections']:
-                if section:
-                    section_entity = Section(record_id=record_id, title=section['subject'], start_time=section['start'], end_time=section['end'])
-                    section_list.append(section_entity)
+
+            # 지우면 안됨. 임시 주석
+            # for section in completion_json['sections']:
+            #     if section:
+            #         section_entity = Section(record_id=record_id, title=section['subject'], start_time=section['start'], end_time=section['end'])
+            #         section_list.append(section_entity)
+            #         all_sections.append(section)  # 모든 섹션 정보 누적
 
             start_index = i + 1  # 다음 시작 인덱스 업데이트
             # prev_text = current_str
             prev_str = current_str # 새로운 코드
 
-            client.beta.vector_stores.files.create(
-                vector_store_id=vector_store.id,
-                file=open("summary_memory.txt", "w").write(completion_json['summary'])
-            )
+            # 현재 요약 저장
+            if 'summary' in completion_json:
+                with open("current_summary.txt", "w", encoding="utf-8") as f:
+                    f.write(completion_json['summary'])
 
+                self.client.beta.vector_stores.files.create(
+                    vector_store_id=vector_store.id,
+                    file=open("current_summary.txt", "rb")
+                )
 
+            self.logger.info("get_6")
+            # client.beta.vector_stores.files.create(
+            #     vector_store_id=vector_store.id,
+            #     file=open("summary_memory.txt", "w").write(completion_json['summary'])
+            # )
+
+        try:
+            self.client.beta.vector_stores.delete(vector_store_id=vector_store.id)
+        except:
+            pass
+
+        self.logger.info("get_7"
+                         )
         return section_list  # API 응답을 JSON 형태로 반환  #
 
     # 위에서 분리된 섹션에 텍스트 전문을 할당해서 script 테이블에 insert
