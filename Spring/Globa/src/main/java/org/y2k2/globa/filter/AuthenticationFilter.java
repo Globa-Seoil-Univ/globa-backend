@@ -34,7 +34,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         String method = request.getMethod();
 
-        return path.equals("/user") && method.equals("POST");
+        return (path.equals("/user") && method.equals("POST")) || path.endsWith(".html");
     }
 
     @Override

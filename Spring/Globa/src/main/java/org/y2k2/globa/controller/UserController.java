@@ -156,7 +156,7 @@ public class UserController {
                     회원 가입 및 로그인에 성공하면 Access Token을 반환합니다.""",
             responses = {
                     @ApiResponse(
-                            responseCode = "200",
+                            responseCode = "201",
                             description = "회원 가입 또는 로그인 완료",
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = JWT.class))
                     ),

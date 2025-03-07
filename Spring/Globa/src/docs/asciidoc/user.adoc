@@ -1,0 +1,13 @@
+== 사용자 API
+
+=== 로그인 및 회원가입
+==== CURL
+include::{snippets}/user/signupAndLogin/curl-request.adoc[]
+
+==== 요청
+include::{snippets}/user/signupAndLogin/http-request.adoc[]
+include::{snippets}/user/signupAndLogin/request-fields.adoc[]
+
+==== 응답
+include::{snippets}/user/signupAndLogin/http-response.adoc[]
+include::{snippets}/user/signupAndLogin/response-fields.adoc[]
