@@ -38,7 +38,6 @@ import org.y2k2.globa.util.redis.RedisStore;
 import java.time.LocalDateTime;
 
 
-@Slf4j
 @WebMvcTest(
         controllers = UserController.class,
         excludeAutoConfiguration = {SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class}
@@ -46,12 +45,10 @@ import java.time.LocalDateTime;
 @AutoConfigureMockMvc(addFilters = false)
 @AutoConfigureRestDocs
 @ExtendWith(RestDocumentationExtension.class)
+@Slf4j
 public class UserControllerTest {
     @MockBean
     private UserService userService;
-
-    @MockBean
-    private RedisStore redisStore;
 
     @MockBean
     private AuthenticationFilter authenticationFilter;
@@ -87,13 +84,6 @@ public class UserControllerTest {
 
         Mockito.when(userService.signup(ArgumentMatchers.any(RequestUserPostDTO.class)))
                 .thenReturn(jwt);
-
-        Mockito.doNothing()
-                .when(redisStore).setValueExpire(
-                        ArgumentMatchers.anyString(),
-                        ArgumentMatchers.anyString(),
-                        ArgumentMatchers.any(LocalDateTime.class)
-                );
 
         mockMvc.perform(
                         RestDocumentationRequestBuilders.post(prefix)
