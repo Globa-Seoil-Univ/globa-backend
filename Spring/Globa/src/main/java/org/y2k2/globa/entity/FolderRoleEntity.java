@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @Table(name = "folder_role")
 public class FolderRoleEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "role_id", nullable = false, length = 1)
     @Check(constraints = "role_id IN ('1', '2', '3')")
     private String roleId;

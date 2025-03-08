@@ -14,7 +14,7 @@ public class UserRoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_role_id", columnDefinition = "INT UNSIGNED")
-    private long userRoleId;
+    private Long userRoleId;
 
     @OneToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
