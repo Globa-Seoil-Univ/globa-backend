@@ -77,7 +77,7 @@ public class UserRepositoryTest {
         Assertions.assertThat(foundUser).isNotEmpty();
         Assertions.assertThat(foundUser.size()).isGreaterThan(0);
 
-        log.info("foundUser: {}", foundUser.getFirst().getName());
+        log.info("foundUser: {}", foundUser.get(0).getName());
     }
 
     @Test

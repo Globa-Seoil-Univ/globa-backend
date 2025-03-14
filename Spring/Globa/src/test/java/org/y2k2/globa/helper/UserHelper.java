@@ -1,6 +1,9 @@
 package org.y2k2.globa.helper;
 
+import org.y2k2.globa.dto.response.analysis.ResponseAnalysisDto;
+import org.y2k2.globa.dto.response.user.ResponseNotificationSettingDto;
 import org.y2k2.globa.dto.response.user.ResponseUserDto;
+import org.y2k2.globa.dto.response.user.ResponseUserSearchDto;
 import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.type.SnsKind;
 
@@ -35,5 +38,34 @@ public class UserHelper {
         responseUserDto.setPublicFolderId(1L);
 
         return responseUserDto;
+    }
+
+    public static ResponseUserSearchDto createResponseUserSearchDto(UserEntity user) {
+        ResponseUserSearchDto responseUserSearchDto = new ResponseUserSearchDto();
+        responseUserSearchDto.setUserId(2L);
+        responseUserSearchDto.setProfile(user.getProfilePath());
+        responseUserSearchDto.setName(user.getName());
+        responseUserSearchDto.setCode(user.getCode());
+
+        return responseUserSearchDto;
+    }
+
+    public static ResponseNotificationSettingDto createResponseNotificationSettingDto(UserEntity user) {
+        return ResponseNotificationSettingDto
+                .builder()
+                .uploadNofi(user.getUploadNofi())
+                .shareNofi(user.getShareNofi())
+                .eventNofi(user.getEventNofi())
+                .build();
+    }
+
+    public static ResponseAnalysisDto createResponseAnalysisDto(UserEntity user) {
+        return ResponseAnalysisDto
+                .builder()
+                .userId(user.getUserId())
+                .profile(user.getProfilePath())
+                .name(user.getName())
+                .code(user.getCode())
+                .build();
     }
 }

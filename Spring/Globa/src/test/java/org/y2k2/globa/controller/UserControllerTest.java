@@ -15,8 +15,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.y2k2.globa.annotation.WithAccount;
+import org.y2k2.globa.constant.Constant;
 import org.y2k2.globa.dto.request.user.RequestUserPostDTO;
+import org.y2k2.globa.dto.response.analysis.ResponseAnalysisDto;
+import org.y2k2.globa.dto.response.user.ResponseNotificationSettingDto;
 import org.y2k2.globa.dto.response.user.ResponseUserDto;
+import org.y2k2.globa.dto.response.user.ResponseUserSearchDto;
 import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.filter.AuthenticationFilter;
 import org.y2k2.globa.helper.JWTHelper;
@@ -43,9 +47,9 @@ public class UserControllerTest {
     private final String prefix = "/user";
 
     @Test
-    @DisplayName("내 정보 가져오기")
+    @DisplayName("내 정보 가져오기 성공")
     @WithAccount
-    public void testGetMyInfo() throws Exception {
+    void testGetMyInfo() throws Exception {
         JWT jwt = JWTHelper.createJWT();
         UserEntity user = UserHelper.createUser();
         ResponseUserDto response = UserHelper.createResponseUserDto(user);
@@ -55,7 +59,7 @@ public class UserControllerTest {
 
         mockMvc.perform(
                         MockMvcRequestBuilders.get(prefix)
-                                .header("Authorization", "Bearer " + jwt.getAccessToken())
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
                                 .accept(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(MockMvcResultMatchers.status().isOk());
@@ -64,7 +68,71 @@ public class UserControllerTest {
     }
 
     @Test
-    @DisplayName("회원가입과 로그인")
+    @DisplayName("유저 정보 가져오기 성공")
+    @WithAccount
+    void testGetUser() throws Exception {
+        JWT jwt = JWTHelper.createJWT();
+        UserEntity user = UserHelper.createUser();
+        ResponseUserSearchDto response = UserHelper.createResponseUserSearchDto(user);
+
+        Mockito.when(userService.searchUser(ArgumentMatchers.any(String.class)))
+                .thenReturn(response);
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get(prefix + "/search")
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .param("code", "ABCDEF")
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk());
+
+        Mockito.verify(userService, Mockito.times(1)).searchUser(ArgumentMatchers.any(String.class));
+    }
+
+    @Test
+    @DisplayName("내 알림 정보 가져오기 성공")
+    @WithAccount
+    void testGetMyNotification() throws Exception {
+        JWT jwt = JWTHelper.createJWT();
+        UserEntity user = UserHelper.createUser();
+        ResponseNotificationSettingDto response = UserHelper.createResponseNotificationSettingDto(user);
+
+        Mockito.when(userService.getNotification(ArgumentMatchers.any(UserEntity.class)))
+                .thenReturn(response);
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get(prefix + "/notification")
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk());
+
+        Mockito.verify(userService, Mockito.times(1)).getNotification(ArgumentMatchers.any(UserEntity.class));
+    }
+
+    @Test
+    @DisplayName("내 분석 정보 가져오기 성공")
+    @WithAccount
+    void getMyAnalysis() throws Exception {
+        JWT jwt = JWTHelper.createJWT();
+        UserEntity user = UserHelper.createUser();
+        ResponseAnalysisDto response = UserHelper.createResponseAnalysisDto(user);
+
+        Mockito.when(userService.getAnalysis(ArgumentMatchers.any(UserEntity.class)))
+                .thenReturn(response);
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get(prefix + "/analysis")
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk());
+
+        Mockito.verify(userService, Mockito.times(1)).getNotification(ArgumentMatchers.any(UserEntity.class));
+    }
+
+    @Test
+    @DisplayName("회원가입과 로그인 성공")
     public void testLoginOrSignup() throws Exception {
         RequestUserPostDTO request = new RequestUserPostDTO();
         request.setSnsId("3526843826");
