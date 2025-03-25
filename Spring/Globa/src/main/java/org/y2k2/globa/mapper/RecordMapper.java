@@ -3,6 +3,9 @@ package org.y2k2.globa.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.y2k2.globa.dto.request.record.RequestPostRecordDto;
+import org.y2k2.globa.entity.FolderEntity;
+import org.y2k2.globa.entity.UserEntity;
 import org.y2k2.globa.projection.RecordSearchProjection;
 import org.y2k2.globa.dto.response.folder.ResponseDetailFolderDto;
 import org.y2k2.globa.dto.response.record.ResponseRecordDetailDto;
@@ -53,4 +56,12 @@ public interface RecordMapper {
     @Mapping(source = "record.title", target = "title")
     @Mapping(source = "record.createdTime", target = "createdTime", qualifiedBy = { CustomTimestampTranslator.class, MapCreatedTime.class })
     ResponseRecordSearchDto.RecordSearchDto toResponseRecordSearch(Long folderId, RecordSearchProjection record, UserIntroDto uploader);
+
+    @Mapping(source = "dto.title", target = "title")
+    @Mapping(source = "dto.path", target = "path")
+    @Mapping(source = "user", target = "uploader")
+    @Mapping(source = "folder", target = "folder")
+    @Mapping(source = "size", target = "size")
+    @Mapping(source = "record.createdTime", target = "createdTime", qualifiedBy = { CustomTimestampTranslator.class, MapCreatedTime.class })
+    RecordEntity toRecordEntity(RequestPostRecordDto dto, FolderEntity folder, UserEntity user, Long size);
 }

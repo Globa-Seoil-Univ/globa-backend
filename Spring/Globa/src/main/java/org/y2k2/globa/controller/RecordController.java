@@ -349,16 +349,13 @@ public class RecordController {
             }
     )
     @PostMapping("/folder/{folder_id}/record")
-    public ResponseEntity<?> postRecord(@Parameter(hidden=true) @RequestHeader(value = "Authorization", required = false) String accessToken,
-                                      @PathVariable(value = "folder_id", required = false) Long folderId,
-                                      @RequestBody RequestPostRecordDto requestPostRecordDto) {
-        if ( folderId == null )
-            throw new CustomException(ErrorCode.REQUIRED_FOLDER_ID);
-        if ( requestPostRecordDto.getPath() == null || requestPostRecordDto.getTitle() == null || requestPostRecordDto.getSize() == null)
-            throw new CustomException(ErrorCode.RECORD_POST_BAD_REQUEST);
-
-
-        return ResponseEntity.status(recordService.postRecord(accessToken, folderId, requestPostRecordDto.getTitle(),requestPostRecordDto.getPath(), requestPostRecordDto.getSize())).body("");
+    public ResponseEntity<?> createdRecord(
+                            @PathVariable(value = "folder_id") Long folderId,
+                            @Valid @RequestBody RequestPostRecordDto dto,
+                            @AuthenticationPrincipal CustomUserDetails details
+    ) {
+        recordService.createdRecord(folderId, dto, details.getUser());
+        return ResponseEntity.ok().build();
     }
 
     @Operation(

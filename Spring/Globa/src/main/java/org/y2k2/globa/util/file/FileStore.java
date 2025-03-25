@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -33,6 +34,30 @@ public class FileStore {
     private String getExtension(String originalFilename) {
         int pos = originalFilename.lastIndexOf(".");
         return originalFilename.substring(pos + 1);
+    }
+
+    /**
+     * File을 Firebase Storage에서 가져옵니다.
+     *
+     * @param path 가져올 파일 경로
+     * @return {@link FileDto} 가져온 파일 정보
+     */
+    public Optional<FileDto> getFile(String path) {
+        log.info("get file: [path = {}]", path);
+
+        Blob file = bucket.get(path);
+
+        if (file == null || !file.exists()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(FileDto.builder()
+                .storeFileName(file.getName())
+                .originalFileName(file.getName())
+                .storePath(file.getName())
+                .size(file.getSize())
+                .extension(file.getContentType())
+                .build());
     }
 
     /**

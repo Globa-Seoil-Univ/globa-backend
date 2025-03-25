@@ -1,14 +1,11 @@
 package org.y2k2.globa.dto.request.record;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.NotBlank;
 
-@Getter
-@Setter
-@NoArgsConstructor
-public class RequestPostRecordDto {
-    String title;
-    String path;
-    String size;
+public record RequestPostRecordDto(
+        @NotBlank(message = "제목은 필수입니다.")
+        String title,
+        @NotBlank(message = "파일 경로는 필수입니다.")
+        String path
+) {
 }

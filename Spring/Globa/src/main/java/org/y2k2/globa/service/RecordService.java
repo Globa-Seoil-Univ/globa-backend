@@ -7,6 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.y2k2.globa.dto.common.file.FileDto;
+import org.y2k2.globa.dto.request.kafka.RequestKafkaDto;
+import org.y2k2.globa.dto.request.record.RequestPostRecordDto;
 import org.y2k2.globa.projection.KeywordProjection;
 import org.y2k2.globa.projection.QuizGradeProjection;
 import org.y2k2.globa.projection.RecordSearchProjection;
@@ -244,37 +247,21 @@ public class RecordService {
     }
 
     @Transactional
-    public HttpStatus postRecord(String accessToken, Long folderId, String title, String path, String size){
-//        Long userId = jwtTokenProvider.getUserIdByAccessTokenWithoutCheck(accessToken); // 사용하지 않아도, 작업을 거치며 토큰 유효성 검사함.
-//        UserEntity userEntity = userRepository.findByUserId(userId);
-//
-//        if (userEntity == null) throw new CustomException(ErrorCode.NOT_FOUND_USER);
-//        if(userEntity.getIsDeleted()) throw new CustomException(ErrorCode.DELETED_USER);
-//
-//        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId)
-//                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));;
-//
-//        boolean hasAccess = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(userEntity, folderEntity.getFolderId(), InvitationStatus.ACCEPT);
-//        if (!hasAccess) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
-//
-//        RecordEntity recordEntity = new RecordEntity();
-//        recordEntity.setCreatedTime(LocalDateTime.now());
-//        recordEntity.setSize(size);
-//        recordEntity.setPath(path);
-//        recordEntity.setTitle(title);
-//        recordEntity.setUser(userEntity);
-//        recordEntity.setFolder(folderEntity);
-//
-//        Blob blob = bucket.get(path);
-//        if( blob == null )
-//            throw new CustomException(ErrorCode.NOT_FOUND_RECORD_FIREBASE);
-//
-//
-//        recordRepository.save(recordEntity);
-//
-//        kafkaProducer.send(topic, topicKey, new RequestKafkaDto(recordEntity.getRecordId(), userEntity.getUserId()));
+    public void createdRecord(Long folderId, RequestPostRecordDto dto, UserEntity user){
+        FolderEntity folderEntity = folderRepository.findFirstByFolderId(folderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));;
 
-        return HttpStatus.CREATED;
+        boolean hasAccess = folderShareRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(user, folderEntity.getFolderId(), InvitationStatus.ACCEPT);
+        if (!hasAccess) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
+
+        FileDto file = fileStore.getFile(dto.path())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD_FIREBASE));
+        RecordEntity record = RecordMapper.INSTANCE.toRecordEntity(dto, folderEntity, user, file.size());
+
+        recordRepository.save(record);
+
+        // TODO : Kafka를 통해 분석 요청 (Front한테 넘길 떄 주석 해제)
+        // kafkaProducer.send(topic, topicKey, new RequestKafkaDto(recordEntity.getRecordId(), user.getUserId()));
     }
 
     @Transactional
