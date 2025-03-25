@@ -17,7 +17,6 @@ import org.y2k2.globa.dto.request.foldershare.RequestInviteDto;
 import org.y2k2.globa.dto.response.foldershare.ResponseFolderShareUserDto;
 import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.FolderShareService;
-import org.y2k2.globa.util.jwt.JWTProvider;
 
 import java.net.URI;
 
@@ -28,7 +27,6 @@ import java.net.URI;
 @Tag(name = "Folder Share", description = "공유 관련 API입니다.")
 public class FolderShareController {
     private final FolderShareService folderShareService;
-    private final JWTProvider jwtTokenProvider;
 
     @Operation(
             summary = "공유된 사용자 조회",
@@ -41,7 +39,6 @@ public class FolderShareController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.ROLE_BAD_REQUEST, ref = SwaggerErrorCode.ROLE_BAD_REQUEST_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),

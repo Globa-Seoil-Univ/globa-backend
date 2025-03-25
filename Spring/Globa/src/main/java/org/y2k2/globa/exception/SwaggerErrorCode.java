@@ -2,7 +2,6 @@ package org.y2k2.globa.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
@@ -14,46 +13,14 @@ public class SwaggerErrorCode {
     public static final String ACTIVE_ACCESS_TOKEN_VALUE = "40011";
     public static final String NOT_MATCH_REFRESH_TOKEN = "NOT_MATCH_REFRESH_TOKEN";
     public static final String NOT_MATCH_REFRESH_TOKEN_VALUE = "40012";
-    public static final String FOLDER_DELETE_BAD_REQUEST = "FOLDER_DELETE_BAD_REQUEST";
-    public static final String FOLDER_DELETE_BAD_REQUEST_VALUE = "40020";
-    public static final String REQUIRED_FOLDER_TITLE = "REQUIRED_FOLDER_TITLE";
-    public static final String REQUIRED_FOLDER_TITLE_VALUE = "40040";
-    public static final String REQUIRED_FOLDER_ID = "REQUIRED_FOLDER_ID";
-    public static final String REQUIRED_FOLDER_ID_VALUE = "40041";
-    public static final String REQUIRED_QUIZ_ID = "REQUIRED_QUIZ_ID";
-    public static final String REQUIRED_QUIZ_ID_VALUE = "40042";
-    public static final String REQUIRED_RECORD_ID = "REQUIRED_RECORD_ID";
-    public static final String REQUIRED_RECORD_ID_VALUE = "40043";
-    public static final String REQUIRED_QUIZ = "REQUIRED_QUIZ";
-    public static final String REQUIRED_QUIZ_VALUE = "40044";
-    public static final String RECORD_POST_BAD_REQUEST = "RECORD_POST_BAD_REQUEST";
-    public static final String RECORD_POST_BAD_REQUEST_VALUE = "40045";
-    public static final String REQUIRED_RECORD_TITLE = "REQUIRED_RECORD_TITLE";
-    public static final String REQUIRED_RECORD_TITLE_VALUE = "40046";
-    public static final String REQUIRED_MOVE_ARRIVED_ID = "REQUIRED_MOVE_ARRIVED_ID";
-    public static final String REQUIRED_MOVE_ARRIVED_ID_VALUE = "40047";
     public static final String INVITE_BAD_REQUEST = "INVITE_BAD_REQUEST";
-    public static final String INVITE_BAD_REQUEST_VALUE = "40048";
+    public static final String INVITE_BAD_REQUEST_VALUE = "40020";
     public static final String INVITE_ACCEPT_BAD_REQUEST = "INVITE_ACCEPT_BAD_REQUEST";
-    public static final String INVITE_ACCEPT_BAD_REQUEST_VALUE = "40049";
-    public static final String REQUIRED_NOTICE_ID = "REQUIRED_NOTICE_ID";
-    public static final String REQUIRED_NOTICE_ID_VALUE = "40050";
-
-    public static final String NOFI_TYPE_BAD_REQUEST = "NOFI_TYPE_BAD_REQUEST";
-    public static final String NOFI_TYPE_BAD_REQUEST_VALUE = "40053";
-    public static final String REQUIRED_NOTIFICATION_ID = "REQUIRED_NOTIFICATION_ID";
-    public static final String REQUIRED_NOTIFICATION_ID_VALUE = "40054";
-
-    public static final String NOT_PARENT_COMMENT = "NOT_PARENT_COMMENT";
-    public static final String NOT_PARENT_COMMENT_VALUE = "40060";
-    public static final String REQUIRED_IMAGE = "REQUIRED_IMAGE";
-    public static final String REQUIRED_IMAGE_VALUE = "40070";
-    public static final String REQUIRED_ROLE = "REQUIRED_ROLE";
-    public static final String REQUIRED_ROLE_VALUE = "40080";
-    public static final String ROLE_BAD_REQUEST = "ROLE_BAD_REQUEST";
-    public static final String ROLE_BAD_REQUEST_VALUE = "40081";
+    public static final String INVITE_ACCEPT_BAD_REQUEST_VALUE = "40021";
+    public static final String NOT_INCLUDE_HIGHLIGHT_COMMENT = "NOT_INCLUDE_HIGHLIGHT_COMMENT";
+    public static final String NOT_INCLUDE_HIGHLIGHT_COMMENT_VALUE = "40030";
     public static final String MISMATCH_FOLDER_ID = "MISMATCH_FOLDER_ID";
-    public static final String MISMATCH_FOLDER_ID_VALUE = "40095";
+    public static final String MISMATCH_FOLDER_ID_VALUE = "40040";
 
     /* 401 UNAUTHORIZED : 허락되지 않은 사용자 */
     public static final String INVALID_TOKEN = "INVALID_TOKEN";
@@ -70,16 +37,14 @@ public class SwaggerErrorCode {
     public static final String NOT_DESERVE_ADD_NOTICE_VALUE = "40320";
     public static final String NOT_DESERVE_ACCESS_FOLDER = "NOT_DESERVE_ACCESS_FOLDER";
     public static final String NOT_DESERVE_ACCESS_FOLDER_VALUE = "40321";
-    public static final String NOT_DESERVE_MODIFY_INVITATION = "NOT_DESERVE_MODIFY_INVITATION";
-    public static final String NOT_DESERVE_MODIFY_INVITATION_VALUE = "40322";
     public static final String NOT_DESERVE_POST_COMMENT = "NOT_DESERVE_POST_COMMENT";
     public static final String NOT_DESERVE_POST_COMMENT_VALUE = "40323";
     public static final String NOT_DESERVE_FCM = "NOT_DESERVE_FCM";
     public static final String NOT_DESERVE_FCM_VALUE = "40324";
-    public static final String NOT_DESERVE_DICTIONARY  = "NOT_DESERVE_DICTIONARY ";
+    public static final String NOT_DESERVE_DICTIONARY  = "NOT_DESERVE_DICTIONARY";
     public static final String NOT_DESERVE_DICTIONARY_VALUE = "40325";
-    public static final String NOT_DESERVE_ACCEPT_INVITATION  = "NOT_DESERVE_DICTIONARY ";
-    public static final String NOT_DESERVE_ACCEPT_INVITATION_VALUE = "40325";
+    public static final String NOT_DESERVE_ACCEPT_INVITATION  = "NOT_DESERVE_DICTIONARY";
+    public static final String NOT_DESERVE_ACCEPT_INVITATION_VALUE = "40326";
     public static final String NOT_DESERVE_ACCESS_NOTIFICATION = "NOT_DESERVE_ACCESS_NOTIFICATION";
     public static final String NOT_DESERVE_ACCESS_NOTIFICATION_VALUE = "40327";
     public static final String MISMATCH_INQUIRY_OWNER = "MISMATCH_INQUIRY_OWNER";
@@ -97,7 +62,7 @@ public class SwaggerErrorCode {
     public static final String MISMATCH_RECORD_FOLDER = "MISMATCH_RECORD_FOLDER";
     public static final String MISMATCH_RECORD_FOLDER_VALUE = "40348";
     public static final String DELETED_USER = "DELETED_USER";
-    public static final String DELETED_USER_VALUE = "40350";
+    public static final String DELETED_USER_VALUE = "40330";
     public static final String NOT_ALLOW_NOTIFICATION_SETTING = "NOT_ALLOW_NOTIFICATION_SETTING";
     public static final String NOT_ALLOW_NOTIFICATION_SETTING_VALUE = "40360";
 
@@ -116,7 +81,7 @@ public class SwaggerErrorCode {
     public static final String NOT_FOUND_INQUIRY_VALUE = "40420";
     public static final String NOT_FOUND_NOTICE = "NOT_FOUND_NOTICE";
     public static final String NOT_FOUND_NOTICE_VALUE = "40430";
-    public static final String NOT_FOUND_NOTIFICATION = "NOT_FOUND_NOTICE";
+    public static final String NOT_FOUND_NOTIFICATION = "NOT_FOUND_NOTIFICATION";
     public static final String NOT_FOUND_NOTIFICATION_VALUE = "40431";
     public static final String NOT_FOUND_NOTIFICATION_TOKEN = "NOT_FOUND_NOTIFICATION_TOKEN";
     public static final String NOT_FOUND_NOTIFICATION_TOKEN_VALUE = "40432";
@@ -124,8 +89,7 @@ public class SwaggerErrorCode {
     public static final String NOT_FOUND_ANSWER_VALUE = "40440";
     public static final String NOT_FOUND_FOLDER = "NOT_FOUND_FOLDER";
     public static final String NOT_FOUND_FOLDER_VALUE = "40450";
-    public static final String NOT_FOUND_ORIGIN_FOLDER = "NOT_FOUND_ORIGIN_FOLDER";
-    public static final String NOT_FOUND_ORIGIN_FOLDER_VALUE = "40452";
+
     public static final String NOT_FOUND_TARGET_FOLDER = "NOT_FOUND_TARGET_FOLDER";
     public static final String NOT_FOUND_TARGET_FOLDER_VALUE = "40453";
     public static final String NOT_FOUND_SHARE = "NOT_FOUND_SHARE";
@@ -152,8 +116,6 @@ public class SwaggerErrorCode {
     /* 409 CONFLICT : 충돌 */
     public static final String HIGHLIGHT_DUPLICATED = "HIGHLIGHT_DUPLICATED";
     public static final String HIGHLIGHT_DUPLICATED_VALUE = "40910";
-    public static final String FOLDER_NAME_DUPLICATED = "FOLDER_NAME_DUPLICATED";
-    public static final String FOLDER_NAME_DUPLICATED_VALUE = "40920";
     public static final String INQUIRY_ANSWER_DUPLICATED = "INQUIRY_ANSWER_DUPLICATED";
     public static final String INQUIRY_ANSWER_DUPLICATED_VALUE = "40930";
     public static final String SHARE_USER_DUPLICATED = "SHARE_USER_DUPLICATED";
@@ -166,16 +128,10 @@ public class SwaggerErrorCode {
     public static final String INTERNAL_SERVER_ERROR_VALUE = "500";
     public static final String FAILED_FILE_UPLOAD = "FAILED_FILE_UPLOAD";
     public static final String FAILED_FILE_UPLOAD_VALUE = "50010";
-    public static final String FAILED_FCM_SEND = "FAILED_FCM_SEND";
-    public static final String FAILED_FCM_SEND_VALUE = "50020";
     public static final String REDIS_TIMEOUT = "REDIS_TIMEOUT";
     public static final String REDIS_TIMEOUT_VALUE = "50030";
     public static final String FAILED_FOLDER_CREATE = "FAILED_FOLDER_CREATE";
     public static final String FAILED_FOLDER_CREATE_VALUE = "50040";
-    public static final String FAILED_FOLDER_DELETE = "FAILED_FOLDER_DELETE";
-    public static final String FAILED_FOLDER_DELETE_VALUE = "50041";
-    public static final String FAILED_FIREBASE = "FAILED_FIREBASE";
-    public static final String FAILED_FIREBASE_VALUE = "50050";
     public static final String FAILED_EXCEL = "FAILED_EXCEL";
     public static final String FAILED_EXCEL_VALUE = "50060";
     public static final String NOT_FOUND_KEYWORD_EXCEL = "NOT_FOUND_KEYWORD_EXCEL";

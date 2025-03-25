@@ -1,7 +1,6 @@
 package org.y2k2.globa.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,11 +13,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.y2k2.globa.dto.common.answer.RequestAnswerDto;
 import org.y2k2.globa.dto.common.auth.CustomUserDetails;
-import org.y2k2.globa.exception.CustomException;
 import org.y2k2.globa.exception.ErrorCode;
 import org.y2k2.globa.exception.SwaggerErrorCode;
 import org.y2k2.globa.service.AnswerService;
-import org.y2k2.globa.util.jwt.JWTProvider;
 
 import java.net.URI;
 
@@ -29,7 +26,6 @@ import java.net.URI;
 @Tag(name = "Answer", description = "답변 관련 API입니다.")
 public class AnswerController {
     private final AnswerService answerService;
-    private final JWTProvider jwtTokenProvider;
 
     @Operation(
             summary = "답변 추가",

@@ -59,9 +59,9 @@ public interface RecordMapper {
 
     @Mapping(source = "dto.title", target = "title")
     @Mapping(source = "dto.path", target = "path")
-    @Mapping(source = "user", target = "uploader")
+    @Mapping(source = "user", target = "user")
     @Mapping(source = "folder", target = "folder")
     @Mapping(source = "size", target = "size")
-    @Mapping(source = "record.createdTime", target = "createdTime", qualifiedBy = { CustomTimestampTranslator.class, MapCreatedTime.class })
-    RecordEntity toRecordEntity(RequestPostRecordDto dto, FolderEntity folder, UserEntity user, Long size);
+    @Mapping(target = "createdTime", ignore = true)
+    RecordEntity toEntity(RequestPostRecordDto dto, FolderEntity folder, UserEntity user, Long size);
 }

@@ -256,7 +256,7 @@ public class RecordService {
 
         FileDto file = fileStore.getFile(dto.path())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD_FIREBASE));
-        RecordEntity record = RecordMapper.INSTANCE.toRecordEntity(dto, folderEntity, user, file.size());
+        RecordEntity record = RecordMapper.INSTANCE.toEntity(dto, folderEntity, user, file.size());
 
         recordRepository.save(record);
 
