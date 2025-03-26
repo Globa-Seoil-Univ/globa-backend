@@ -7,8 +7,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 import org.springframework.test.annotation.Commit;
 import org.y2k2.globa.annotation.WithAccount;
-import org.y2k2.globa.dto.common.auth.CustomUserDetails;
-import org.y2k2.globa.entity.UserEntity;
+import org.y2k2.globa.application.common.dto.auth.CustomUserDetails;
+import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.helper.UserHelper;
 
 public class WithAccountSecurityContextFactory implements WithSecurityContextFactory<WithAccount> {

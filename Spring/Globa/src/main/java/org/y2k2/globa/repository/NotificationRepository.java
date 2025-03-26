@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.y2k2.globa.projection.NotificationProjection;
 import org.y2k2.globa.projection.NotificationUnReadCount;
 import org.y2k2.globa.entity.NotificationEntity;
-import org.y2k2.globa.entity.UserEntity;
+import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
 
 import java.util.Optional;
 

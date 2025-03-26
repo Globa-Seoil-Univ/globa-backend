@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import org.hibernate.annotations.*;
+import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
 
 import java.time.LocalDateTime;
 

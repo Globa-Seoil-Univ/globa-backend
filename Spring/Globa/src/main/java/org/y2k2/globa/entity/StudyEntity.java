@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
 
 import java.time.LocalDateTime;
 @Getter

@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.y2k2.globa.insfrastructure.persistence.role.entity.RoleEntity;
+import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
 
 @Getter
 @Setter

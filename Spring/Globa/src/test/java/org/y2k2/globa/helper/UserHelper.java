@@ -1,11 +1,11 @@
 package org.y2k2.globa.helper;
 
-import org.y2k2.globa.dto.response.analysis.ResponseAnalysisDto;
-import org.y2k2.globa.dto.response.user.ResponseNotificationSettingDto;
-import org.y2k2.globa.dto.response.user.ResponseUserDto;
-import org.y2k2.globa.dto.response.user.ResponseUserSearchDto;
-import org.y2k2.globa.entity.UserEntity;
-import org.y2k2.globa.type.SnsKind;
+import org.y2k2.globa.application.analysis.dto.response.ResponseAnalysisDto;
+import org.y2k2.globa.application.user.dto.response.ResponseNotificationSettingDto;
+import org.y2k2.globa.application.user.dto.response.ResponseUserDto;
+import org.y2k2.globa.application.user.dto.response.ResponseUserSearchDto;
+import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.domain.user.type.SnsKind;
 
 public class UserHelper {
     public static UserEntity createUser() {

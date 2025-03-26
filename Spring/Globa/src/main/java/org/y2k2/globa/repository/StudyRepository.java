@@ -6,7 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.y2k2.globa.projection.StudyTimeProjection;
 import org.y2k2.globa.entity.RecordEntity;
 import org.y2k2.globa.entity.StudyEntity;
-import org.y2k2.globa.entity.UserEntity;
+import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
 
 import java.util.List;
 import java.util.Optional;
