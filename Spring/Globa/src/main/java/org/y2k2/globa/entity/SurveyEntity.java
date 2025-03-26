@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.y2k2.globa.type.SurveyType;
+import org.y2k2.globa.common.type.SurveyType;
 
 import java.time.LocalDateTime;
 

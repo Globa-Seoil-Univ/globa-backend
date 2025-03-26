@@ -4,7 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.y2k2.globa.entity.InquiryEntity;
-import org.y2k2.globa.entity.UserEntity;
+import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
 
 import java.util.Optional;
 

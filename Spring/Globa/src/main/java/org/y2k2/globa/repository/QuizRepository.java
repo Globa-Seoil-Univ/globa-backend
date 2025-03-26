@@ -6,7 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.y2k2.globa.projection.QuizGradeProjection;
 import org.y2k2.globa.entity.QuizEntity;
 import org.y2k2.globa.entity.RecordEntity;
-import org.y2k2.globa.entity.UserEntity;
+import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
 
 import java.util.List;
 
