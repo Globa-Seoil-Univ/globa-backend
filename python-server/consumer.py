@@ -85,23 +85,17 @@ class Consumer:
             self.logger.info(f"In stt method recordId: {record_id} user_id: {user_id}")
 
             with SessionMaker() as session:
-                self.logger.info("입장 테스트1-3")
                 try:
                     # 지우면 안됨 임시 주석
-                    # self.logger.info("입장 테스트1-4")
                     # user = session.query(AppUser).filter(AppUser.user_id == user_id).first()
-                    # self.logger.info("입장 테스트2")
                     # if user is None:
                     #     self.logger.info(f"Not found user")
                     #     raise NotFoundException("No such user")
-                    # self.logger.info("입장 테스트3")
                     # record = session.query(Record).filter(Record.record_id == record_id).first()
                     # if record is None:
                     #     raise NotFoundException("No such record")
-                    # self.logger.info("입장 테스트4")
                     # if record.path is None:
                     #     raise NotFoundException("No such path")
-                    # self.logger.info("입장 테스트5")
                     # folder_share = (session.query(FolderShare).filter(FolderShare.folder_id == record.folder_id
                     #                                                   and FolderShare.owner_id == user.user_id)
                     #                 .first())
@@ -111,7 +105,7 @@ class Consumer:
                     self.logger.info(f"Starting analyze audio: {record_id}")
                     # 지우면 안됨 임시 주석
                     # stt_results = stt(record.path, lan)
-                    stt_results = stt2("./test3.wav","en")
+                    stt_results = stt2("./test3.wav","ko")
                     self.logger.info(f"result: {stt_results}")
                     add_section(record_id=record_id, text=stt_results, session=session)
                     assign_text(record_id=record_id, text=stt_results, session=session)
@@ -119,7 +113,7 @@ class Consumer:
 
                     text = ''.join(result.text for result in stt_results)
                     add_qa(record_id=record_id, text=text, session=session)
-                    add_keywords(record_id=record_id, text=text, session=session, lan="en")
+                    add_keywords(record_id=record_id, text=text, session=session, lan="ko") # ja en ko
 
                     # 지우면 안됨 임시 주석
                     # session.commit()

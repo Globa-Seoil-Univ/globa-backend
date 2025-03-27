@@ -47,19 +47,20 @@ class WhisperManager:
 
         return output_file_path
 
-    def stt(self, path: str, lan: str):# parameter language [ kr, jp, en ]
+    def stt(self, path: str, lan: str):# parameter language [ ko, ja, en ]
         self.logger.info("Starting STT2222")
-        if lan == "kr":
-            language = "한국어"
-        elif lan == "jp":
-            language = "일본어"
+        if lan == "ko":
+            prompt = "너는 이제부터 한국어로 대화하는 회의, 강의, 모임 등 사람들과의 대화를 한국어 텍스트로 변환해야하는 역할이야."
+        elif lan == "ja":
+            prompt = "あなたは、会議、講義、会議など、人々との会話をテキストに変換する役割です。"
         else:
-            language = "영어"
+            prompt = "Now your role is to convert conversations from conferences, lectures, meetings, etc. into text."
+
         segments, info = self.model.transcribe(
             path,
-            initial_prompt="너는 이제부터" + language + "로 대화하는 회의, 강의, 모임 등 사람들과의 대화를 "+language+"텍스트로 변환해야 하는 역할이야. 번역하지말고 원문 그대로 작성해",
+            initial_prompt=prompt,
             beam_size=5,
-            language="ko",
+            language=lan,
             temperature=0,
             condition_on_previous_text=False,
             max_new_tokens=128,
@@ -81,7 +82,7 @@ class WhisperManager:
 
             results.append(result)
 
-        output_path = "./test_jp.json"
+        output_path = "./enhance_stt.json"
         self.save_stt_results_to_json(results, output_path)
         self.logger.info(f"STT 결과가 {output_path}에 저장되었습니다.")
 

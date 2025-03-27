@@ -2,6 +2,7 @@ from typing import List
 
 from util.whisper import WhisperManager, STTResults
 from util.storage import FirebaseStorageManager
+from util.open_ai import OpenAIUtil
 
 from re import sub
 
@@ -17,9 +18,14 @@ def stt(path: str) -> List[STTResults]:
 
 def stt2(path: str, lan: str) -> List[STTResults]:
     # url = storage_manager.getDownloadUrl(path=path)
+    open_ai = OpenAIUtil()
     url = "./test3.wav" # 임시 로컬
-    stt_results = whisper_manager.stt(path=url, lan="jp")
-    return stt_results
+    stt_results = whisper_manager.stt(path=url, lan=lan)
+
+    # 테스트 맞춤법 검사
+    stt_results_enhance = open_ai.correct_spelling(stt_results=stt_results, language=lan)
+
+    return stt_results_enhance
 
 
 def remove_noise_text(stt_results: List[STTResults]):
