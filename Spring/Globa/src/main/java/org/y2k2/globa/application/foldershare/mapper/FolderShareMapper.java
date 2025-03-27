@@ -5,11 +5,11 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 import org.y2k2.globa.application.foldershare.dto.response.ResponseFolderShareUserDto;
-import org.y2k2.globa.insfrastructure.persistence.folder.entity.FolderEntity;
-import org.y2k2.globa.insfrastructure.persistence.folderrole.entity.FolderRoleEntity;
-import org.y2k2.globa.insfrastructure.persistence.foldershare.entity.FolderShareEntity;
-import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
-import org.y2k2.globa.common.type.InvitationStatus;
+import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
+import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
+import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStatus;
 
 @Mapper
 public interface FolderShareMapper {

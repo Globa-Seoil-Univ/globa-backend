@@ -1,7 +1,7 @@
 package org.y2k2.globa.application.comment.dto.request;
 
 import lombok.Builder;
-import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 public record RequestCommentWithIdsDto(
         UserEntity user,

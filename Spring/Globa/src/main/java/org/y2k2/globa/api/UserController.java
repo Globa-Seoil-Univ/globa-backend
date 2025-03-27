@@ -24,9 +24,8 @@ import org.y2k2.globa.application.fcm.dto.request.RequestNotificationTokenDto;
 import org.y2k2.globa.application.survey.dto.request.RequestSurveyDto;
 import org.y2k2.globa.application.user.dto.response.ResponseUserDto;
 import org.y2k2.globa.application.user.dto.response.ResponseUserSearchDto;
-import org.y2k2.globa.application.user.service.CreateUserService;
+import org.y2k2.globa.application.user.service.*;
 import org.y2k2.globa.common.exception.SwaggerErrorCode;
-import org.y2k2.globa.application.user.service.UserService;
 import org.y2k2.globa.common.util.jwt.JWT;
 
 @RestController
@@ -36,6 +35,11 @@ import org.y2k2.globa.common.util.jwt.JWT;
 @Tag(name = "User", description = "사용자 관련 API입니다.")
 public class UserController {
     private final UserService userService;
+
+    private final GetUserService getUserService;
+    private final GetSearchUserService getSearchUserService;
+    private final GetUserNotificationService getUserNotificationService;
+    private final GetUserAnalysisService getUserAnalysisService;
     private final CreateUserService createUserService;
 
     @Operation(
@@ -62,8 +66,8 @@ public class UserController {
             }
     )
     @GetMapping
-    public ResponseEntity<?> getUser(@AuthenticationPrincipal CustomUserDetails details) {
-        return ResponseEntity.ok(userService.getUser(details.getUser()));
+    public ResponseEntity<ResponseUserDto> getUser(@AuthenticationPrincipal CustomUserDetails details) {
+        return ResponseEntity.ok(getUserService.getUser(details));
     }
 
     @Operation(
@@ -88,8 +92,8 @@ public class UserController {
             }
     )
     @GetMapping("/search")
-    public ResponseEntity<?> getUserSearch(@RequestParam(value = "code", required = false) String code) {
-        return ResponseEntity.ok(userService.searchUser(code));
+    public ResponseEntity<ResponseUserSearchDto> getUserSearch(@RequestParam(value = "code", required = false) String code) {
+        return ResponseEntity.ok(getSearchUserService.getSearchUser(code));
     }
 
     @Operation(
@@ -118,7 +122,7 @@ public class UserController {
     )
     @GetMapping("/notification")
     public ResponseEntity<?> getUserNotification(@AuthenticationPrincipal CustomUserDetails details) {
-        return ResponseEntity.ok(userService.getNotification(details.getUser()));
+        return ResponseEntity.ok(getUserNotificationService.getUserNotification(details));
     }
 
     @Operation(
@@ -147,8 +151,8 @@ public class UserController {
             }
     )
     @GetMapping("/analysis")
-    public ResponseEntity<?> getAnalysis(@AuthenticationPrincipal CustomUserDetails details) {
-        return ResponseEntity.ok(userService.getAnalysis(details.getUser()));
+    public ResponseEntity<ResponseAnalysisDto> getAnalysis(@AuthenticationPrincipal CustomUserDetails details) {
+        return ResponseEntity.ok(getUserAnalysisService.getAnalysis(details));
     }
 
     @Operation(
@@ -164,6 +168,9 @@ public class UserController {
                             description = "회원 가입 또는 로그인 완료",
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = JWT.class))
                     ),
+                    @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.INVALID_SNS_KIND, ref = SwaggerErrorCode.INVALID_SNS_KIND_VALUE),
+                    })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.INVALID_SNS_TOKEN, ref = SwaggerErrorCode.INVALID_SNS_TOKEN_VALUE),
                     })),
@@ -174,9 +181,8 @@ public class UserController {
             }
     )
     @PostMapping
-    public ResponseEntity<?> signup(@Valid @RequestBody RequestUserPostDTO dto) {
-        CreateUserCommand command = CreateUserCommand.from(dto);
-        JWT jwtToken = createUserService.createUser(command);
+    public ResponseEntity<JWT> signup(@Valid @RequestBody RequestUserPostDTO dto) {
+        JWT jwtToken = createUserService.createUser(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(jwtToken);
     }
 

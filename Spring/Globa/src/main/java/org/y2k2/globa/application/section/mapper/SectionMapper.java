@@ -6,7 +6,7 @@ import org.mapstruct.factory.Mappers;
 import org.y2k2.globa.application.analysis.dto.response.ResponseRecordAnalysisDto;
 import org.y2k2.globa.application.section.dto.response.ResponseSectionDto;
 import org.y2k2.globa.application.summary.dto.response.ResponseDetailSummaryDto;
-import org.y2k2.globa.entity.SectionEntity;
+import org.y2k2.globa.infrastructure.persistence.section.entity.SectionEntity;
 import org.y2k2.globa.application.comment.mapper.CustomTimestampMapper;
 import org.y2k2.globa.mapper.CustomTimestampTranslator;
 import org.y2k2.globa.mapper.MapCreatedTime;

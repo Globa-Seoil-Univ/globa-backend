@@ -4,12 +4,12 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import org.y2k2.globa.application.record.dto.request.RequestPostRecordDto;
-import org.y2k2.globa.insfrastructure.persistence.folder.entity.FolderEntity;
-import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.application.comment.mapper.CustomTimestampMapper;
 import org.y2k2.globa.mapper.CustomTimestampTranslator;
 import org.y2k2.globa.mapper.MapCreatedTime;
-import org.y2k2.globa.projection.RecordSearchProjection;
+import org.y2k2.globa.infrastructure.persistence.record.projection.RecordSearchProjection;
 import org.y2k2.globa.application.folder.dto.response.ResponseDetailFolderDto;
 import org.y2k2.globa.application.record.dto.response.ResponseRecordDetailDto;
 import org.y2k2.globa.application.record.dto.response.ResponseRecordDto;
@@ -18,7 +18,7 @@ import org.y2k2.globa.application.keyword.dto.response.ResponseKeywordDto;
 import org.y2k2.globa.application.record.dto.request.RequestRecordDto;
 import org.y2k2.globa.application.user.dto.common.UserIntroDto;
 import org.y2k2.globa.application.section.dto.response.ResponseSectionDto;
-import org.y2k2.globa.entity.RecordEntity;
+import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 
 import java.util.List;
 

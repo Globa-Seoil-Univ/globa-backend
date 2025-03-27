@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import org.y2k2.globa.application.hightlight.dto.response.ResponseDetailHighlightDto;
-import org.y2k2.globa.entity.HighlightEntity;
+import org.y2k2.globa.infrastructure.persistence.highlight.entity.HighlightEntity;
 
 @Mapper
 public interface HighlightMapper {

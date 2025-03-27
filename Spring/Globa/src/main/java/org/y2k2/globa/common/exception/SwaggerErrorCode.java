@@ -21,6 +21,8 @@ public class SwaggerErrorCode {
     public static final String NOT_INCLUDE_HIGHLIGHT_COMMENT_VALUE = "40030";
     public static final String MISMATCH_FOLDER_ID = "MISMATCH_FOLDER_ID";
     public static final String MISMATCH_FOLDER_ID_VALUE = "40040";
+    public static final String INVALID_SNS_KIND = "INVALID_SNS_KIND";
+    public static final String INVALID_SNS_KIND_VALUE = "40050";
 
     /* 401 UNAUTHORIZED : 허락되지 않은 사용자 */
     public static final String INVALID_TOKEN = "INVALID_TOKEN";

@@ -2,8 +2,8 @@ package org.y2k2.globa.application.record.dto.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.y2k2.globa.insfrastructure.persistence.folder.entity.FolderEntity;
-import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

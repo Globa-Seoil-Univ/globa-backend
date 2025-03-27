@@ -10,15 +10,21 @@ import org.y2k2.globa.application.quiz.mapper.QuizMapper;
 import org.y2k2.globa.application.studytime.mapper.StudyTimeMapper;
 import org.y2k2.globa.application.survey.mapper.SurveyMapper;
 import org.y2k2.globa.application.user.mapper.UserMapper;
-import org.y2k2.globa.insfrastructure.persistence.folder.entity.FolderEntity;
-import org.y2k2.globa.insfrastructure.persistence.role.entity.RoleEntity;
-import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
-import org.y2k2.globa.insfrastructure.persistence.folder.repository.FolderJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
+import org.y2k2.globa.infrastructure.persistence.keyword.repository.KeywordJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.quiz.repository.QuizJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
+import org.y2k2.globa.infrastructure.persistence.record.repository.RecordJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.role.entity.RoleEntity;
+import org.y2k2.globa.infrastructure.persistence.study.repository.StudyJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.survey.repository.SurveyJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.infrastructure.persistence.folder.repository.FolderJpaRepository;
 import org.y2k2.globa.insfrastructure.persistence.jpa.repository.UserJpaRepository;
-import org.y2k2.globa.insfrastructure.persistence.role.repository.RoleJpaRepository;
-import org.y2k2.globa.projection.KeywordProjection;
-import org.y2k2.globa.projection.QuizGradeProjection;
-import org.y2k2.globa.projection.StudyTimeProjection;
+import org.y2k2.globa.infrastructure.persistence.role.repository.RoleJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.keyword.projection.KeywordProjection;
+import org.y2k2.globa.infrastructure.persistence.quiz.projection.QuizGradeProjection;
+import org.y2k2.globa.infrastructure.persistence.study.projection.StudyTimeProjection;
 import org.y2k2.globa.common.annotation.FileCleanup;
 import org.y2k2.globa.application.common.dto.file.FileDto;
 import org.y2k2.globa.application.user.dto.request.RequestNameDto;
@@ -34,11 +40,11 @@ import org.y2k2.globa.application.user.dto.request.RequestUserPostDTO;
 import org.y2k2.globa.application.user.dto.response.ResponseNotificationSettingDto;
 import org.y2k2.globa.application.user.dto.response.ResponseUserDto;
 import org.y2k2.globa.application.user.dto.response.ResponseUserSearchDto;
-import org.y2k2.globa.entity.*;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.exception.FileUploadException;
-import org.y2k2.globa.repository.*;
+import org.y2k2.globa.infrastructure.persistence.userrole.entity.UserRoleEntity;
+import org.y2k2.globa.infrastructure.persistence.userrole.repository.UserRoleJpaRepository;
 import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.common.util.file.FileStore;
 import org.y2k2.globa.common.util.jwt.JWT;
@@ -61,14 +67,14 @@ public class UserService {
     private final FileStore fileStore;
 
     private final UserJpaRepository userJpaRepository;
-    private final StudyRepository studyRepository;
-    private final SurveyRepository surveyRepository;
+    private final StudyJpaRepository studyJpaRepository;
+    private final SurveyJpaRepository surveyJpaRepository;
     private final FolderJpaRepository folderJpaRepository;
-    private final RecordRepository recordRepository;
-    private final UserRoleRepository userRoleRepository;
+    private final RecordJpaRepository recordJpaRepository;
+    private final UserRoleJpaRepository userRoleJpaRepository;
     private final RoleJpaRepository roleJpaRepository;
-    private final QuizRepository quizRepository;
-    private final KeywordRepository keywordRepository;
+    private final QuizJpaRepository quizJpaRepository;
+    private final KeywordJpaRepository keywordJpaRepository;
 
     // TODO : 의존성 제거 ?
     public final FolderService folderService;
@@ -106,14 +112,14 @@ public class UserService {
     }
 
     public ResponseAnalysisDto getAnalysis(UserEntity user) {
-        List<RecordEntity> records = recordRepository.findAllByUser(user.getUserId());
+        List<RecordEntity> records = recordJpaRepository.findAllByUser(user.getUserId());
         if(records.isEmpty())
             return new ResponseAnalysisDto(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 
         List<Long> recordIds = records.stream().map(RecordEntity::getRecordId).toList();
-        List<StudyTimeProjection> studyTimeProjections = studyRepository.findStudyTimeByUserInWeek(user.getUserId());
-        List<QuizGradeProjection> quizGradeProjections = quizRepository.findQuizGradeByUserInWeek(user.getUserId());
-        List<KeywordProjection> keywordProjections = keywordRepository.findKeywordByRecordIds(recordIds);
+        List<StudyTimeProjection> studyTimeProjections = studyJpaRepository.findStudyTimeByUserInWeek(user.getUserId());
+        List<QuizGradeProjection> quizGradeProjections = quizJpaRepository.findQuizGradeByUserInWeek(user.getUserId());
+        List<KeywordProjection> keywordProjections = keywordJpaRepository.findKeywordByRecordIds(recordIds);
 
         List<ResponseStudyTimesDto> studyTimes = studyTimeProjections.stream().map(
                 StudyTimeMapper.INSTANCE::toResponseTotalStudyTimesDto
@@ -226,7 +232,7 @@ public class UserService {
                     RoleEntity roleEntity = roleJpaRepository.findByRoleId(4);
                     userRoleEntity.setUser(newUser);
                     userRoleEntity.setRoleId(roleEntity);
-                    userRoleRepository.save(userRoleEntity);
+                    userRoleJpaRepository.save(userRoleEntity);
 
                     folderService.createDefaultFolder(newUser);
                     return newUser;
@@ -301,7 +307,7 @@ public class UserService {
         user.setNotificationTokenTime(null);
 
         userJpaRepository.save(user);
-        surveyRepository.save(SurveyMapper.INSTANCE.toEntity(dto));
+        surveyJpaRepository.save(SurveyMapper.INSTANCE.toEntity(dto));
     }
 
     private String generateRandomCode(){

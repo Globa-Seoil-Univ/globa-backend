@@ -7,14 +7,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.y2k2.globa.application.dictionary.dto.common.DictionaryDto;
 import org.y2k2.globa.application.dictionary.dto.response.ResponseDictionaryDto;
-import org.y2k2.globa.entity.DictionaryEntity;
-import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
-import org.y2k2.globa.entity.UserRoleEntity;
+import org.y2k2.globa.infrastructure.persistence.dictionary.entity.DictionaryEntity;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.infrastructure.persistence.userrole.entity.UserRoleEntity;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.application.dictionary.mapper.DictionaryMapper;
-import org.y2k2.globa.repository.DictionaryRepository;
-import org.y2k2.globa.repository.UserRoleRepository;
+import org.y2k2.globa.infrastructure.persistence.dictionary.repository.DictionaryJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.userrole.repository.UserRoleJpaRepository;
 import org.y2k2.globa.common.util.Excel;
 import org.y2k2.globa.application.userrole.service.UserRoleService;
 
@@ -31,12 +31,12 @@ public class DictionaryService {
 
     private final UserRoleService userRoleService;
 
-    private final UserRoleRepository userRoleRepository;
-    private final DictionaryRepository dictionaryRepository;
+    private final UserRoleJpaRepository userRoleJpaRepository;
+    private final DictionaryJpaRepository dictionaryJpaRepository;
 
     @Transactional
     public ResponseDictionaryDto getDictionary(String keyword) {
-        List<DictionaryEntity> dtos = dictionaryRepository.findTop10ByWordStartingWithOrEngWordStartingWithOrderByCreatedTimeAsc(keyword, keyword);
+        List<DictionaryEntity> dtos = dictionaryJpaRepository.findTop10ByWordStartingWithOrEngWordStartingWithOrderByCreatedTimeAsc(keyword, keyword);
 
         return new ResponseDictionaryDto(dtos.stream()
                 .map(DictionaryMapper.INSTANCE::toDictionaryDto)
@@ -45,7 +45,7 @@ public class DictionaryService {
 
     @Transactional
     public void addDictionary(UserEntity user) {
-        Optional<UserRoleEntity> optionalUserRole = userRoleRepository.findByUser(user);
+        Optional<UserRoleEntity> optionalUserRole = userRoleJpaRepository.findByUser(user);
 
         if (optionalUserRole.isEmpty()) {
             userRoleService.createUserRoleAndThrowException(user);
@@ -55,7 +55,7 @@ public class DictionaryService {
         }
 
         List<DictionaryDto> dtos = excel.getDictionaryDto();
-        dictionaryRepository.deleteAllInBatch();
+        dictionaryJpaRepository.deleteAllInBatch();
 
         final long[] num = {1};
         // bulk insert

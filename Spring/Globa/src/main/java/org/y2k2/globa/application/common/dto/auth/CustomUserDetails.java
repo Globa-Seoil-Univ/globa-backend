@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -13,7 +13,9 @@ import java.util.Collections;
 @RequiredArgsConstructor
 @Getter
 public class CustomUserDetails implements UserDetails {
-    private final UserEntity user;
+    private final Long userId;
+    private final String name;
+    private final String fcmToken;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -27,7 +29,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.user.getName();
+        return this.getName();
     }
 
     @Override

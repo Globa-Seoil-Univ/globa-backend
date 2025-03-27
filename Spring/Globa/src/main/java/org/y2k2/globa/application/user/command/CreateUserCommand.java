@@ -7,6 +7,7 @@ import java.security.SecureRandom;
 import java.util.Random;
 
 public record CreateUserCommand(
+        String code,
         SnsKind snsKind,
         String snsId,
         String name,
@@ -15,8 +16,9 @@ public record CreateUserCommand(
         boolean notification,
         boolean eventNotification
 ) {
-    public static CreateUserCommand from(RequestUserPostDTO dto) {
+    public static CreateUserCommand from(RequestUserPostDTO dto, String code) {
         return new CreateUserCommand(
+                code,
                 SnsKind.fromCode(dto.snsKind()),
                 dto.snsId(),
                 dto.name(),
@@ -25,42 +27,5 @@ public record CreateUserCommand(
                 dto.notification() != null ? dto.notification() : false,
                 dto.eventNotification() != null ? dto.eventNotification() : false
         );
-    }
-
-    public boolean hasProfile() {
-        return profile != null && !profile.isEmpty();
-    }
-
-    public boolean hasToken() {
-        return token != null && !token.isEmpty();
-    }
-
-    public boolean isKakao() {
-        return snsKind == SnsKind.KAKAO;
-    }
-
-    public boolean isGoogle() {
-        return snsKind == SnsKind.GOOGLE;
-    }
-
-    public boolean isNaver() {
-        return snsKind == SnsKind.NAVER;
-    }
-
-    public boolean isTwitter() {
-        return snsKind == SnsKind.TWITTER;
-    }
-
-    public String generateRandomCode(){
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        Random random = new SecureRandom();
-        StringBuilder code = new StringBuilder();
-
-        for(int i = 0; i < 6; ++i ){
-            int index = random.nextInt(characters.length());
-            code.append(characters.charAt(index));
-        }
-
-        return code.toString();
     }
 }

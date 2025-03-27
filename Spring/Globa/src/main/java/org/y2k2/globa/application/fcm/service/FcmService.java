@@ -10,11 +10,11 @@ import org.y2k2.globa.application.fcm.dto.common.FcmUnSubscribeEvent;
 import org.y2k2.globa.application.fcm.dto.request.RequestFcmTopicDto;
 import org.y2k2.globa.application.fcm.dto.request.RequestSubscribeTopicDto;
 import org.y2k2.globa.application.notification.dto.common.RequestNotificationWithTopicDto;
-import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
-import org.y2k2.globa.entity.UserRoleEntity;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.infrastructure.persistence.userrole.entity.UserRoleEntity;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
-import org.y2k2.globa.repository.UserRoleRepository;
+import org.y2k2.globa.infrastructure.persistence.userrole.repository.UserRoleJpaRepository;
 import org.y2k2.globa.common.type.FcmTopic;
 import org.y2k2.globa.application.userrole.service.UserRoleService;
 
@@ -28,10 +28,10 @@ public class FcmService {
 
     private final UserRoleService userRoleService;
 
-    private final UserRoleRepository userRoleRepository;
+    private final UserRoleJpaRepository userRoleJpaRepository;
 
     public void sendTopicNotification(RequestFcmTopicDto dto, UserEntity user) {
-        Optional<UserRoleEntity> userRole = userRoleRepository.findByUser(user);
+        Optional<UserRoleEntity> userRole = userRoleJpaRepository.findByUser(user);
 
         if (userRole.isEmpty()) {
             userRoleService.createUserRoleAndThrowException(user);

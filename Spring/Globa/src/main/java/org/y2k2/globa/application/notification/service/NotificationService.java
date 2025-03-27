@@ -8,25 +8,25 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.application.notification.dto.common.*;
-import org.y2k2.globa.projection.NotificationProjection;
-import org.y2k2.globa.projection.NotificationUnReadCount;
+import org.y2k2.globa.infrastructure.persistence.notification.projection.NotificationProjection;
+import org.y2k2.globa.infrastructure.persistence.notification.projection.NotificationUnReadCountProjection;
 import org.y2k2.globa.application.notification.dto.response.ResponseNotificationDto;
 import org.y2k2.globa.application.notification.dto.response.ResponseUnreadCountDto;
 import org.y2k2.globa.application.notification.dto.response.ResponseUnreadNotificationDto;
-import org.y2k2.globa.insfrastructure.persistence.foldershare.entity.FolderShareEntity;
-import org.y2k2.globa.entity.NotificationEntity;
-import org.y2k2.globa.entity.NotificationReadEntity;
-import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
+import org.y2k2.globa.infrastructure.persistence.notification.entity.NotificationEntity;
+import org.y2k2.globa.infrastructure.persistence.notificationread.entity.NotificationReadEntity;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.application.notification.mapper.NotificationMapper;
 import org.y2k2.globa.application.notificationread.mapper.NotificationReadMapper;
-import org.y2k2.globa.insfrastructure.persistence.foldershare.repository.FolderShareJpaRepository;
-import org.y2k2.globa.repository.NotificationReadRepository;
-import org.y2k2.globa.repository.NotificationRepository;
-import org.y2k2.globa.common.type.InvitationStatus;
+import org.y2k2.globa.infrastructure.persistence.foldershare.repository.FolderShareJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.notificationread.repository.NotificationReadJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.notification.repository.NotificationJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStatus;
 import org.y2k2.globa.common.type.NotificationSort;
-import org.y2k2.globa.common.type.NotificationType;
+import org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +37,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class NotificationService {
-    private final NotificationRepository notificationRepository;
-    private final NotificationReadRepository notificationReadRepository;
+    private final NotificationJpaRepository notificationJpaRepository;
+    private final NotificationReadJpaRepository notificationReadJpaRepository;
     private final FolderShareJpaRepository folderShareJpaRepository;
 
     public ResponseNotificationDto getNotifications(int count, int page, NotificationSort sort, UserEntity user) {
@@ -71,7 +71,7 @@ public class NotificationService {
         }
 
         Pageable pageable = PageRequest.of(page - 1, count);
-        Page<NotificationProjection> notificationEntityPage = notificationRepository.findAllByReceiverOrTypeIdInOrderByCreatedTimeDesc(
+        Page<NotificationProjection> notificationEntityPage = notificationJpaRepository.findAllByReceiverOrTypeIdInOrderByCreatedTimeDesc(
                 pageable,
                 user.getUserId(),
                 includeNotice,
@@ -89,24 +89,24 @@ public class NotificationService {
     }
 
     public ResponseUnreadNotificationDto getHasUnreadNotification(UserEntity user) {
-        Long hasUnread = notificationRepository.existsByReceiver(user.getUserId());
-        return new ResponseUnreadNotificationDto(hasUnread != 0);
+        Boolean hasUnread = notificationJpaRepository.existsByReceiver(user.getUserId());
+        return new ResponseUnreadNotificationDto(hasUnread);
     }
 
     public ResponseUnreadCountDto getCountUnreadNotification(UserEntity user) {
-        NotificationUnReadCount notificationUnReadCount = notificationRepository.countByReceiverUserId(user.getUserId());
-        Long total = notificationUnReadCount.getNoticeCount() +
-                notificationUnReadCount.getInviteCount() +
-                notificationUnReadCount.getShareCount() +
-                notificationUnReadCount.getRecordCount() +
-                notificationUnReadCount.getInquiryCount();
+        NotificationUnReadCountProjection notificationUnReadCountProjection = notificationJpaRepository.countByReceiverUserId(user.getUserId());
+        Long total = notificationUnReadCountProjection.getNoticeCount() +
+                notificationUnReadCountProjection.getInviteCount() +
+                notificationUnReadCountProjection.getShareCount() +
+                notificationUnReadCountProjection.getRecordCount() +
+                notificationUnReadCountProjection.getInquiryCount();
 
         return new ResponseUnreadCountDto(
                 total,
-                notificationUnReadCount.getNoticeCount(),
-                notificationUnReadCount.getInviteCount() + notificationUnReadCount.getShareCount(),
-                notificationUnReadCount.getRecordCount(),
-                notificationUnReadCount.getInquiryCount()
+                notificationUnReadCountProjection.getNoticeCount(),
+                notificationUnReadCountProjection.getInviteCount() + notificationUnReadCountProjection.getShareCount(),
+                notificationUnReadCountProjection.getRecordCount(),
+                notificationUnReadCountProjection.getInquiryCount()
         );
     }
 
@@ -121,7 +121,7 @@ public class NotificationService {
             return;
         }
 
-        notificationRepository.save(notification);
+        notificationJpaRepository.save(notification);
     }
 
     @Transactional
@@ -140,18 +140,18 @@ public class NotificationService {
             notifications.add(notification);
         }
 
-        notificationRepository.saveAll(notifications);
+        notificationJpaRepository.saveAll(notifications);
     }
 
     @Transactional
     public void readNotification(long notificationId, UserEntity user) {
-        Optional<NotificationReadEntity> notificationRead = notificationReadRepository.findByNotificationNotificationId(notificationId);
+        Optional<NotificationReadEntity> notificationRead = notificationReadJpaRepository.findByNotificationNotificationId(notificationId);
 
         if (notificationRead.isPresent()) {
             throw new CustomException(ErrorCode.NOTIFICATION_READ_DUPLICATED);
         }
 
-        NotificationEntity notification = notificationRepository.findByNotificationId(notificationId)
+        NotificationEntity notification = notificationJpaRepository.findByNotificationId(notificationId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_NOTIFICATION));
 
         log.info("test = {}", notification.getReceiver().getName());
@@ -159,12 +159,12 @@ public class NotificationService {
         checkAccessible(notification, user);
 
         NotificationReadEntity readEntity = NotificationReadMapper.INSTANCE.toEntity(notification, user, false);
-        notificationReadRepository.save(readEntity);
+        notificationReadJpaRepository.save(readEntity);
     }
 
     @Transactional
     public void deleteNotification(long notificationId, UserEntity user) {
-        NotificationEntity notification = notificationRepository.findByNotificationId(notificationId)
+        NotificationEntity notification = notificationJpaRepository.findByNotificationId(notificationId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_NOTIFICATION));
 
         checkAccessible(notification, user);
@@ -172,12 +172,12 @@ public class NotificationService {
         char type = notification.getTypeId();
         if (type == NotificationType.NOTICE.getTypeId() || isShareNotification(notification)) {
             // 공지, 공유 관련 알림은 불특정 다수에게 전달되는 알림으로 특정 사용자만 삭제한 것으로 처리
-            NotificationReadEntity readEntity = notificationReadRepository.findByNotificationNotificationId(notificationId)
+            NotificationReadEntity readEntity = notificationReadJpaRepository.findByNotificationNotificationId(notificationId)
                     .orElseGet(() -> NotificationReadMapper.INSTANCE.toEntity(notification, user, true));
 
-            notificationReadRepository.save(readEntity);
+            notificationReadJpaRepository.save(readEntity);
         } else {
-            notificationRepository.delete(notification);
+            notificationJpaRepository.delete(notification);
         }
     }
 

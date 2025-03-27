@@ -6,7 +6,7 @@ import org.mapstruct.factory.Mappers;
 
 import org.y2k2.globa.application.common.dto.file.FileDto;
 import org.y2k2.globa.application.dummyimage.dto.response.ResponseDummyImageDto;
-import org.y2k2.globa.entity.DummyImageEntity;
+import org.y2k2.globa.infrastructure.persistence.dummyimage.entity.DummyImageEntity;
 
 @Mapper
 public interface DummyImageMapper {

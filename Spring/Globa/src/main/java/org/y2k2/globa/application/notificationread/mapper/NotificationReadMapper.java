@@ -3,9 +3,9 @@ package org.y2k2.globa.application.notificationread.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import org.y2k2.globa.entity.NotificationEntity;
-import org.y2k2.globa.entity.NotificationReadEntity;
-import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.infrastructure.persistence.notification.entity.NotificationEntity;
+import org.y2k2.globa.infrastructure.persistence.notificationread.entity.NotificationReadEntity;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.application.comment.mapper.CustomTimestampMapper;
 
 @Mapper(uses = {CustomTimestampMapper.class})

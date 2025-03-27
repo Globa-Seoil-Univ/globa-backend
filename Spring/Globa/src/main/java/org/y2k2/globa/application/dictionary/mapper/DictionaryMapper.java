@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import org.y2k2.globa.application.dictionary.dto.common.DictionaryDto;
-import org.y2k2.globa.entity.DictionaryEntity;
+import org.y2k2.globa.infrastructure.persistence.dictionary.entity.DictionaryEntity;
 
 @Mapper
 public interface DictionaryMapper {

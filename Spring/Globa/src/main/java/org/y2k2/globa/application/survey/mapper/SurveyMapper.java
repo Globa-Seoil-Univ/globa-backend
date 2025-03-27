@@ -3,7 +3,7 @@ package org.y2k2.globa.application.survey.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.y2k2.globa.application.survey.dto.request.RequestSurveyDto;
-import org.y2k2.globa.entity.SurveyEntity;
+import org.y2k2.globa.infrastructure.persistence.survey.entity.SurveyEntity;
 
 @Mapper
 public interface SurveyMapper {

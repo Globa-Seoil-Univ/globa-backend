@@ -59,6 +59,7 @@ public class SwaggerConfig {
         components.addExamples(ErrorCode.INVITE_BAD_REQUEST.getErrorCode(), createExample(ErrorCode.INVITE_BAD_REQUEST.getErrorCode(), "자신을 초대할 수 없습니다."));
         components.addExamples(ErrorCode.INVITE_ACCEPT_BAD_REQUEST.getErrorCode(), createExample(ErrorCode.INVITE_ACCEPT_BAD_REQUEST.getErrorCode(), "이미 초대된 사용자입니다."));
         components.addExamples(ErrorCode.MISMATCH_FOLDER_ID.getErrorCode(), createExample(ErrorCode.MISMATCH_FOLDER_ID.getErrorCode(), "요청한 Folder Id와 DB의 정보가 일치하지 않습니다."));
+        components.addExamples(ErrorCode.INVALID_SNS_KIND.getErrorCode(), createExample(ErrorCode.INVALID_SNS_KIND.getErrorCode(), "유효하지 않은 Sns Kind입니다."));
 
         // 401 Errors
         components.addExamples(ErrorCode.INVALID_TOKEN.getErrorCode(), createExample(ErrorCode.INVALID_TOKEN.getErrorCode(), "유효하지 않은 토큰입니다."));

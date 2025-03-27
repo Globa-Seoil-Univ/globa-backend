@@ -21,7 +21,7 @@ import org.y2k2.globa.application.analysis.dto.response.ResponseAnalysisDto;
 import org.y2k2.globa.application.user.dto.response.ResponseNotificationSettingDto;
 import org.y2k2.globa.application.user.dto.response.ResponseUserDto;
 import org.y2k2.globa.application.user.dto.response.ResponseUserSearchDto;
-import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.common.filter.AuthenticationFilter;
 import org.y2k2.globa.helper.JWTHelper;
 import org.y2k2.globa.helper.UserHelper;

@@ -6,9 +6,9 @@ import org.mapstruct.factory.Mappers;
 import org.y2k2.globa.application.comment.mapper.CustomTimestampMapper;
 import org.y2k2.globa.mapper.CustomTimestampTranslator;
 import org.y2k2.globa.mapper.MapCreatedTime;
-import org.y2k2.globa.projection.StudyTimeProjection;
+import org.y2k2.globa.infrastructure.persistence.study.projection.StudyTimeProjection;
 import org.y2k2.globa.application.studytime.dto.response.ResponseStudyTimesDto;
-import org.y2k2.globa.entity.StudyEntity;
+import org.y2k2.globa.infrastructure.persistence.study.entity.StudyEntity;
 
 @Mapper(uses = {CustomTimestampMapper.class})
 public interface StudyTimeMapper {

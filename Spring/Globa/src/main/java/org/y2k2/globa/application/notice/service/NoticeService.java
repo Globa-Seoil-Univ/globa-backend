@@ -11,19 +11,24 @@ import org.y2k2.globa.common.annotation.FileCleanup;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.exception.FileUploadException;
-import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.infrastructure.persistence.dummyimage.entity.DummyImageEntity;
+import org.y2k2.globa.infrastructure.persistence.notice.entity.NoticeEntity;
+import org.y2k2.globa.infrastructure.persistence.notice.repository.NoticeJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.noticeimage.entity.NoticeImageEntity;
+import org.y2k2.globa.infrastructure.persistence.noticeimage.repository.NoticeImageJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.application.common.dto.file.FileDto;
 import org.y2k2.globa.application.notice.dto.request.RequestNoticeAddDto;
 import org.y2k2.globa.application.notification.dto.common.RequestNotificationWithTopicDto;
 import org.y2k2.globa.application.notice.dto.response.ResponseNoticeDetailDto;
 import org.y2k2.globa.application.notice.dto.response.ResponseNoticeIntroDto;
 import org.y2k2.globa.application.noticeimage.mapper.NoticeImageMapper;
-import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.*;
-import org.y2k2.globa.repository.*;
+import org.y2k2.globa.infrastructure.persistence.userrole.entity.UserRoleEntity;
+import org.y2k2.globa.infrastructure.persistence.userrole.repository.UserRoleJpaRepository;
 import org.y2k2.globa.application.notice.mapper.NoticeMapper;
 import org.y2k2.globa.common.type.FcmTopic;
-import org.y2k2.globa.common.type.NotificationType;
+import org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType;
 import org.y2k2.globa.common.util.file.FileStore;
 import org.y2k2.globa.application.notification.service.NotificationService;
 import org.y2k2.globa.application.userrole.service.UserRoleService;
@@ -42,13 +47,13 @@ public class NoticeService {
     private final UserRoleService userRoleService;
     private final NotificationService notificationService;
 
-    private final UserRoleRepository userRoleRepository;
-    private final NoticeRepository noticeRepository;
-    private final NoticeImageRepository noticeImageRepository;
+    private final UserRoleJpaRepository userRoleJpaRepository;
+    private final NoticeJpaRepository noticeJpaRepository;
+    private final NoticeImageJpaRepository noticeImageJpaRepository;
     private final DummyImageRepository dummyImageRepository;
 
     public List<ResponseNoticeIntroDto> getIntroNotices() {
-        List<NoticeEntity> noticeEntities = noticeRepository.findByOrderByCreatedTimeDesc(Limit.of(3));
+        List<NoticeEntity> noticeEntities = noticeJpaRepository.findByOrderByCreatedTimeDesc(Limit.of(3));
 
         return noticeEntities.stream()
                 .map(NoticeMapper.INSTANCE::toIntroResponseDto)
@@ -56,7 +61,7 @@ public class NoticeService {
     }
 
     public ResponseNoticeDetailDto getNoticeDetail(Long noticeId) {
-        NoticeEntity noticeEntity = noticeRepository.findByNoticeId(noticeId)
+        NoticeEntity noticeEntity = noticeJpaRepository.findByNoticeId(noticeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_NOTICE));
 
         return NoticeMapper.INSTANCE.toDetailResponseDto(noticeEntity);
@@ -65,7 +70,7 @@ public class NoticeService {
     @Transactional
     @FileCleanup
     public Long addNotice(RequestNoticeAddDto dto, UserEntity user) {
-        Optional<UserRoleEntity> optionalUserRole = userRoleRepository.findByUser(user);
+        Optional<UserRoleEntity> optionalUserRole = userRoleJpaRepository.findByUser(user);
 
         if (optionalUserRole.isEmpty()) {
             userRoleService.createUserRoleAndThrowException(user);
@@ -79,7 +84,7 @@ public class NoticeService {
 
         try {
             NoticeEntity notice = NoticeMapper.INSTANCE.toEntity(dto, user, fileDto);
-            createdNotice = noticeRepository.save(notice);
+            createdNotice = noticeJpaRepository.save(notice);
 
             if (dto.imageIds() != null) {
                 List<DummyImageEntity> dummyImages = dummyImageRepository.findByImageIdIn(dto.imageIds());
@@ -88,7 +93,7 @@ public class NoticeService {
                 ).toList();
 
                 dummyImageRepository.deleteAllInBatch(dummyImages);
-                noticeImageRepository.saveAll(noticeImages);
+                noticeImageJpaRepository.saveAll(noticeImages);
             }
         } catch (Exception e) {
             log.error("Failed to add notice = ", e);

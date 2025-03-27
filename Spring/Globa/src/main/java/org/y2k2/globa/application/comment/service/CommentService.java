@@ -11,9 +11,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
-import org.y2k2.globa.insfrastructure.persistence.folder.entity.FolderEntity;
-import org.y2k2.globa.insfrastructure.persistence.foldershare.entity.FolderShareEntity;
-import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.infrastructure.persistence.comment.entity.CommentEntity;
+import org.y2k2.globa.infrastructure.persistence.comment.repository.CommentJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
+import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
+import org.y2k2.globa.infrastructure.persistence.highlight.entity.HighlightEntity;
+import org.y2k2.globa.infrastructure.persistence.highlight.repository.HighlightJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
+import org.y2k2.globa.infrastructure.persistence.section.entity.SectionEntity;
+import org.y2k2.globa.infrastructure.persistence.section.repository.SectionJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.application.comment.dto.common.CommentDto;
 import org.y2k2.globa.application.comment.dto.common.ReplyDto;
 import org.y2k2.globa.application.notification.dto.common.RequestNotificationWithFolderShareCommentDto;
@@ -22,13 +29,11 @@ import org.y2k2.globa.application.comment.dto.request.RequestCommentWithIdsDto;
 import org.y2k2.globa.application.comment.dto.request.RequestFirstCommentDto;
 import org.y2k2.globa.application.comment.dto.response.ResponseCommentDto;
 import org.y2k2.globa.application.comment.dto.response.ResponseReplyDto;
-import org.y2k2.globa.entity.*;
 import org.y2k2.globa.exception.*;
-import org.y2k2.globa.insfrastructure.persistence.foldershare.repository.FolderShareJpaRepository;
-import org.y2k2.globa.repository.*;
+import org.y2k2.globa.infrastructure.persistence.foldershare.repository.FolderShareJpaRepository;
 import org.y2k2.globa.application.comment.mapper.CommentMapper;
-import org.y2k2.globa.common.type.InvitationStatus;
-import org.y2k2.globa.common.type.NotificationType;
+import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStatus;
+import org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType;
 import org.y2k2.globa.common.type.FolderRole;
 import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.application.notification.service.NotificationService;
@@ -43,19 +48,19 @@ public class CommentService {
     private final NotificationService notificationService;
     private final ApplicationEventPublisher publisher;
 
-    private final CommentRepository commentRepository;
+    private final CommentJpaRepository commentJpaRepository;
     private final FolderShareJpaRepository folderShareJpaRepository;
-    private final SectionRepository sectionRepository;
-    private final HighlightRepository highlightRepository;
+    private final SectionJpaRepository sectionJpaRepository;
+    private final HighlightJpaRepository highlightJpaRepository;
 
     public ResponseCommentDto getComments(RequestCommentWithIdsDto request, int page, int count) {
-        SectionEntity section = sectionRepository.findBySection(request.sectionId(), request.folderId(), request.recordId())
+        SectionEntity section = sectionJpaRepository.findBySection(request.sectionId(), request.folderId(), request.recordId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SECTION));
         validateFolderShare(section, request.user());
         HighlightEntity highlight = validateHighlight(request.highlightId());
 
         Pageable pageable = PageRequest.of(page - 1, count);
-        Page<CommentEntity> commentEntityPage = commentRepository.findByHighlightAndParentIsNullOrderByCommentIdDesc(highlight, pageable);
+        Page<CommentEntity> commentEntityPage = commentJpaRepository.findByHighlightAndParentIsNullOrderByCommentIdDesc(highlight, pageable);
 
         List<CommentEntity> parentCommentEntities = commentEntityPage.getContent();
         List<CommentDto> comments = parentCommentEntities.stream()
@@ -66,13 +71,13 @@ public class CommentService {
     }
 
     public ResponseReplyDto getReply(RequestCommentWithIdsDto request, int page, int count) {
-        SectionEntity section = sectionRepository.findBySection(request.sectionId(), request.folderId(), request.recordId())
+        SectionEntity section = sectionJpaRepository.findBySection(request.sectionId(), request.folderId(), request.recordId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SECTION));
 
         validateFolderShare(section, request.user());
         validateHighlight(request.highlightId());
 
-        CommentEntity parentComment = commentRepository.findByCommentIdAndParentIsNull(request.parentId())
+        CommentEntity parentComment = commentJpaRepository.findByCommentIdAndParentIsNull(request.parentId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PARENT_COMMENT));
 
         if (!parentComment.getHighlight().getHighlightId().equals(request.highlightId())) {
@@ -80,7 +85,7 @@ public class CommentService {
         }
 
         Pageable pageable = PageRequest.of(page - 1, count);
-        Page<CommentEntity> commentEntityPage = commentRepository.findByParent_CommentIdOrderByCommentIdAsc(request.parentId(), pageable);
+        Page<CommentEntity> commentEntityPage = commentJpaRepository.findByParent_CommentIdOrderByCommentIdAsc(request.parentId(), pageable);
         List<CommentEntity> comments = commentEntityPage.getContent();
         List<ReplyDto> dto = comments.stream()
                 .map(CommentMapper.INSTANCE::toResponseReplyDto)
@@ -91,15 +96,15 @@ public class CommentService {
 
     @Transactional
     public long addFirstComment(RequestCommentWithIdsDto request, RequestFirstCommentDto dto) {
-        SectionEntity section = sectionRepository.findBySection(request.sectionId(), request.folderId(), request.recordId())
+        SectionEntity section = sectionJpaRepository.findBySection(request.sectionId(), request.folderId(), request.recordId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SECTION));
         FolderShareEntity folderShare = validateFolderShareWithRole(section, request.user());
 
-        boolean isAlready = highlightRepository.existsBySectionAndInRange(section.getSectionId(), dto.startIdx(), dto.endIdx());
+        boolean isAlready = highlightJpaRepository.existsBySectionAndInRange(section.getSectionId(), dto.startIdx(), dto.endIdx());
         if (isAlready) throw new CustomException(ErrorCode.HIGHLIGHT_DUPLICATED);
 
         HighlightEntity highlight = HighlightEntity.create(section, dto.startIdx(), dto.endIdx());
-        HighlightEntity createdHighlight = highlightRepository.save(highlight);
+        HighlightEntity createdHighlight = highlightJpaRepository.save(highlight);
 
         CommentEntity comment = saveComment(request.user(), createdHighlight, dto.content());
         saveNotification(request, folderShare, section, comment);
@@ -110,7 +115,7 @@ public class CommentService {
 
     @Transactional
     public void addComment(RequestCommentWithIdsDto request, RequestCommentDto dto) {
-        SectionEntity section = sectionRepository.findBySection(request.sectionId(), request.folderId(), request.recordId())
+        SectionEntity section = sectionJpaRepository.findBySection(request.sectionId(), request.folderId(), request.recordId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SECTION));
         FolderShareEntity folderShare = validateFolderShareWithRole(section, request.user());
         HighlightEntity highlight = validateHighlight(request.highlightId());
@@ -122,12 +127,12 @@ public class CommentService {
 
     @Transactional
     public void addReply(RequestCommentWithIdsDto request, RequestCommentDto dto) {
-        SectionEntity section = sectionRepository.findBySection(request.sectionId(), request.folderId(), request.recordId())
+        SectionEntity section = sectionJpaRepository.findBySection(request.sectionId(), request.folderId(), request.recordId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SECTION));
         FolderShareEntity folderShare = validateFolderShareWithRole(section, request.user());
         HighlightEntity highlight = validateHighlight(request.highlightId());
 
-        CommentEntity parentComment = commentRepository.findByCommentIdAndParentIsNull(request.parentId())
+        CommentEntity parentComment = commentJpaRepository.findByCommentIdAndParentIsNull(request.parentId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PARENT_COMMENT));
 
         CommentEntity addedComment = saveComment(request.user(), highlight, parentComment, dto.getContent());
@@ -136,40 +141,40 @@ public class CommentService {
     }
 
     public void updateComment(RequestCommentWithIdsDto request, long commentId, RequestCommentDto dto) {
-        SectionEntity section = sectionRepository.findBySection(request.sectionId(), request.folderId(), request.recordId())
+        SectionEntity section = sectionJpaRepository.findBySection(request.sectionId(), request.folderId(), request.recordId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SECTION));
         validateFolderShareWithRole(section, request.user());
         validateHighlight(request.highlightId());
         CommentEntity comment = validateComment(commentId, request.user().getUserId());
 
         comment.setContent(dto.getContent());
-        commentRepository.save(comment);
+        commentJpaRepository.save(comment);
     }
 
     @Transactional
     public void deleteComment(RequestCommentWithIdsDto request, Long commentId) {
-        SectionEntity section = sectionRepository.findBySection(request.sectionId(), request.folderId(), request.recordId())
+        SectionEntity section = sectionJpaRepository.findBySection(request.sectionId(), request.folderId(), request.recordId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SECTION));
         validateFolderShareWithRole(section, request.user());
         validateHighlight(request.highlightId());
 
-        Boolean exists = commentRepository.existsSelfOrChildDeletedByCommentId(commentId);
+        Boolean exists = commentJpaRepository.existsSelfOrChildDeletedByCommentId(commentId);
         CommentEntity comment = validateComment(commentId, request.user().getUserId());
 
         if (exists) {
-            List<CommentEntity> deletedComments = commentRepository.findAllSelfOrChildDeletedByCommentId(commentId);
+            List<CommentEntity> deletedComments = commentJpaRepository.findAllSelfOrChildDeletedByCommentId(commentId);
             if (deletedComments.isEmpty()) throw new CustomException(ErrorCode.NOT_FOUND_COMMENT);
 
             Long highlightId = deletedComments.get(0).getHighlight().getHighlightId();
-            HighlightEntity highlight = highlightRepository.findByHighlightId(highlightId)
+            HighlightEntity highlight = highlightJpaRepository.findByHighlightId(highlightId)
                     .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_HIGHLIGHT));
 
-            commentRepository.deleteAllInBatch(deletedComments);
-            highlightRepository.delete(highlight);
+            commentJpaRepository.deleteAllInBatch(deletedComments);
+            highlightJpaRepository.delete(highlight);
         } else {
             comment.setIsDeleted(true);
             comment.setDeletedTime(new CustomTimestamp().getTimestamp());
-            commentRepository.save(comment);
+            commentJpaRepository.save(comment);
         }
     }
 
@@ -192,12 +197,12 @@ public class CommentService {
     }
 
     private HighlightEntity validateHighlight(long highlightId) {
-        return highlightRepository.findByHighlightId(highlightId)
+        return highlightJpaRepository.findByHighlightId(highlightId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_HIGHLIGHT));
     }
 
     private CommentEntity validateComment(Long commentId, Long userId) {
-        CommentEntity comment = commentRepository.findByCommentId(commentId)
+        CommentEntity comment = commentJpaRepository.findByCommentId(commentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COMMENT));
         if (!comment.getUser().getUserId().equals(userId)) throw new CustomException(ErrorCode.MISMATCH_COMMENT_OWNER);
 
@@ -206,12 +211,12 @@ public class CommentService {
 
     private CommentEntity saveComment(UserEntity user, HighlightEntity highlight, String content) {
         CommentEntity comment = CommentEntity.create(user, highlight, content);
-        return commentRepository.save(comment);
+        return commentJpaRepository.save(comment);
     }
 
     private CommentEntity saveComment(UserEntity user, HighlightEntity highlight, CommentEntity parent, String content) {
         CommentEntity comment = CommentEntity.createReply(user, highlight, parent, content);
-        return commentRepository.save(comment);
+        return commentJpaRepository.save(comment);
     }
 
     private void saveNotification(

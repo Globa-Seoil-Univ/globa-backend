@@ -6,8 +6,8 @@ import org.y2k2.globa.application.notification.dto.common.*;
 import org.y2k2.globa.application.comment.mapper.CustomTimestampMapper;
 import org.y2k2.globa.mapper.CustomTimestampTranslator;
 import org.y2k2.globa.mapper.MapCreatedTime;
-import org.y2k2.globa.projection.NotificationProjection;
-import org.y2k2.globa.entity.NotificationEntity;
+import org.y2k2.globa.infrastructure.persistence.notification.projection.NotificationProjection;
+import org.y2k2.globa.infrastructure.persistence.notification.entity.NotificationEntity;
 
 @Mapper(uses = {CustomTimestampMapper.class})
 public interface NotificationMapper {

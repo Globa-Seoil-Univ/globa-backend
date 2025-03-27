@@ -15,17 +15,32 @@ import org.y2k2.globa.application.record.mapper.RecordMapper;
 import org.y2k2.globa.application.section.mapper.SectionMapper;
 import org.y2k2.globa.application.studytime.mapper.StudyTimeMapper;
 import org.y2k2.globa.application.summary.mapper.SummaryMapper;
-import org.y2k2.globa.insfrastructure.persistence.folder.entity.FolderEntity;
-import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.infrastructure.persistence.analysis.entity.AnalysisEntity;
+import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
+import org.y2k2.globa.infrastructure.persistence.highlight.entity.HighlightEntity;
+import org.y2k2.globa.infrastructure.persistence.highlight.repository.HighlightJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.keyword.repository.KeywordJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.quiz.repository.QuizJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.quizattemp.repository.QuizAttemptJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
+import org.y2k2.globa.infrastructure.persistence.record.repository.RecordJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.section.entity.SectionEntity;
+import org.y2k2.globa.infrastructure.persistence.section.repository.SectionJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.study.entity.StudyEntity;
+import org.y2k2.globa.infrastructure.persistence.study.repository.StudyJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.summary.entity.SummaryEntity;
+import org.y2k2.globa.infrastructure.persistence.summary.repository.SummaryJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.survey.repository.SurveyJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.application.common.dto.file.FileDto;
 import org.y2k2.globa.application.record.dto.request.RequestPostRecordDto;
-import org.y2k2.globa.insfrastructure.persistence.folder.repository.FolderJpaRepository;
-import org.y2k2.globa.insfrastructure.persistence.folderrole.repository.FolderRoleJpaRepository;
-import org.y2k2.globa.insfrastructure.persistence.foldershare.repository.FolderShareJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.folder.repository.FolderJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.folderrole.repository.FolderRoleJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.foldershare.repository.FolderShareJpaRepository;
 import org.y2k2.globa.insfrastructure.persistence.jpa.repository.UserJpaRepository;
-import org.y2k2.globa.projection.KeywordProjection;
-import org.y2k2.globa.projection.QuizGradeProjection;
-import org.y2k2.globa.projection.RecordSearchProjection;
+import org.y2k2.globa.infrastructure.persistence.keyword.projection.KeywordProjection;
+import org.y2k2.globa.infrastructure.persistence.quiz.projection.QuizGradeProjection;
+import org.y2k2.globa.infrastructure.persistence.record.projection.RecordSearchProjection;
 import org.y2k2.globa.common.annotation.FileCleanup;
 import org.y2k2.globa.application.record.dto.request.RequestRecordMoveDto;
 import org.y2k2.globa.application.record.dto.request.RequestRecordNameDto;
@@ -44,12 +59,10 @@ import org.y2k2.globa.application.studytime.dto.request.RequestStudyDto;
 import org.y2k2.globa.application.studytime.dto.response.ResponseStudyTimesDto;
 import org.y2k2.globa.application.summary.dto.response.ResponseDetailSummaryDto;
 import org.y2k2.globa.application.user.dto.common.UserIntroDto;
-import org.y2k2.globa.entity.*;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.exception.FileUploadException;
-import org.y2k2.globa.repository.*;
-import org.y2k2.globa.common.type.InvitationStatus;
+import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStatus;
 import org.y2k2.globa.common.type.FolderRole;
 import org.y2k2.globa.common.util.file.FileStore;
 
@@ -63,19 +76,19 @@ public class RecordService {
     private final FileStore fileStore;
 
     public final UserJpaRepository userJpaRepository;;
-    public final StudyRepository studyRepository;
-    public final SurveyRepository surveyRepository;
+    public final StudyJpaRepository studyJpaRepository;
+    public final SurveyJpaRepository surveyJpaRepository;
     public final FolderJpaRepository folderJpaRepository;
-    public final RecordRepository recordRepository;
+    public final RecordJpaRepository recordJpaRepository;
     public final FolderShareJpaRepository folderShareJpaRepository;
     public final FolderRoleJpaRepository folderRoleJpaRepository;
-    public final SectionRepository sectionRepository;
+    public final SectionJpaRepository sectionJpaRepository;
     public final AnalysisRepository analysisRepository;
-    public final HighlightRepository highlightRepository;
-    public final SummaryRepository summaryRepository;
-    public final QuizRepository quizRepository;
-    public final QuizAttemptRepository quizAttemptRepository;
-    public final KeywordRepository keywordRepository;
+    public final HighlightJpaRepository highlightJpaRepository;
+    public final SummaryJpaRepository summaryJpaRepository;
+    public final QuizJpaRepository quizJpaRepository;
+    public final QuizAttemptJpaRepository quizAttemptJpaRepository;
+    public final KeywordJpaRepository keywordJpaRepository;
 
     public ResponseRecordsByFolderDto getRecords(Long folderId, int page, int count, UserEntity user) {
         FolderEntity folder = folderJpaRepository.findFirstByFolderId(folderId)
@@ -85,7 +98,7 @@ public class RecordService {
         if (!hasAccess) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
         Pageable pageable = PageRequest.of(page - 1, count);
-        Page<RecordEntity> records = recordRepository.findAllByFolderFolderId(folderId, pageable);
+        Page<RecordEntity> records = recordJpaRepository.findAllByFolderFolderId(folderId, pageable);
 
         boolean isOwner = folder.getUser().getUserId().equals(user.getUserId());
 
@@ -98,14 +111,14 @@ public class RecordService {
 
     public ResponseRecordsDto getRecentRecords(int page, int count, UserEntity user) {
         Pageable pageable = PageRequest.of(page - 1, count);
-        Page<RecordEntity> recordPages = recordRepository.findAllByAccessibleRecord(user, pageable);
+        Page<RecordEntity> recordPages = recordJpaRepository.findAllByAccessibleRecord(user, pageable);
 
         if (recordPages == null || recordPages.getContent().isEmpty()) {
             return new ResponseRecordsDto(new ArrayList<>(), 0L);
         }
 
         List<RecordEntity> records = recordPages.getContent();
-        List<KeywordProjection> keywords = keywordRepository.findAllByRecordInOrderByImportanceDesc(records);
+        List<KeywordProjection> keywords = keywordJpaRepository.findAllByRecordInOrderByImportanceDesc(records);
 
         return new ResponseRecordsDto(
                 records.stream()
@@ -124,7 +137,7 @@ public class RecordService {
     }
 
     public ResponseRecordDetailDto getRecordDetail(Long folderId, Long recordId, UserEntity user){
-        RecordEntity record = recordRepository.findFirstByRecordId(recordId)
+        RecordEntity record = recordJpaRepository.findByRecordId(recordId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
         
         if (!record.getIsShare()) {
@@ -138,10 +151,10 @@ public class RecordService {
          * 3. 섹션 내 하이라이트 찾기
          * 4. 섹션 내 요약 찾기
          * */
-        List<SectionEntity> sections = sectionRepository.findAllByRecordOrderByStartTimeAsc(record);
+        List<SectionEntity> sections = sectionJpaRepository.findAllByRecordOrderByStartTimeAsc(record);
         List<AnalysisEntity> analyses = analysisRepository.findALlBySectionIn(sections);
-        List<HighlightEntity> highlights = highlightRepository.findAllBySectionIn(sections);
-        List<SummaryEntity> summaries = summaryRepository.findAllBySectionIn(sections);
+        List<HighlightEntity> highlights = highlightJpaRepository.findAllBySectionIn(sections);
+        List<SummaryEntity> summaries = summaryJpaRepository.findAllBySectionIn(sections);
         List<ResponseSectionDto> responseSections = new ArrayList<>();
 
         for (SectionEntity section : sections) {
@@ -172,12 +185,13 @@ public class RecordService {
     }
 
     public ResponseAnalysisDto getAnalysis(Long recordId, Long folderId, UserEntity user) {
+        // TODO : 모든 정보를 가져오는 무거운 작업이 많기 때문에 캐싱이 필요
         boolean hasAccess = folderShareJpaRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(user, folderId, InvitationStatus.ACCEPT);
         if (!hasAccess) throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 
-        List<StudyEntity> studies = studyRepository.findAllByUserAndRecordRecordId(user, recordId);
-        List<QuizGradeProjection> quizzes = quizRepository.findQuizGradeByUserAndRecordRecordId(user, recordId);
-        List<KeywordProjection> keywords = keywordRepository.findAllByRecordId(recordId);
+        List<StudyEntity> studies = studyJpaRepository.findAllByUserAndRecordRecordId(user, recordId);
+        List<QuizGradeProjection> quizzes = quizJpaRepository.findQuizGradeByUserAndRecordRecordId(user, recordId);
+        List<KeywordProjection> keywords = keywordJpaRepository.findAllByRecordId(recordId);
 
         List<ResponseStudyTimesDto> responseStudyTimes = studies.stream()
                 .map(StudyTimeMapper.INSTANCE::toResponseStudyTimesDto)
@@ -193,7 +207,7 @@ public class RecordService {
     }
 
     public ResponseRecordSearchDto searchRecord(String keyword, int page, int count, UserEntity user) {
-        Page<RecordSearchProjection> recordEntities = recordRepository.findAllSharedOrOwnedRecords(
+        Page<RecordSearchProjection> recordEntities = recordJpaRepository.findAllSharedOrOwnedRecords(
                 user,
                 keyword,
                 PageRequest.of(page - 1, count)
@@ -209,13 +223,13 @@ public class RecordService {
 
     public ResponseRecordsDto getReceivingRecords(int page, int count, UserEntity user) {
         Pageable pageable = PageRequest.of(page - 1, count);
-        Page<RecordEntity> records = recordRepository.findReceivingRecordsByUserOrderByCreatedTimeDesc(user, pageable);
+        Page<RecordEntity> records = recordJpaRepository.findReceivingRecordsByUserOrderByCreatedTimeDesc(user, pageable);
         return getResponseRecordsDto(records.getContent(), records.getTotalElements());
     }
 
     public ResponseRecordsDto getSharingRecords(int page, int count, UserEntity user) {
         Pageable pageable = PageRequest.of(page - 1, count);
-        Page<RecordEntity> records = recordRepository.findSharingRecordsByUserOrderByCreatedTimeDesc(user, pageable);
+        Page<RecordEntity> records = recordJpaRepository.findSharingRecordsByUserOrderByCreatedTimeDesc(user, pageable);
         return getResponseRecordsDto(records.getContent(), records.getTotalElements());
     }
 
@@ -224,7 +238,7 @@ public class RecordService {
             return new ResponseRecordsDto(new ArrayList<>(), 0L);
         }
 
-        List<KeywordProjection> keywords = keywordRepository.findAllByRecordInOrderByImportanceDesc(records);
+        List<KeywordProjection> keywords = keywordJpaRepository.findAllByRecordInOrderByImportanceDesc(records);
 
         return new ResponseRecordsDto(
                 records.stream()
@@ -248,14 +262,14 @@ public class RecordService {
     public void changeLinkShare(Long folderId, Long recordId, boolean isShare, UserEntity user){
         FolderEntity folder = folderJpaRepository.findFirstByFolderId(folderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));
-        RecordEntity record = recordRepository.findFirstByRecordId(recordId)
+        RecordEntity record = recordJpaRepository.findByRecordId(recordId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
 
         if (!folder.getUser().getUserId().equals(user.getUserId())) throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
         if (!record.getUser().getUserId().equals(user.getUserId())) throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
 
         record.setIsShare(isShare);
-        recordRepository.save(record);
+        recordJpaRepository.save(record);
     }
 
     @Transactional
@@ -270,7 +284,7 @@ public class RecordService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD_FIREBASE));
         RecordEntity record = RecordMapper.INSTANCE.toEntity(dto, folderEntity, user, file.size());
 
-        recordRepository.save(record);
+        recordJpaRepository.save(record);
 
         // TODO : Kafka를 통해 분석 요청 (Front한테 넘길 떄 주석 해제)
         // kafkaProducer.send(topic, topicKey, new RequestKafkaDto(recordEntity.getRecordId(), user.getUserId()));
@@ -278,7 +292,7 @@ public class RecordService {
 
     @Transactional
     public void modifyRecordName(Long folderId, Long recordId, RequestRecordNameDto dto, UserEntity user) {
-        RecordEntity record = recordRepository.findFirstByRecordId(recordId)
+        RecordEntity record = recordJpaRepository.findByRecordId(recordId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
 
         boolean hasAccess = folderShareJpaRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(user, folderId, InvitationStatus.ACCEPT);
@@ -289,13 +303,13 @@ public class RecordService {
         }
 
         record.setTitle(dto.title());
-        recordRepository.save(record);
+        recordJpaRepository.save(record);
     }
 
     @Transactional
     @FileCleanup
     public void moveRecord(Long folderId, Long recordId, RequestRecordMoveDto dto, UserEntity user) {
-        RecordEntity record = recordRepository.findFirstByRecordId(recordId)
+        RecordEntity record = recordJpaRepository.findByRecordId(recordId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
         FolderEntity target = folderJpaRepository.findFirstByFolderId(dto.targetId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_TARGET_FOLDER));
@@ -319,7 +333,7 @@ public class RecordService {
         try {
             record.setFolder(target);
             record.setPath(newPath);
-            recordRepository.save(record);
+            recordJpaRepository.save(record);
         } catch (Exception e) {
             throw new FileUploadException(newPath);
         }
@@ -329,14 +343,14 @@ public class RecordService {
 
     @Transactional
     public void modifyStudyTime(Long folderId, Long recordId, RequestStudyDto dto, UserEntity user) {
-        RecordEntity record = recordRepository.findFirstByRecordId(recordId)
+        RecordEntity record = recordJpaRepository.findByRecordId(recordId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
         if (!record.getFolder().getFolderId().equals(folderId)) throw new CustomException(ErrorCode.MISMATCH_RECORD_FOLDER);
 
         Boolean existsByFolderShare = folderShareJpaRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(user, folderId, InvitationStatus.ACCEPT);
         if (!existsByFolderShare) throw new CustomException(ErrorCode.MISMATCH_RECORD_OWNER);
 
-        StudyEntity study = studyRepository.findByCreatedTime(user, record)
+        StudyEntity study = studyJpaRepository.findByCreatedTime(user, record)
                 .orElse(
                         StudyEntity.builder()
                             .user(user)
@@ -350,12 +364,12 @@ public class RecordService {
             study.setStudyTime(dto.studyTime());
         }
 
-        studyRepository.save(study);
+        studyJpaRepository.save(study);
     }
 
     @Transactional
     public void deleteRecord(Long folderId, Long recordId, UserEntity user){
-        RecordEntity record = recordRepository.findFirstByRecordId(recordId)
+        RecordEntity record = recordJpaRepository.findByRecordId(recordId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD));
 
         boolean hasAccess = folderShareJpaRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatusAndRole_RoleName(
@@ -371,7 +385,7 @@ public class RecordService {
             throw new CustomException(ErrorCode.MISMATCH_RECORD_FOLDER);
         }
 
-        recordRepository.delete(record);
+        recordJpaRepository.delete(record);
         fileStore.deleteFile(record.getPath());
     }
 }

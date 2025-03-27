@@ -1,0 +1,81 @@
+package org.y2k2.globa.infrastructure.persistence.foldershare.repository;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
+import org.y2k2.globa.common.type.FolderRole;
+import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStatus;
+import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
+import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
+import org.y2k2.globa.domain.foldershare.repository.FolderShareRepository;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
+
+import java.util.List;
+import java.util.Optional;
+
+@RequiredArgsConstructor
+@Repository
+public class FolderShareRepositoryImpl implements FolderShareRepository {
+    private final FolderShareJpaRepository folderShareJpaRepository;
+
+    @Override
+    public FolderShareEntity save(FolderShareEntity entity) {
+        return folderShareJpaRepository.save(entity);
+    }
+
+    @Override
+    public List<FolderShareEntity> saveAll(List<FolderShareEntity> entities) {
+        return folderShareJpaRepository.saveAll(entities);
+    }
+
+    @Override
+    public void delete(FolderShareEntity entity) {
+        folderShareJpaRepository.delete(entity);
+    }
+
+    @Override
+    public Boolean isAccessible(UserEntity user, Long folderId) {
+        return folderShareJpaRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(user, folderId, InvitationStatus.ACCEPT);
+    }
+
+    @Override
+    public Boolean isOwner(UserEntity user, Long folderId) {
+        return folderShareJpaRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatusAndRole_RoleName(
+                user,
+                folderId,
+                InvitationStatus.ACCEPT,
+                FolderRole.OWNER.getRoleName()
+        );
+    }
+
+    @Override
+    public Boolean isInvited(FolderEntity folder, UserEntity user) {
+        return folderShareJpaRepository.existsByFolderAndTargetUser(folder, user);
+    }
+
+    @Override
+    public Page<FolderShareEntity> getShareInvitations(FolderEntity folder, Pageable pageable) {
+        return folderShareJpaRepository.findByFolderOrderByCreatedTimeAsc(folder, pageable);
+    }
+
+    @Override
+    public List<FolderShareEntity> getAllShareInvitations(Long folderId) {
+        return folderShareJpaRepository.findAllByFolderFolderId(folderId);
+    }
+
+    @Override
+    public List<FolderShareEntity> getAllShareInvitationsWithoutMe(Long folderId, Long excludeId) {
+        return folderShareJpaRepository.findAllByFolderFolderIdAndTargetUser_UserIdNot(folderId, excludeId);
+    }
+
+    @Override
+    public Optional<FolderShareEntity> getShareInvitation(FolderEntity folder, UserEntity user) {
+        return folderShareJpaRepository.findByFolderAndTargetUser(folder, user);
+    }
+
+    @Override
+    public Optional<FolderShareEntity> getShareInvitationWithRole(FolderEntity folder, UserEntity user) {
+        return folderShareJpaRepository.findByFolderAndTargetUserJoinRole(folder, user);
+    }
+}

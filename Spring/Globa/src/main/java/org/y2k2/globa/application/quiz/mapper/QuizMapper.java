@@ -6,10 +6,10 @@ import org.mapstruct.factory.Mappers;
 import org.y2k2.globa.application.comment.mapper.CustomTimestampMapper;
 import org.y2k2.globa.mapper.CustomTimestampTranslator;
 import org.y2k2.globa.mapper.MapCreatedTime;
-import org.y2k2.globa.projection.QuizGradeProjection;
+import org.y2k2.globa.infrastructure.persistence.quiz.projection.QuizGradeProjection;
 import org.y2k2.globa.application.quiz.dto.common.QuizDto;
 import org.y2k2.globa.application.quiz.dto.response.ResponseQuizGradeDto;
-import org.y2k2.globa.entity.QuizEntity;
+import org.y2k2.globa.infrastructure.persistence.quiz.entity.QuizEntity;
 
 @Mapper(uses = {CustomTimestampMapper.class})
 public interface QuizMapper {

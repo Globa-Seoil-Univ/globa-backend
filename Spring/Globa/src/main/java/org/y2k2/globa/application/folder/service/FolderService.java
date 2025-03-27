@@ -9,20 +9,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
-import org.y2k2.globa.insfrastructure.persistence.folder.entity.FolderEntity;
-import org.y2k2.globa.insfrastructure.persistence.folderrole.entity.FolderRoleEntity;
-import org.y2k2.globa.insfrastructure.persistence.foldershare.entity.FolderShareEntity;
-import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
+import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
+import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
+import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
+import org.y2k2.globa.infrastructure.persistence.record.repository.RecordJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.application.folder.dto.request.RequestFolderPostDto;
 import org.y2k2.globa.application.folder.dto.response.ResponseFolderDto;
-import org.y2k2.globa.entity.*;
-import org.y2k2.globa.insfrastructure.persistence.folder.repository.FolderJpaRepository;
-import org.y2k2.globa.insfrastructure.persistence.folderrole.repository.FolderRoleJpaRepository;
-import org.y2k2.globa.insfrastructure.persistence.foldershare.repository.FolderShareJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.folder.repository.FolderJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.folderrole.repository.FolderRoleJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.foldershare.repository.FolderShareJpaRepository;
 import org.y2k2.globa.insfrastructure.persistence.jpa.repository.UserJpaRepository;
 import org.y2k2.globa.application.foldershare.mapper.FolderShareMapper;
-import org.y2k2.globa.repository.*;
-import org.y2k2.globa.common.type.InvitationStatus;
+import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStatus;
 import org.y2k2.globa.common.type.FolderRole;
 import org.y2k2.globa.exception.*;
 import org.y2k2.globa.application.folder.mapper.FolderMapper;
@@ -40,7 +40,7 @@ public class FolderService {
     private final FileStore fileStore;
 
     private final UserJpaRepository userJpaRepository;;
-    private final RecordRepository recordRepository;
+    private final RecordJpaRepository recordJpaRepository;
     private final FolderJpaRepository folderJpaRepository;
     private final FolderShareJpaRepository folderShareJpaRepository;
     private final FolderRoleJpaRepository folderRoleJpaRepository;
@@ -142,7 +142,7 @@ public class FolderService {
 
     @Async
     public void deleteFiles(FolderEntity folder) {
-        List<RecordEntity> records = recordRepository.findAllByFolder(folder);
+        List<RecordEntity> records = recordJpaRepository.findAllByFolder(folder);
         fileStore.deleteFiles(records.stream()
                 .map(RecordEntity::getPath)
                 .toList()

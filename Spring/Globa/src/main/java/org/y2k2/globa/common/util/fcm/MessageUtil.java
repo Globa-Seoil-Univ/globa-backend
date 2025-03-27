@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.application.fcm.dto.common.FcmData;
 import org.y2k2.globa.application.notification.dto.common.*;
-import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.insfrastructure.persistence.jpa.repository.UserJpaRepository;
-import org.y2k2.globa.common.type.NotificationType;
+import org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType;
 
 import java.util.List;
 

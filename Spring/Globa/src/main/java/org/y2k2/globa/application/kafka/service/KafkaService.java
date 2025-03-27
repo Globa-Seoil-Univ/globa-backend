@@ -11,20 +11,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
-import org.y2k2.globa.insfrastructure.persistence.foldershare.entity.FolderShareEntity;
-import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.domain.analysis.repository.AnalysisRepository;
+import org.y2k2.globa.infrastructure.persistence.analysis.entity.AnalysisEntity;
+import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
+import org.y2k2.globa.infrastructure.persistence.keyword.entity.KeywordEntity;
+import org.y2k2.globa.infrastructure.persistence.keyword.repository.KeywordJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.notification.entity.NotificationEntity;
+import org.y2k2.globa.infrastructure.persistence.notification.repository.NotificationJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.quiz.entity.QuizEntity;
+import org.y2k2.globa.infrastructure.persistence.quiz.repository.QuizJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
+import org.y2k2.globa.infrastructure.persistence.record.repository.RecordJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.section.entity.SectionEntity;
+import org.y2k2.globa.infrastructure.persistence.section.repository.SectionJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.dto.response.kafka.ConsumerValidateDto;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
-import org.y2k2.globa.insfrastructure.persistence.foldershare.repository.FolderShareJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.foldershare.repository.FolderShareJpaRepository;
 import org.y2k2.globa.insfrastructure.persistence.jpa.repository.UserJpaRepository;
-import org.y2k2.globa.repository.*;
-import org.y2k2.globa.common.type.NotificationType;
+import org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType;
 import org.y2k2.globa.dto.response.kafka.ResponseKafkaDto;
-import org.y2k2.globa.entity.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -33,12 +44,12 @@ public class KafkaService {
     private final FirebaseMessaging firebaseMessaging;
     private final UserJpaRepository userJpaRepository;
     private final FolderShareJpaRepository folderShareJpaRepository;
-    private final RecordRepository recordRepository;
-    private final SectionRepository sectionRepository;
-    private final QuizRepository quizRepository;
+    private final RecordJpaRepository recordJpaRepository;
+    private final SectionJpaRepository sectionJpaRepository;
+    private final QuizJpaRepository quizJpaRepository;
     private final AnalysisRepository analysisRepository;
-    private final KeywordRepository keywordRepository;
-    private final NotificationRepository notificationRepository;
+    private final KeywordJpaRepository keywordJpaRepository;
+    private final NotificationJpaRepository notificationJpaRepository;
 
     @Autowired
     private final Bucket bucket;
@@ -104,6 +115,7 @@ public class KafkaService {
     }
 
     private ConsumerValidateDto validateRecord(long userId, long recordId) {
+        // TODO : Summary 검증 추가
         boolean isValid = true;
 
         UserEntity user = userJpaRepository.findByUserId(userId)
@@ -112,19 +124,19 @@ public class KafkaService {
                     return new CustomException(ErrorCode.NOT_FOUND_USER);
                 });
 
-        RecordEntity record = recordRepository.findByRecordId(recordId);
-        if (record == null) {
+        Optional<RecordEntity> record = recordJpaRepository.findByRecordId(recordId);
+        if (record.isEmpty()) {
             log.warn("Record not found and userId: {}, recordId: {}", userId, recordId);
             isValid = false;
         }
 
-        List<SectionEntity> sections = sectionRepository.findAllByRecord(record);
-        if (sections.isEmpty()) {
+        List<SectionEntity> sections = sectionJpaRepository.existsByRecord(record);
+        if (sections) {
             log.warn("Section not found and userId: {}, recordId: {}", userId, recordId);
             isValid = false;
         }
 
-        List<QuizEntity> quiz = quizRepository.findAllByRecord(record);
+        List<QuizEntity> quiz = quizJpaRepository.findAllByRecord(record);
         if (quiz.isEmpty()) {
             log.warn("Quiz not found and userId: {}, recordId: {}", userId, recordId);
             isValid = false;
@@ -141,7 +153,7 @@ public class KafkaService {
             isValid = false;
         }
 
-        List<KeywordEntity> keywords = keywordRepository.findAllByRecord(record);
+        List<KeywordEntity> keywords = keywordJpaRepository.findAllByRecord(record);
         if (keywords.isEmpty()) {
             log.warn("Keyword not found and userId: {}, recordId: {}", userId, recordId);
             isValid = false;
@@ -149,13 +161,13 @@ public class KafkaService {
 
         // 유효성 검사 실패하면 퀴즈, 키워드, 분석 데이터 등 삭제
         if (!isValid) {
-            quizRepository.deleteAllInBatch(quiz);
+            quizJpaRepository.deleteAllInBatch(quiz);
             analysisRepository.deleteAllInBatch(analysis);
-            sectionRepository.deleteAllInBatch(sections);
-            keywordRepository.deleteAllInBatch(keywords);
-            if (record != null) {
-                deleteRecordWithFirebase(record.getPath());
-                recordRepository.delete(record);
+            sectionJpaRepository.deleteAllInBatch(sections);
+            keywordJpaRepository.deleteAllInBatch(keywords);
+            if (record.isPresent()) {
+                deleteRecordWithFirebase(record.get().getPath());
+                recordJpaRepository.delete(record.get());
             }
 
             sendNotification("업로드 실패", "업로드 실패하였습니다.\n나중에 다시 시도해주세요.", user);
@@ -173,7 +185,7 @@ public class KafkaService {
         entity.setFolder(record.getFolder());
         entity.setRecord(record);
 
-        notificationRepository.save(entity);
+        notificationJpaRepository.save(entity);
     }
 
     private void sendNotification(String title, String body, UserEntity user) {

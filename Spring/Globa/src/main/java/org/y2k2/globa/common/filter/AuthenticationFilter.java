@@ -11,7 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.y2k2.globa.application.common.dto.auth.CustomUserDetails;
-import org.y2k2.globa.insfrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.exception.ErrorResponse;
@@ -73,7 +73,11 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     private Authentication getAuthentication(String accessToken) {
         Long userId = provider.getUserIdByAccessToken(accessToken);
         UserEntity user = userService.getUser(userId);
-        CustomUserDetails customUser = new CustomUserDetails(user);
+        CustomUserDetails customUser = new CustomUserDetails(
+                user.getUserId(),
+                user.getName(),
+                user.getNotificationToken()
+        );
 
         return new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
     }

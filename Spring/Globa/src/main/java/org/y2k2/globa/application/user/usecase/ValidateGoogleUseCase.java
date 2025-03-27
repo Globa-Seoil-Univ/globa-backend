@@ -6,7 +6,7 @@ import com.google.firebase.auth.FirebaseToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.y2k2.globa.application.user.command.CreateUserCommand;
+import org.y2k2.globa.application.user.command.ValidateSnsCommand;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.usecase.VoidUseCase;
@@ -14,11 +14,11 @@ import org.y2k2.globa.common.usecase.VoidUseCase;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class ValidateGoogleUseCase implements VoidUseCase<CreateUserCommand> {
+public class ValidateGoogleUseCase implements VoidUseCase<ValidateSnsCommand> {
     private final FirebaseAuth firebaseAuth;
 
     @Override
-    public void execute(CreateUserCommand command) {
+    public void execute(ValidateSnsCommand command) {
         try {
             FirebaseToken token = firebaseAuth.verifyIdToken(command.token());
 

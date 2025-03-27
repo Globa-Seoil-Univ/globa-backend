@@ -15,6 +15,7 @@ public enum ErrorCode {
     INVITE_ACCEPT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "이미 수락된 초대입니다.", "40021"),
     NOT_INCLUDE_HIGHLIGHT_COMMENT(HttpStatus.BAD_REQUEST, "해당 하이라이트 댓글이 아닙니다.", "40030"),
     MISMATCH_FOLDER_ID(HttpStatus.BAD_REQUEST, "요청한 Folder Id가 일치하지 않습니다.", "40040"),
+    INVALID_SNS_KIND(HttpStatus.BAD_REQUEST, "유효하지 않은 Sns Kind 입니다.", "40050"),
 
     /* 401 UNAUTHORIZED : 허락되지 않은 사용자 */
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 Access 토큰입니다.", "40110"),

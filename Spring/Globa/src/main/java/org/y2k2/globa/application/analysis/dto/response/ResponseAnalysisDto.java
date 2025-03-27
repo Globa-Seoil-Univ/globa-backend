@@ -10,4 +10,8 @@ public record ResponseAnalysisDto(
         List<ResponseKeywordDto> keywords,
         List<ResponseStudyTimesDto> studyTimes,
         List<ResponseQuizGradeDto> quizGrades
-) {}
+) {
+    public static ResponseAnalysisDto empty() {
+        return new ResponseAnalysisDto(List.of(), List.of(), List.of());
+    }
+}
