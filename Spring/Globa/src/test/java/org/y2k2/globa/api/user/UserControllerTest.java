@@ -18,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -96,7 +97,7 @@ public class UserControllerTest {
     }
 
     @Test
-    @DisplayName("유저 정보 가져오기 성공")
+    @DisplayName("정보 가져오기 성공")
     @WithAccount
     void searchUserTest() throws Exception {
         ResponseUserSearchDto response = FixtureMonkey.builder()
@@ -282,7 +283,7 @@ public class UserControllerTest {
     }
 
     @Test
-    @DisplayName("유저 이름 수정 성공")
+    @DisplayName("이름 수정 성공")
     @WithAccount
     void modifyUserNameTest() throws Exception {
         RequestNameDto request = FixtureMonkey.builder()
@@ -312,14 +313,23 @@ public class UserControllerTest {
     }
 
     @Test
-    @DisplayName("유저 프로필 이미지 수정 성공")
+    @DisplayName("프로필 이미지 수정 성공")
     @WithAccount
     void modifyUserProfileImgTest() throws Exception {
         RequestProfileImageDto request = FixtureMonkey.builder()
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
-                .plugin(new JakartaValidationPlugin())
                 .build()
-                .giveMeOne(RequestProfileImageDto.class);
+                .giveMeBuilder(RequestProfileImageDto.class)
+                .set(
+                        "profile",
+                        new MockMultipartFile(
+                                "profile",
+                                "profile.jpg",
+                                "image/jpeg",
+                                "testdata".getBytes()
+                        )
+                )
+                .sample();
 
         Mockito.doNothing()
                 .when(updateUserProfileImgService)
@@ -329,15 +339,62 @@ public class UserControllerTest {
                 );
 
         mockMvc.perform(
-                        MockMvcRequestBuilders.patch(Constant.USER_PREFIX.getValue() + "/profile")
+                        MockMvcRequestBuilders.multipart(Constant.USER_PREFIX.getValue() + "/profile")
+                                .file((MockMultipartFile) request.profile())
                                 .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
                                 .accept(MediaType.APPLICATION_JSON)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(MediaType.MULTIPART_FORM_DATA)
+                                .with(req -> {
+                                    req.setMethod("PATCH");
+                                    return req;
+                                })
                 )
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         Mockito.verify(updateUserProfileImgService, Mockito.times(1))
+                .update(ArgumentMatchers.any(RequestProfileImageDto.class), ArgumentMatchers.any(Long.class));
+    }
+
+    @Test
+    @DisplayName("프로필 이미지 수정 실패 (비어있는 파일)")
+    @WithAccount
+    void failedModifyUserProfileImgTest() throws Exception {
+        RequestProfileImageDto request = FixtureMonkey.builder()
+                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
+                .build()
+                .giveMeBuilder(RequestProfileImageDto.class)
+                .set(
+                        "profile",
+                        new MockMultipartFile(
+                                "profile",
+                                "profile.jpg",
+                                "image/jpeg",
+                                new byte[0]
+                        )
+                )
+                .sample();
+
+        Mockito.doNothing()
+                .when(updateUserProfileImgService)
+                .update(
+                        ArgumentMatchers.any(RequestProfileImageDto.class),
+                        ArgumentMatchers.any(Long.class)
+                );
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.multipart(Constant.USER_PREFIX.getValue() + "/profile")
+                                .file((MockMultipartFile) request.profile())
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.MULTIPART_FORM_DATA)
+                                .with(req -> {
+                                    req.setMethod("PATCH");
+                                    return req;
+                                })
+                )
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+
+        Mockito.verify(updateUserProfileImgService, Mockito.times(0))
                 .update(ArgumentMatchers.any(RequestProfileImageDto.class), ArgumentMatchers.any(Long.class));
     }
 
