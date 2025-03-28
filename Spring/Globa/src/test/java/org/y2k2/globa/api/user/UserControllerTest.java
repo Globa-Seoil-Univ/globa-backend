@@ -2,11 +2,12 @@ package org.y2k2.globa.api.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navercorp.fixturemonkey.FixtureMonkey;
-import com.navercorp.fixturemonkey.api.instantiator.Instantiator;
-import com.navercorp.fixturemonkey.api.introspector.BeanArbitraryIntrospector;
 import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitraryIntrospector;
 import com.navercorp.fixturemonkey.jakarta.validation.plugin.JakartaValidationPlugin;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.bcel.Const;
+import org.aspectj.lang.annotation.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -24,14 +25,15 @@ import org.y2k2.globa.annotation.WithAccount;
 import org.y2k2.globa.api.ControllerConfig;
 import org.y2k2.globa.api.UserController;
 import org.y2k2.globa.application.analysis.dto.response.ResponseAnalysisDto;
-import org.y2k2.globa.application.user.dto.request.RequestUserPostDTO;
+import org.y2k2.globa.application.fcm.dto.request.RequestNotificationTokenDto;
+import org.y2k2.globa.application.survey.dto.request.RequestSurveyDto;
+import org.y2k2.globa.application.user.dto.request.*;
 import org.y2k2.globa.application.user.dto.response.ResponseNotificationSettingDto;
 import org.y2k2.globa.application.user.dto.response.ResponseUserDto;
 import org.y2k2.globa.application.user.dto.response.ResponseUserSearchDto;
 import org.y2k2.globa.application.user.service.*;
 import org.y2k2.globa.common.util.jwt.JWT;
 import org.y2k2.globa.constant.Constant;
-import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 
 @Slf4j
@@ -40,10 +42,13 @@ import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 @AutoConfigureMockMvc(addFilters = false)
 public class UserControllerTest {
     @Autowired
+    private JWT jwt;
+
+    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @MockBean
     private GetUserService getUserService;
@@ -68,17 +73,10 @@ public class UserControllerTest {
     @MockBean
     private DeleteUserService deleteUserService;
 
-    private final String prefix = "/user";
-
     @Test
     @DisplayName("내 정보 가져오기 성공")
     @WithAccount
     void getMyInfoTest() throws Exception {
-        JWT jwt = FixtureMonkey.builder()
-                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
-                .build()
-                .giveMeOne(JWT.class);
-
         ResponseUserDto response = FixtureMonkey.builder()
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
                 .build()
@@ -88,7 +86,7 @@ public class UserControllerTest {
                 .thenReturn(response);
 
         mockMvc.perform(
-                        MockMvcRequestBuilders.get(prefix)
+                        MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue())
                                 .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
                                 .accept(MediaType.APPLICATION_JSON)
                 )
@@ -101,11 +99,6 @@ public class UserControllerTest {
     @DisplayName("유저 정보 가져오기 성공")
     @WithAccount
     void searchUserTest() throws Exception {
-        JWT jwt = FixtureMonkey.builder()
-                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
-                .build()
-                .giveMeOne(JWT.class);
-
         ResponseUserSearchDto response = FixtureMonkey.builder()
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
                 .build()
@@ -115,7 +108,7 @@ public class UserControllerTest {
                 .thenReturn(response);
 
         mockMvc.perform(
-                        MockMvcRequestBuilders.get(prefix + "/search")
+                        MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue() + "/search")
                                 .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
                                 .param("code", "ABCDEF")
                                 .accept(MediaType.APPLICATION_JSON)
@@ -130,11 +123,6 @@ public class UserControllerTest {
     @DisplayName("내 알림 정보 가져오기 성공")
     @WithAccount
     void getMyNotificationTest() throws Exception {
-        JWT jwt = FixtureMonkey.builder()
-                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
-                .build()
-                .giveMeOne(JWT.class);
-
         ResponseNotificationSettingDto response = FixtureMonkey.builder()
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
                 .build()
@@ -144,7 +132,7 @@ public class UserControllerTest {
                 .thenReturn(response);
 
         mockMvc.perform(
-                        MockMvcRequestBuilders.get(prefix + "/notification")
+                        MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue() + "/notification")
                                 .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
                                 .accept(MediaType.APPLICATION_JSON)
                 )
@@ -158,11 +146,6 @@ public class UserControllerTest {
     @DisplayName("내 분석 정보 가져오기 성공")
     @WithAccount
     void getMyAnalysisTest() throws Exception {
-        JWT jwt = FixtureMonkey.builder()
-                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
-                .build()
-                .giveMeOne(JWT.class);
-
         ResponseAnalysisDto response = FixtureMonkey.builder()
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
                 .build()
@@ -172,7 +155,7 @@ public class UserControllerTest {
                 .thenReturn(response);
 
         mockMvc.perform(
-                        MockMvcRequestBuilders.get(prefix + "/analysis")
+                        MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue() + "/analysis")
                                 .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
                                 .accept(MediaType.APPLICATION_JSON)
                 )
@@ -184,7 +167,7 @@ public class UserControllerTest {
 
     @Test
     @DisplayName("회원가입과 로그인 성공")
-    public void signupOrLoginTest() throws Exception {
+    void signupOrLoginTest() throws Exception {
         RequestUserPostDTO request = FixtureMonkey.builder()
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
                 .build()
@@ -195,16 +178,11 @@ public class UserControllerTest {
                 .set("token", "fcm_token")
                 .sample();
 
-        JWT jwt = FixtureMonkey.builder()
-                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
-                .build()
-                .giveMeOne(JWT.class);
-
         Mockito.when(createUserService.signupOrLogin(ArgumentMatchers.any(RequestUserPostDTO.class)))
                 .thenReturn(jwt);
 
         mockMvc.perform(
-                        MockMvcRequestBuilders.post(prefix)
+                        MockMvcRequestBuilders.post(Constant.USER_PREFIX.getValue())
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
@@ -213,5 +191,185 @@ public class UserControllerTest {
 
         Mockito.verify(createUserService, Mockito.times(1))
                 .signupOrLogin(ArgumentMatchers.any(RequestUserPostDTO.class));
+    }
+
+    @Test
+    @DisplayName("Access Token 갱신")
+    void reissueTokenTest() throws Exception {
+        RequestRTRDto request = FixtureMonkey.builder()
+                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
+                .plugin(new JakartaValidationPlugin())
+                .build()
+                .giveMeOne(RequestRTRDto.class);
+
+        Mockito.when(reissueTokenService.reissue(
+                        ArgumentMatchers.any(String.class),
+                        ArgumentMatchers.any(String.class)
+                ))
+                .thenReturn(jwt);
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post(Constant.USER_PREFIX.getValue() + "/refresh")
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk());
+
+        Mockito.verify(reissueTokenService, Mockito.times(1))
+                .reissue(ArgumentMatchers.any(String.class), ArgumentMatchers.any(String.class));
+    }
+
+    @Test
+    @DisplayName("FCM 토큰 저장 또는 수정 성공")
+    @WithAccount
+    void upsertFcmTokenTest() throws Exception {
+        RequestNotificationTokenDto request = FixtureMonkey.builder()
+                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
+                .plugin(new JakartaValidationPlugin())
+                .build()
+                .giveMeOne(RequestNotificationTokenDto.class);
+
+        Mockito.doNothing()
+                .when(upsertFcmService)
+                .upsert(
+                        ArgumentMatchers.any(RequestNotificationTokenDto.class),
+                        ArgumentMatchers.any(Long.class)
+                );
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post(Constant.USER_PREFIX.getValue() + "/notification/token")
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        Mockito.verify(upsertFcmService, Mockito.times(1))
+                .upsert(ArgumentMatchers.any(RequestNotificationTokenDto.class), ArgumentMatchers.any(Long.class));
+    }
+
+    @Test
+    @DisplayName("알림 정보 수정 성공")
+    @WithAccount
+    void modifyNotificationTest() throws Exception {
+        RequestNotificationSettingDto request = FixtureMonkey.builder()
+                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
+                .plugin(new JakartaValidationPlugin())
+                .build()
+                .giveMeOne(RequestNotificationSettingDto.class);
+
+        Mockito.doNothing()
+                .when(updateUserNotificationService)
+                .update(
+                        ArgumentMatchers.any(RequestNotificationSettingDto.class),
+                        ArgumentMatchers.any(Long.class)
+                );
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.put(Constant.USER_PREFIX.getValue() + "/notification")
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        Mockito.verify(updateUserNotificationService, Mockito.times(1))
+                .update(ArgumentMatchers.any(RequestNotificationSettingDto.class), ArgumentMatchers.any(Long.class));
+    }
+
+    @Test
+    @DisplayName("유저 이름 수정 성공")
+    @WithAccount
+    void modifyUserNameTest() throws Exception {
+        RequestNameDto request = FixtureMonkey.builder()
+                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
+                .plugin(new JakartaValidationPlugin())
+                .build()
+                .giveMeOne(RequestNameDto.class);
+
+        Mockito.doNothing()
+                .when(updateUserNameService)
+                .update(
+                        ArgumentMatchers.any(RequestNameDto.class),
+                        ArgumentMatchers.any(Long.class)
+                );
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.patch(Constant.USER_PREFIX.getValue() + "/name")
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        Mockito.verify(updateUserNameService, Mockito.times(1))
+                .update(ArgumentMatchers.any(RequestNameDto.class), ArgumentMatchers.any(Long.class));
+    }
+
+    @Test
+    @DisplayName("유저 프로필 이미지 수정 성공")
+    @WithAccount
+    void modifyUserProfileImgTest() throws Exception {
+        RequestProfileImageDto request = FixtureMonkey.builder()
+                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
+                .plugin(new JakartaValidationPlugin())
+                .build()
+                .giveMeOne(RequestProfileImageDto.class);
+
+        Mockito.doNothing()
+                .when(updateUserProfileImgService)
+                .update(
+                        ArgumentMatchers.any(RequestProfileImageDto.class),
+                        ArgumentMatchers.any(Long.class)
+                );
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.patch(Constant.USER_PREFIX.getValue() + "/profile")
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        Mockito.verify(updateUserProfileImgService, Mockito.times(1))
+                .update(ArgumentMatchers.any(RequestProfileImageDto.class), ArgumentMatchers.any(Long.class));
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 성공")
+    @WithAccount
+    void deleteUserTest() throws Exception {
+        RequestSurveyDto request = FixtureMonkey.builder()
+                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
+                .build()
+                .giveMeBuilder(RequestSurveyDto.class)
+                .set("surveyType", "BSV")
+                .set("content", "서비스 사용이 너무 어려워요.")
+                .sample();
+
+        Mockito.doNothing()
+                .when(deleteUserService)
+                .delete(
+                        ArgumentMatchers.any(RequestSurveyDto.class),
+                        ArgumentMatchers.any(Long.class)
+                );
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete(Constant.USER_PREFIX.getValue())
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        Mockito.verify(deleteUserService, Mockito.times(1))
+                .delete(ArgumentMatchers.any(RequestSurveyDto.class), ArgumentMatchers.any(Long.class));
     }
 }

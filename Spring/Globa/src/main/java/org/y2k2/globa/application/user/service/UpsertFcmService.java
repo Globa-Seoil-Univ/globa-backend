@@ -18,8 +18,8 @@ public class UpsertFcmService {
 
     private final UserRepository userRepository;
 
-    public void upsert(RequestNotificationTokenDto dto, CustomUserDetails details) {
-        UserEntity user = findUserUseCase.execute(details.getUserId());
+    public void upsert(RequestNotificationTokenDto dto, Long userId) {
+        UserEntity user = findUserUseCase.execute(userId);
         user.setNotificationToken(dto.token());
         user.setNotificationTokenTime(new CustomTimestamp().getTimestamp());
 

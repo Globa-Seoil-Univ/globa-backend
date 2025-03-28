@@ -250,11 +250,11 @@ public class UserController {
             }
     )
     @RequestMapping(path = "/notification/token", method = { RequestMethod.POST, RequestMethod.PUT })
-    public ResponseEntity<?> upsertFcmToken(
+    public ResponseEntity<Void> upsertFcmToken(
             @Valid @RequestBody RequestNotificationTokenDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
-        upsertFcmService.upsert(dto, details);
+        upsertFcmService.upsert(dto, details.getUserId());
         return ResponseEntity.noContent().build();
     }
 
@@ -283,7 +283,7 @@ public class UserController {
             }
     )
     @PutMapping("/notification")
-    public ResponseEntity<?> modifyNotification(
+    public ResponseEntity<Void> modifyNotification(
             @Valid @RequestBody RequestNotificationSettingDto settingDto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
@@ -317,7 +317,7 @@ public class UserController {
             }
     )
     @PatchMapping("/name")
-    public ResponseEntity<?> modifyUsername(
+    public ResponseEntity<Void> modifyUsername(
             @Valid @RequestBody RequestNameDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
@@ -352,7 +352,7 @@ public class UserController {
             }
     )
     @PatchMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> modifyProfileImg(
+    public ResponseEntity<Void> modifyProfileImg(
             @Valid RequestProfileImageDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
@@ -385,7 +385,7 @@ public class UserController {
             }
     )
     @DeleteMapping
-    public ResponseEntity<?> deleteUser(
+    public ResponseEntity<Void> deleteUser(
             @Valid @RequestBody RequestSurveyDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
