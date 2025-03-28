@@ -195,6 +195,7 @@ firebase.json
 
 ### properties ###
 /Spring/Globa/src/main/resources/application.properties
+/Spring/Globa/src/test/resources/application.properties
 
 HELP.md
 .gradle/
