@@ -28,8 +28,8 @@ public class GetUserAnalysisService {
     private final QuizRepository quizRepository;
     private final KeywordRepository keywordRepository;
 
-    public ResponseAnalysisDto getAnalysis(CustomUserDetails details) {
-        List<Long> recordIds = recordRepository.getAllRecordId(details.getUserId());
+    public ResponseAnalysisDto getAnalysis(Long userId) {
+        List<Long> recordIds = recordRepository.getAllRecordId(userId);
 
         if (recordIds.isEmpty()) {
             return ResponseAnalysisDto.empty();
@@ -37,8 +37,8 @@ public class GetUserAnalysisService {
 
         return new ResponseAnalysisDto(
                 getResponseKeywordDto(recordIds),
-                getResponseTotalStudyTimesDto(details.getUserId()),
-                getResponseQuizGradeDto(details.getUserId())
+                getResponseTotalStudyTimesDto(userId),
+                getResponseQuizGradeDto(userId)
         );
     }
 

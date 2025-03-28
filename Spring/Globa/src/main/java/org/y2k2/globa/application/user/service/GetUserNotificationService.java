@@ -12,9 +12,9 @@ import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 public class GetUserNotificationService {
     private final FindUserUseCase findUserUseCase;
 
-    public ResponseNotificationSettingDto getUserNotification(CustomUserDetails details) {
+    public ResponseNotificationSettingDto getUserNotification(Long userId) {
         return UserMapper.INSTANCE.toResponseNotificationSettingDto(
-                findUserUseCase.execute(details.getUserId())
+                findUserUseCase.execute(userId)
         );
     }
 }

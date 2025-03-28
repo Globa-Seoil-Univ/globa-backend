@@ -129,7 +129,7 @@ public class UserController {
     )
     @GetMapping("/notification")
     public ResponseEntity<?> getUserNotification(@AuthenticationPrincipal CustomUserDetails details) {
-        return ResponseEntity.ok(getUserNotificationService.getUserNotification(details));
+        return ResponseEntity.ok(getUserNotificationService.getUserNotification(details.getUserId()));
     }
 
     @Operation(
@@ -159,7 +159,7 @@ public class UserController {
     )
     @GetMapping("/analysis")
     public ResponseEntity<ResponseAnalysisDto> getAnalysis(@AuthenticationPrincipal CustomUserDetails details) {
-        return ResponseEntity.ok(getUserAnalysisService.getAnalysis(details));
+        return ResponseEntity.ok(getUserAnalysisService.getAnalysis(details.getUserId()));
     }
 
     @Operation(
