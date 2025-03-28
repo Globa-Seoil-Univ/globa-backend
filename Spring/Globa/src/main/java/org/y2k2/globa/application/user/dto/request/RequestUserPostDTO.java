@@ -6,11 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.y2k2.globa.common.annotation.EnumValue;
-import org.y2k2.globa.domain.user.type.SnsKind;
+import org.y2k2.globa.infrastructure.persistence.user.type.SnsKind;
 
-@Getter
-@Setter
-@NoArgsConstructor
 public record RequestUserPostDTO(
         @EnumValue(enumClass = SnsKind.class, message = "SNS 종류는 'KAKAO', 'GOOGLE' 중 하나여야 합니다.", ignoreCase = true)
         String snsKind,

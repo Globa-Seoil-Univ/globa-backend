@@ -1,4 +1,4 @@
-package org.y2k2.globa.domain.user.type;
+package org.y2k2.globa.infrastructure.persistence.user.type;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

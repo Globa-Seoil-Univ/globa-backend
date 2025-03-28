@@ -28,19 +28,26 @@ import org.y2k2.globa.application.user.service.*;
 import org.y2k2.globa.common.exception.SwaggerErrorCode;
 import org.y2k2.globa.common.util.jwt.JWT;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/user")
 @ResponseBody
-@RequiredArgsConstructor
 @Tag(name = "User", description = "사용자 관련 API입니다.")
 public class UserController {
-    private final UserService userService;
-
     private final GetUserService getUserService;
     private final GetSearchUserService getSearchUserService;
     private final GetUserNotificationService getUserNotificationService;
     private final GetUserAnalysisService getUserAnalysisService;
+
     private final CreateUserService createUserService;
+    private final ReissueTokenService reissueTokenService;
+
+    private final UpsertFcmService upsertFcmService;
+    private final UpdateUserNameService updateUserNameService;
+    private final UpdateUserProfileImgService updateUserProfileImgService;
+    private final UpdateUserNotificationService updateUserNotificationService;
+
+    private final DeleteUserService deleteUserService;
 
     @Operation(
             summary = "내 정보 가져오기",
@@ -67,7 +74,7 @@ public class UserController {
     )
     @GetMapping
     public ResponseEntity<ResponseUserDto> getUser(@AuthenticationPrincipal CustomUserDetails details) {
-        return ResponseEntity.ok(getUserService.getUser(details));
+        return ResponseEntity.ok(getUserService.getUser(details.getUserId()));
     }
 
     @Operation(
@@ -182,7 +189,7 @@ public class UserController {
     )
     @PostMapping
     public ResponseEntity<JWT> signup(@Valid @RequestBody RequestUserPostDTO dto) {
-        JWT jwtToken = createUserService.createUser(dto);
+        JWT jwtToken = createUserService.signupOrLogin(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(jwtToken);
     }
 
@@ -206,10 +213,10 @@ public class UserController {
             }
     )
     @PostMapping("/refresh")
-    public ResponseEntity<?> reloadRefreshToken(@Valid @RequestBody RequestRTRDto dto,
+    public ResponseEntity<JWT> reissueToken(@Valid @RequestBody RequestRTRDto dto,
                                                 @Parameter(hidden = true)
                                                 @RequestHeader(value = "Authorization", required = false) String accessToken) {
-        JWT jwtToken = userService.reloadRefreshToken(accessToken, dto.refreshToken());
+        JWT jwtToken = reissueTokenService.reissue(accessToken, dto.refreshToken());
         return ResponseEntity.ok(jwtToken);
     }
 
@@ -247,7 +254,7 @@ public class UserController {
             @Valid @RequestBody RequestNotificationTokenDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
-        userService.upsertFcmToken(dto, details.getUser());
+        upsertFcmService.upsert(dto, details);
         return ResponseEntity.noContent().build();
     }
 
@@ -280,7 +287,7 @@ public class UserController {
             @Valid @RequestBody RequestNotificationSettingDto settingDto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
-        userService.modifyNotification(settingDto, details.getUser());
+        updateUserNotificationService.update(settingDto, details.getUserId());
         return ResponseEntity.noContent().build();
     }
 
@@ -314,7 +321,7 @@ public class UserController {
             @Valid @RequestBody RequestNameDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
-        userService.modifyUsername(dto, details.getUser());
+        updateUserNameService.update(dto, details.getUserId());
         return ResponseEntity.noContent().build();
     }
 
@@ -349,7 +356,7 @@ public class UserController {
             @Valid RequestProfileImageDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
-        userService.modifyProfileImg(dto, details.getUser());
+        updateUserProfileImgService.update(dto, details.getUserId());
         return ResponseEntity.noContent().build();
     }
 
@@ -382,7 +389,7 @@ public class UserController {
             @Valid @RequestBody RequestSurveyDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
-        userService.deleteUser(dto, details.getUser());
+        deleteUserService.delete(dto, details.getUserId());
         return ResponseEntity.noContent().build();
     }
 }

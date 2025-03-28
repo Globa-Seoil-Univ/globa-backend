@@ -6,7 +6,7 @@ import org.mapstruct.factory.Mappers;
 import org.y2k2.globa.infrastructure.persistence.notification.entity.NotificationEntity;
 import org.y2k2.globa.infrastructure.persistence.notificationread.entity.NotificationReadEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
-import org.y2k2.globa.application.comment.mapper.CustomTimestampMapper;
+import org.y2k2.globa.application.common.mapper.CustomTimestampMapper;
 
 @Mapper(uses = {CustomTimestampMapper.class})
 public interface NotificationReadMapper {

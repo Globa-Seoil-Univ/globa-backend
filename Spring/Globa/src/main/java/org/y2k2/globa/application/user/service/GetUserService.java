@@ -19,10 +19,10 @@ public class GetUserService {
 
     private final FolderRepository folderRepository;
 
-    public ResponseUserDto getUser(CustomUserDetails details) {
-        UserEntity user = findUserUseCase.execute(details.getUserId());
+    public ResponseUserDto getUser(Long userId) {
+        UserEntity user = findUserUseCase.execute(userId);
 
-        FolderEntity folder = folderRepository.getDefaultFolder(details.getUserId())
+        FolderEntity folder = folderRepository.getDefaultFolder(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DEFAULT_FOLDER));
 
         return UserMapper.INSTANCE.toResponseUserDto(user, folder.getFolderId());

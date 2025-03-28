@@ -4,9 +4,10 @@ import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 import org.y2k2.globa.application.comment.dto.common.CommentDto;
 import org.y2k2.globa.application.comment.dto.common.ReplyDto;
+import org.y2k2.globa.application.common.mapper.CustomTimestampMapper;
+import org.y2k2.globa.application.common.mapper.CustomTimestampTranslator;
+import org.y2k2.globa.application.common.mapper.MapCreatedTime;
 import org.y2k2.globa.infrastructure.persistence.comment.entity.CommentEntity;
-import org.y2k2.globa.mapper.CustomTimestampTranslator;
-import org.y2k2.globa.mapper.MapCreatedTime;
 
 @Mapper(uses = CustomTimestampMapper.class)
 public interface CommentMapper {

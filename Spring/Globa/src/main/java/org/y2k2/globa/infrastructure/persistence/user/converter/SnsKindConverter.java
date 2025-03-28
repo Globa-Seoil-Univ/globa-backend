@@ -2,7 +2,7 @@ package org.y2k2.globa.infrastructure.persistence.user.converter;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import org.y2k2.globa.domain.user.type.SnsKind;
+import org.y2k2.globa.infrastructure.persistence.user.type.SnsKind;
 
 @Converter(autoApply = true)
 public class SnsKindConverter implements AttributeConverter<SnsKind, String> {

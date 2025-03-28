@@ -1,10 +1,7 @@
 package org.y2k2.globa.application.user.command;
 
 import org.y2k2.globa.application.user.dto.request.RequestUserPostDTO;
-import org.y2k2.globa.domain.user.type.SnsKind;
-
-import java.security.SecureRandom;
-import java.util.Random;
+import org.y2k2.globa.infrastructure.persistence.user.type.SnsKind;
 
 public record CreateUserCommand(
         String code,

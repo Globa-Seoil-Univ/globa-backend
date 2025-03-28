@@ -3,13 +3,13 @@ package org.y2k2.globa.application.inquiry.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.y2k2.globa.application.common.mapper.CustomTimestampTranslator;
+import org.y2k2.globa.application.common.mapper.MapCreatedTime;
 import org.y2k2.globa.application.inquiry.dto.common.InquiryDto;
 import org.y2k2.globa.application.inquiry.dto.response.ResponseInquiryDetailDto;
 import org.y2k2.globa.infrastructure.persistence.answer.entity.AnswerEntity;
 import org.y2k2.globa.infrastructure.persistence.inquiry.entity.InquiryEntity;
-import org.y2k2.globa.application.comment.mapper.CustomTimestampMapper;
-import org.y2k2.globa.mapper.CustomTimestampTranslator;
-import org.y2k2.globa.mapper.MapCreatedTime;
+import org.y2k2.globa.application.common.mapper.CustomTimestampMapper;
 
 @Mapper(uses = CustomTimestampMapper.class)
 public interface InquiryMapper {

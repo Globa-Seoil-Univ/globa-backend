@@ -5,14 +5,14 @@ import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 import org.y2k2.globa.application.common.dto.file.FileDto;
+import org.y2k2.globa.application.common.mapper.CustomTimestampTranslator;
+import org.y2k2.globa.application.common.mapper.MapCreatedTime;
 import org.y2k2.globa.application.notice.dto.request.RequestNoticeAddDto;
 import org.y2k2.globa.application.notice.dto.response.ResponseNoticeDetailDto;
 import org.y2k2.globa.application.notice.dto.response.ResponseNoticeIntroDto;
 import org.y2k2.globa.infrastructure.persistence.notice.entity.NoticeEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
-import org.y2k2.globa.application.comment.mapper.CustomTimestampMapper;
-import org.y2k2.globa.mapper.CustomTimestampTranslator;
-import org.y2k2.globa.mapper.MapCreatedTime;
+import org.y2k2.globa.application.common.mapper.CustomTimestampMapper;
 
 @Mapper(uses = CustomTimestampMapper.class)
 public interface NoticeMapper {

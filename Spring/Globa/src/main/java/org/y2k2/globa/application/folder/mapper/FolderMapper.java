@@ -3,13 +3,13 @@ package org.y2k2.globa.application.folder.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.y2k2.globa.application.common.mapper.CustomTimestampMapper;
+import org.y2k2.globa.application.common.mapper.CustomTimestampTranslator;
+import org.y2k2.globa.application.common.mapper.MapCreatedTime;
 import org.y2k2.globa.application.folder.dto.response.ResponseDetailFolderDto;
 import org.y2k2.globa.application.folder.dto.response.ResponseFolderDto;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
-import org.y2k2.globa.application.comment.mapper.CustomTimestampMapper;
-import org.y2k2.globa.mapper.CustomTimestampTranslator;
-import org.y2k2.globa.mapper.MapCreatedTime;
 
 @Mapper(uses = CustomTimestampMapper.class)
 public interface FolderMapper {

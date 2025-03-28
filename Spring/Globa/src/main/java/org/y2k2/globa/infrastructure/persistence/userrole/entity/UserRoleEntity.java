@@ -26,5 +26,5 @@ public class UserRoleEntity {
     @OneToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "role_id", columnDefinition = "SMALLINT")
-    private RoleEntity roleId;
+    private RoleEntity role;
 }

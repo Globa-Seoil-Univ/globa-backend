@@ -11,12 +11,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.y2k2.globa.application.common.dto.auth.CustomUserDetails;
-import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.exception.ErrorResponse;
-import org.y2k2.globa.application.user.service.UserService;
 import org.y2k2.globa.common.util.jwt.JWTProvider;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 import java.io.IOException;
 
@@ -25,7 +25,8 @@ import java.io.IOException;
 @Component
 public class AuthenticationFilter extends OncePerRequestFilter {
     private final JWTProvider provider;
-    private final UserService userService;
+
+    private final FindUserUseCase findUserUseCase;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -72,7 +73,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
     private Authentication getAuthentication(String accessToken) {
         Long userId = provider.getUserIdByAccessToken(accessToken);
-        UserEntity user = userService.getUser(userId);
+        UserEntity user = findUserUseCase.execute(userId);
         CustomUserDetails customUser = new CustomUserDetails(
                 user.getUserId(),
                 user.getName(),

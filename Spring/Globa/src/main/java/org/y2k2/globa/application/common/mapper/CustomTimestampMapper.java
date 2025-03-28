@@ -1,13 +1,8 @@
-package org.y2k2.globa.application.comment.mapper;
+package org.y2k2.globa.application.common.mapper;
 
-import org.mapstruct.Qualifier;
 import org.y2k2.globa.common.util.CustomTimestamp;
 
 import java.time.LocalDateTime;
-
-@Qualifier @interface CustomTimestampTranslator { }
-
-@Qualifier @interface MapCreatedTime { }
 
 @CustomTimestampTranslator
 public class CustomTimestampMapper {

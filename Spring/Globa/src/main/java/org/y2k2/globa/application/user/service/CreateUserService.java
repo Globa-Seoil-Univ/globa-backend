@@ -17,7 +17,7 @@ import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.util.jwt.JWT;
 import org.y2k2.globa.domain.role.type.UserRole;
 import org.y2k2.globa.domain.user.repository.UserRepository;
-import org.y2k2.globa.domain.user.type.SnsKind;
+import org.y2k2.globa.infrastructure.persistence.user.type.SnsKind;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 import java.security.SecureRandom;
@@ -37,7 +37,7 @@ public class CreateUserService {
     private final UserRepository userRepository;
 
     @Transactional
-    public JWT createUser(RequestUserPostDTO dto) {
+    public JWT signupOrLogin(RequestUserPostDTO dto) {
         ValidateSnsCommand validateCommand = ValidateSnsCommand.of(dto.snsId(), dto.token());
 
         switch (SnsKind.valueOf(dto.snsKind())) {

@@ -1,15 +1,20 @@
 package org.y2k2.globa.infrastructure.persistence.user.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.y2k2.globa.application.common.dto.file.FileDto;
+import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.infrastructure.persistence.user.converter.SnsKindConverter;
-import org.y2k2.globa.domain.user.type.SnsKind;
+import org.y2k2.globa.infrastructure.persistence.user.type.SnsKind;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "app_user")
 public class UserEntity {
@@ -66,4 +71,39 @@ public class UserEntity {
 
     @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
+
+    public void updateName(String name) {
+        if (name != null) {
+            this.name = name;
+        }
+    }
+
+    public void updateProfile(FileDto profileImage) {
+        if (profileImage != null) {
+            this.profilePath = profileImage.storePath();
+            this.profileType = profileImage.extension();
+            this.profileSize = profileImage.size();
+        }
+    }
+
+    public void updateNotification(Boolean uploadNofi, Boolean shareNofi, Boolean eventNofi) {
+        if (uploadNofi != null) {
+            this.uploadNofi = uploadNofi;
+        }
+
+        if (shareNofi != null) {
+            this.shareNofi = shareNofi;
+        }
+
+        if (eventNofi != null) {
+            this.eventNofi = eventNofi;
+        }
+    }
+
+    public void delete() {
+        this.setIsDeleted(true);
+        this.setDeletedTime(new CustomTimestamp().getTimestamp());
+        this.setNotificationToken(null);
+        this.setNotificationTokenTime(null);
+    }
 }

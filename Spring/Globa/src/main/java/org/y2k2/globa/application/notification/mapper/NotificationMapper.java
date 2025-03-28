@@ -1,13 +1,16 @@
 package org.y2k2.globa.application.notification.mapper;
 
-import org.mapstruct.*;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
+import org.y2k2.globa.application.common.mapper.CustomTimestampMapper;
+import org.y2k2.globa.application.common.mapper.CustomTimestampTranslator;
+import org.y2k2.globa.application.common.mapper.MapCreatedTime;
 import org.y2k2.globa.application.notification.dto.common.*;
-import org.y2k2.globa.application.comment.mapper.CustomTimestampMapper;
-import org.y2k2.globa.mapper.CustomTimestampTranslator;
-import org.y2k2.globa.mapper.MapCreatedTime;
-import org.y2k2.globa.infrastructure.persistence.notification.projection.NotificationProjection;
 import org.y2k2.globa.infrastructure.persistence.notification.entity.NotificationEntity;
+import org.y2k2.globa.infrastructure.persistence.notification.projection.NotificationProjection;
 
 @Mapper(uses = {CustomTimestampMapper.class})
 public interface NotificationMapper {

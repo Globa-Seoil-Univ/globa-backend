@@ -7,14 +7,11 @@ import lombok.ToString;
 
 import java.io.Serializable;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@ToString
-public class ResponseUserDto implements Serializable {
-    private String profile;
-    private String name;
-    private String code;
-    private Long userId;
-    private Long publicFolderId;
+public record ResponseUserDto(
+        String profile,
+        String name,
+        String code,
+        Long userId,
+        Long publicFolderId
+) {
 }

@@ -42,6 +42,11 @@ dependencies {
     implementation 'org.springframework.kafka:spring-kafka'
     implementation 'org.mariadb.jdbc:mariadb-java-client'
 
+    // Fixture Monkey
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("com.navercorp.fixturemonkey:fixture-monkey-starter:1.1.10")
+    testImplementation("com.navercorp.fixturemonkey:fixture-monkey-jakarta-validation:1.1.10")
+
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
