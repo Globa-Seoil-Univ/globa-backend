@@ -79,7 +79,11 @@ public class UserEntity {
     }
 
     public void updateProfile(FileDto profileImage) {
-        if (profileImage != null) {
+        if (profileImage == null || profileImage.isEmpty()) {
+            this.profilePath = null;
+            this.profileType = null;
+            this.profileSize = null;
+        } else {
             this.profilePath = profileImage.storePath();
             this.profileType = profileImage.extension();
             this.profileSize = profileImage.size();

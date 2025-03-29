@@ -66,7 +66,7 @@ public class CreateUserService {
         return newUser.getUserId();
     }
 
-    public String getUniqueCode() {
+    private String getUniqueCode() {
         String code = generateRandomCode();
 
         while (userRepository.isCodeExists(code)) {

@@ -42,6 +42,4 @@ public class UserRepositoryImpl implements UserRepository {
     public Optional<UserEntity> getUserByUserId(Long userId) {
         return userJpaRepository.findByUserId(userId);
     }
-
-
 }

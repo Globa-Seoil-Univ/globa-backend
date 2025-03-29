@@ -26,4 +26,11 @@ public record FileDto(
         this.extension = extension;
         this.size = size;
     }
+
+    public boolean isEmpty() {
+        return originalFileName == null
+                && storeFileName == null
+                && storePath == null
+                && extension == null;
+    }
 }
