@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
-public class UserRoleJpaRepositoryImpl implements UserRoleRepository {
+public class UserRoleRepositoryImpl implements UserRoleRepository {
     private final UserRoleJpaRepository userRoleJpaRepository;
 
     @Override

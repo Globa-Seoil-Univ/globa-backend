@@ -23,7 +23,8 @@ public interface RecordJpaRepository extends JpaRepository<RecordEntity, Long> {
     @Query(
             value = "SELECT r.path FROM RecordEntity r " +
                     "JOIN FolderShareEntity fs ON r.folder = fs.folder " +
-                    "WHERE fs.ownerUser.userId = :userId OR fs.targetUser.userId = :userId "
+                    "WHERE fs.ownerUser.userId = :userId OR fs.targetUser.userId = :userId " +
+                    "AND r.folder = :folder"
     )
     List<String> findAllPaths(FolderEntity folder);
 
