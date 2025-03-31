@@ -10,11 +10,13 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.y2k2.globa.application.common.dto.file.FileDto;
 import org.y2k2.globa.domain.user.repository.UserRepository;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
-import org.y2k2.globa.infrastructure.persistence.user.repository.UserJpaRepository;
 import org.y2k2.globa.infrastructure.persistence.user.repository.UserRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.user.type.SnsKind;
+
+import java.util.List;
 
 @Slf4j
 @Import(UserRepositoryImpl.class)
@@ -24,7 +26,7 @@ import org.y2k2.globa.infrastructure.persistence.user.type.SnsKind;
 public class UserRepositoryTest {
     private final String TEST_SNS_ID = "testSnsId";
     private final String TEST_NAME = "testName";
-    private final String TEST_CODE = "ABCABC";
+    private final String TEST_CODE = "USER01";
 
     @Autowired
     private UserRepository userRepository;
@@ -68,7 +70,7 @@ public class UserRepositoryTest {
 
     @Test
     @DisplayName("유저 ID로 조회 성공")
-    void findByUserId() {
+    void getUserById() {
         UserEntity foundUser = userRepository.getUserByUserId(user.getUserId()).orElse(null);
 
         Assertions.assertThat(foundUser).isNotNull();
@@ -78,65 +80,148 @@ public class UserRepositoryTest {
         log.info("foundUser ID = {}", foundUser.getUserId());
     }
 
-//    @Test
-//    @DisplayName("여러 개의 코드로 조회 성공")
-//    void findAllByCodeIn() {
-//        UserEntity user = UserHelper.createUser();
-//        userJpaRepository.save(user);
-//
-//        List<UserEntity> foundUser = userJpaRepository.findAllByCodeIn(List.of(user.getCode()));
-//
-//        Assertions.assertThat(foundUser).isNotEmpty();
-//        Assertions.assertThat(foundUser.size()).isGreaterThan(0);
-//
-//        log.info("foundUser: {}", foundUser.get(0).getName());
-//    }
-//
-//    @Test
-//    @DisplayName("유저 저장 성공")
-//    void saveUser() {
-//        UserEntity user = UserHelper.createUser();
-//
-//        UserEntity createdUser = userJpaRepository.save(user);
-//
-//        Assertions.assertThat(createdUser).isNotNull();
-//        Assertions.assertThat(createdUser.getUserId()).isNotNull();
-//        Assertions.assertThat(createdUser.getSnsId()).isEqualTo(user.getSnsId());
-//
-//        log.info("foundUser: {}", createdUser.getName());
-//    }
-//
-//    @Test
-//    @DisplayName("유저 수정 성공")
-//    void updateUser() {
-//        UserEntity user = UserHelper.createUser();
-//        userJpaRepository.save(user);
-//
-//        UserEntity foundUser = userJpaRepository.findBySnsId(user.getSnsId()).orElse(null);
-//        Assertions.assertThat(foundUser).isNotNull();
-//
-//        foundUser.setName("newNickname");
-//
-//        UserEntity updatedUser = userJpaRepository.save(foundUser);
-//
-//        Assertions.assertThat(updatedUser).isNotNull();
-//        Assertions.assertThat(updatedUser.getName()).isEqualTo("newNickname");
-//
-//        log.info("foundUser: {}", foundUser.getName());
-//    }
-//
-//    @Test
-//    @DisplayName("유저 삭제 성공")
-//    void deleteUser() {
-//        UserEntity user = UserHelper.createUser();
-//        userJpaRepository.save(user);
-//
-//        UserEntity foundUser = userJpaRepository.findBySnsId(user.getSnsId()).orElse(null);
-//        Assertions.assertThat(foundUser).isNotNull();
-//
-//        userJpaRepository.delete(foundUser);
-//
-//        UserEntity deletedUser = userJpaRepository.findBySnsId(user.getSnsId()).orElse(null);
-//        Assertions.assertThat(deletedUser).isNull();
-//    }
+    @Test
+    @DisplayName("여러 개의 코드로 조회 성공")
+    void getAllUsersByCodes() {
+        List<UserEntity> foundUser = userRepository.getAllUsersByCodes(List.of(user.getCode()));
+
+        Assertions.assertThat(foundUser).isNotEmpty();
+        Assertions.assertThat(foundUser.size()).isGreaterThan(0);
+        Assertions.assertThat(foundUser.get(0).getCode()).isEqualTo(TEST_CODE);
+        Assertions.assertThat(foundUser.get(0)).isEqualTo(user);
+
+        log.info("foundUser = {}", foundUser.get(0).getCode());
+    }
+
+    @Test
+    @DisplayName("유저 저장 성공")
+    void saveUser() {
+        UserEntity newUser = new UserEntity();
+        newUser.setSnsKind(SnsKind.KAKAO);
+        newUser.setSnsId("testSnsId2");
+        newUser.setName("testName2");
+        newUser.setCode("USER02");
+
+        UserEntity createdUser = userRepository.save(newUser);
+
+        Assertions.assertThat(createdUser).isNotNull();
+        Assertions.assertThat(createdUser.getUserId()).isNotNull();
+        Assertions.assertThat(createdUser.getSnsId()).isEqualTo("testSnsId2");
+        Assertions.assertThat(createdUser.getName()).isEqualTo("testName2");
+        Assertions.assertThat(createdUser.getCode()).isEqualTo("USER02");
+
+        log.info("newUser = {}, {}, {}", createdUser.getSnsId(), createdUser.getName(), createdUser.getCode());
+    }
+
+    @Test
+    @DisplayName("유저 수정 성공 - 이름")
+    void updateUser() {
+        user.updateName("newNickname");
+
+        UserEntity updatedUser = userRepository.save(user);
+
+        Assertions.assertThat(updatedUser).isNotNull();
+        Assertions.assertThat(updatedUser.getName()).isEqualTo("newNickname");
+
+        log.info("updateUser = {}", user.getName());
+    }
+
+    @Test
+    @DisplayName("유저 수정 성공 - 이름 null")
+    void updateUserNull() {
+        // 먼저 이름을 변경
+        user.updateName("newNickname");
+
+        // null 값이 들어가면 기존 값이 유지되어야 함
+        user.updateName(null);
+
+        UserEntity updatedUser = userRepository.save(user);
+
+        Assertions.assertThat(updatedUser).isNotNull();
+        Assertions.assertThat(updatedUser.getName()).isEqualTo("newNickname");
+
+        log.info("updateUser = {}", user.getName());
+    }
+
+    @Test
+    @DisplayName("유저 수정 성공 - 프로필")
+    void updateUserProfile() {
+        FileDto file = FileDto.builder()
+                .storeFileName("storeFileName")
+                .storePath("storePath")
+                .originalFileName("originalFileName")
+                .extension("image/jpeg")
+                .size(1000L)
+                .build();
+
+        user.updateProfile(file);
+
+        UserEntity updatedUser = userRepository.save(user);
+
+        Assertions.assertThat(updatedUser).isNotNull();
+        Assertions.assertThat(updatedUser.getProfilePath()).isEqualTo("storePath");
+        Assertions.assertThat(updatedUser.getProfileSize()).isEqualTo(1000L);
+        Assertions.assertThat(updatedUser.getProfileType()).isEqualTo("image/jpeg");
+
+        log.info("updateUser = {}, {}, {}", updatedUser.getProfilePath(), updatedUser.getProfileSize(), updatedUser.getProfileType());
+    }
+
+    @Test
+    @DisplayName("유저 수정 성공 - 프로필 삭제")
+    void updateUserProfileDelete() {
+        user.updateProfile(null);
+
+        UserEntity updatedUser = userRepository.save(user);
+
+        Assertions.assertThat(updatedUser).isNotNull();
+        Assertions.assertThat(updatedUser.getProfilePath()).isNull();
+        Assertions.assertThat(updatedUser.getProfileSize()).isNull();
+        Assertions.assertThat(updatedUser.getProfileType()).isNull();
+    }
+
+    @Test
+    @DisplayName("유저 수정 성공 - 알림")
+    void updateUserNotification() {
+        user.updateNotification(true, true, true);
+
+        UserEntity updatedUser = userRepository.save(user);
+
+        Assertions.assertThat(updatedUser).isNotNull();
+        Assertions.assertThat(updatedUser.getUploadNofi()).isTrue();
+        Assertions.assertThat(updatedUser.getShareNofi()).isTrue();
+        Assertions.assertThat(updatedUser.getEventNofi()).isTrue();
+    }
+
+    @Test
+    @DisplayName("유저 수정 성공 - 알림 null")
+    void updateUserNotificationNull() {
+        // 먼저 알림 설정을 true로 변경
+        user.updateNotification(true, true, true);
+
+        // null 값이 들어가면 기존 값이 유지되어야 함
+        user.updateNotification(null, null, null);
+
+        UserEntity updatedUser = userRepository.save(user);
+
+        Assertions.assertThat(updatedUser).isNotNull();
+        Assertions.assertThat(updatedUser.getUploadNofi()).isTrue();
+        Assertions.assertThat(updatedUser.getShareNofi()).isTrue();
+        Assertions.assertThat(updatedUser.getEventNofi()).isTrue();
+    }
+
+    @Test
+    @DisplayName("유저 삭제 성공 - Soft Delete")
+    void deleteUser() {
+        user.delete();
+
+        UserEntity deletedUser = userRepository.save(user);
+
+        Assertions.assertThat(deletedUser).isNotNull();
+        Assertions.assertThat(deletedUser.getIsDeleted()).isTrue();
+        Assertions.assertThat(deletedUser.getDeletedTime()).isNotNull();
+        Assertions.assertThat(deletedUser.getNotificationToken()).isNull();
+        Assertions.assertThat(deletedUser.getNotificationTokenTime()).isNull();
+
+        log.info("deletedUser = {}", deletedUser.getDeletedTime());
+    }
 }
