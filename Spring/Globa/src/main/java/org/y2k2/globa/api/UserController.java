@@ -22,6 +22,7 @@ import org.y2k2.globa.application.common.dto.auth.CustomUserDetails;
 import org.y2k2.globa.application.analysis.dto.response.ResponseAnalysisDto;
 import org.y2k2.globa.application.fcm.dto.request.RequestNotificationTokenDto;
 import org.y2k2.globa.application.survey.dto.request.RequestSurveyDto;
+import org.y2k2.globa.application.user.dto.response.ResponseNotificationSettingDto;
 import org.y2k2.globa.application.user.dto.response.ResponseUserDto;
 import org.y2k2.globa.application.user.dto.response.ResponseUserSearchDto;
 import org.y2k2.globa.application.user.service.*;
@@ -128,7 +129,7 @@ public class UserController {
             }
     )
     @GetMapping("/notification")
-    public ResponseEntity<?> getUserNotification(@AuthenticationPrincipal CustomUserDetails details) {
+    public ResponseEntity<ResponseNotificationSettingDto> getUserNotification(@AuthenticationPrincipal CustomUserDetails details) {
         return ResponseEntity.ok(getUserNotificationService.getUserNotification(details.getUserId()));
     }
 

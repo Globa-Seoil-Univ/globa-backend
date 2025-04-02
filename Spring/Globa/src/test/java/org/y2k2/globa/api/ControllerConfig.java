@@ -3,15 +3,15 @@ package org.y2k2.globa.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.navercorp.fixturemonkey.FixtureMonkey;
-import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitraryIntrospector;
-import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.ActiveProfiles;
 import org.y2k2.globa.common.filter.AuthenticationFilter;
+import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.common.util.jwt.JWT;
 
+@ActiveProfiles("test")
 @TestConfiguration
 public class ControllerConfig {
     @Bean
@@ -29,9 +29,12 @@ public class ControllerConfig {
 
     @Bean
     public JWT jwt() {
-        return FixtureMonkey.builder()
-                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
-                .build()
-                .giveMeOne(JWT.class);
+        return JWT.builder()
+                .grantType("Bearer ")
+                .accessToken("accessToken")
+                .refreshToken("refreshToken")
+                .accessTokenExpireTime(new CustomTimestamp().getTimestamp())
+                .refreshTokenExpireTime(new CustomTimestamp().getTimestamp())
+                .build();
     }
 }

@@ -86,8 +86,10 @@ public class UserControllerTest {
         Mockito.when(getUserService.getUser(ArgumentMatchers.any(Long.class)))
                 .thenReturn(response);
 
+        log.info("jwt: {}", jwt.getGrantType() + jwt.getAccessToken());
+
         mockMvc.perform(
-                        MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue())
+                        MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue()  )
                                 .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
                                 .accept(MediaType.APPLICATION_JSON)
                 )

@@ -7,6 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum Constant {
     JWT_HEADER("Authorization"),
+
     USER_PREFIX("/user"),
     ;
 

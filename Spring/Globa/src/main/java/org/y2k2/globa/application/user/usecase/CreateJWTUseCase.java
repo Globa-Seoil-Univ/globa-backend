@@ -18,7 +18,7 @@ public class CreateJWTUseCase implements UseCase<CreateJWTCommand, JWT> {
     public JWT execute(CreateJWTCommand command) {
         JWT jwt = jwtProvider.generateToken(command.userId());
         redisStore.setValueExpire(
-                command.userId().toString(),
+                "refreshToken::" + jwt.getRefreshToken(),
                 jwt.getRefreshToken(),
                 jwt.getRefreshTokenExpireTime()
         );
