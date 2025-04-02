@@ -3,7 +3,6 @@ package org.y2k2.globa.application.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.y2k2.globa.application.analysis.dto.response.ResponseAnalysisDto;
-import org.y2k2.globa.application.common.dto.auth.CustomUserDetails;
 import org.y2k2.globa.application.keyword.dto.response.ResponseKeywordDto;
 import org.y2k2.globa.application.keyword.mapper.KeywordMapper;
 import org.y2k2.globa.application.quiz.dto.response.ResponseQuizGradeDto;
@@ -11,11 +10,11 @@ import org.y2k2.globa.application.quiz.mapper.QuizMapper;
 import org.y2k2.globa.application.studytime.dto.response.ResponseStudyTimesDto;
 import org.y2k2.globa.application.studytime.mapper.StudyTimeMapper;
 import org.y2k2.globa.domain.keyword.repository.KeywordRepository;
-import org.y2k2.globa.domain.quiz.repository.QuizRepository;
+import org.y2k2.globa.domain.quizattemp.repository.QuizAttemptRepository;
 import org.y2k2.globa.domain.record.repository.RecordRepository;
 import org.y2k2.globa.domain.study.repository.StudyRepository;
 import org.y2k2.globa.infrastructure.persistence.keyword.projection.KeywordProjection;
-import org.y2k2.globa.infrastructure.persistence.quiz.projection.QuizGradeProjection;
+import org.y2k2.globa.infrastructure.persistence.quizattemp.projection.QuizGradeProjection;
 import org.y2k2.globa.infrastructure.persistence.study.projection.StudyTimeProjection;
 
 import java.util.List;
@@ -25,7 +24,7 @@ import java.util.List;
 public class GetUserAnalysisService {
     private final RecordRepository recordRepository;
     private final StudyRepository studyRepository;
-    private final QuizRepository quizRepository;
+    private final QuizAttemptRepository quizAttemptRepository;
     private final KeywordRepository keywordRepository;
 
     public ResponseAnalysisDto getAnalysis(Long userId) {
@@ -58,7 +57,7 @@ public class GetUserAnalysisService {
     }
 
     private List<ResponseQuizGradeDto> getResponseQuizGradeDto(Long userId) {
-        List<QuizGradeProjection> quizGradeProjections = quizRepository.getQuizInWeek(userId);
+        List<QuizGradeProjection> quizGradeProjections = quizAttemptRepository.getQuizAttemptByUserInDays(userId);
 
         return quizGradeProjections.stream().map(
                 QuizMapper.INSTANCE::toResponseQuizGradeDto

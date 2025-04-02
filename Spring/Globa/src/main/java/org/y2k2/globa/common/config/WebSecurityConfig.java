@@ -32,6 +32,7 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "user").permitAll()
+                        .requestMatchers(HttpMethod.POST, "user/refresh").permitAll()
                         .requestMatchers(HttpMethod.GET, "**.html").permitAll()
                         .requestMatchers(SWAGGER_PATHS).permitAll()
                         .anyRequest().authenticated()

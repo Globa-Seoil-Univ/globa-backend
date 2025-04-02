@@ -15,8 +15,8 @@ public class WithAccountSecurityContextFactory implements WithSecurityContextFac
 
         CustomUserDetails customUser = new CustomUserDetails(
                 1L,
-                annotation.nickname(),
-                annotation.fcmToken()
+                "TEST_USER_NAME",
+                "TEST_FCM_TOKEN"
         );
 
         Authentication auth = new UsernamePasswordAuthenticationToken(

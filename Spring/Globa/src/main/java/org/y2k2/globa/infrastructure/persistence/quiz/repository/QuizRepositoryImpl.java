@@ -4,9 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.y2k2.globa.domain.quiz.repository.QuizRepository;
 import org.y2k2.globa.infrastructure.persistence.quiz.entity.QuizEntity;
-import org.y2k2.globa.infrastructure.persistence.quiz.projection.QuizGradeProjection;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
-import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 import java.util.List;
 
@@ -14,6 +12,11 @@ import java.util.List;
 @Repository
 public class QuizRepositoryImpl implements QuizRepository {
     private final QuizJpaRepository quizJpaRepository;
+
+    @Override
+    public QuizEntity save(QuizEntity entity) {
+        return quizJpaRepository.save(entity);
+    }
 
     @Override
     public void deleteAll(List<QuizEntity> entities) {
@@ -33,15 +36,5 @@ public class QuizRepositoryImpl implements QuizRepository {
     @Override
     public List<QuizEntity> getAllByQuizzesInRecord(RecordEntity record, List<Long> quizIds) {
         return quizJpaRepository.findAllByRecordAndQuizIdIn(record, quizIds);
-    }
-
-    @Override
-    public List<QuizGradeProjection> getQuizInWeek(Long userId) {
-        return quizJpaRepository.findQuizGradeByUserInWeek(userId);
-    }
-
-    @Override
-    public List<QuizGradeProjection> getQuizByUserAndRecord(UserEntity user, Long recordId) {
-        return quizJpaRepository.findQuizGradeByUserAndRecordRecordId(user, recordId);
     }
 }

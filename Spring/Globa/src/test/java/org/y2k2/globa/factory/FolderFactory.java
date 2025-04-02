@@ -1,9 +1,6 @@
 package org.y2k2.globa.factory;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -18,28 +15,18 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @Getter
-@NoArgsConstructor
+@Setter
 @Import(FolderRepositoryImpl.class)
 @Component
 public class FolderFactory extends CreatorFactory<FolderEntity> {
     @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     @Autowired
     private FolderRepository folderRepository;
 
     private String title = "DEFAULT";
     private UserEntity user;
     private LocalDateTime createdTime = new CustomTimestamp().getTimestamp();
-
-    @Builder
-    public FolderFactory(
-            String title,
-            UserEntity user,
-            LocalDateTime createdTime
-    ) {
-        this.title = title;
-        this.user = user;
-        this.createdTime = createdTime;
-    }
 
     @Override
     protected FolderEntity create() {

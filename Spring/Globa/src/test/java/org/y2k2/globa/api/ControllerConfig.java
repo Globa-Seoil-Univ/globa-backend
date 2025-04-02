@@ -11,7 +11,6 @@ import org.y2k2.globa.common.filter.AuthenticationFilter;
 import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.common.util.jwt.JWT;
 
-@ActiveProfiles("test")
 @TestConfiguration
 public class ControllerConfig {
     @Bean

@@ -1,9 +1,6 @@
 package org.y2k2.globa.factory;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -15,13 +12,18 @@ import org.y2k2.globa.infrastructure.persistence.user.type.SnsKind;
 
 @Slf4j
 @Getter
-@NoArgsConstructor
+@Setter
 @Import(UserRepositoryImpl.class)
 @Component
 public class UserFactory extends CreatorFactory<UserEntity> {
     @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     @Autowired
     private UserRepository userRepository;
+
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private UserEntity lastUser;
 
     private String code = "ABCDEF";
     private String name = "TESTNAME";
@@ -35,35 +37,6 @@ public class UserFactory extends CreatorFactory<UserEntity> {
     private boolean uploadNofi = true;
     private boolean shareNofi = true;
     private boolean eventNofi = true;
-
-    @Builder
-    public UserFactory(
-            String code,
-            String name,
-            String snsId,
-            SnsKind snsKind,
-            String profilePath,
-            String profileType,
-            Long profileSize,
-            boolean isDeleted,
-            boolean primaryNofi,
-            boolean uploadNofi,
-            boolean shareNofi,
-            boolean eventNofi
-    ) {
-        this.code = code;
-        this.name = name;
-        this.snsId = snsId;
-        this.snsKind = snsKind;
-        this.profilePath = profilePath;
-        this.profileType = profileType;
-        this.profileSize = profileSize;
-        this.isDeleted = isDeleted;
-        this.primaryNofi = primaryNofi;
-        this.uploadNofi = uploadNofi;
-        this.shareNofi = shareNofi;
-        this.eventNofi = eventNofi;
-    }
 
     @Override
     protected UserEntity create() {
@@ -91,7 +64,8 @@ public class UserFactory extends CreatorFactory<UserEntity> {
     @Override
     protected UserEntity saveEntity(UserEntity entity) {
         if (userRepository != null) {
-            return userRepository.save(entity);
+            lastUser = userRepository.save(entity);
+            return lastUser;
         } else {
             throw new RuntimeException("UserRepository is null, entity will not be persisted");
         }

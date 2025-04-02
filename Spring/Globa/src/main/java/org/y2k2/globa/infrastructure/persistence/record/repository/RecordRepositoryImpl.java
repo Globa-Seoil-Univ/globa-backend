@@ -19,8 +19,8 @@ public class RecordRepositoryImpl implements RecordRepository {
     private final RecordJpaRepository recordJpaRepository;
 
     @Override
-    public void save(RecordEntity entity) {
-        recordJpaRepository.save(entity);
+    public RecordEntity save(RecordEntity entity) {
+        return recordJpaRepository.save(entity);
     }
 
     @Override

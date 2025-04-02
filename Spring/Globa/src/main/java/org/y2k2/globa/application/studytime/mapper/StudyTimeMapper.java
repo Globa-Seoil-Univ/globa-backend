@@ -15,10 +15,10 @@ public interface StudyTimeMapper {
     StudyTimeMapper INSTANCE = Mappers.getMapper(StudyTimeMapper.class);
 
     @Mapping(source = "totalStudyTime", target = "studyTime")
-    @Mapping(source = "createdTime", target = "createdTime", qualifiedBy = {CustomTimestampTranslator.class, MapCreatedTime.class})
+    @Mapping(source = "createdTime", target = "createdTime")
     ResponseStudyTimesDto toResponseTotalStudyTimesDto(StudyTimeProjection projection);
 
     @Mapping(source = "studyTime", target = "studyTime")
-    @Mapping(source = "createdTime", target = "createdTime", qualifiedBy = {CustomTimestampTranslator.class, MapCreatedTime.class})
+    @Mapping(source = "createdTime", target = "createdTime")
     ResponseStudyTimesDto toResponseStudyTimesDto(StudyEntity projection);
 }

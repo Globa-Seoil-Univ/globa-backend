@@ -34,6 +34,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         String method = request.getMethod();
 
         return (path.equals("/user") && method.equals("POST"))
+                || (path.equals("/user/refresh") && method.equals("POST"))
                 || path.endsWith(".html")
                 || path.startsWith("/swagger-ui")
                 || path.startsWith("/v3/api-docs");

@@ -7,6 +7,7 @@ import org.y2k2.globa.infrastructure.persistence.keyword.projection.KeywordProje
 import java.util.List;
 
 public interface KeywordRepository {
+    KeywordEntity save(KeywordEntity entity);
     void deleteAll(List<KeywordEntity> entities);
 
     Boolean hasKeyword(RecordEntity record);

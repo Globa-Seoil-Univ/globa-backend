@@ -5,5 +5,7 @@ import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEnt
 import java.util.Optional;
 
 public interface FolderRoleRepository {
+    FolderRoleEntity save(FolderRoleEntity entity);
+
     Optional<FolderRoleEntity> getRole(String roleName);
 }

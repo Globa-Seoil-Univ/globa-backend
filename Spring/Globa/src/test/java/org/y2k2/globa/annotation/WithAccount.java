@@ -9,6 +9,4 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 @WithSecurityContext(factory = WithAccountSecurityContextFactory.class)
 public @interface WithAccount {
-    String nickname() default "TESTUSER";
-    String fcmToken() default "FCMTOKEN";
 }
