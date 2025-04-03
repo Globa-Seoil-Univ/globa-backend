@@ -2,7 +2,9 @@ package org.y2k2.globa.application.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.y2k2.globa.application.folder.command.CreateDefaultFolderCommand;
 import org.y2k2.globa.application.folder.command.UpdateFolderNameCommand;
+import org.y2k2.globa.application.folder.usecase.CreateDefaultFolderUseCase;
 import org.y2k2.globa.application.folder.usecase.UpdateFolderNameUseCase;
 import org.y2k2.globa.application.user.command.UpdateUserCommand;
 import org.y2k2.globa.application.user.dto.request.RequestNameDto;
@@ -20,6 +22,7 @@ public class UpdateUserNameService {
     private final FindUserUseCase findUserUseCase;
     private final UpdateUserUseCase updateUserUseCase;
     private final UpdateFolderNameUseCase updateFolderNameCommand;
+    private final CreateDefaultFolderUseCase createDefaultFolderUseCase;
 
     private final FolderRepository folderRepository;
 
@@ -34,7 +37,9 @@ public class UpdateUserNameService {
         );
 
         FolderEntity folder = folderRepository.getDefaultFolder(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DEFAULT_FOLDER));
+                .orElseGet(() -> createDefaultFolderUseCase.execute(
+                        CreateDefaultFolderCommand.of(user)
+                ));
 
         updateFolderNameCommand.execute(
                 UpdateFolderNameCommand.of(folder, dto.name())

@@ -16,11 +16,14 @@ import org.y2k2.globa.application.user.usecase.ValidateJWTUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.util.jwt.JWTProvider;
+import org.y2k2.globa.common.util.redis.RedisKey;
 import org.y2k2.globa.common.util.redis.RedisStore;
 
 @Slf4j
 @ExtendWith(SpringExtension.class)
 public class ValidateJWTUseCaseTest {
+    Long userId = 1L;
+
     private ValidateJWTCommand command;
     private ValidateJWTUseCase validateJWTUseCase;
 
@@ -40,14 +43,12 @@ public class ValidateJWTUseCaseTest {
     }
 
     @Test
-    @DisplayName("JWT 검증 성공")
+    @DisplayName("JWT 검증 - 성공")
     void validateJWTTest() {
-        Long userId = 1L;
-
         Mockito.when(jwtProvider.getUserIdByAccessTokenWithoutCheck(command.accessToken()))
                 .thenReturn(userId);
 
-        Mockito.when(redisStore.getValue(command.accessToken()))
+        Mockito.when(redisStore.getValue(RedisKey.REFRESH_KEY.getValue() + userId))
                 .thenReturn(command.refreshToken());
 
         Mockito.when(jwtProvider.isExpired(command.accessToken()))
@@ -64,18 +65,18 @@ public class ValidateJWTUseCaseTest {
                 .isEqualTo(userId);
 
         Mockito.verify(jwtProvider, Mockito.times(1)).getUserIdByAccessTokenWithoutCheck(command.accessToken());
-        Mockito.verify(redisStore, Mockito.times(1)).getValue(command.accessToken());
+        Mockito.verify(redisStore, Mockito.times(1)).getValue(RedisKey.REFRESH_KEY.getValue() + userId);
         Mockito.verify(jwtProvider, Mockito.times(1)).isExpired(command.accessToken());
         Mockito.verify(jwtProvider, Mockito.times(1)).isExpired(command.refreshToken());
     }
 
     @Test
-    @DisplayName("JWT 검증 실패 - AT 만료되지 않음")
+    @DisplayName("JWT 검증 - 실패 (AT 만료 X)")
     void validateJWTATFailTest() {
         Mockito.when(jwtProvider.getUserIdByAccessTokenWithoutCheck(command.accessToken()))
-                .thenReturn(1L);
+                .thenReturn(userId);
 
-        Mockito.when(redisStore.getValue(command.accessToken()))
+        Mockito.when(redisStore.getValue(RedisKey.REFRESH_KEY.getValue() + userId))
                 .thenReturn(command.refreshToken());
 
         Mockito.when(jwtProvider.isExpired(command.accessToken()))
@@ -90,18 +91,18 @@ public class ValidateJWTUseCaseTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ACTIVE_ACCESS_TOKEN);
 
         Mockito.verify(jwtProvider, Mockito.times(1)).getUserIdByAccessTokenWithoutCheck(command.accessToken());
-        Mockito.verify(redisStore, Mockito.times(1)).getValue(command.accessToken());
+        Mockito.verify(redisStore, Mockito.times(1)).getValue(RedisKey.REFRESH_KEY.getValue() + userId);
         Mockito.verify(jwtProvider, Mockito.times(1)).isExpired(command.accessToken());
         Mockito.verify(jwtProvider, Mockito.times(0)).isExpired(command.refreshToken());
     }
     
     @Test
-    @DisplayName("JWT 검증 실패 - RT 만료됨")
+    @DisplayName("JWT 검증 - 실패 (RT 만료)")
     void validateJWTRTFailTest() {
         Mockito.when(jwtProvider.getUserIdByAccessTokenWithoutCheck(command.accessToken()))
                 .thenReturn(1L);
 
-        Mockito.when(redisStore.getValue(command.accessToken()))
+        Mockito.when(redisStore.getValue(RedisKey.REFRESH_KEY.getValue() + 1L))
                 .thenReturn(command.refreshToken());
 
         Mockito.when(jwtProvider.isExpired(command.accessToken()))
@@ -116,18 +117,18 @@ public class ValidateJWTUseCaseTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.EXPIRED_REFRESH_TOKEN);
 
         Mockito.verify(jwtProvider, Mockito.times(1)).getUserIdByAccessTokenWithoutCheck(command.accessToken());
-        Mockito.verify(redisStore, Mockito.times(1)).getValue(command.accessToken());
+        Mockito.verify(redisStore, Mockito.times(1)).getValue(RedisKey.REFRESH_KEY.getValue() + userId);
         Mockito.verify(jwtProvider, Mockito.times(1)).isExpired(command.accessToken());
         Mockito.verify(jwtProvider, Mockito.times(1)).isExpired(command.refreshToken());
     }
 
     @Test
-    @DisplayName("JWT 검증 실패 - RT 불일치")
+    @DisplayName("JWT 검증 - 실패 (RT 불일치)")
     void validateJWTRTNotMatchFailTest() {
         Mockito.when(jwtProvider.getUserIdByAccessTokenWithoutCheck(command.accessToken()))
                 .thenReturn(1L);
 
-        Mockito.when(redisStore.getValue(command.accessToken()))
+        Mockito.when(redisStore.getValue(RedisKey.REFRESH_KEY.getValue() + 1L))
                 .thenReturn("invalid");
 
         Mockito.when(jwtProvider.isExpired(command.accessToken()))
@@ -142,7 +143,7 @@ public class ValidateJWTUseCaseTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_MATCH_REFRESH_TOKEN);
 
         Mockito.verify(jwtProvider, Mockito.times(1)).getUserIdByAccessTokenWithoutCheck(command.accessToken());
-        Mockito.verify(redisStore, Mockito.times(1)).getValue(command.accessToken());
+        Mockito.verify(redisStore, Mockito.times(1)).getValue(RedisKey.REFRESH_KEY.getValue() + userId);
         Mockito.verify(jwtProvider, Mockito.times(1)).isExpired(command.accessToken());
         Mockito.verify(jwtProvider, Mockito.times(1)).isExpired("invalid");
     }

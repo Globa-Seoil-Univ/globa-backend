@@ -87,7 +87,6 @@ public class SwaggerConfig {
 
         // 404 Errors
         components.addExamples(ErrorCode.NOT_FOUND_USER.getErrorCode(), createExample(ErrorCode.NOT_FOUND_USER.getErrorCode(), "사용자를 찾을 수 없습니다."));
-        components.addExamples(ErrorCode.NOT_FOUND_DEFAULT_FOLDER.getErrorCode(), createExample(ErrorCode.NOT_FOUND_DEFAULT_FOLDER.getErrorCode(), "기본 폴더를 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_TARGET_USER.getErrorCode(), createExample(ErrorCode.NOT_FOUND_TARGET_USER.getErrorCode(), "대상 사용자를 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_ROLE.getErrorCode(), createExample(ErrorCode.NOT_FOUND_ROLE.getErrorCode(), "권한을 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_FOLDER.getErrorCode(), createExample(ErrorCode.NOT_FOUND_FOLDER_ROLE.getErrorCode(), "폴더 권한을 찾을 수 없습니다."));

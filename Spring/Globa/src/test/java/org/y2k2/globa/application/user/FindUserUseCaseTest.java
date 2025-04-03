@@ -37,7 +37,7 @@ public class FindUserUseCaseTest {
      * - CacheManager SpringBootTest(통합 테스트)에서만 동작하기 때문에 단위 테스트에서는 확인하지 않음.
      */
     @Test
-    @DisplayName("유저 조회 성공")
+    @DisplayName("유저 조회 - 성공")
     void getUserTest() {
         Long userId = 1L;
         UserEntity user = FixtureMonkey.builder()
@@ -57,7 +57,7 @@ public class FindUserUseCaseTest {
     }
 
     @Test
-    @DisplayName("유저 조회 실패 - 유저가 존재하지 않음")
+    @DisplayName("유저 조회 - 실패 (유저가 존재하지 않음)")
     void getUserFailTest() {
         Long userId = 1L;
 

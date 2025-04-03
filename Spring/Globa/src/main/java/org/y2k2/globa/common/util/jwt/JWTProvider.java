@@ -35,8 +35,6 @@ public class JWTProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // Member 정보를 가지고 AccessToken, RefreshToken을 생성하는 메서드
-
     /**
      * UserId를 통해 AccessToken, RefreshToken 생성
      *
@@ -107,22 +105,20 @@ public class JWTProvider {
         return claims.getExpiration().before(new Date());
     }
 
-    private Claims parseClaims(String accessToken, boolean validate) {
-        if (accessToken == null) {
+    private Claims parseClaims(String token, boolean validate) {
+        if (token == null) {
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
 
-        if (accessToken.contains("Bearer")) {
-            accessToken = accessToken.split(" ")[1].trim();
-        } else {
-            throw new CustomException(ErrorCode.INVALID_TOKEN);
+        if (token.contains("Bearer")) {
+            token = token.split(" ")[1].trim();
         }
 
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
-                    .parseClaimsJws(accessToken)
+                    .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException e) {
             if (validate) {

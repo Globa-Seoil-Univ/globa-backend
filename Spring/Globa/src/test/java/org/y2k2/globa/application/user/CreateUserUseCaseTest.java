@@ -31,7 +31,7 @@ public class CreateUserUseCaseTest {
     }
 
     @Test
-    @DisplayName("유저 생성 성공")
+    @DisplayName("유저 생성 - 성공")
     void createUserTest() {
         CreateUserCommand command = FixtureMonkey.builder()
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)

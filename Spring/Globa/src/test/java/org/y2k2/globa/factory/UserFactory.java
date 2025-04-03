@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
+import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.domain.user.repository.UserRepository;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.infrastructure.persistence.user.repository.UserRepositoryImpl;
@@ -32,6 +33,7 @@ public class UserFactory extends CreatorFactory<UserEntity> {
     private String profilePath = "profilePath";
     private String profileType = "image/jpeg";
     private Long profileSize = 1000L;
+    private String fcmToken = "fcmToken";
     private boolean isDeleted = false;
     private boolean primaryNofi = true;
     private boolean uploadNofi = true;
@@ -52,6 +54,8 @@ public class UserFactory extends CreatorFactory<UserEntity> {
         entity.setProfilePath(profilePath);
         entity.setProfileType(profileType);
         entity.setProfileSize(profileSize);
+        entity.setNotificationToken(fcmToken);
+        entity.setNotificationTokenTime(new CustomTimestamp().getTimestamp());
         entity.setIsDeleted(isDeleted);
         entity.setPrimaryNofi(primaryNofi);
         entity.setUploadNofi(uploadNofi);

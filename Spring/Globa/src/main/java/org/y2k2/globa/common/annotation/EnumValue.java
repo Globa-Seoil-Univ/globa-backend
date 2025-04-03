@@ -9,9 +9,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Constraint(validatedBy = EnumValueValidator.class)
-@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
+@Target(value = ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
+@Constraint(validatedBy = EnumValueValidator.class)
 public @interface EnumValue {
     String message() default "Enum에 정의된 값이 아닙니다.";
     Class<?>[] groups() default { };

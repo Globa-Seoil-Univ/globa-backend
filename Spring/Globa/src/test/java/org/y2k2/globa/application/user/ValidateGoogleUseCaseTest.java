@@ -36,7 +36,7 @@ public class ValidateGoogleUseCaseTest {
     }
 
     @Test
-    @DisplayName("Google Token 검증 성공")
+    @DisplayName("Google Token 검증 - 성공")
     void validateGoogleTest() throws FirebaseAuthException {
         FirebaseToken token = Mockito.mock(FirebaseToken.class);
 
@@ -53,7 +53,7 @@ public class ValidateGoogleUseCaseTest {
     }
 
     @Test
-    @DisplayName("Google Token 검증 실패 - 토큰이 다름")
+    @DisplayName("Google Token 검증 - 실패 (토큰이 다름)")
     void validateGoogleFailTest() throws FirebaseAuthException {
         FirebaseToken token = Mockito.mock(FirebaseToken.class);
 
@@ -72,7 +72,7 @@ public class ValidateGoogleUseCaseTest {
     }
 
     @Test
-    @DisplayName("Google Token 검증 실패 - FirebaseAuthException 발생")
+    @DisplayName("Google Token 검증 - 실패 (FirebaseAuthException)")
     void validateGoogleFailFirebaseAuthExceptionTest() throws FirebaseAuthException {
         Mockito.when(firebaseAuth.verifyIdToken(command.token()))
                 .thenThrow(FirebaseAuthException.class);

@@ -3,6 +3,8 @@ package org.y2k2.globa.application.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.y2k2.globa.application.common.dto.auth.CustomUserDetails;
+import org.y2k2.globa.application.folder.command.CreateDefaultFolderCommand;
+import org.y2k2.globa.application.folder.usecase.CreateDefaultFolderUseCase;
 import org.y2k2.globa.application.user.dto.response.ResponseUserDto;
 import org.y2k2.globa.application.user.mapper.UserMapper;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
@@ -16,6 +18,7 @@ import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 @Service
 public class GetUserService {
     private final FindUserUseCase findUserUseCase;
+    private final CreateDefaultFolderUseCase createDefaultFolderUseCase;
 
     private final FolderRepository folderRepository;
 
@@ -23,7 +26,11 @@ public class GetUserService {
         UserEntity user = findUserUseCase.execute(userId);
 
         FolderEntity folder = folderRepository.getDefaultFolder(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_DEFAULT_FOLDER));
+                .orElseGet(
+                        () -> createDefaultFolderUseCase.execute(
+                                new CreateDefaultFolderCommand(user)
+                        )
+                );
 
         return UserMapper.INSTANCE.toResponseUserDto(user, folder.getFolderId());
     }

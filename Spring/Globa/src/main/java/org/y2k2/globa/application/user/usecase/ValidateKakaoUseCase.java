@@ -14,6 +14,7 @@ import org.y2k2.globa.application.user.command.ValidateSnsCommand;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.usecase.VoidUseCase;
+import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,7 +24,7 @@ public class ValidateKakaoUseCase implements VoidUseCase<ValidateSnsCommand> {
 
     private final RestTemplate restTemplate;
 
-    public void execute(ValidateSnsCommand command) {
+    public FolderEntity execute(ValidateSnsCommand command) {
         try {
             // HTTP 요청 헤더에 Authorization 추가
             HttpHeaders headers = new HttpHeaders();
@@ -49,5 +50,7 @@ public class ValidateKakaoUseCase implements VoidUseCase<ValidateSnsCommand> {
             log.error("Failed to verify kakao token : " + e);
             throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
         }
+
+        return null;
     }
 }

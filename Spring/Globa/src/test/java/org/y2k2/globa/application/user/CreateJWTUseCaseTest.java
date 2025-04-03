@@ -15,6 +15,7 @@ import org.y2k2.globa.application.user.command.CreateJWTCommand;
 import org.y2k2.globa.application.user.usecase.CreateJWTUseCase;
 import org.y2k2.globa.common.util.jwt.JWT;
 import org.y2k2.globa.common.util.jwt.JWTProvider;
+import org.y2k2.globa.common.util.redis.RedisKey;
 import org.y2k2.globa.common.util.redis.RedisStore;
 
 @Slf4j
@@ -34,7 +35,7 @@ public class CreateJWTUseCaseTest {
     }
 
     @Test
-    @DisplayName("JWT 생성 성공")
+    @DisplayName("JWT 생성 - 성공")
     void createJWTTest() {
         CreateJWTCommand command = FixtureMonkey.builder()
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
@@ -54,7 +55,7 @@ public class CreateJWTUseCaseTest {
         Mockito.doNothing()
                 .when(redisStore)
                 .setValueExpire(
-                        command.userId().toString(),
+                        RedisKey.REFRESH_KEY.getValue() + command.userId().toString(),
                         jwt.getRefreshToken(),
                         jwt.getRefreshTokenExpireTime()
                 );
@@ -72,7 +73,7 @@ public class CreateJWTUseCaseTest {
         Mockito.verify(jwtProvider, Mockito.times(1)).generateToken(command.userId());
         Mockito.verify(redisStore, Mockito.times(1))
                 .setValueExpire(
-                        command.userId().toString(),
+                        RedisKey.REFRESH_KEY.getValue() + command.userId().toString(),
                         jwt.getRefreshToken(),
                         jwt.getRefreshTokenExpireTime()
                 );

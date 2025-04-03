@@ -24,21 +24,21 @@ public class UserEntityTest {
     }
 
     @Test
-    @DisplayName("이름 수정 성공")
+    @DisplayName("이름 수정 - 성공")
     void updateName() {
         user.updateName("newName");
         Assertions.assertThat(user.getName()).isEqualTo("newName");
     }
 
     @Test
-    @DisplayName("이름 수정 실패 - null")
+    @DisplayName("이름 수정 - 실패 (null)")
     void updateNameFail() {
         user.updateName(null);
         Assertions.assertThat(user.getName()).isNotEqualTo("newName");
     }
 
     @Test
-    @DisplayName("프로필 사진 수정 성공")
+    @DisplayName("프로필 사진 수정 - 성공")
     void updateProfile() {
         FileDto fileDto = FixtureMonkey.builder()
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
@@ -53,7 +53,7 @@ public class UserEntityTest {
     }
 
     @Test
-    @DisplayName("프로필 사진 삭제")
+    @DisplayName("프로필 사진 삭제 - 성공")
     void updateProfileFail() {
         user.updateProfile(null);
 
@@ -63,7 +63,7 @@ public class UserEntityTest {
     }
 
     @Test
-    @DisplayName("알림 설정 수정 성공")
+    @DisplayName("알림 설정 수정 - 성공")
     void updateNotification() {
         user.updateNotification(true, true, true);
 
@@ -73,7 +73,7 @@ public class UserEntityTest {
     }
 
     @Test
-    @DisplayName("알림 설정 수정 성공 - null 제외")
+    @DisplayName("알림 설정 수정 - 성공 (null 제외)")
     void updateNotificationExcludeNull() {
         user.updateNotification(true, true, true);
         user.updateNotification(null, false, null);
@@ -84,7 +84,7 @@ public class UserEntityTest {
     }
 
     @Test
-    @DisplayName("알림 설정 수정 실패 - null")
+    @DisplayName("알림 설정 수정 - 실패 (null)")
     void updateNotificationFail() {
         user.updateNotification(true ,true, true);
         user.updateNotification(null, null, null);
@@ -95,7 +95,7 @@ public class UserEntityTest {
     }
 
     @Test
-    @DisplayName("유저 삭제 성공")
+    @DisplayName("유저 삭제 - 성공")
     void deleteUser() {
         user.delete();
 

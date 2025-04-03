@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.y2k2.globa.application.user.command.UpdateUserCommand;
 import org.y2k2.globa.common.usecase.VoidUseCase;
 import org.y2k2.globa.domain.user.repository.UserRepository;
+import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 @RequiredArgsConstructor
@@ -13,7 +14,7 @@ public class UpdateUserUseCase implements VoidUseCase<UpdateUserCommand> {
     private final UserRepository userRepository;
 
     @Override
-    public void execute(UpdateUserCommand command) {
+    public FolderEntity execute(UpdateUserCommand command) {
         UserEntity user = command.user();
 
         user.updateName(command.name());
@@ -25,5 +26,6 @@ public class UpdateUserUseCase implements VoidUseCase<UpdateUserCommand> {
         );
 
         userRepository.save(user);
+        return null;
     }
 }

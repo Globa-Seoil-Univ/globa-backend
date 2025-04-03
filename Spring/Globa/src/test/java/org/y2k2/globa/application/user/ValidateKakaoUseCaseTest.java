@@ -20,7 +20,7 @@ import org.y2k2.globa.common.exception.ErrorCode;
 
 @ExtendWith(SpringExtension.class)
 @Slf4j
-class ValidateKakaoSnsUseCaseTest {
+public class ValidateKakaoUseCaseTest {
     private static final String KAKAO_USER_INFO_URL = "https://kapi.kakao.com/v2/user/me";
 
     private ValidateSnsCommand command;
@@ -36,7 +36,7 @@ class ValidateKakaoSnsUseCaseTest {
     }
 
     @Test
-    @DisplayName("카카오 토큰 검증 성공")
+    @DisplayName("카카오 토큰 검증 - 성공")
     void validateKakaoTokenSuccess() {
         ResponseEntity<String> response = ResponseEntity.ok(generateResponse(command.snsId()));
 
@@ -58,7 +58,7 @@ class ValidateKakaoSnsUseCaseTest {
     }
 
     @Test
-    @DisplayName("카카오 토큰 검증 실패 - 불일치")
+    @DisplayName("카카오 토큰 검증 - 실패 (불일치)")
     void validateKakaoTokenFailMismatchTest() {
         ResponseEntity<String> response = ResponseEntity.ok(generateResponse("54321"));
 
@@ -82,7 +82,7 @@ class ValidateKakaoSnsUseCaseTest {
     }
 
     @Test
-    @DisplayName("카카오 토큰 검증 실패 - 잘못된 토큰")
+    @DisplayName("카카오 토큰 검증 - 실패 (잘못된 토큰)")
     void validateKakaoTokenFailTest() {
         Mockito.when(restTemplate.exchange(
                 ArgumentMatchers.eq(KAKAO_USER_INFO_URL),

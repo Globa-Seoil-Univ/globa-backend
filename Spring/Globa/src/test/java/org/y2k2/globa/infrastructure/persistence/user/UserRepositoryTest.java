@@ -44,7 +44,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("유저 Sns ID로 조회 성공")
+    @DisplayName("유저 Sns ID로 조회 - 성공")
     void getUserBySnsId() {
         UserEntity foundedUser = userRepository.getUserBySnsId(user.getSnsId())
                 .orElse(null);
@@ -57,7 +57,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("유저 코드로 조회 성공")
+    @DisplayName("유저 코드로 조회 - 성공")
     void getUserByCode() {
         UserEntity foundUser = userRepository.getUserByCode(user.getCode()).orElse(null);
 
@@ -69,7 +69,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("유저 ID로 조회 성공")
+    @DisplayName("유저 ID로 조회 - 성공")
     void getUserById() {
         UserEntity foundUser = userRepository.getUserByUserId(user.getUserId()).orElse(null);
 
@@ -81,7 +81,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("여러 개의 코드로 조회 성공")
+    @DisplayName("여러 개의 코드로 조회 - 성공")
     void getAllUsersByCodes() {
         List<UserEntity> foundUser = userRepository.getAllUsersByCodes(List.of(user.getCode()));
 
@@ -94,7 +94,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("유저 저장 성공")
+    @DisplayName("유저 저장 - 성공")
     void saveUser() {
         UserEntity newUser = new UserEntity();
         newUser.setSnsKind(SnsKind.KAKAO);
@@ -114,7 +114,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("유저 수정 성공 - 이름")
+    @DisplayName("유저 이름 수정 - 성공 (이름)")
     void updateUser() {
         user.updateName("newNickname");
 
@@ -127,7 +127,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("유저 수정 성공 - 이름 null")
+    @DisplayName("유저 이름 수정 - 성공 (null)")
     void updateUserNull() {
         // 먼저 이름을 변경
         user.updateName("newNickname");
@@ -144,7 +144,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("유저 수정 성공 - 프로필")
+    @DisplayName("유저 프로필 수정 - 성공")
     void updateUserProfile() {
         FileDto file = FileDto.builder()
                 .storeFileName("storeFileName")
@@ -167,7 +167,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("유저 수정 성공 - 프로필 삭제")
+    @DisplayName("유저 프로필 삭제 - 성공")
     void updateUserProfileDelete() {
         user.updateProfile(null);
 
@@ -180,7 +180,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("유저 수정 성공 - 알림")
+    @DisplayName("유저 알림 수정 - 성공")
     void updateUserNotification() {
         user.updateNotification(true, true, true);
 
@@ -193,7 +193,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("유저 수정 성공 - 알림 null")
+    @DisplayName("유저 알림 유지 - 성공")
     void updateUserNotificationNull() {
         // 먼저 알림 설정을 true로 변경
         user.updateNotification(true, true, true);
@@ -210,7 +210,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("유저 삭제 성공 - Soft Delete")
+    @DisplayName("유저 삭제 - 성공 (Soft Delete)")
     void deleteUser() {
         user.delete();
 

@@ -7,6 +7,7 @@ import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.usecase.UseCase;
 import org.y2k2.globa.common.util.jwt.JWTProvider;
+import org.y2k2.globa.common.util.redis.RedisKey;
 import org.y2k2.globa.common.util.redis.RedisStore;
 
 @RequiredArgsConstructor
@@ -18,7 +19,7 @@ public class ValidateJWTUseCase implements UseCase<ValidateJWTCommand, Long> {
     @Override
     public Long execute(ValidateJWTCommand command) {
         Long userId = jwtProvider.getUserIdByAccessTokenWithoutCheck(command.accessToken());
-        String refreshToken = redisStore.getValue(command.accessToken());
+        String refreshToken = redisStore.getValue(RedisKey.REFRESH_KEY.getValue() + userId);
 
         if (!jwtProvider.isExpired(command.accessToken())) {
             redisStore.deleteValue(userId.toString());

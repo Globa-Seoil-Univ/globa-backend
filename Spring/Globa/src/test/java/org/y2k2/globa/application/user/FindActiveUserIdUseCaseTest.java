@@ -34,7 +34,7 @@ public class FindActiveUserIdUseCaseTest {
     }
 
     @Test
-    @DisplayName("사용자 고유 ID 조회 성공")
+    @DisplayName("사용자 고유 ID 조회 - 성공")
     void getUserIdTest() {
         UserEntity user = FixtureMonkey.builder()
                 .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)

@@ -31,7 +31,7 @@ public class UpdateUserUseCaseTest {
     }
 
     @Test
-    @DisplayName("유저 업데이트 성공")
+    @DisplayName("유저 수정 - 성공")
     void updateUserTest() {
         UserEntity user = Mockito.mock(UserEntity.class);
 

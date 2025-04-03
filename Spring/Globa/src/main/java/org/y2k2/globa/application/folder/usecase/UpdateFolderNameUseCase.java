@@ -13,9 +13,10 @@ public class UpdateFolderNameUseCase implements VoidUseCase<UpdateFolderNameComm
     private final FolderRepository folderRepository;
 
     @Override
-    public void execute(UpdateFolderNameCommand command) {
+    public FolderEntity execute(UpdateFolderNameCommand command) {
         FolderEntity folder = command.folder();
         folder.setTitle(command.title());
         folderRepository.save(folder);
+        return folder;
     }
 }
