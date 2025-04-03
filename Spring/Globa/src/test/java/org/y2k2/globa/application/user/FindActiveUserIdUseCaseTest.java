@@ -40,6 +40,7 @@ public class FindActiveUserIdUseCaseTest {
                 .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)
                 .build()
                 .giveMeBuilder(UserEntity.class)
+                .set("userId", 1L)
                 .set("isDeleted", false)
                 .sample();
 

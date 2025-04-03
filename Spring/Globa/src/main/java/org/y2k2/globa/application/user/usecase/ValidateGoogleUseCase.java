@@ -10,7 +10,6 @@ import org.y2k2.globa.application.user.command.ValidateSnsCommand;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.usecase.VoidUseCase;
-import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -19,7 +18,7 @@ public class ValidateGoogleUseCase implements VoidUseCase<ValidateSnsCommand> {
     private final FirebaseAuth firebaseAuth;
 
     @Override
-    public FolderEntity execute(ValidateSnsCommand command) {
+    public void execute(ValidateSnsCommand command) {
         try {
             FirebaseToken token = firebaseAuth.verifyIdToken(command.token());
 
@@ -30,7 +29,5 @@ public class ValidateGoogleUseCase implements VoidUseCase<ValidateSnsCommand> {
             log.error("Failed to verify firebase token : " + e);
             throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);
         }
-
-        return null;
     }
 }

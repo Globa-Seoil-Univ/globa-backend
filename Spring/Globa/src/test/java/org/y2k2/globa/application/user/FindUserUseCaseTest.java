@@ -43,7 +43,9 @@ public class FindUserUseCaseTest {
         UserEntity user = FixtureMonkey.builder()
                 .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)
                 .build()
-                .giveMeOne(UserEntity.class);
+                .giveMeBuilder(UserEntity.class)
+                .set("isDeleted", false)
+                .sample();
 
         Mockito.when(userRepository.getUserByUserId(userId))
                 .thenReturn(Optional.of(user));
@@ -68,6 +70,28 @@ public class FindUserUseCaseTest {
                 .as("유저가 존재하지 않는 경우 CustomException이 발생해야 합니다.")
                 .isInstanceOf(CustomException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND_USER);
+
+        Mockito.verify(userRepository, Mockito.times(1)).getUserByUserId(userId);
+    }
+
+    @Test
+    @DisplayName("유저 조회 - 실패 (삭제된 유저)")
+    void getUserFailDeletedTest() {
+        Long userId = 1L;
+        UserEntity user = FixtureMonkey.builder()
+                .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)
+                .build()
+                .giveMeBuilder(UserEntity.class)
+                .set("isDeleted", true)
+                .sample();
+
+        Mockito.when(userRepository.getUserByUserId(userId))
+                .thenReturn(Optional.of(user));
+
+        Assertions.assertThatThrownBy(() -> findUserUseCase.execute(userId))
+                .as("삭제된 유저인 경우 CustomException이 발생해야 합니다.")
+                .isInstanceOf(CustomException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DELETED_USER);
 
         Mockito.verify(userRepository, Mockito.times(1)).getUserByUserId(userId);
     }

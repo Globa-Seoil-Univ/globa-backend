@@ -22,7 +22,13 @@ public class FindUserUseCase implements UseCase<Long, UserEntity> {
     )
     @Override
     public UserEntity execute(Long userId) {
-        return userRepository.getUserByUserId(userId)
+        UserEntity user = userRepository.getUserByUserId(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        if (user.getIsDeleted()) {
+            throw new CustomException(ErrorCode.DELETED_USER);
+        }
+
+        return user;
     }
 }

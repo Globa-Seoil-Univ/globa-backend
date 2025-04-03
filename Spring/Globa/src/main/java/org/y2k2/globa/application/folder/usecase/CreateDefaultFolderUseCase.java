@@ -9,7 +9,6 @@ import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.type.FolderRole;
 import org.y2k2.globa.common.usecase.UseCase;
-import org.y2k2.globa.common.usecase.VoidUseCase;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.domain.folderrole.repository.FolderRoleRepository;
 import org.y2k2.globa.domain.foldershare.repository.FolderShareRepository;

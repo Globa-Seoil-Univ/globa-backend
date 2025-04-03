@@ -324,8 +324,9 @@ public class UserIntegrationTest extends IntegrationTest {
                 true
         );
 
-        Mockito.when(validateKakaoUseCase.execute(ArgumentMatchers.any(ValidateSnsCommand.class)))
-                        .thenReturn(null);
+        Mockito.doNothing()
+                .when(validateGoogleUseCase)
+                .execute(ArgumentMatchers.any(ValidateSnsCommand.class));
 
         mockMvc.perform(
                         MockMvcRequestBuilders.post(Constant.USER_PREFIX.getValue())
@@ -383,8 +384,9 @@ public class UserIntegrationTest extends IntegrationTest {
                 .withName(UserRole.USER)
                 .create();
 
-        Mockito.when(validateKakaoUseCase.execute(ArgumentMatchers.any(ValidateSnsCommand.class)))
-                .thenReturn(null);
+        Mockito.doNothing()
+                .when(validateGoogleUseCase)
+                .execute(ArgumentMatchers.any(ValidateSnsCommand.class));
 
         RequestUserPostDTO request = new RequestUserPostDTO(
                 SnsKind.GOOGLE.toString(),
@@ -486,11 +488,13 @@ public class UserIntegrationTest extends IntegrationTest {
                 true
         );
 
-        Mockito.when(validateGoogleUseCase.execute(ArgumentMatchers.any(ValidateSnsCommand.class)))
-                .thenReturn(null);
+        Mockito.doNothing()
+                .when(validateKakaoUseCase)
+                .execute(ArgumentMatchers.any(ValidateSnsCommand.class));
 
-        Mockito.when(validateKakaoUseCase.execute(ArgumentMatchers.any(ValidateSnsCommand.class)))
-                .thenReturn(null);
+        Mockito.doNothing()
+                .when(validateGoogleUseCase)
+                .execute(ArgumentMatchers.any(ValidateSnsCommand.class));
 
         mockMvc.perform(
                         MockMvcRequestBuilders.post(Constant.USER_PREFIX.getValue())

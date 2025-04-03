@@ -10,8 +10,6 @@ import org.y2k2.globa.application.user.command.UpdateUserCommand;
 import org.y2k2.globa.application.user.dto.request.RequestNameDto;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 import org.y2k2.globa.application.user.usecase.UpdateUserUseCase;
-import org.y2k2.globa.common.exception.CustomException;
-import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
@@ -21,7 +19,7 @@ import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 public class UpdateUserNameService {
     private final FindUserUseCase findUserUseCase;
     private final UpdateUserUseCase updateUserUseCase;
-    private final UpdateFolderNameUseCase updateFolderNameCommand;
+    private final UpdateFolderNameUseCase updateFolderNameUseCase;
     private final CreateDefaultFolderUseCase createDefaultFolderUseCase;
 
     private final FolderRepository folderRepository;
@@ -41,7 +39,7 @@ public class UpdateUserNameService {
                         CreateDefaultFolderCommand.of(user)
                 ));
 
-        updateFolderNameCommand.execute(
+        updateFolderNameUseCase.execute(
                 UpdateFolderNameCommand.of(folder, dto.name())
         );
     }
