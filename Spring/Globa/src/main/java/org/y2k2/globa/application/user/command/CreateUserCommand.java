@@ -16,7 +16,7 @@ public record CreateUserCommand(
     public static CreateUserCommand from(RequestUserPostDTO dto, String code) {
         return new CreateUserCommand(
                 code,
-                SnsKind.fromCode(dto.snsKind()),
+                SnsKind.fromCode(SnsKind.valueOf(dto.snsKind()).getCode()),
                 dto.snsId(),
                 dto.name(),
                 dto.token(),

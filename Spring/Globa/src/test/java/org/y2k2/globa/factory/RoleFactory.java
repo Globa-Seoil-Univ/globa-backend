@@ -8,7 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.common.util.CustomTimestamp;
+import org.y2k2.globa.domain.role.type.UserRole;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
+import org.y2k2.globa.infrastructure.persistence.role.entity.RoleEntity;
+import org.y2k2.globa.infrastructure.persistence.role.repository.RoleTestRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.study.entity.StudyEntity;
 import org.y2k2.globa.infrastructure.persistence.study.repository.StudyRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.study.repository.StudyTestRepositoryImpl;
@@ -21,37 +24,31 @@ import java.time.LocalDateTime;
 @Setter
 @Import(StudyRepositoryImpl.class)
 @Component
-public class StudyFactory extends CreatorFactory<StudyEntity> {
+public class RoleFactory extends CreatorFactory<RoleEntity> {
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     @Autowired
-    private StudyTestRepositoryImpl studyRepository;
+    private RoleTestRepositoryImpl roleRepository;
 
-    private UserEntity user;
-    private Long studyTime = 1L;
-    private RecordEntity record;
-    private LocalDateTime createdTime = new CustomTimestamp().getTimestamp();
+    private String roleName = UserRole.USER.name();
 
     @Override
-    protected StudyEntity create() {
-        return new StudyEntity();
+    protected RoleEntity create() {
+        return new RoleEntity();
     }
 
     @Override
-    protected StudyEntity setDefaultValues(StudyEntity entity) {
-        entity.setUser(user);
-        entity.setStudyTime(studyTime);
-        entity.setRecord(record);
-        entity.setCreatedTime(createdTime);
+    protected RoleEntity setDefaultValues(RoleEntity entity) {
+        entity.setName(roleName);
         return entity;
     }
 
     @Override
-    protected StudyEntity saveEntity(StudyEntity entity) {
-        if (studyRepository != null) {
-            return studyRepository.save(entity);
+    protected RoleEntity saveEntity(RoleEntity entity) {
+        if (roleRepository != null) {
+            return roleRepository.save(entity);
         } else {
-            throw new RuntimeException("StudyTestRepositoryImpl is null, entity will not be persisted");
+            throw new RuntimeException("RoleTestRepositoryImpl is null, entity will not be persisted");
         }
     }
 }

@@ -14,11 +14,6 @@ public class QuizRepositoryImpl implements QuizRepository {
     private final QuizJpaRepository quizJpaRepository;
 
     @Override
-    public QuizEntity save(QuizEntity entity) {
-        return quizJpaRepository.save(entity);
-    }
-
-    @Override
     public void deleteAll(List<QuizEntity> entities) {
         quizJpaRepository.deleteAllInBatch(entities);
     }

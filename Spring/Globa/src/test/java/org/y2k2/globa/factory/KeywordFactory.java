@@ -12,6 +12,7 @@ import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.folder.repository.FolderRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.keyword.entity.KeywordEntity;
 import org.y2k2.globa.infrastructure.persistence.keyword.repository.KeywordRepositoryImpl;
+import org.y2k2.globa.infrastructure.persistence.keyword.repository.KeywordTestRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
@@ -27,7 +28,7 @@ public class KeywordFactory extends CreatorFactory<KeywordEntity> {
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     @Autowired
-    private KeywordRepository keywordRepository;
+    private KeywordTestRepositoryImpl keywordRepository;
 
     private String word = "word";
     private BigDecimal importance = new BigDecimal(1);
@@ -53,7 +54,7 @@ public class KeywordFactory extends CreatorFactory<KeywordEntity> {
         if (keywordRepository != null) {
             return keywordRepository.save(entity);
         } else {
-            throw new RuntimeException("KeywordRepository is null, entity will not be persisted");
+            throw new RuntimeException("KeywordTestRepositoryImpl is null, entity will not be persisted");
         }
     }
 }

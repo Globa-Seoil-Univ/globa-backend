@@ -6,7 +6,6 @@ import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 import java.util.List;
 
 public interface QuizRepository {
-    QuizEntity save(QuizEntity entity);
     void deleteAll(List<QuizEntity> entities);
 
     List<QuizEntity> getAllQuizzes(RecordEntity record);

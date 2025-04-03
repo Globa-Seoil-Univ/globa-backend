@@ -15,11 +15,6 @@ public class KeywordRepositoryImpl implements KeywordRepository {
     private final KeywordJpaRepository keywordJpaRepository;
 
     @Override
-    public KeywordEntity save(KeywordEntity entity) {
-        return keywordJpaRepository.save(entity);
-    }
-
-    @Override
     public void deleteAll(List<KeywordEntity> entities) {
         keywordJpaRepository.deleteAllInBatch(entities);
     }

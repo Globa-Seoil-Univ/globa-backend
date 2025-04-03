@@ -79,6 +79,8 @@ public class SwaggerErrorCode {
     public static final String NOT_FOUND_TARGET_USER_VALUE = "40412";
     public static final String NOT_FOUND_ROLE = "NOT_FOUND_ROLE";
     public static final String NOT_FOUND_ROLE_VALUE = "40413";
+    public static final String NOT_FOUND_FOLDER_ROLE = "NOT_FOUND_FOLDER_ROLE";
+    public static final String NOT_FOUND_FOLDER_ROLE_VALUE = "40414";
     public static final String NOT_FOUND_INQUIRY = "NOT_FOUND_INQUIRY";
     public static final String NOT_FOUND_INQUIRY_VALUE = "40420";
     public static final String NOT_FOUND_NOTICE = "NOT_FOUND_NOTICE";

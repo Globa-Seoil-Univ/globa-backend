@@ -90,6 +90,7 @@ public class SwaggerConfig {
         components.addExamples(ErrorCode.NOT_FOUND_DEFAULT_FOLDER.getErrorCode(), createExample(ErrorCode.NOT_FOUND_DEFAULT_FOLDER.getErrorCode(), "기본 폴더를 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_TARGET_USER.getErrorCode(), createExample(ErrorCode.NOT_FOUND_TARGET_USER.getErrorCode(), "대상 사용자를 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_ROLE.getErrorCode(), createExample(ErrorCode.NOT_FOUND_ROLE.getErrorCode(), "권한을 찾을 수 없습니다."));
+        components.addExamples(ErrorCode.NOT_FOUND_FOLDER.getErrorCode(), createExample(ErrorCode.NOT_FOUND_FOLDER_ROLE.getErrorCode(), "폴더 권한을 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_INQUIRY.getErrorCode(), createExample(ErrorCode.NOT_FOUND_INQUIRY.getErrorCode(), "문의 사항을 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_NOTICE.getErrorCode(), createExample(ErrorCode.NOT_FOUND_NOTICE.getErrorCode(), "공지를 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_NOTIFICATION.getErrorCode(), createExample(ErrorCode.NOT_FOUND_NOTIFICATION.getErrorCode(), "알림을 찾을 수 없습니다."));

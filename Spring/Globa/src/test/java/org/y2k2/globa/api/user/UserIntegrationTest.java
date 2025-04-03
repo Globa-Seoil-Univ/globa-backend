@@ -3,52 +3,42 @@ package org.y2k2.globa.api.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.transaction.annotation.Transactional;
-import org.y2k2.globa.annotation.WithAccount;
-import org.y2k2.globa.api.ControllerConfig;
 import org.y2k2.globa.api.IntegrationTest;
 import org.y2k2.globa.application.analysis.dto.response.ResponseAnalysisDto;
-import org.y2k2.globa.application.common.dto.auth.CustomUserDetails;
+import org.y2k2.globa.application.user.command.ValidateSnsCommand;
+import org.y2k2.globa.application.user.dto.request.RequestUserPostDTO;
 import org.y2k2.globa.application.user.dto.response.ResponseNotificationSettingDto;
 import org.y2k2.globa.application.user.dto.response.ResponseUserDto;
 import org.y2k2.globa.application.user.dto.response.ResponseUserSearchDto;
+import org.y2k2.globa.application.user.usecase.ValidateKakaoUseCase;
 import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.common.util.jwt.JWT;
 import org.y2k2.globa.constant.Constant;
-import org.y2k2.globa.domain.quiz.repository.QuizRepository;
-import org.y2k2.globa.factory.*;
+import org.y2k2.globa.domain.role.type.UserRole;
 import org.y2k2.globa.fixture.folder.FolderFixture;
-import org.y2k2.globa.fixture.user.AnalysisFixture;
+import org.y2k2.globa.fixture.folderrole.FolderRoleFixture;
+import org.y2k2.globa.fixture.role.RoleFixture;
+import org.y2k2.globa.fixture.user.AnalysisFixtureBuilder;
 import org.y2k2.globa.fixture.user.UserFixture;
-import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
-import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
-import org.y2k2.globa.infrastructure.persistence.quiz.entity.QuizEntity;
-import org.y2k2.globa.infrastructure.persistence.quizattemp.entity.QuizAttemptEntity;
-import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
+import org.y2k2.globa.fixture.user.data.AnalysisData;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
+import org.y2k2.globa.infrastructure.persistence.user.type.SnsKind;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Slf4j
@@ -65,15 +55,22 @@ public class UserIntegrationTest extends IntegrationTest {
     @Autowired
     private UserFixture userFixture;
     @Autowired
-    private AnalysisFixture analysisFixture;
+    private AnalysisFixtureBuilder analysisFixture;
     @Autowired
     private FolderFixture folderFixture;
+    @Autowired
+    private FolderRoleFixture folderRoleFixture;
+    @Autowired
+    private RoleFixture roleFixture;
+
+    @MockBean
+    private ValidateKakaoUseCase validateKakaoUseCase;
 
     private UserEntity user;
 
     @BeforeEach
     void setUp() {
-        user = userFixture.createFixture();
+        user = userFixture.create();
         setSecurityContext(user);
     }
 
@@ -81,7 +78,9 @@ public class UserIntegrationTest extends IntegrationTest {
     @DisplayName("내 정보 조회 - 성공")
     @CacheEvict(value = "user", allEntries = true)
     public void getUser() throws Exception {
-        folderFixture.createFixture(user);
+        folderFixture
+                .withUser(user)
+                .create();
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue())
@@ -98,8 +97,8 @@ public class UserIntegrationTest extends IntegrationTest {
         );
 
         Assertions.assertThat(response.userId()).isNotNull();
-        Assertions.assertThat(response.name()).isEqualTo(userFixture.getUserFactory().getName());
-        Assertions.assertThat(response.code()).isEqualTo(userFixture.getUserFactory().getCode());
+        Assertions.assertThat(response.name()).isEqualTo(user.getName());
+        Assertions.assertThat(response.code()).isEqualTo(user.getCode());
         Assertions.assertThat(response.publicFolderId()).isNotNull();
 
         // Cache 확인
@@ -108,8 +107,8 @@ public class UserIntegrationTest extends IntegrationTest {
 
         Assertions.assertThat(cachedUser).isNotNull();
         Assertions.assertThat(cachedUser.getUserId()).isNotNull();
-        Assertions.assertThat(cachedUser.getName()).isEqualTo(userFixture.getUserFactory().getName());
-        Assertions.assertThat(cachedUser.getCode()).isEqualTo(userFixture.getUserFactory().getCode());
+        Assertions.assertThat(cachedUser.getName()).isEqualTo(user.getName());
+        Assertions.assertThat(cachedUser.getCode()).isEqualTo(user.getCode());
     }
 
     @Test
@@ -118,7 +117,7 @@ public class UserIntegrationTest extends IntegrationTest {
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue() + "/search")
                                 .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
-                                .param("code", userFixture.getUserFactory().getCode())
+                                .param("code", user.getCode())
                                 .accept(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -131,8 +130,8 @@ public class UserIntegrationTest extends IntegrationTest {
         );
 
         Assertions.assertThat(response.userId()).isNotNull();
-        Assertions.assertThat(response.code()).isEqualTo(userFixture.getUserFactory().getCode());
-        Assertions.assertThat(response.name()).isEqualTo(userFixture.getUserFactory().getName());
+        Assertions.assertThat(response.code()).isEqualTo(user.getCode());
+        Assertions.assertThat(response.name()).isEqualTo(user.getName());
     }
 
     @Test
@@ -176,7 +175,10 @@ public class UserIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("내 분석 정보 조회 - 성공 (퀴즈 기록 7일 이내)")
     void getAnalysis() throws Exception {
-        analysisFixture.createFixture(user, new CustomTimestamp().getTimestamp());
+        AnalysisData data = analysisFixture
+                .withUser(user)
+                .withCreatedTime(new CustomTimestamp().getTimestamp())
+                .build();
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue() + "/analysis")
@@ -194,7 +196,7 @@ public class UserIntegrationTest extends IntegrationTest {
 
         Assertions.assertThat(response.keywords()).isNotNull();
         Assertions.assertThat(response.keywords().size()).isGreaterThan(0);
-        Assertions.assertThat(response.keywords().get(0).word()).isEqualTo(analysisFixture.getKeywordFactory().getWord());
+        Assertions.assertThat(response.keywords().get(0).word()).isEqualTo(data.keyword().getWord());
         Assertions.assertThat(response.keywords().get(0).importance()).isGreaterThan(0);
 
         Assertions.assertThat(response.quizGrades()).isNotNull();
@@ -209,7 +211,10 @@ public class UserIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("내 분석 정보 조회 - 실패 (퀴즈 기록 7일 이후)")
     void getAnalysisAfter7Days() throws Exception {
-        analysisFixture.createFixture(user, new CustomTimestamp().getTimestamp().minusDays(8));
+        AnalysisData data = analysisFixture
+                .withUser(user)
+                .withCreatedTime(new CustomTimestamp().getTimestamp().minusDays(8))
+                .build();
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue() + "/analysis")
@@ -227,7 +232,7 @@ public class UserIntegrationTest extends IntegrationTest {
 
         Assertions.assertThat(response.keywords()).isNotNull();
         Assertions.assertThat(response.keywords().size()).isGreaterThan(0);
-        Assertions.assertThat(response.keywords().get(0).word()).isEqualTo(analysisFixture.getKeywordFactory().getWord());
+        Assertions.assertThat(response.keywords().get(0).word()).isEqualTo(data.keyword().getWord());
         Assertions.assertThat(response.keywords().get(0).importance()).isGreaterThan(0);
 
         Assertions.assertThat(response.studyTimes()).isNotNull();
@@ -235,5 +240,64 @@ public class UserIntegrationTest extends IntegrationTest {
         Assertions.assertThat(response.studyTimes().get(0).studyTime()).isGreaterThan(0);
 
         Assertions.assertThat(response.quizGrades()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("내 분석 정보 조회 - 실패 (기록 없음)")
+    void getAnalysisNoRecord() throws Exception {
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue() + "/analysis")
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+
+        ResponseAnalysisDto response = objectMapper.readValue(
+            result.getResponse().getContentAsString(),
+            ResponseAnalysisDto.class
+        );
+
+        Assertions.assertThat(response.keywords()).isEmpty();
+        Assertions.assertThat(response.studyTimes()).isEmpty();
+        Assertions.assertThat(response.quizGrades()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("회원가입 - 성공 (카카오)")
+    void signup() throws Exception {
+        folderRoleFixture.create();
+        roleFixture
+                .withName(UserRole.USER)
+                .create();
+
+        RequestUserPostDTO request = new RequestUserPostDTO(
+                SnsKind.KAKAO.toString(),
+                "SNS_ID",
+                "NAME",
+                "SNS_TOKEN",
+                "PROFILE",
+                true,
+                true
+        );
+
+        Mockito.doNothing()
+                .when(validateKakaoUseCase)
+                .execute(ArgumentMatchers.any(ValidateSnsCommand.class));
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post(Constant.USER_PREFIX.getValue())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.accessToken").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.refreshToken").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.grantType").value("Bearer"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.accessTokenExpireTime").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.refreshTokenExpireTime").exists())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
     }
 }

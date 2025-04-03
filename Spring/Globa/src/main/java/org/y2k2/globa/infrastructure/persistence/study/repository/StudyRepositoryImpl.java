@@ -19,11 +19,6 @@ public class StudyRepositoryImpl implements StudyRepository {
     private final StudyJpaRepository studyJpaRepository;
 
     @Override
-    public StudyEntity save(StudyEntity entity) {
-        return studyJpaRepository.save(entity);
-    }
-
-    @Override
     public List<StudyEntity> getAllStudies(UserEntity user, Long recordId) {
         return studyJpaRepository.findAllByUserAndRecordRecordId(user, recordId);
     }

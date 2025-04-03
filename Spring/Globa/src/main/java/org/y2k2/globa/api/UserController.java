@@ -15,13 +15,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.y2k2.globa.application.user.command.CreateUserCommand;
-import org.y2k2.globa.application.user.dto.request.RequestUserPostDTO;
-import org.y2k2.globa.application.user.dto.request.*;
-import org.y2k2.globa.application.common.dto.auth.CustomUserDetails;
 import org.y2k2.globa.application.analysis.dto.response.ResponseAnalysisDto;
+import org.y2k2.globa.application.common.dto.auth.CustomUserDetails;
 import org.y2k2.globa.application.fcm.dto.request.RequestNotificationTokenDto;
 import org.y2k2.globa.application.survey.dto.request.RequestSurveyDto;
+import org.y2k2.globa.application.user.dto.request.*;
 import org.y2k2.globa.application.user.dto.response.ResponseNotificationSettingDto;
 import org.y2k2.globa.application.user.dto.response.ResponseUserDto;
 import org.y2k2.globa.application.user.dto.response.ResponseUserSearchDto;
@@ -184,6 +182,10 @@ public class UserController {
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                    })),
+                    @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_ROLE, ref = SwaggerErrorCode.NOT_FOUND_ROLE_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_FOLDER_ROLE, ref = SwaggerErrorCode.NOT_FOUND_FOLDER_ROLE_VALUE),
                     })),
                     @ApiResponse(responseCode = "500", ref = "500")
             }

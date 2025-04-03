@@ -40,11 +40,11 @@ public class CreateUserService {
     public JWT signupOrLogin(RequestUserPostDTO dto) {
         ValidateSnsCommand validateCommand = ValidateSnsCommand.of(dto.snsId(), dto.token());
 
-//        switch (SnsKind.valueOf(dto.snsKind())) {
-//            case GOOGLE -> googleUseCase.execute(validateCommand);
-//            case KAKAO -> kakaoUseCase.execute(validateCommand);
-//            default -> throw new CustomException(ErrorCode.INVALID_SNS_KIND);
-//        }
+        switch (SnsKind.valueOf(dto.snsKind())) {
+            case GOOGLE -> googleUseCase.execute(validateCommand);
+            case KAKAO -> kakaoUseCase.execute(validateCommand);
+            default -> throw new CustomException(ErrorCode.INVALID_SNS_KIND);
+        }
 
         Long userId = findActiveUserIdUseCase.execute(dto.snsId())
                 .orElseGet(() -> {

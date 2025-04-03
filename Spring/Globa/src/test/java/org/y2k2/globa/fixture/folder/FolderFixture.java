@@ -4,20 +4,22 @@ import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.factory.FolderFactory;
+import org.y2k2.globa.fixture.AbstractFixture;
+import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 @Component
-@Getter
-public class FolderFixture {
+public class FolderFixture extends AbstractFixture<FolderEntity> {
     @Autowired
     private FolderFactory folderFactory;
 
-    public void createFixture(UserEntity user) {
-        createFolder(user);
+    @Override
+    protected FolderEntity build() {
+        return folderFactory.createAndSave();
     }
 
-    private void createFolder(UserEntity user) {
+    public FolderFixture withUser(UserEntity user) {
         folderFactory.setUser(user);
-        folderFactory.createAndSave();
+        return this;
     }
 }
