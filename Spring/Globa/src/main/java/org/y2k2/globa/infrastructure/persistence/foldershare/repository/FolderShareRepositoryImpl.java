@@ -40,9 +40,9 @@ public class FolderShareRepositoryImpl implements FolderShareRepository {
     }
 
     @Override
-    public Boolean isOwner(UserEntity user, Long folderId) {
-        return folderShareJpaRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatusAndRole_RoleName(
-                user,
+    public Boolean isOwner(Long userId, Long folderId) {
+        return folderShareJpaRepository.existsByTargetUser_UserIdAndFolderFolderIdAndInvitationStatusAndRole_RoleName(
+                userId,
                 folderId,
                 InvitationStatus.ACCEPT,
                 FolderRole.OWNER.getRoleName()
@@ -57,6 +57,12 @@ public class FolderShareRepositoryImpl implements FolderShareRepository {
     @Override
     public Page<FolderShareEntity> getShareInvitations(FolderEntity folder, Pageable pageable) {
         return folderShareJpaRepository.findByFolderOrderByCreatedTimeAsc(folder, pageable);
+    }
+
+    @Override
+    public Page<FolderShareEntity> getInvitationsForFolderExcludingDefault(Long userId, Pageable pageable) {
+        return folderShareJpaRepository.findByInvitationsForFolderExcludingDefault(userId, InvitationStatus.ACCEPT, pageable);
+
     }
 
     @Override

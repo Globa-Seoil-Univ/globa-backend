@@ -16,12 +16,16 @@ public interface FolderShareRepository {
 
     Boolean isAccessible(UserEntity user, Long folderId);
     Boolean isOwner(
-            UserEntity user,
+            Long userId,
             Long folderId
     );
     Boolean isInvited(FolderEntity folder, UserEntity user);
 
     Page<FolderShareEntity> getShareInvitations(FolderEntity folder, Pageable pageable);
+    Page<FolderShareEntity> getInvitationsForFolderExcludingDefault(
+            Long userId,
+            Pageable pageable
+    );
 
     List<FolderShareEntity> getAllShareInvitations(Long folderId);
     List<FolderShareEntity> getAllShareInvitationsWithoutMe(Long folderId, Long excludeId);

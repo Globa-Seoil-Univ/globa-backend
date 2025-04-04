@@ -29,7 +29,7 @@ public class CreateDefaultFolderUseCase implements UseCase<CreateDefaultFolderCo
         FolderRoleEntity role = folderRoleRepository.getRole(FolderRole.OWNER.getRoleName())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER_ROLE));
 
-        FolderEntity folder = FolderMapper.INSTANCE.toEntity(command.user(), command.user().getName() + "님의 폴더");
+        FolderEntity folder = FolderMapper.INSTANCE.toEntity(command.user(), command.user().getName());
         FolderEntity createdFolder = folderRepository.save(folder);
 
         FolderShareEntity folderShare = FolderShareMapper.INSTANCE.toEntity(

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.y2k2.globa.application.folder.command.UpdateFolderNameCommand;
 import org.y2k2.globa.common.usecase.VoidUseCase;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
+import org.y2k2.globa.domain.foldershare.repository.FolderShareRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 
 @RequiredArgsConstructor

@@ -15,21 +15,36 @@ import java.util.Optional;
 
 public interface FolderShareJpaRepository extends JpaRepository<FolderShareEntity, Long> {
     Boolean existsByTargetUserAndFolderFolderIdAndInvitationStatus(UserEntity user, Long folderId, InvitationStatus status);
-    Boolean existsByTargetUserAndFolderFolderIdAndInvitationStatusAndRole_RoleName(
-            UserEntity user,
+
+    Boolean existsByTargetUser_UserIdAndFolderFolderIdAndInvitationStatusAndRole_RoleName(
+            Long userId,
             Long folderId,
             InvitationStatus status,
             String roleName
     );
+
     Boolean existsByFolderAndTargetUser(FolderEntity folder, UserEntity user);
 
     Page<FolderShareEntity> findByFolderOrderByCreatedTimeAsc(FolderEntity folder, Pageable pageable);
 
-    @EntityGraph(value = "FolderShare.getFolderShareAndUser", attributePaths = {
+    @Query(
+            "SELECT fs FROM FolderShareEntity fs " +
+                    "JOIN FETCH fs.folder f " +
+                    "WHERE f.folderId <> (" +
+                        "SELECT MIN(f2.folderId) FROM FolderEntity f2 " +
+                            "WHERE f2.user.userId = :userId"+
+                    ") " +
+                    "AND fs.ownerUser.userId = :userId OR fs.targetUser.userId = :userId " +
+                    "AND fs.invitationStatus = :status"
+    )
+    Page<FolderShareEntity> findByInvitationsForFolderExcludingDefault(Long userId, InvitationStatus status, Pageable pageable);
+
+    @EntityGraph(attributePaths = {
             "targetUser"
     }, type = EntityGraph.EntityGraphType.FETCH)
     List<FolderShareEntity> findAllByFolderFolderId(Long folderId);
-    @EntityGraph(value = "FolderShare.getFolderShareAndUser", attributePaths = {
+
+    @EntityGraph(attributePaths = {
             "targetUser"
     }, type = EntityGraph.EntityGraphType.FETCH)
     List<FolderShareEntity> findAllByFolderFolderIdAndTargetUser_UserIdNot(Long folderId, Long excludeId);
