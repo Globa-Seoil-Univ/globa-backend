@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface StudyRepository {
-    List<StudyEntity> getAllStudies(UserEntity user, Long recordId);
+    StudyEntity save(StudyEntity study);
+
+    List<StudyEntity> getAllStudies(Long userId, Long recordId);
     List<StudyTimeProjection> getStudyTimeInWeek(Long userId);
 
     Optional<StudyEntity> getStudy(UserEntity user, RecordEntity record);

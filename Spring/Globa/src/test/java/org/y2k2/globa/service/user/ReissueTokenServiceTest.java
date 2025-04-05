@@ -10,10 +10,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.y2k2.globa.application.user.command.CreateJWTCommand;
-import org.y2k2.globa.application.user.command.ValidateJWTCommand;
+import org.y2k2.globa.application.user.command.VerifyJWTCommand;
 import org.y2k2.globa.application.user.service.ReissueTokenService;
 import org.y2k2.globa.application.user.usecase.CreateJWTUseCase;
-import org.y2k2.globa.application.user.usecase.ValidateJWTUseCase;
+import org.y2k2.globa.application.user.usecase.VerifyJWTUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.util.CustomTimestamp;
@@ -26,7 +26,7 @@ public class ReissueTokenServiceTest {
     private ReissueTokenService reissueTokenService;
 
     @Mock
-    private ValidateJWTUseCase validateJWTUseCase;
+    private VerifyJWTUseCase verifyJWTUseCase;
     @Mock
     private CreateJWTUseCase createJWTUseCase;
 
@@ -43,7 +43,7 @@ public class ReissueTokenServiceTest {
     void reissue() {
         Long userId = 1L;
 
-        Mockito.when(validateJWTUseCase.execute(ValidateJWTCommand.of("accessToken", "refreshToken")))
+        Mockito.when(verifyJWTUseCase.execute(VerifyJWTCommand.of("accessToken", "refreshToken")))
                 .thenReturn(userId);
 
         Mockito.when(createJWTUseCase.execute(CreateJWTCommand.of(userId)))
@@ -61,7 +61,7 @@ public class ReissueTokenServiceTest {
     void reissueInvalidToken() {
         Long userId = 1L;
 
-        Mockito.when(validateJWTUseCase.execute(ValidateJWTCommand.of("invalidAccessToken", "invalidRefreshToken")))
+        Mockito.when(verifyJWTUseCase.execute(VerifyJWTCommand.of("invalidAccessToken", "invalidRefreshToken")))
                 .thenThrow(new CustomException(ErrorCode.ACTIVE_ACCESS_TOKEN));
 
         Assertions.assertThatThrownBy(() -> reissueTokenService.reissue("invalidAccessToken", "invalidRefreshToken"))
@@ -76,7 +76,7 @@ public class ReissueTokenServiceTest {
     void reissueRTExpired() {
         Long userId = 1L;
 
-        Mockito.when(validateJWTUseCase.execute(ValidateJWTCommand.of("accessToken", "expiredRefreshToken")))
+        Mockito.when(verifyJWTUseCase.execute(VerifyJWTCommand.of("accessToken", "expiredRefreshToken")))
                 .thenThrow(new CustomException(ErrorCode.EXPIRED_REFRESH_TOKEN));
 
         Assertions.assertThatThrownBy(() -> reissueTokenService.reissue("accessToken", "expiredRefreshToken"))
@@ -91,7 +91,7 @@ public class ReissueTokenServiceTest {
     void reissueRTNotMatched() {
         Long userId = 1L;
 
-        Mockito.when(validateJWTUseCase.execute(ValidateJWTCommand.of("accessToken", "mismatchedRefreshToken")))
+        Mockito.when(verifyJWTUseCase.execute(VerifyJWTCommand.of("accessToken", "mismatchedRefreshToken")))
                 .thenThrow(new CustomException(ErrorCode.NOT_MATCH_REFRESH_TOKEN));
 
         Assertions.assertThatThrownBy(() -> reissueTokenService.reissue("accessToken", "mismatchedRefreshToken"))

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface HighlightJpaRepository extends JpaRepository<HighlightEntity, Long> {
-    List<HighlightEntity> findAllBySectionIn(List<SectionEntity> sections);
+    List<HighlightEntity> findAllBySection_SectionIdIn(List<Long> sectionIds);
 
     @Query(
             value = "SELECT CASE WHEN EXISTS ( " +

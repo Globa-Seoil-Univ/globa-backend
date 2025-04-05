@@ -3,7 +3,6 @@ package org.y2k2.globa.infrastructure.persistence.summary.repository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.y2k2.globa.domain.summary.repository.SummaryRepository;
-import org.y2k2.globa.infrastructure.persistence.section.entity.SectionEntity;
 import org.y2k2.globa.infrastructure.persistence.summary.entity.SummaryEntity;
 
 import java.util.List;
@@ -19,7 +18,7 @@ public class SummaryRepositoryImpl implements SummaryRepository {
     }
 
     @Override
-    public List<SummaryEntity> getSummaryInSections(List<SectionEntity> sections) {
-        return summaryJpaRepository.findAllBySectionIn(sections);
+    public List<SummaryEntity> getSummaryInSections(List<Long> sectionIds) {
+        return summaryJpaRepository.findAllBySection_SectionIdIn(sectionIds);
     }
 }

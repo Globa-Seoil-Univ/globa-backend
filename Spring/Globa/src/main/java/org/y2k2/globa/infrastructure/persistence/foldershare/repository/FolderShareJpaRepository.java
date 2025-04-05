@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FolderShareJpaRepository extends JpaRepository<FolderShareEntity, Long> {
-    Boolean existsByTargetUserAndFolderFolderIdAndInvitationStatus(UserEntity user, Long folderId, InvitationStatus status);
+    Boolean existsByTargetUser_UserIdAndFolderFolderIdAndInvitationStatus(Long userId, Long folderId, InvitationStatus status);
 
     Boolean existsByTargetUser_UserIdAndFolderFolderIdAndInvitationStatusAndRole_RoleName(
             Long userId,

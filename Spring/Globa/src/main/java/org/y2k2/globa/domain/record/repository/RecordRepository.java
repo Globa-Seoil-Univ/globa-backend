@@ -17,10 +17,11 @@ public interface RecordRepository {
     List<Long> getAllRecordId(Long userId);
     List<String> getAllPath(FolderEntity folder);
 
-    Page<RecordEntity> getAccessibleRecord(UserEntity user, Pageable pageable);
-    Page<RecordSearchProjection> getRecordByKeyword(UserEntity user, String keyword, Pageable pageable);
-    Page<RecordEntity> getInvitedRecord(UserEntity user, Pageable pageable);
-    Page<RecordEntity> getOwnedRecord(UserEntity user, Pageable pageable);
+    Page<RecordEntity> getRecordsByFolderId(Long folderId, Pageable pageable);
+    Page<RecordEntity> getAccessibleRecord(Long userId, Pageable pageable);
+    Page<RecordSearchProjection> getRecordByKeyword(Long userId, String keyword, Pageable pageable);
+    Page<RecordEntity> getInvitedRecord(Long userId, Pageable pageable);
+    Page<RecordEntity> getOwnedRecord(Long userId, Pageable pageable);
 
     Optional<RecordEntity> getRecord(Long recordId);
 }

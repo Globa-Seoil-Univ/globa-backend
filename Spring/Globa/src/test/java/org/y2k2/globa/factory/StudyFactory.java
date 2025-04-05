@@ -8,10 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.common.util.CustomTimestamp;
+import org.y2k2.globa.domain.study.repository.StudyRepository;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 import org.y2k2.globa.infrastructure.persistence.study.entity.StudyEntity;
 import org.y2k2.globa.infrastructure.persistence.study.repository.StudyRepositoryImpl;
-import org.y2k2.globa.infrastructure.persistence.study.repository.StudyTestRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 import java.time.LocalDateTime;
@@ -25,7 +25,7 @@ public class StudyFactory extends CreatorFactory<StudyEntity> {
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     @Autowired
-    private StudyTestRepositoryImpl studyRepository;
+    private StudyRepository studyRepository;
 
     private UserEntity user;
     private Long studyTime = 1L;

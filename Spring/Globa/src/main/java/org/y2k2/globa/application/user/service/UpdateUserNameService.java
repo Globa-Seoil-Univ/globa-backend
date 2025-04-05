@@ -2,6 +2,7 @@ package org.y2k2.globa.application.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.application.folder.command.CreateDefaultFolderCommand;
 import org.y2k2.globa.application.folder.command.UpdateFolderNameCommand;
 import org.y2k2.globa.application.folder.usecase.CreateDefaultFolderUseCase;
@@ -24,6 +25,7 @@ public class UpdateUserNameService {
 
     private final FolderRepository folderRepository;
 
+    @Transactional
     public void update(RequestNameDto dto, Long userId) {
         UserEntity user = findUserUseCase.execute(userId);
 

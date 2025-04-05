@@ -30,8 +30,8 @@ public class HighlightRepositoryImpl implements HighlightRepository {
     }
 
     @Override
-    public List<HighlightEntity> getAllHighlights(List<SectionEntity> sections) {
-        return highlightJpaRepository.findAllBySectionIn(sections);
+    public List<HighlightEntity> getAllHighlights(List<Long> sectionIds) {
+        return highlightJpaRepository.findAllBySection_SectionIdIn(sectionIds);
     }
 
     @Override

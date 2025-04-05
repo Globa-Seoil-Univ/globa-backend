@@ -31,10 +31,10 @@ public interface QuizAttemptJpaRepository extends JpaRepository<QuizAttemptEntit
                     ", qa.createdTime AS createdTime " +
                     "FROM QuizAttemptEntity qa " +
                     "JOIN qa.quiz q ON qa.quiz = q " +
-                    "WHERE qa.user = :user " +
+                    "WHERE qa.user.userId = :userId " +
                     "AND qa.isCorrect IS NOT NULL " +
                     "AND q.record.recordId = :recordId " +
                     "GROUP BY DATE(qa.createdTime)"
     )
-    List<QuizGradeProjection> findQuizGradeByUserAndRecordId(UserEntity user, Long recordId);
+    List<QuizGradeProjection> findQuizGradeByUserAndRecordId(Long userId, Long recordId);
 }

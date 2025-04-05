@@ -7,17 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
-import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.domain.role.type.UserRole;
-import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 import org.y2k2.globa.infrastructure.persistence.role.entity.RoleEntity;
 import org.y2k2.globa.infrastructure.persistence.role.repository.RoleTestRepositoryImpl;
-import org.y2k2.globa.infrastructure.persistence.study.entity.StudyEntity;
 import org.y2k2.globa.infrastructure.persistence.study.repository.StudyRepositoryImpl;
-import org.y2k2.globa.infrastructure.persistence.study.repository.StudyTestRepositoryImpl;
-import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
-
-import java.time.LocalDateTime;
 
 @Slf4j
 @Getter

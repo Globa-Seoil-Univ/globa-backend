@@ -11,7 +11,6 @@ import org.y2k2.globa.common.util.fcm.MessageUtil;
 
 import java.util.List;
 
-@EnableAsync
 @Component
 @RequiredArgsConstructor
 public class NotificationListener {

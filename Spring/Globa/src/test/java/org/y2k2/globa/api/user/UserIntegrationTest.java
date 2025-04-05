@@ -24,13 +24,13 @@ import org.y2k2.globa.api.IntegrationTest;
 import org.y2k2.globa.application.analysis.dto.response.ResponseAnalysisDto;
 import org.y2k2.globa.application.fcm.dto.request.RequestNotificationTokenDto;
 import org.y2k2.globa.application.survey.dto.request.RequestSurveyDto;
-import org.y2k2.globa.application.user.command.ValidateSnsCommand;
+import org.y2k2.globa.application.user.command.VerifySnsCommand;
 import org.y2k2.globa.application.user.dto.request.*;
 import org.y2k2.globa.application.user.dto.response.ResponseNotificationSettingDto;
 import org.y2k2.globa.application.user.dto.response.ResponseUserDto;
 import org.y2k2.globa.application.user.dto.response.ResponseUserSearchDto;
-import org.y2k2.globa.application.user.usecase.ValidateGoogleUseCase;
-import org.y2k2.globa.application.user.usecase.ValidateKakaoUseCase;
+import org.y2k2.globa.application.user.usecase.VerifyGoogleUseCase;
+import org.y2k2.globa.application.user.usecase.VerifyKakaoUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.util.CustomTimestamp;
@@ -79,9 +79,9 @@ public class UserIntegrationTest extends IntegrationTest {
     private RoleFixture roleFixture;
 
     @MockBean
-    private ValidateKakaoUseCase validateKakaoUseCase;
+    private VerifyKakaoUseCase verifyKakaoUseCase;
     @MockBean
-    private ValidateGoogleUseCase validateGoogleUseCase;
+    private VerifyGoogleUseCase verifyGoogleUseCase;
 
     private UserEntity user;
 
@@ -325,8 +325,8 @@ public class UserIntegrationTest extends IntegrationTest {
         );
 
         Mockito.doNothing()
-                .when(validateGoogleUseCase)
-                .execute(ArgumentMatchers.any(ValidateSnsCommand.class));
+                .when(verifyGoogleUseCase)
+                .execute(ArgumentMatchers.any(VerifySnsCommand.class));
 
         mockMvc.perform(
                         MockMvcRequestBuilders.post(Constant.USER_PREFIX.getValue())
@@ -352,8 +352,8 @@ public class UserIntegrationTest extends IntegrationTest {
                 .create();
 
         Mockito.doThrow(new CustomException(ErrorCode.INVALID_SNS_TOKEN))
-                .when(validateKakaoUseCase)
-                .execute(ArgumentMatchers.any(ValidateSnsCommand.class));
+                .when(verifyKakaoUseCase)
+                .execute(ArgumentMatchers.any(VerifySnsCommand.class));
 
         RequestUserPostDTO request = new RequestUserPostDTO(
                 SnsKind.KAKAO.toString(),
@@ -385,8 +385,8 @@ public class UserIntegrationTest extends IntegrationTest {
                 .create();
 
         Mockito.doNothing()
-                .when(validateGoogleUseCase)
-                .execute(ArgumentMatchers.any(ValidateSnsCommand.class));
+                .when(verifyGoogleUseCase)
+                .execute(ArgumentMatchers.any(VerifySnsCommand.class));
 
         RequestUserPostDTO request = new RequestUserPostDTO(
                 SnsKind.GOOGLE.toString(),
@@ -422,8 +422,8 @@ public class UserIntegrationTest extends IntegrationTest {
                 .create();
 
         Mockito.doThrow(new CustomException(ErrorCode.INVALID_SNS_TOKEN))
-                .when(validateGoogleUseCase)
-                .execute(ArgumentMatchers.any(ValidateSnsCommand.class));
+                .when(verifyGoogleUseCase)
+                .execute(ArgumentMatchers.any(VerifySnsCommand.class));
 
         RequestUserPostDTO request = new RequestUserPostDTO(
                 SnsKind.GOOGLE.toString(),
@@ -489,12 +489,12 @@ public class UserIntegrationTest extends IntegrationTest {
         );
 
         Mockito.doNothing()
-                .when(validateKakaoUseCase)
-                .execute(ArgumentMatchers.any(ValidateSnsCommand.class));
+                .when(verifyKakaoUseCase)
+                .execute(ArgumentMatchers.any(VerifySnsCommand.class));
 
         Mockito.doNothing()
-                .when(validateGoogleUseCase)
-                .execute(ArgumentMatchers.any(ValidateSnsCommand.class));
+                .when(verifyGoogleUseCase)
+                .execute(ArgumentMatchers.any(VerifySnsCommand.class));
 
         mockMvc.perform(
                         MockMvcRequestBuilders.post(Constant.USER_PREFIX.getValue())

@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.y2k2.globa.domain.record.repository.RecordRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
+import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStatus;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 import org.y2k2.globa.infrastructure.persistence.record.projection.RecordSearchProjection;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
@@ -39,23 +40,28 @@ public class RecordRepositoryImpl implements RecordRepository {
     }
 
     @Override
-    public Page<RecordEntity> getAccessibleRecord(UserEntity user, Pageable pageable) {
-        return recordJpaRepository.findAllByAccessibleRecord(user, pageable);
+    public Page<RecordEntity> getRecordsByFolderId(Long folderId, Pageable pageable) {
+        return recordJpaRepository.findAllByFolderFolderId(folderId, pageable);
     }
 
     @Override
-    public Page<RecordSearchProjection> getRecordByKeyword(UserEntity user, String keyword, Pageable pageable) {
-        return recordJpaRepository.findAllSharedOrOwnedRecordsByKeyword(user, keyword, pageable);
+    public Page<RecordEntity> getAccessibleRecord(Long userId, Pageable pageable) {
+        return recordJpaRepository.findAllByAccessibleRecord(userId, InvitationStatus.ACCEPT, pageable);
     }
 
     @Override
-    public Page<RecordEntity> getInvitedRecord(UserEntity user, Pageable pageable) {
-        return recordJpaRepository.findReceivingRecordsByUserOrderByCreatedTimeDesc(user, pageable);
+    public Page<RecordSearchProjection> getRecordByKeyword(Long userId, String keyword, Pageable pageable) {
+        return recordJpaRepository.findAllSharedOrOwnedRecordsByKeyword(userId, keyword, pageable);
     }
 
     @Override
-    public Page<RecordEntity> getOwnedRecord(UserEntity user, Pageable pageable) {
-        return recordJpaRepository.findSharingRecordsByUserOrderByCreatedTimeDesc(user, pageable);
+    public Page<RecordEntity> getInvitedRecord(Long userId, Pageable pageable) {
+        return recordJpaRepository.findReceivingRecordsByUserOrderByCreatedTimeDesc(userId, InvitationStatus.ACCEPT, pageable);
+    }
+
+    @Override
+    public Page<RecordEntity> getOwnedRecord(Long userId, Pageable pageable) {
+        return recordJpaRepository.findSharingRecordsByUserOrderByCreatedTimeDesc(userId, InvitationStatus.ACCEPT, pageable);
     }
 
     @Override

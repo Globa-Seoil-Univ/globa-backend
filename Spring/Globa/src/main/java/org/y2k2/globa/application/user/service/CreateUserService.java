@@ -7,7 +7,7 @@ import org.y2k2.globa.application.folder.command.CreateDefaultFolderCommand;
 import org.y2k2.globa.application.folder.usecase.CreateDefaultFolderUseCase;
 import org.y2k2.globa.application.user.command.CreateJWTCommand;
 import org.y2k2.globa.application.user.command.CreateUserCommand;
-import org.y2k2.globa.application.user.command.ValidateSnsCommand;
+import org.y2k2.globa.application.user.command.VerifySnsCommand;
 import org.y2k2.globa.application.user.dto.request.RequestUserPostDTO;
 import org.y2k2.globa.application.user.usecase.*;
 import org.y2k2.globa.application.userrole.command.CreateUserRoleCommand;
@@ -26,8 +26,8 @@ import java.util.Random;
 @RequiredArgsConstructor
 @Service
 public class CreateUserService {
-    private final ValidateGoogleUseCase googleUseCase;
-    private final ValidateKakaoUseCase kakaoUseCase;
+    private final VerifyGoogleUseCase googleUseCase;
+    private final VerifyKakaoUseCase kakaoUseCase;
     private final FindActiveUserIdUseCase findActiveUserIdUseCase;
     private final CreateUserUseCase createUserUseCase;
     private final CreateJWTUseCase createJWTUseCase;
@@ -38,7 +38,7 @@ public class CreateUserService {
 
     @Transactional
     public JWT signupOrLogin(RequestUserPostDTO dto) {
-        ValidateSnsCommand validateCommand = ValidateSnsCommand.of(dto.snsId(), dto.token());
+        VerifySnsCommand validateCommand = VerifySnsCommand.of(dto.snsId(), dto.token());
 
         switch (SnsKind.valueOf(dto.snsKind())) {
             case GOOGLE -> googleUseCase.execute(validateCommand);

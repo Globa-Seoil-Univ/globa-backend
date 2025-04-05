@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface StudyJpaRepository extends JpaRepository<StudyEntity, Long> {
-    List<StudyEntity> findAllByUserAndRecordRecordId(UserEntity user, Long recordId);
+    List<StudyEntity> findAllByUser_UserIdAndRecordRecordId(Long userId, Long recordId);
 
     @Query(value = "SELECT " +
             "SUM(s.studyTime) AS totalStudyTime, " +

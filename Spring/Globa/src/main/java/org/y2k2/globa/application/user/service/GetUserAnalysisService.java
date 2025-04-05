@@ -7,8 +7,8 @@ import org.y2k2.globa.application.keyword.dto.response.ResponseKeywordDto;
 import org.y2k2.globa.application.keyword.mapper.KeywordMapper;
 import org.y2k2.globa.application.quiz.dto.response.ResponseQuizGradeDto;
 import org.y2k2.globa.application.quiz.mapper.QuizMapper;
-import org.y2k2.globa.application.studytime.dto.response.ResponseStudyTimesDto;
-import org.y2k2.globa.application.studytime.mapper.StudyTimeMapper;
+import org.y2k2.globa.application.study.dto.response.ResponseStudyTimesDto;
+import org.y2k2.globa.application.study.mapper.StudyMapper;
 import org.y2k2.globa.domain.keyword.repository.KeywordRepository;
 import org.y2k2.globa.domain.quizattemp.repository.QuizAttemptRepository;
 import org.y2k2.globa.domain.record.repository.RecordRepository;
@@ -52,7 +52,7 @@ public class GetUserAnalysisService {
         List<StudyTimeProjection> studyTimeProjections = studyRepository.getStudyTimeInWeek(userId);
 
         return studyTimeProjections.stream().map(
-                StudyTimeMapper.INSTANCE::toResponseTotalStudyTimesDto
+                StudyMapper.INSTANCE::toResponseTotalStudyTimesDto
         ).toList();
     }
 

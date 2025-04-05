@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStatus;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 import org.y2k2.globa.infrastructure.persistence.record.projection.RecordSearchProjection;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
@@ -34,10 +35,10 @@ public interface RecordJpaRepository extends JpaRepository<RecordEntity, Long> {
             value = "SELECT r FROM RecordEntity r " +
                     "JOIN FolderShareEntity fs ON r.folder = fs.folder " +
                     "WHERE " +
-                        "fs.targetUser = :user AND fs.invitationStatus = 'ACCEPT' " +
+                        "fs.targetUser.userId = :userId AND fs.invitationStatus = :status " +
                     "ORDER BY r.createdTime"
     )
-    Page<RecordEntity> findAllByAccessibleRecord(UserEntity user, Pageable pageable);
+    Page<RecordEntity> findAllByAccessibleRecord(Long userId, InvitationStatus status, Pageable pageable);
 
     @Query(
             value = "SELECT DISTINCT u.userId AS userId, u.name AS name, u.profilePath AS profilePath" +
@@ -46,7 +47,7 @@ public interface RecordJpaRepository extends JpaRepository<RecordEntity, Long> {
                     "JOIN UserEntity u ON u = r.user " +
                     "JOIN FolderEntity f ON f = r.folder " +
                     "JOIN FolderShareEntity fs ON fs.folder = f " +
-                    "WHERE (f.user = :user OR fs.targetUser = :user) " +
+                    "WHERE (f.user.userId = :userId OR fs.targetUser.userId = :userId) " +
                     "AND fs.invitationStatus = 'ACCEPT' " +
                     "AND r.title LIKE CONCAT('%', :keyword, '%') " +
                     "ORDER BY (CASE WHEN r.title LIKE CONCAT(:keyword, '%') THEN 0 ELSE 1 END)" +
@@ -56,30 +57,28 @@ public interface RecordJpaRepository extends JpaRepository<RecordEntity, Long> {
                     "JOIN FolderEntity f " +
                     "JOIN UserEntity u " +
                     "JOIN FolderShareEntity fs " +
-                    "WHERE (f.user = :user OR fs.targetUser = :user) " +
+                    "WHERE (f.user.userId = :userId OR fs.targetUser.userId = :userId) " +
                     "AND fs.invitationStatus = 'ACCEPT' " +
                     "AND r.title LIKE CONCAT('%', :keyword, '%')"
     )
-    Page<RecordSearchProjection> findAllSharedOrOwnedRecordsByKeyword(UserEntity user, String keyword, Pageable pageable);
+    Page<RecordSearchProjection> findAllSharedOrOwnedRecordsByKeyword(Long userId, String keyword, Pageable pageable);
 
     @Query(
             value = "SELECT r " +
                     "FROM RecordEntity r " +
                     "JOIN FolderShareEntity fs ON r.folder = fs.folder " +
-                    "WHERE fs.targetUser = :user AND fs.ownerUser != :user " +
-                    "AND fs.invitationStatus = 'ACCEPT' " +
+                    "WHERE fs.targetUser.userId = :userId AND fs.ownerUser.userId != :userId " +
+                    "AND fs.invitationStatus = :status " +
                     "ORDER BY r.createdTime DESC"
     )
-    Page<RecordEntity> findReceivingRecordsByUserOrderByCreatedTimeDesc(UserEntity user, Pageable pageable);
+    Page<RecordEntity> findReceivingRecordsByUserOrderByCreatedTimeDesc(Long userId, InvitationStatus status, Pageable pageable);
 
     @Query(
             value = "SELECT DISTINCT r FROM RecordEntity r " +
                     "JOIN FolderShareEntity fs ON r.folder = fs.folder " +
-                    "WHERE fs.targetUser != :user AND fs.ownerUser = :user " +
-                    "AND fs.invitationStatus = 'ACCEPT' " +
+                    "WHERE fs.targetUser.userId != :userId AND fs.ownerUser.userId = :userId " +
+                    "AND fs.invitationStatus = :status " +
                     "ORDER BY r.createdTime DESC"
     )
-    Page<RecordEntity> findSharingRecordsByUserOrderByCreatedTimeDesc(UserEntity user, Pageable pageable);
-  
-    Optional<RecordEntity> findByRecordId(Long recordId);
+    Page<RecordEntity> findSharingRecordsByUserOrderByCreatedTimeDesc(Long userId, InvitationStatus status, Pageable pageable);
 }

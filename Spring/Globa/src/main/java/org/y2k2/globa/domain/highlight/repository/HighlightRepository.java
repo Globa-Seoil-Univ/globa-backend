@@ -12,7 +12,7 @@ public interface HighlightRepository {
 
     Boolean hasHighlightInRange(Long sectionId, Long startIndex, Long endIndex);
 
-    List<HighlightEntity> getAllHighlights(List<SectionEntity> sections);
+    List<HighlightEntity> getAllHighlights(List<Long> sectionIds);
 
     Optional<HighlightEntity> getHighlight(Long highlightId);
 }

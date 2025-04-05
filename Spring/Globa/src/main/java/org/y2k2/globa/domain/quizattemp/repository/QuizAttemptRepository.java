@@ -11,5 +11,5 @@ public interface QuizAttemptRepository {
     void saveAll(List<QuizAttemptEntity> entities);
 
     List<QuizGradeProjection> getQuizAttemptByUserInDays(Long userId);
-    List<QuizGradeProjection> getQuizAttemptByUserAndRecordId(UserEntity user, Long recordId);
+    List<QuizGradeProjection> getQuizAttemptByUserAndRecordId(Long userId, Long recordId);
 }

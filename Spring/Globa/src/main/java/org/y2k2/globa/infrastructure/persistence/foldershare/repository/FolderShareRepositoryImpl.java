@@ -35,8 +35,8 @@ public class FolderShareRepositoryImpl implements FolderShareRepository {
     }
 
     @Override
-    public Boolean isAccessible(UserEntity user, Long folderId) {
-        return folderShareJpaRepository.existsByTargetUserAndFolderFolderIdAndInvitationStatus(user, folderId, InvitationStatus.ACCEPT);
+    public Boolean isAccessible(Long userId, Long folderId) {
+        return folderShareJpaRepository.existsByTargetUser_UserIdAndFolderFolderIdAndInvitationStatus(userId, folderId, InvitationStatus.ACCEPT);
     }
 
     @Override

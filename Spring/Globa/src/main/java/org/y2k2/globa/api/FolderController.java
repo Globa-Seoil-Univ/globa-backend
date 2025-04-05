@@ -21,7 +21,7 @@ import org.y2k2.globa.application.folder.dto.request.RequestFolderPostDto;
 import org.y2k2.globa.application.folder.dto.response.ResponseFolderDto;
 import org.y2k2.globa.application.folder.service.CreateFolderService;
 import org.y2k2.globa.application.folder.service.DeleteFolderService;
-import org.y2k2.globa.application.folder.service.GetFolderService;
+import org.y2k2.globa.application.folder.service.GetFoldersService;
 import org.y2k2.globa.application.folder.service.UpdateFolderNameService;
 import org.y2k2.globa.common.exception.SwaggerErrorCode;
 
@@ -33,7 +33,7 @@ import java.net.URI;
 @RequiredArgsConstructor
 @Tag(name = "Folder", description = "폴더 관련 API입니다.")
 public class FolderController {
-    private final GetFolderService getFolderService;
+    private final GetFoldersService getFoldersService;
     private final CreateFolderService createFolderService;
     private final UpdateFolderNameService updateFolderNameService;
     private final DeleteFolderService deleteFolderService;
@@ -68,7 +68,7 @@ public class FolderController {
             @RequestParam(required = false, defaultValue = "100", value = "count") int count,
             @AuthenticationPrincipal CustomUserDetails details
             )
-    { return ResponseEntity.status(HttpStatus.OK).body(getFolderService.getFolders(page, count, details.getUserId())); }
+    { return ResponseEntity.status(HttpStatus.OK).body(getFoldersService.getFolders(page, count, details.getUserId())); }
 
     @Operation(
             summary = "폴더 추가",

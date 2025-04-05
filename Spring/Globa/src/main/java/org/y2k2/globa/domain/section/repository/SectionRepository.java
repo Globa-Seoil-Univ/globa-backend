@@ -11,7 +11,7 @@ public interface SectionRepository {
 
     List<SectionEntity> getAllSections(RecordEntity record);
 
-    List<SectionEntity> getAllSortedSections(RecordEntity record);
+    List<SectionEntity> getAllSortedSections(Long recordId);
 
     Optional<SectionEntity> getSection(Long sectionId, Long folderId, Long recordId);
 }

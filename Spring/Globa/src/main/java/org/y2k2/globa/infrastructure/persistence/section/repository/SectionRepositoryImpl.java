@@ -25,8 +25,8 @@ public class SectionRepositoryImpl implements SectionRepository {
     }
 
     @Override
-    public List<SectionEntity> getAllSortedSections(RecordEntity record) {
-        return sectionJpaRepository.findAllByRecordOrderByStartTimeAsc(record);
+    public List<SectionEntity> getAllSortedSections(Long recordId) {
+        return sectionJpaRepository.findAllByRecord_RecordIdOrderByStartTimeAsc(recordId);
     }
 
     @Override

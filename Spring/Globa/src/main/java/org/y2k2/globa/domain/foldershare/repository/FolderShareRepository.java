@@ -14,7 +14,7 @@ public interface FolderShareRepository {
     List<FolderShareEntity> saveAll(List<FolderShareEntity> entities);
     void delete(FolderShareEntity entity);
 
-    Boolean isAccessible(UserEntity user, Long folderId);
+    Boolean isAccessible(Long userId, Long folderId);
     Boolean isOwner(
             Long userId,
             Long folderId

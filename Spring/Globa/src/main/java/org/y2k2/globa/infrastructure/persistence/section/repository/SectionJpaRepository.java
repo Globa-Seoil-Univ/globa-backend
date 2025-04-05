@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SectionJpaRepository extends JpaRepository<SectionEntity, Long> {
-    List<SectionEntity> findAllByRecordOrderByStartTimeAsc(RecordEntity record);
+    List<SectionEntity> findAllByRecord_RecordIdOrderByStartTimeAsc(Long recordId);
     List<SectionEntity> findAllByRecord(RecordEntity record);
 
     @Query(

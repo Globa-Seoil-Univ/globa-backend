@@ -33,7 +33,7 @@ public class QuizAttemptRepositoryImpl implements QuizAttemptRepository {
     }
 
     @Override
-    public List<QuizGradeProjection> getQuizAttemptByUserAndRecordId(UserEntity user, Long recordId) {
-        return quizAttemptJpaRepository.findQuizGradeByUserAndRecordId(user, recordId);
+    public List<QuizGradeProjection> getQuizAttemptByUserAndRecordId(Long userId, Long recordId) {
+        return quizAttemptJpaRepository.findQuizGradeByUserAndRecordId(userId, recordId);
     }
 }

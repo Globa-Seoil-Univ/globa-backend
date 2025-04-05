@@ -16,7 +16,7 @@ import org.y2k2.globa.application.folder.command.CreateDefaultFolderCommand;
 import org.y2k2.globa.application.folder.usecase.CreateDefaultFolderUseCase;
 import org.y2k2.globa.application.user.command.CreateJWTCommand;
 import org.y2k2.globa.application.user.command.CreateUserCommand;
-import org.y2k2.globa.application.user.command.ValidateSnsCommand;
+import org.y2k2.globa.application.user.command.VerifySnsCommand;
 import org.y2k2.globa.application.user.dto.request.RequestUserPostDTO;
 import org.y2k2.globa.application.user.service.CreateUserService;
 import org.y2k2.globa.application.user.usecase.*;
@@ -36,9 +36,9 @@ public class CreateUserServiceTest {
     private CreateUserService createUserService;
 
     @Mock
-    private ValidateGoogleUseCase validateGoogleUseCase;
+    private VerifyGoogleUseCase verifyGoogleUseCase;
     @Mock
-    private ValidateKakaoUseCase validateKakaoUseCase;
+    private VerifyKakaoUseCase verifyKakaoUseCase;
     @Mock
     private FindActiveUserIdUseCase findActiveUserIdUseCase;
     @Mock
@@ -74,10 +74,10 @@ public class CreateUserServiceTest {
                 .set("token", "fcm_token")
                 .sample();
 
-        ValidateSnsCommand validateCommand = ValidateSnsCommand.of(request.snsId(), request.token());
+        VerifySnsCommand validateCommand = VerifySnsCommand.of(request.snsId(), request.token());
 
         Mockito.doNothing()
-                .when(validateKakaoUseCase)
+                .when(verifyKakaoUseCase)
                 .execute(validateCommand);
 
         Mockito.when(findActiveUserIdUseCase.execute(request.snsId()))
@@ -110,10 +110,10 @@ public class CreateUserServiceTest {
                 .set("token", "fcm_token")
                 .sample();
 
-        ValidateSnsCommand validateCommand = ValidateSnsCommand.of(request.snsId(), request.token());
+        VerifySnsCommand validateCommand = VerifySnsCommand.of(request.snsId(), request.token());
 
         Mockito.doNothing()
-                .when(validateGoogleUseCase)
+                .when(verifyGoogleUseCase)
                 .execute(validateCommand);
 
         Mockito.when(findActiveUserIdUseCase.execute(request.snsId()))
@@ -158,10 +158,10 @@ public class CreateUserServiceTest {
                 .set("token", "fcm_token")
                 .sample();
 
-        ValidateSnsCommand validateCommand = ValidateSnsCommand.of(request.snsId(), request.token());
+        VerifySnsCommand validateCommand = VerifySnsCommand.of(request.snsId(), request.token());
 
         Mockito.doNothing()
-                .when(validateKakaoUseCase)
+                .when(verifyKakaoUseCase)
                 .execute(validateCommand);
 
         Mockito.when(findActiveUserIdUseCase.execute(request.snsId()))
