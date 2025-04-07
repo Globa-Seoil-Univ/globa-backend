@@ -19,7 +19,7 @@ def stt(path: str) -> List[STTResults]:
 def stt2(path: str, lan: str) -> List[STTResults]:
     # url = storage_manager.getDownloadUrl(path=path)
     open_ai = OpenAIUtil()
-    url = "./test3.wav" # 임시 로컬
+    url = "./"+path+".wav" # 임시 로컬
     stt_results = whisper_manager.stt(path=url, lan=lan)
 
     # 테스트 맞춤법 검사

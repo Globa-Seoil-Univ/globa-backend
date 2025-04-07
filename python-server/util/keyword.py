@@ -50,4 +50,6 @@ class KeywordUtil:
         keywords = self.kw_model.extract_keywords(pre_sentences[0], keyphrase_ngram_range=(1, 1), stop_words=None,
                                                   use_maxsum=True, use_mmr=True, diversity=0.3, top_n=10)
 
+        for keyword in keywords:
+            self.logger.info("keyword result " + keyword[0]+ " :: " + f"{keyword[1]}")
         return keywords

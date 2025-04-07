@@ -105,7 +105,7 @@ class Consumer:
                     self.logger.info(f"Starting analyze audio: {record_id}")
                     # 지우면 안됨 임시 주석
                     # stt_results = stt(record.path, lan)
-                    stt_results = stt2("./test3.wav","ko")
+                    stt_results = stt2(str(record_id),"ko")
                     self.logger.info(f"result: {stt_results}")
                     add_section(record_id=record_id, text=stt_results, session=session)
                     assign_text(record_id=record_id, text=stt_results, session=session)

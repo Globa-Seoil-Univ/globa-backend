@@ -20,7 +20,7 @@ from util.keyword_en import KeywordUtilEn
 #     session.add_all(keywords)
 def add_keywords(record_id: int, text: str, session: Session, lan: str):
 
-    if lan == "jp":
+    if lan == "ja":
         keyword_util = KeywordUtilJP() # 일본어 형태소 분석기
     elif lan == "en" :
         keyword_util = KeywordUtilEn()

@@ -283,7 +283,7 @@ class OpenAIUtil:
             all_completions.append(completion_data)
 
             # 모든 completion 결과를 JSON 파일로 저장
-            with open("section_result_jp.json", "w", encoding="utf-8") as f:
+            with open(str(record_id)+".json", "w", encoding="utf-8") as f:
                 json.dump(all_completions, f, ensure_ascii=False, indent=2)
 
             if hasattr(completion.choices[0].message, 'function_call'):

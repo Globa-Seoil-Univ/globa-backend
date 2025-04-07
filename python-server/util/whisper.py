@@ -22,7 +22,8 @@ class WhisperManager:
 
     def __init__(self):
         model_size = "large-v3"
-        self.model = WhisperModel(model_size, device="cuda", compute_type="float32")
+        self.model = WhisperModel(model_size, device="cuda", compute_type="float16", cpu_threads=16, num_workers=8)
+
 
     def save_stt_results_to_json(self, results, output_file_path):
         """
@@ -40,7 +41,9 @@ class WhisperManager:
                 "start": result.start,
                 "end": result.end
             })
-
+        # json_data = {
+        #     "result": results_dict
+        # }
         # JSON 파일로 저장
         with open(output_file_path, 'w', encoding='utf-8') as f:
             json.dump(results_dict, f, ensure_ascii=False, indent=2)
@@ -67,7 +70,14 @@ class WhisperManager:
             vad_filter=True,
             repetition_penalty=1.2,
             no_repeat_ngram_size=3,
-            vad_parameters=dict(min_silence_duration_ms=500)
+            vad_parameters=dict(
+                min_silence_duration_ms=500,
+                threshold=0.5,        # VAD 감도 조정
+                speech_pad_ms=400     # 음성 패딩 조정
+            ),
+            best_of=5,  # 가장 좋은 결과 선택 (beam_size와 함께 조정)
+            suppress_blank=True,      # 빈 세그먼트 억제
+            suppress_tokens=[-1],     # 특수 토큰 억제
         )
 
         results = []
@@ -81,8 +91,8 @@ class WhisperManager:
             )
 
             results.append(result)
-
-        output_path = "./enhance_stt.json"
+        file_name = os.path.basename(path)
+        output_path = f"./origin_{file_name}.json"
         self.save_stt_results_to_json(results, output_path)
         self.logger.info(f"STT 결과가 {output_path}에 저장되었습니다.")
 
