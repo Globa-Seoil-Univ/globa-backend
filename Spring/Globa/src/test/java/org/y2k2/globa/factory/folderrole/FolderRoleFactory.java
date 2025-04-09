@@ -9,23 +9,22 @@ import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.common.type.FolderRole;
 import org.y2k2.globa.common.util.CustomTimestamp;
-import org.y2k2.globa.factory.CreatorFactory;
+import org.y2k2.globa.factory.AbstractFactory;
+import org.y2k2.globa.infrastructure.persistence.folderrole.FolderRoleTestRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
 import org.y2k2.globa.infrastructure.persistence.folderrole.repository.FolderRoleRepositoryImpl;
-import org.y2k2.globa.infrastructure.persistence.folderrole.repository.FolderRoleTestRepositoryImpl;
 
 @Slf4j
 @Getter
 @Setter
 @Import(FolderRoleRepositoryImpl.class)
 @Component
-public class FolderRoleFactory extends CreatorFactory<FolderRoleEntity> {
+public class FolderRoleFactory extends AbstractFactory<FolderRoleEntity> {
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     @Autowired
     private FolderRoleTestRepositoryImpl folderRoleRepository;
 
-    private String roleId = "1";
     private String roleName = FolderRole.OWNER.getRoleName();
 
     @Override
@@ -35,7 +34,6 @@ public class FolderRoleFactory extends CreatorFactory<FolderRoleEntity> {
 
     @Override
     protected FolderRoleEntity setDefaultValues(FolderRoleEntity entity) {
-        entity.setRoleId(roleId);
         entity.setRoleName(roleName);
         entity.setCreatedTime(new CustomTimestamp().getTimestamp());
         return entity;

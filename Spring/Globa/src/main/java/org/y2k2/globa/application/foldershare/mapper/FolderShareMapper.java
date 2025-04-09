@@ -24,7 +24,7 @@ public interface FolderShareMapper {
     ResponseFolderShareUserDto.FolderShareUserDto toShareUserDto(FolderShareEntity shareEntity);
 
     @Named("MapRoleId")
-    default String mapRoleId(FolderRoleEntity folderRole) {
+    default Long mapRoleId(FolderRoleEntity folderRole) {
         return folderRole != null ? folderRole.getRoleId() : null;
     }
 

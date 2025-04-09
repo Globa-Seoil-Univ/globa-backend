@@ -8,10 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.common.util.CustomTimestamp;
-import org.y2k2.globa.factory.CreatorFactory;
+import org.y2k2.globa.factory.AbstractFactory;
+import org.y2k2.globa.infrastructure.persistence.quiz.QuizTestRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.quiz.entity.QuizEntity;
 import org.y2k2.globa.infrastructure.persistence.quiz.repository.QuizRepositoryImpl;
-import org.y2k2.globa.infrastructure.persistence.quiz.repository.QuizTestRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 
 import java.time.LocalDateTime;
@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @Setter
 @Import(QuizRepositoryImpl.class)
 @Component
-public class QuizFactory extends CreatorFactory<QuizEntity> {
+public class QuizFactory extends AbstractFactory<QuizEntity> {
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     @Autowired

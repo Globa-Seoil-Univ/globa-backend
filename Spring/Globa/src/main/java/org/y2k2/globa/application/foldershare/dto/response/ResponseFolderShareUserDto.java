@@ -16,7 +16,7 @@ public class ResponseFolderShareUserDto {
     @AllArgsConstructor
     public static class FolderShareUserDto {
         private final Long shareId;
-        private final String roleId;
+        private final Long roleId;
         private final UserIntroDto user;
         private final InvitationStatus invitationStatus;
     }

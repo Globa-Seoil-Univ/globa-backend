@@ -13,6 +13,11 @@ public class FolderRoleRepositoryImpl implements FolderRoleRepository {
     private final FolderRoleJpaRepository folderRoleJpaRepository;
 
     @Override
+    public FolderRoleEntity save(FolderRoleEntity folderRoleEntity) {
+        return folderRoleJpaRepository.save(folderRoleEntity);
+    }
+
+    @Override
     public Optional<FolderRoleEntity> getRole(String roleName) {
         return folderRoleJpaRepository.findByRoleName(roleName);
     }

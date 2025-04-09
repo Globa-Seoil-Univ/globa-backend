@@ -67,7 +67,7 @@ public class FolderController {
             @RequestParam(required = false, defaultValue = "1", value = "page") int page,
             @RequestParam(required = false, defaultValue = "100", value = "count") int count,
             @AuthenticationPrincipal CustomUserDetails details
-            )
+    )
     { return ResponseEntity.status(HttpStatus.OK).body(getFoldersService.getFolders(page, count, details.getUserId())); }
 
     @Operation(

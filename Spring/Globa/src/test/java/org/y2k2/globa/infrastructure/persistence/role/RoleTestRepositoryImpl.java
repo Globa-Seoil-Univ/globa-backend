@@ -1,8 +1,10 @@
-package org.y2k2.globa.infrastructure.persistence.role.repository;
+package org.y2k2.globa.infrastructure.persistence.role;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.infrastructure.persistence.role.entity.RoleEntity;
+import org.y2k2.globa.infrastructure.persistence.role.repository.RoleJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.role.repository.RoleRepositoryImpl;
 
 @Component
 @Primary

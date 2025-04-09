@@ -23,9 +23,9 @@ public interface FolderShareJpaRepository extends JpaRepository<FolderShareEntit
             String roleName
     );
 
-    Boolean existsByFolderAndTargetUser(FolderEntity folder, UserEntity user);
+    Boolean existsByFolder_FolderIdAndTargetUser(Long folderId, UserEntity user);
 
-    Page<FolderShareEntity> findByFolderOrderByCreatedTimeAsc(FolderEntity folder, Pageable pageable);
+    Page<FolderShareEntity> findByFolder_FolderIdOrderByCreatedTimeAsc(Long folderId, Pageable pageable);
 
     @Query(
             "SELECT fs FROM FolderShareEntity fs " +

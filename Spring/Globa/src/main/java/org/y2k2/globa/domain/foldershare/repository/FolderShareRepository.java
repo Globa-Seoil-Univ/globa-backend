@@ -19,9 +19,9 @@ public interface FolderShareRepository {
             Long userId,
             Long folderId
     );
-    Boolean isInvited(FolderEntity folder, UserEntity user);
+    Boolean isInvited(Long folderId, UserEntity user);
 
-    Page<FolderShareEntity> getShareInvitations(FolderEntity folder, Pageable pageable);
+    Page<FolderShareEntity> getShareInvitations(Long folderId, Pageable pageable);
     Page<FolderShareEntity> getInvitationsForFolderExcludingDefault(
             Long userId,
             Pageable pageable

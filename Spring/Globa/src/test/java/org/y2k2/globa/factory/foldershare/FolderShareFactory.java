@@ -1,16 +1,16 @@
 package org.y2k2.globa.factory.foldershare;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.common.util.CustomTimestamp;
-import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.domain.foldershare.repository.FolderShareRepository;
-import org.y2k2.globa.factory.CreatorFactory;
+import org.y2k2.globa.factory.AbstractFactory;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
-import org.y2k2.globa.infrastructure.persistence.folder.repository.FolderRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
 import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
 import org.y2k2.globa.infrastructure.persistence.foldershare.repository.FolderShareRepositoryImpl;
@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 @Setter
 @Import(FolderShareRepositoryImpl.class)
 @Component
-public class FolderShareFactory extends CreatorFactory<FolderShareEntity> {
+public class FolderShareFactory extends AbstractFactory<FolderShareEntity> {
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     @Autowired

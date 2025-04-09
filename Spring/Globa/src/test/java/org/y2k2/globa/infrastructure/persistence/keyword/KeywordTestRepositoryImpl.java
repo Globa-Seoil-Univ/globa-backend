@@ -1,8 +1,10 @@
-package org.y2k2.globa.infrastructure.persistence.keyword.repository;
+package org.y2k2.globa.infrastructure.persistence.keyword;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.infrastructure.persistence.keyword.entity.KeywordEntity;
+import org.y2k2.globa.infrastructure.persistence.keyword.repository.KeywordJpaRepository;
+import org.y2k2.globa.infrastructure.persistence.keyword.repository.KeywordRepositoryImpl;
 
 @Component
 @Primary

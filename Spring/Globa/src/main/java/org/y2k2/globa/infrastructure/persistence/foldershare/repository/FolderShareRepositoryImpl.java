@@ -50,13 +50,13 @@ public class FolderShareRepositoryImpl implements FolderShareRepository {
     }
 
     @Override
-    public Boolean isInvited(FolderEntity folder, UserEntity user) {
-        return folderShareJpaRepository.existsByFolderAndTargetUser(folder, user);
+    public Boolean isInvited(Long folderId, UserEntity user) {
+        return folderShareJpaRepository.existsByFolder_FolderIdAndTargetUser(folderId, user);
     }
 
     @Override
-    public Page<FolderShareEntity> getShareInvitations(FolderEntity folder, Pageable pageable) {
-        return folderShareJpaRepository.findByFolderOrderByCreatedTimeAsc(folder, pageable);
+    public Page<FolderShareEntity> getShareInvitations(Long folderId, Pageable pageable) {
+        return folderShareJpaRepository.findByFolder_FolderIdOrderByCreatedTimeAsc(folderId, pageable);
     }
 
     @Override

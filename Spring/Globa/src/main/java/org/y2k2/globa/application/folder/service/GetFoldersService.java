@@ -9,10 +9,14 @@ import org.y2k2.globa.application.folder.command.CreateDefaultFolderCommand;
 import org.y2k2.globa.application.folder.dto.response.ResponseFolderDto;
 import org.y2k2.globa.application.folder.mapper.FolderMapper;
 import org.y2k2.globa.application.folder.usecase.CreateDefaultFolderUseCase;
+import org.y2k2.globa.application.folderrole.command.GetFolderRoleCommand;
+import org.y2k2.globa.application.folderrole.usecase.GetFolderRoleUseCase;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
+import org.y2k2.globa.common.type.FolderRole;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.domain.foldershare.repository.FolderShareRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
+import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
 import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
@@ -23,6 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GetFoldersService {
     private final FindUserUseCase findUserUseCase;
+    private final GetFolderRoleUseCase getFolderRoleUseCase;
     private final CreateDefaultFolderUseCase createDefaultFolderUseCase;
 
     private final FolderRepository folderRepository;
@@ -36,9 +41,12 @@ public class GetFoldersService {
             pageable = PageRequest.of(0, count - 1);
 
             UserEntity user = findUserUseCase.execute(userId);
+            FolderRoleEntity folderRole = getFolderRoleUseCase.execute(
+                    GetFolderRoleCommand.of(FolderRole.OWNER)
+            );
 
             FolderEntity defaultFolder = folderRepository.getDefaultFolder(userId)
-                    .orElseGet(() -> createDefaultFolderUseCase.execute(CreateDefaultFolderCommand.of(user)));
+                    .orElseGet(() -> createDefaultFolderUseCase.execute(CreateDefaultFolderCommand.of(folderRole, user)));
 
             folders.add(defaultFolder);
         } else {

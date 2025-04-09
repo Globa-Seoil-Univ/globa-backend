@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.domain.role.type.UserRole;
-import org.y2k2.globa.factory.CreatorFactory;
+import org.y2k2.globa.factory.AbstractFactory;
+import org.y2k2.globa.infrastructure.persistence.role.RoleTestRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.role.entity.RoleEntity;
-import org.y2k2.globa.infrastructure.persistence.role.repository.RoleTestRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.study.repository.StudyRepositoryImpl;
 
 @Slf4j
@@ -18,7 +18,7 @@ import org.y2k2.globa.infrastructure.persistence.study.repository.StudyRepositor
 @Setter
 @Import(StudyRepositoryImpl.class)
 @Component
-public class RoleFactory extends CreatorFactory<RoleEntity> {
+public class RoleFactory extends AbstractFactory<RoleEntity> {
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     @Autowired

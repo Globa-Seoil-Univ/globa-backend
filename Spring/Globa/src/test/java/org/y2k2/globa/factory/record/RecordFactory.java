@@ -1,24 +1,20 @@
 package org.y2k2.globa.factory.record;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.common.util.CustomTimestamp;
-import org.y2k2.globa.domain.folder.repository.FolderRepository;
-import org.y2k2.globa.domain.keyword.repository.KeywordRepository;
 import org.y2k2.globa.domain.record.repository.RecordRepository;
-import org.y2k2.globa.factory.CreatorFactory;
+import org.y2k2.globa.factory.AbstractFactory;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
-import org.y2k2.globa.infrastructure.persistence.folder.repository.FolderRepositoryImpl;
-import org.y2k2.globa.infrastructure.persistence.keyword.entity.KeywordEntity;
-import org.y2k2.globa.infrastructure.persistence.keyword.repository.KeywordRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 import org.y2k2.globa.infrastructure.persistence.record.repository.RecordRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -26,7 +22,7 @@ import java.time.LocalDateTime;
 @Setter
 @Import(RecordRepositoryImpl.class)
 @Component
-public class RecordFactory extends CreatorFactory<RecordEntity> {
+public class RecordFactory extends AbstractFactory<RecordEntity> {
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     @Autowired

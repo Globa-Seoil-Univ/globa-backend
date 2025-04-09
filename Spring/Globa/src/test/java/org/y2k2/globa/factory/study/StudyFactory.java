@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.domain.study.repository.StudyRepository;
-import org.y2k2.globa.factory.CreatorFactory;
+import org.y2k2.globa.factory.AbstractFactory;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 import org.y2k2.globa.infrastructure.persistence.study.entity.StudyEntity;
 import org.y2k2.globa.infrastructure.persistence.study.repository.StudyRepositoryImpl;
@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 @Setter
 @Import(StudyRepositoryImpl.class)
 @Component
-public class StudyFactory extends CreatorFactory<StudyEntity> {
+public class StudyFactory extends AbstractFactory<StudyEntity> {
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     @Autowired

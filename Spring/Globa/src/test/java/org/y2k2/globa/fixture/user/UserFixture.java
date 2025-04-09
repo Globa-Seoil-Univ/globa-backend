@@ -20,4 +20,19 @@ public class UserFixture extends AbstractFixture<UserEntity> {
         userFactory.setName(name);
         return this;
     }
+
+    public UserFixture withCode(String code) {
+        userFactory.setCode(code);
+        return this;
+    }
+
+    public UserFixture withFcmToken(String fcmToken) {
+        userFactory.setFcmToken(fcmToken);
+        return this;
+    }
+
+    public UserFixture withSnsId(String snsId) {
+        userFactory.setSnsId(snsId);
+        return this;
+    }
 }

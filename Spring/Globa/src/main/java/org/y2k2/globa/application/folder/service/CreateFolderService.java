@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.application.folder.dto.request.RequestFolderPostDto;
 import org.y2k2.globa.application.folder.mapper.FolderMapper;
+import org.y2k2.globa.application.folderrole.command.GetFolderRoleCommand;
+import org.y2k2.globa.application.folderrole.usecase.GetFolderRoleUseCase;
 import org.y2k2.globa.application.foldershare.command.CreateFolderSharesCommand;
 import org.y2k2.globa.application.foldershare.usecase.CreateFolderSharesUseCase;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
@@ -26,17 +28,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CreateFolderService {
     private final FindUserUseCase findUserUseCase;
+    private final GetFolderRoleUseCase getFolderRoleUseCase;
     private final CreateFolderSharesUseCase createFolderSharesUsecase;
 
     private final FolderRepository folderRepository;
-    private final FolderRoleRepository folderRoleRepository;
     private final UserRepository userRepository;
 
     @Transactional
     public FolderShareEntity create(String title, Long userId) {
         UserEntity ownerUser = findUserUseCase.execute(userId);
-        FolderRoleEntity role = folderRoleRepository.getRole(FolderRole.OWNER.getRoleName())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER_ROLE));
+        FolderRoleEntity role = getFolderRoleUseCase.execute(
+                GetFolderRoleCommand.of(FolderRole.OWNER)
+        );
 
         FolderEntity folder = FolderMapper.INSTANCE.toEntity(ownerUser, title);
         FolderEntity createdFolder = folderRepository.save(folder);

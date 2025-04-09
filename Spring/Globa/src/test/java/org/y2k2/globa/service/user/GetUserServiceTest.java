@@ -2,23 +2,29 @@ package org.y2k2.globa.service.user;
 
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.BeanArbitraryIntrospector;
+import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitraryIntrospector;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.y2k2.globa.application.folder.usecase.CreateDefaultFolderUseCase;
+import org.y2k2.globa.application.folderrole.command.GetFolderRoleCommand;
+import org.y2k2.globa.application.folderrole.usecase.GetFolderRoleUseCase;
 import org.y2k2.globa.application.user.dto.response.ResponseUserDto;
 import org.y2k2.globa.application.user.service.GetUserService;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
+import org.y2k2.globa.common.type.FolderRole;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
+import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 import java.util.Optional;
@@ -31,6 +37,8 @@ public class GetUserServiceTest {
 
     @Mock
     private FindUserUseCase findUserUseCase;
+    @Mock
+    private GetFolderRoleUseCase getFolderRoleUseCase;
     @Mock
     private CreateDefaultFolderUseCase createDefaultFolderUseCase;
     @Mock
@@ -48,6 +56,13 @@ public class GetUserServiceTest {
                 .set("userId", userId)
                 .sample();
 
+        FolderRoleEntity folderRole = FixtureMonkey.builder()
+                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
+                .build()
+                .giveMeBuilder(FolderRoleEntity.class)
+                .set("roleName", FolderRole.OWNER.getRoleName())
+                .sample();
+
         FolderEntity folder = FixtureMonkey.builder()
                 .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)
                 .build()
@@ -57,6 +72,9 @@ public class GetUserServiceTest {
 
         Mockito.when(findUserUseCase.execute(userId))
                 .thenReturn(user);
+
+        Mockito.when(getFolderRoleUseCase.execute(ArgumentMatchers.any(GetFolderRoleCommand.class)))
+                .thenReturn(folderRole);
 
         Mockito.when(folderRepository.getDefaultFolder(userId))
                 .thenReturn(Optional.of(folder));
@@ -80,6 +98,13 @@ public class GetUserServiceTest {
                 .set("userId", userId)
                 .sample();
 
+        FolderRoleEntity folderRole = FixtureMonkey.builder()
+                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
+                .build()
+                .giveMeBuilder(FolderRoleEntity.class)
+                .set("roleName", FolderRole.OWNER.getRoleName())
+                .sample();
+
         FolderEntity folder = FixtureMonkey.builder()
                 .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)
                 .build()
@@ -90,6 +115,9 @@ public class GetUserServiceTest {
 
         Mockito.when(folderRepository.getDefaultFolder(userId))
                 .thenReturn(Optional.empty());
+
+        Mockito.when(getFolderRoleUseCase.execute(ArgumentMatchers.any(GetFolderRoleCommand.class)))
+                .thenReturn(folderRole);
 
         Mockito.when(createDefaultFolderUseCase.execute(Mockito.any()))
                 .thenReturn(folder);

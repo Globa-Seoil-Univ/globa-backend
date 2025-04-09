@@ -1,6 +1,7 @@
 package org.y2k2.globa.service.user;
 
 import com.navercorp.fixturemonkey.FixtureMonkey;
+import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitraryIntrospector;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,13 +14,17 @@ import org.y2k2.globa.application.folder.command.CreateDefaultFolderCommand;
 import org.y2k2.globa.application.folder.command.UpdateFolderNameCommand;
 import org.y2k2.globa.application.folder.usecase.CreateDefaultFolderUseCase;
 import org.y2k2.globa.application.folder.usecase.UpdateFolderNameUseCase;
+import org.y2k2.globa.application.folderrole.command.GetFolderRoleCommand;
+import org.y2k2.globa.application.folderrole.usecase.GetFolderRoleUseCase;
 import org.y2k2.globa.application.user.command.UpdateUserCommand;
 import org.y2k2.globa.application.user.dto.request.RequestNameDto;
 import org.y2k2.globa.application.user.service.UpdateUserNameService;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 import org.y2k2.globa.application.user.usecase.UpdateUserUseCase;
+import org.y2k2.globa.common.type.FolderRole;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
+import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 import java.util.Optional;
@@ -32,6 +37,8 @@ public class UpdateUserNameServiceTest {
 
     @Mock
     private FindUserUseCase findUserUseCase;
+    @Mock
+    private GetFolderRoleUseCase getFolderRoleUseCase;
     @Mock
     private UpdateUserUseCase updateUserUseCase;
     @Mock
@@ -54,6 +61,13 @@ public class UpdateUserNameServiceTest {
                 .set("isDeleted", false)
                 .sample();
 
+        FolderRoleEntity folderRole = FixtureMonkey.builder()
+                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
+                .build()
+                .giveMeBuilder(FolderRoleEntity.class)
+                .set("roleName", FolderRole.OWNER.getRoleName())
+                .sample();
+
         FolderEntity folder = FixtureMonkey.builder()
                 .build()
                 .giveMeBuilder(FolderEntity.class)
@@ -71,6 +85,9 @@ public class UpdateUserNameServiceTest {
 
         Mockito.when(folderRepository.getDefaultFolder(user.getUserId()))
                 .thenReturn(Optional.of(folder));
+
+        Mockito.when(getFolderRoleUseCase.execute(Mockito.any(GetFolderRoleCommand.class)))
+                .thenReturn(folderRole);
 
         Mockito.doNothing()
                 .when(updateFolderNameUseCase)
@@ -107,6 +124,13 @@ public class UpdateUserNameServiceTest {
                 .set("isDeleted", false)
                 .sample();
 
+        FolderRoleEntity folderRole = FixtureMonkey.builder()
+                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
+                .build()
+                .giveMeBuilder(FolderRoleEntity.class)
+                .set("roleName", FolderRole.OWNER.getRoleName())
+                .sample();
+
         FolderEntity folder = FixtureMonkey.builder()
                 .build()
                 .giveMeBuilder(FolderEntity.class)
@@ -121,6 +145,9 @@ public class UpdateUserNameServiceTest {
         Mockito.doNothing()
                 .when(updateUserUseCase)
                 .execute(Mockito.any(UpdateUserCommand.class));
+
+        Mockito.when(getFolderRoleUseCase.execute(Mockito.any(GetFolderRoleCommand.class)))
+                .thenReturn(folderRole);
 
         Mockito.when(createDefaultFolderUseCase.execute(Mockito.any(CreateDefaultFolderCommand.class)))
                 .thenReturn(folder);
