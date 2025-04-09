@@ -2,7 +2,7 @@ package org.y2k2.globa.fixture.quizattempt;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.y2k2.globa.factory.QuizAttemptFactory;
+import org.y2k2.globa.factory.quizattempt.QuizAttemptFactory;
 import org.y2k2.globa.fixture.AbstractFixture;
 import org.y2k2.globa.infrastructure.persistence.quiz.entity.QuizEntity;
 import org.y2k2.globa.infrastructure.persistence.quizattemp.entity.QuizAttemptEntity;

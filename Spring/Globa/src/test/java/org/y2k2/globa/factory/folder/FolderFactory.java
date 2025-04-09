@@ -1,4 +1,4 @@
-package org.y2k2.globa.factory;
+package org.y2k2.globa.factory.folder;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
+import org.y2k2.globa.factory.CreatorFactory;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.folder.repository.FolderRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;

@@ -1,6 +1,6 @@
 package org.y2k2.globa.factory;
 
-public abstract class CreatorFactory<T> {
+public abstract class AbstractFactory<T> {
     protected abstract T create();
 
     protected abstract T setDefaultValues(T entity);

@@ -1,4 +1,4 @@
-package org.y2k2.globa.factory;
+package org.y2k2.globa.factory.quiz;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.common.util.CustomTimestamp;
+import org.y2k2.globa.factory.CreatorFactory;
 import org.y2k2.globa.infrastructure.persistence.quiz.entity.QuizEntity;
 import org.y2k2.globa.infrastructure.persistence.quiz.repository.QuizRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.quiz.repository.QuizTestRepositoryImpl;

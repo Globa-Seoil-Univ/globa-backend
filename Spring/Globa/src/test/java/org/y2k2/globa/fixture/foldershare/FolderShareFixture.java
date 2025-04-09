@@ -2,7 +2,7 @@ package org.y2k2.globa.fixture.foldershare;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.y2k2.globa.factory.FolderShareFactory;
+import org.y2k2.globa.factory.foldershare.FolderShareFactory;
 import org.y2k2.globa.fixture.AbstractFixture;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;

@@ -1,4 +1,4 @@
-package org.y2k2.globa.factory;
+package org.y2k2.globa.factory.role;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.domain.role.type.UserRole;
+import org.y2k2.globa.factory.CreatorFactory;
 import org.y2k2.globa.infrastructure.persistence.role.entity.RoleEntity;
 import org.y2k2.globa.infrastructure.persistence.role.repository.RoleTestRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.study.repository.StudyRepositoryImpl;

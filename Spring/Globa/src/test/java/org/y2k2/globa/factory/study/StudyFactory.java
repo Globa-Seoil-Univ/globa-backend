@@ -1,4 +1,4 @@
-package org.y2k2.globa.factory;
+package org.y2k2.globa.factory.study;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.domain.study.repository.StudyRepository;
+import org.y2k2.globa.factory.CreatorFactory;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 import org.y2k2.globa.infrastructure.persistence.study.entity.StudyEntity;
 import org.y2k2.globa.infrastructure.persistence.study.repository.StudyRepositoryImpl;

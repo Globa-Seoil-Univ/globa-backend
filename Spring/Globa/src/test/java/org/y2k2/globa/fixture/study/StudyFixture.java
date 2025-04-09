@@ -2,7 +2,7 @@ package org.y2k2.globa.fixture.study;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.y2k2.globa.factory.StudyFactory;
+import org.y2k2.globa.factory.study.StudyFactory;
 import org.y2k2.globa.fixture.AbstractFixture;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 import org.y2k2.globa.infrastructure.persistence.study.entity.StudyEntity;
