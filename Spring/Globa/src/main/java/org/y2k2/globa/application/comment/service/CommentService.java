@@ -52,66 +52,6 @@
 //    private final SectionJpaRepository sectionJpaRepository;
 //    private final HighlightJpaRepository highlightJpaRepository;
 //
-//    public ResponseCommentDto getComments(RequestCommentWithIdsDto request, int page, int count) {
-//        SectionEntity section = sectionJpaRepository.findBySection(request.sectionId(), request.folderId(), request.recordId())
-//                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SECTION));
-//        validateFolderShare(section, request.user());
-//        HighlightEntity highlight = validateHighlight(request.highlightId());
-//
-//        Pageable pageable = PageRequest.of(page - 1, count);
-//        Page<CommentEntity> commentEntityPage = commentJpaRepository.findByHighlightAndParentIsNullOrderByCommentIdDesc(highlight, pageable);
-//
-//        List<CommentEntity> parentCommentEntities = commentEntityPage.getContent();
-//        List<CommentDto> comments = parentCommentEntities.stream()
-//                .map(CommentMapper.INSTANCE::toResponseCommentDto)
-//                .toList();
-//
-//        return new ResponseCommentDto(comments, commentEntityPage.getTotalElements());
-//    }
-//
-//    public ResponseReplyDto getReply(RequestCommentWithIdsDto request, int page, int count) {
-//        SectionEntity section = sectionJpaRepository.findBySection(request.sectionId(), request.folderId(), request.recordId())
-//                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SECTION));
-//
-//        validateFolderShare(section, request.user());
-//        validateHighlight(request.highlightId());
-//
-//        CommentEntity parentComment = commentJpaRepository.findByCommentIdAndParentIsNull(request.parentId())
-//                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PARENT_COMMENT));
-//
-//        if (!parentComment.getHighlight().getHighlightId().equals(request.highlightId())) {
-//            throw new CustomException(ErrorCode.NOT_INCLUDE_HIGHLIGHT_COMMENT);
-//        }
-//
-//        Pageable pageable = PageRequest.of(page - 1, count);
-//        Page<CommentEntity> commentEntityPage = commentJpaRepository.findByParent_CommentIdOrderByCommentIdAsc(request.parentId(), pageable);
-//        List<CommentEntity> comments = commentEntityPage.getContent();
-//        List<ReplyDto> dto = comments.stream()
-//                .map(CommentMapper.INSTANCE::toResponseReplyDto)
-//                .toList();
-//
-//        return new ResponseReplyDto(dto, commentEntityPage.getTotalElements());
-//    }
-//
-//    @Transactional
-//    public long addFirstComment(RequestCommentWithIdsDto request, RequestFirstCommentDto dto) {
-//        SectionEntity section = sectionJpaRepository.findBySection(request.sectionId(), request.folderId(), request.recordId())
-//                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SECTION));
-//        FolderShareEntity folderShare = validateFolderShareWithRole(section, request.user());
-//
-//        boolean isAlready = highlightJpaRepository.existsBySectionAndInRange(section.getSectionId(), dto.startIdx(), dto.endIdx());
-//        if (isAlready) throw new CustomException(ErrorCode.HIGHLIGHT_DUPLICATED);
-//
-//        HighlightEntity highlight = HighlightEntity.create(section, dto.startIdx(), dto.endIdx());
-//        HighlightEntity createdHighlight = highlightJpaRepository.save(highlight);
-//
-//        CommentEntity comment = saveComment(request.user(), createdHighlight, dto.content());
-//        saveNotification(request, folderShare, section, comment);
-//        sendNotification(request.user(), section.getRecord().getFolder(), section.getRecord(), folderShare);
-//
-//        return createdHighlight.getHighlightId();
-//    }
-//
 //    @Transactional
 //    public void addComment(RequestCommentWithIdsDto request, RequestCommentDto dto) {
 //        SectionEntity section = sectionJpaRepository.findBySection(request.sectionId(), request.folderId(), request.recordId())
@@ -175,14 +115,6 @@
 //            comment.setDeletedTime(new CustomTimestamp().getTimestamp());
 //            commentJpaRepository.save(comment);
 //        }
-//    }
-//
-//    private void validateFolderShare(SectionEntity section, UserEntity user) {
-//        FolderShareEntity folderShare = folderShareJpaRepository.findByFolderAndTargetUser(section.getRecord().getFolder(), user)
-//                .orElseThrow(() -> new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER));
-//
-//        if (folderShare.getInvitationStatus().equals(InvitationStatus.PENDING))
-//            throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_FOLDER);
 //    }
 //
 //    private FolderShareEntity validateFolderShareWithRole(SectionEntity section, UserEntity user) {

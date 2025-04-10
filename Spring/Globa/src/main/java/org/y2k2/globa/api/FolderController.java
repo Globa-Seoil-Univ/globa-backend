@@ -63,7 +63,7 @@ public class FolderController {
             }
     )
     @GetMapping
-    public ResponseEntity<?> getFolders(
+    public ResponseEntity<ResponseFolderDto> getFolders(
             @RequestParam(required = false, defaultValue = "1", value = "page") int page,
             @RequestParam(required = false, defaultValue = "100", value = "count") int count,
             @AuthenticationPrincipal CustomUserDetails details
@@ -99,7 +99,7 @@ public class FolderController {
             }
     )
     @PostMapping
-    public ResponseEntity<?> createFolder(
+    public ResponseEntity<Void> createFolder(
             @Valid @RequestBody RequestFolderPostDto request,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
@@ -138,7 +138,7 @@ public class FolderController {
             }
     )
     @PatchMapping("/{folder_id}/name")
-    public ResponseEntity<?> updateFolderName(
+    public ResponseEntity<Void> updateFolderName(
             @PathVariable(value = "folder_id") Long folderId,
             @Valid @RequestBody RequestFolderNameDto dto,
             @AuthenticationPrincipal CustomUserDetails details
@@ -173,7 +173,7 @@ public class FolderController {
             }
     )
     @DeleteMapping("/{folder_id}")
-    public ResponseEntity<?> deleteFolder(
+    public ResponseEntity<Void> deleteFolder(
             @PathVariable(value = "folder_id") Long folderId,
             @AuthenticationPrincipal CustomUserDetails details
     ) {

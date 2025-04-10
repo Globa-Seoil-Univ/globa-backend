@@ -30,12 +30,17 @@ public class HighlightRepositoryImpl implements HighlightRepository {
     }
 
     @Override
+    public Boolean isHighlightInSection(Long sectionId, Long highlightId) {
+        return highlightJpaRepository.existsBySection_SectionIdAndHighlightId(sectionId, highlightId);
+    }
+
+    @Override
     public List<HighlightEntity> getAllHighlights(List<Long> sectionIds) {
         return highlightJpaRepository.findAllBySection_SectionIdIn(sectionIds);
     }
 
     @Override
-    public Optional<HighlightEntity> getHighlight(Long highlightId) {
-        return highlightJpaRepository.findByHighlightId(highlightId);
+    public Optional<HighlightEntity> getHighlight(Long sectionId, Long highlightId) {
+        return highlightJpaRepository.findBySection_SectionIdAndHighlightId(sectionId, highlightId);
     }
 }

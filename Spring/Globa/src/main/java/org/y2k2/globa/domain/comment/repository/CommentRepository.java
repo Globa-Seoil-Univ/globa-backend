@@ -13,10 +13,11 @@ public interface CommentRepository {
     void delete(CommentEntity entity);
     void deleteAll(List<CommentEntity> entities);
 
-    Optional<CommentEntity> getComment(Long commentId);
-    Optional<CommentEntity> getParentComment(Long commentId);
 
-    Page<CommentEntity> getParentComments(HighlightEntity highlight, Pageable pageable);
+    Optional<CommentEntity> getComment(Long highlightId, Long commentId);
+    Optional<CommentEntity> getParentComment(Long highlightId, Long commentId);
+
+    Page<CommentEntity> getParentComments(Long highlightId, Pageable pageable);
     Page<CommentEntity> getChildComments(Long parentId, Pageable pageable);
     List<CommentEntity> getAllDeletedComment(Long commentId);
 

@@ -21,4 +21,14 @@ public interface SectionJpaRepository extends JpaRepository<SectionEntity, Long>
                         "AND r.folder.folderId = :folderId "
     )
     Optional<SectionEntity> findBySection(Long sectionId, Long folderId, Long recordId);
+
+    @Query(
+            value = "SELECT s, r, f FROM SectionEntity s " +
+                    "JOIN FETCH s.record r " +
+                    "JOIN FETCH s.record.folder f " +
+                    "WHERE s.sectionId = :sectionId " +
+                        "AND r.recordId = :recordId " +
+                        "AND r.folder.folderId = :folderId "
+    )
+    Optional<SectionEntity> findByAllJoin(Long sectionId, Long folderId, Long recordId);
 }

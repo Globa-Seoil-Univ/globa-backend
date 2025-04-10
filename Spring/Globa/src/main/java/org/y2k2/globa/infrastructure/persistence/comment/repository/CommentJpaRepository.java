@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CommentJpaRepository extends JpaRepository<CommentEntity, Long> {
-    Optional<CommentEntity> findByCommentId(Long commentId);
-    Optional<CommentEntity> findByCommentIdAndParentIsNull(Long commentId);
-    Page<CommentEntity> findByHighlightAndParentIsNullOrderByCommentIdDesc(HighlightEntity highlight, Pageable pageable);
+    Optional<CommentEntity> findByHighlight_HighlightIdAndCommentId(Long highlightId, Long commentId);
+    Optional<CommentEntity> findByHighlight_HighlightIdAndCommentIdAndParentIsNull(Long highlightId, Long commentId);
+    Page<CommentEntity> findByHighlight_HighlightIdAndParentIsNullOrderByCommentIdDesc(Long highlightId, Pageable pageable);
     Page<CommentEntity> findByParent_CommentIdOrderByCommentIdAsc(Long parentId, Pageable pageable);
 
     @Query(

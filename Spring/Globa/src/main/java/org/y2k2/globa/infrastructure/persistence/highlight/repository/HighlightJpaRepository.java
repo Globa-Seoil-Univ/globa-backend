@@ -20,5 +20,7 @@ public interface HighlightJpaRepository extends JpaRepository<HighlightEntity, L
     )
     Boolean existsBySectionAndInRange(Long sectionId, Long startIndex, Long endIndex);
 
-    Optional<HighlightEntity> findByHighlightId(Long highlightId);
+    Boolean existsBySection_SectionIdAndHighlightId(Long sectionId, Long highlightId);
+
+    Optional<HighlightEntity> findBySection_SectionIdAndHighlightId(Long sectionId, Long highlightId);
 }

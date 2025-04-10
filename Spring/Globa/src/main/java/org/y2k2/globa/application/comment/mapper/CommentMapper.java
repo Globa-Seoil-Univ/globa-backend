@@ -8,6 +8,8 @@ import org.y2k2.globa.application.common.mapper.CustomTimestampMapper;
 import org.y2k2.globa.application.common.mapper.CustomTimestampTranslator;
 import org.y2k2.globa.application.common.mapper.MapCreatedTime;
 import org.y2k2.globa.infrastructure.persistence.comment.entity.CommentEntity;
+import org.y2k2.globa.infrastructure.persistence.highlight.entity.HighlightEntity;
+import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 @Mapper(uses = CustomTimestampMapper.class)
 public interface CommentMapper {
@@ -29,6 +31,23 @@ public interface CommentMapper {
     @Mapping(source = "entity.isDeleted", target = "deleted")
     @Mapping(source = "entity.createdTime", target = "createdTime", qualifiedBy = { CustomTimestampTranslator.class, MapCreatedTime.class })
     ReplyDto toResponseReplyDto(CommentEntity entity);
+
+    @Mapping(source = "user", target = "user")
+    @Mapping(source = "highlight", target = "highlight")
+    @Mapping(source = "content", target = "content")
+    @Mapping(target = "isDeleted", constant = "false")
+    @Mapping(target = "createdTime", ignore = true)
+    @Mapping(target = "deletedTime", ignore = true)
+    CommentEntity toParentCommentEntity(UserEntity user, HighlightEntity highlight, String content);
+
+    @Mapping(source = "user", target = "user")
+    @Mapping(source = "highlight", target = "highlight")
+    @Mapping(source = "parent", target = "parent")
+    @Mapping(source = "content", target = "content")
+    @Mapping(target = "isDeleted", constant = "false")
+    @Mapping(target = "createdTime", ignore = true)
+    @Mapping(target = "deletedTime", ignore = true)
+    CommentEntity toChildCommentEntity(UserEntity user, HighlightEntity highlight, CommentEntity parent, String content);
 
     @AfterMapping
     static void handleDeletedContent(@MappingTarget CommentDto dto, CommentEntity entity) {

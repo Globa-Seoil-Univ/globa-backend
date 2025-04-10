@@ -70,7 +70,7 @@ public class RecordController {
             }
     )
     @GetMapping("/folder/{folder_id}/record")
-    public ResponseEntity<?> getRecordByFolderId(
+    public ResponseEntity<ResponseRecordsByFolderDto> getRecordByFolderId(
             @PathVariable(value = "folder_id") Long folderId,
             @RequestParam(value = "page", defaultValue = "1", required = false) int page,
             @RequestParam(value = "count", defaultValue = "10", required = false) int count,
@@ -104,7 +104,7 @@ public class RecordController {
             }
     )
     @GetMapping("/record")
-    public ResponseEntity<?> getRecentRecords(
+    public ResponseEntity<ResponseRecordsDto> getRecentRecords(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "count", defaultValue = "10") int count,
             @AuthenticationPrincipal CustomUserDetails details
@@ -139,7 +139,7 @@ public class RecordController {
             }
     )
     @GetMapping("/folder/{folder_id}/record/{record_id}")
-    public ResponseEntity<?> getRecordDetail(
+    public ResponseEntity<ResponseRecordDetailDto> getRecordDetail(
             @PathVariable(value = "folder_id") Long folderId,
             @PathVariable(value = "record_id") Long recordId,
             @AuthenticationPrincipal CustomUserDetails details
@@ -173,7 +173,7 @@ public class RecordController {
             }
     )
     @GetMapping("/folder/{folder_id}/record/{record_id}/analysis")
-    public ResponseEntity<?> getAnalysis(
+    public ResponseEntity<ResponseAnalysisDto> getAnalysis(
                     @PathVariable(value = "folder_id") Long folderId,
                     @PathVariable(value = "record_id") Long recordId,
                     @AuthenticationPrincipal CustomUserDetails details
@@ -204,7 +204,7 @@ public class RecordController {
             }
     )
     @GetMapping("/record/search")
-    public ResponseEntity<?> searchRecord(
+    public ResponseEntity<ResponseRecordSearchDto> searchRecord(
             @RequestParam(value = "page", defaultValue = "1", required = false) int page,
             @RequestParam(value = "count", defaultValue = "10", required = false) int count,
             @RequestParam(required = false) String keyword,
@@ -238,7 +238,7 @@ public class RecordController {
             }
     )
     @GetMapping("/record/receiving")
-    public ResponseEntity<?> getReceivingRecord(
+    public ResponseEntity<ResponseRecordsDto> getReceivingRecord(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int count,
             @AuthenticationPrincipal CustomUserDetails details
@@ -271,7 +271,7 @@ public class RecordController {
             }
     )
     @GetMapping("/record/sharing")
-    public ResponseEntity<?> getSharingRecord(
+    public ResponseEntity<ResponseRecordsDto> getSharingRecord(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int count,
             @AuthenticationPrincipal CustomUserDetails details
@@ -312,7 +312,7 @@ public class RecordController {
             }
     )
     @PostMapping("/folder/{folder_id}/record")
-    public ResponseEntity<?> createdRecord(
+    public ResponseEntity<Void> createdRecord(
                             @PathVariable(value = "folder_id") Long folderId,
                             @Valid @RequestBody RequestPostRecordDto dto,
                             @AuthenticationPrincipal CustomUserDetails details
@@ -354,7 +354,7 @@ public class RecordController {
             }
     )
     @PostMapping("/folder/{folder_id}/record/{record_id}/link")
-    public ResponseEntity<?> addLinkShare(
+    public ResponseEntity<Void> addLinkShare(
             @PathVariable(value = "folder_id", required = false) Long folderId,
             @PathVariable(value = "record_id", required = false) Long recordId,
             @AuthenticationPrincipal CustomUserDetails details
@@ -391,7 +391,7 @@ public class RecordController {
             }
     )
     @PatchMapping("/folder/{folder_id}/record/{record_id}/name")
-    public ResponseEntity<?> modifyRecordName(
+    public ResponseEntity<Void> modifyRecordName(
             @PathVariable(value = "folder_id") Long folderId,
             @PathVariable(value = "record_id") Long recordId,
             @Valid @RequestBody RequestRecordNameDto dto,
@@ -434,7 +434,7 @@ public class RecordController {
             }
     )
     @PatchMapping("/folder/{folder_id}/record/{record_id}/move")
-    public ResponseEntity<?> moveRecord(
+    public ResponseEntity<Void> moveRecord(
             @PathVariable(value = "folder_id") Long folderId,
             @PathVariable(value = "record_id") Long recordId,
             @Valid @RequestBody RequestRecordMoveDto dto,
@@ -471,7 +471,7 @@ public class RecordController {
             }
     )
     @PatchMapping("/folder/{folder_id}/record/{record_id}/study")
-    public ResponseEntity<?> modifyStudyTime(
+    public ResponseEntity<Void> modifyStudyTime(
             @PathVariable(value = "folder_id") Long folderId,
             @PathVariable(value = "record_id") Long recordId,
             @Valid @RequestBody RequestStudyDto dto,
@@ -509,7 +509,7 @@ public class RecordController {
             }
     )
     @DeleteMapping("/folder/{folder_id}/record/{record_id}")
-    public ResponseEntity<?> deleteRecord(
+    public ResponseEntity<Void> deleteRecord(
             @PathVariable(value = "record_id") Long recordId,
             @PathVariable(value = "folder_id") Long folderId,
             @AuthenticationPrincipal CustomUserDetails details
@@ -547,7 +547,7 @@ public class RecordController {
             }
     )
     @DeleteMapping("/folder/{folder_id}/record/{record_id}/link")
-    public ResponseEntity<?> deleteLinkShare(
+    public ResponseEntity<Void> deleteLinkShare(
             @PathVariable(value = "folder_id") Long folderId,
             @PathVariable(value = "record_id") Long recordId,
             @AuthenticationPrincipal CustomUserDetails details

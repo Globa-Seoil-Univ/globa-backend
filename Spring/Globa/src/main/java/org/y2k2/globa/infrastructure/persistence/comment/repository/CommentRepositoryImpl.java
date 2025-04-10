@@ -33,18 +33,18 @@ public class CommentRepositoryImpl implements CommentRepository {
     }
 
     @Override
-    public Optional<CommentEntity> getComment(Long commentId) {
-        return commentJpaRepository.findByCommentId(commentId);
+    public Optional<CommentEntity> getComment(Long highlightId, Long commentId) {
+        return commentJpaRepository.findByHighlight_HighlightIdAndCommentId(highlightId, commentId);
     }
 
     @Override
-    public Optional<CommentEntity> getParentComment(Long commentId) {
-        return commentJpaRepository.findByCommentIdAndParentIsNull(commentId);
+    public Optional<CommentEntity> getParentComment(Long highlightId, Long commentId) {
+        return commentJpaRepository.findByHighlight_HighlightIdAndCommentIdAndParentIsNull(highlightId, commentId);
     }
 
     @Override
-    public Page<CommentEntity> getParentComments(HighlightEntity highlight, Pageable pageable) {
-        return commentJpaRepository.findByHighlightAndParentIsNullOrderByCommentIdDesc(highlight, pageable);
+    public Page<CommentEntity> getParentComments(Long highlightId, Pageable pageable) {
+        return commentJpaRepository.findByHighlight_HighlightIdAndParentIsNullOrderByCommentIdDesc(highlightId, pageable);
     }
 
     @Override

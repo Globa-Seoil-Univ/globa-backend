@@ -11,8 +11,9 @@ public interface HighlightRepository {
     void delete(HighlightEntity entity);
 
     Boolean hasHighlightInRange(Long sectionId, Long startIndex, Long endIndex);
+    Boolean isHighlightInSection(Long sectionId, Long highlightId);
 
     List<HighlightEntity> getAllHighlights(List<Long> sectionIds);
 
-    Optional<HighlightEntity> getHighlight(Long highlightId);
+    Optional<HighlightEntity> getHighlight(Long sectionId, Long highlightId);
 }

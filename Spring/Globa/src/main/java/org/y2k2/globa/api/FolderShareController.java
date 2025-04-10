@@ -135,7 +135,7 @@ public class FolderShareController {
             }
     )
     @PatchMapping("/user/{userId}")
-    public ResponseEntity<?> editShare(
+    public ResponseEntity<Void> editShare(
             @PathVariable(value = "folderId") Long folderId,
             @PathVariable(value = "userId") Long targetId,
             @Valid @RequestBody RequestInviteDto dto,
@@ -172,7 +172,7 @@ public class FolderShareController {
             }
     )
     @DeleteMapping("/user/{userId}")
-    public ResponseEntity<?> deleteShare(
+    public ResponseEntity<Void> deleteShare(
             @PathVariable(value = "folderId") Long folderId,
             @PathVariable(value = "userId") Long targetId,
             @AuthenticationPrincipal CustomUserDetails details
@@ -210,7 +210,7 @@ public class FolderShareController {
             }
     )
     @PostMapping("/{shareId}")
-    public ResponseEntity<?> acceptShare(
+    public ResponseEntity<Void> acceptShare(
             @PathVariable(value = "folderId") Long folderId,
             @PathVariable(value = "shareId") Long shareId,
             @AuthenticationPrincipal CustomUserDetails details
@@ -248,7 +248,7 @@ public class FolderShareController {
             }
     )
     @DeleteMapping("/{shareId}")
-    public ResponseEntity<?> refuseShare(
+    public ResponseEntity<Void> refuseShare(
             @PathVariable(value = "folderId") Long folderId,
             @PathVariable(value = "shareId") Long shareId,
             @AuthenticationPrincipal CustomUserDetails details
