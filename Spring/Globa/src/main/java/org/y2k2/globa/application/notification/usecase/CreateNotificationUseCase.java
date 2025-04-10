@@ -22,22 +22,8 @@ public class CreateNotificationUseCase implements VoidUseCase<CreateNotification
 
     @Override
     public void execute(CreateNotificationCommand command) {
-        log.info("Save Notifications count = {}", command.sendMessages()
-                .size());
-        List<NotificationEntity> notifications = new ArrayList<>();
-
-        for (SendMessage sendMessage : command.sendMessages()) {
-            NotificationEntity notification = createNotification(sendMessage);
-
-            if (notification == null) {
-                log.warn("Notification is null. userId = {}, name = {}", sendMessage.getReceiver().getUserId(), sendMessage.getReceiver().getName());
-                continue;
-            }
-
-            notifications.add(notification);
-        }
-
-        notificationRepository.saveAll(notifications);
+        NotificationEntity notification = createNotification(command.sendMessage());
+        notificationRepository.save(notification);
     }
 
     private NotificationEntity createNotification(SendMessage sendMessage) {

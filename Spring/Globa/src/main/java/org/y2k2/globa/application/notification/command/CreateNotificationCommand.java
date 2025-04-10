@@ -5,9 +5,9 @@ import org.y2k2.globa.application.notification.dto.common.SendMessage;
 import java.util.List;
 
 public record CreateNotificationCommand(
-        List<? extends SendMessage> sendMessages
+        SendMessage sendMessage
 ) {
-    public static CreateNotificationCommand of(List<? extends SendMessage> sendMessages) {
-        return new CreateNotificationCommand(sendMessages);
+    public static CreateNotificationCommand of(SendMessage sendMessage) {
+        return new CreateNotificationCommand(sendMessage);
     }
 }

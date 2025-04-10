@@ -44,8 +44,8 @@ public class NotificationRepositoryImpl implements NotificationRepository {
     }
 
     @Override
-    public Optional<NotificationEntity> getReceivedNotification(Long folderId, Long folderShareId, UserEntity receiver) {
-        return notificationJpaRepository.findByFolderFolderIdAndFolderShareShareIdAndReceiver(folderId, folderShareId, receiver);
+    public Optional<NotificationEntity> getReceivedNotification(Long folderId, Long folderShareId, Long receiverId) {
+        return notificationJpaRepository.findByFolderFolderIdAndFolderShareShareIdAndReceiver_UserId(folderId, folderShareId, receiverId);
     }
 
     @Override

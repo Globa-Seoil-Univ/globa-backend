@@ -76,8 +76,13 @@ public class FolderShareRepositoryImpl implements FolderShareRepository {
     }
 
     @Override
-    public Optional<FolderShareEntity> getShareInvitation(FolderEntity folder, UserEntity user) {
-        return folderShareJpaRepository.findByFolderAndTargetUser(folder, user);
+    public Optional<FolderShareEntity> getShareInvitation(Long folderId, Long userId) {
+        return folderShareJpaRepository.findByFolder_FolderIdAndTargetUser_UserId(folderId, userId);
+    }
+
+    @Override
+    public Optional<FolderShareEntity> getShareInvitationWithFolder(Long folderId, Long userId) {
+        return folderShareJpaRepository.findByFolderAndTargetUserJoinFolder(folderId, userId);
     }
 
     @Override

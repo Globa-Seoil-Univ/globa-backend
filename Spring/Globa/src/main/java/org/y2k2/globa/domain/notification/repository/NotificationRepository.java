@@ -27,7 +27,7 @@ public interface NotificationRepository {
             Pageable pageable
     );
 
-    Optional<NotificationEntity> getReceivedNotification(Long folderId, Long folderShareId, UserEntity receiver);
+    Optional<NotificationEntity> getReceivedNotification(Long folderId, Long folderShareId, Long receiverId);
     Optional<NotificationEntity> getNotification(Long notificationId);
 
     NotificationUnReadCountProjection getUnReadCount(Long userId);

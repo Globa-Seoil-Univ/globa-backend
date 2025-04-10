@@ -30,6 +30,7 @@ public interface FolderShareRepository {
     List<FolderShareEntity> getAllShareInvitations(Long folderId);
     List<FolderShareEntity> getAllShareInvitationsWithoutMe(Long folderId, Long excludeId);
 
-    Optional<FolderShareEntity> getShareInvitation(FolderEntity folder, UserEntity user);
+    Optional<FolderShareEntity> getShareInvitation(Long folderId, Long userId);
+    Optional<FolderShareEntity> getShareInvitationWithFolder(Long folderId, Long userId);
     Optional<FolderShareEntity> getShareInvitationWithRole(FolderEntity folder, UserEntity user);
 }

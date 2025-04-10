@@ -96,7 +96,7 @@ public interface NotificationJpaRepository extends JpaRepository<NotificationEnt
             Pageable pageable
     );
 
-    Optional<NotificationEntity> findByFolderFolderIdAndFolderShareShareIdAndReceiver(long folderId, long folderShareId, UserEntity receiver);
+    Optional<NotificationEntity> findByFolderFolderIdAndFolderShareShareIdAndReceiver_UserId(Long folderId, Long folderShareId, Long receiverId);
     Optional<NotificationEntity> findByNotificationId(Long notificationId);
 
     @Query(
