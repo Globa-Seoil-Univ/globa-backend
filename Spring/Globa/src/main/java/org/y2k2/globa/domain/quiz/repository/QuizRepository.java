@@ -8,7 +8,6 @@ import java.util.List;
 public interface QuizRepository {
     void deleteAll(List<QuizEntity> entities);
 
-    List<QuizEntity> getAllQuizzes(RecordEntity record);
     List<QuizEntity> getAllQuizzes(Long recordId);
     List<QuizEntity> getAllByQuizzesInRecord(RecordEntity record, List<Long> quizIds);
 }

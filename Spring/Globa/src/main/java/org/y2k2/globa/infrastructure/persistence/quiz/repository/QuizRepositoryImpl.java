@@ -19,11 +19,6 @@ public class QuizRepositoryImpl implements QuizRepository {
     }
 
     @Override
-    public List<QuizEntity> getAllQuizzes(RecordEntity record) {
-        return quizJpaRepository.findAllByRecord(record);
-    }
-
-    @Override
     public List<QuizEntity> getAllQuizzes(Long recordId) {
         return quizJpaRepository.findAllByRecordRecordId(recordId);
     }
