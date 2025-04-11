@@ -304,7 +304,7 @@ class OpenAIUtil:
     def assign_text(self, stt_origin: List[STTResults], sections: List[Section]):
         assign_text_list = []
         assign_results = []  # 결과를 저장할 리스트
-
+        self.logger.info("assign 진입")
         start_index = 0
         for section in sections:
             current_str = ""  # 현재 섹션의 텍스트를 저장할 변수
@@ -348,7 +348,7 @@ class OpenAIUtil:
                 assign_results.append(section_result)
 
         # 결과를 JSON 파일로 저장
-        with open("assign_result_jp.json", "w", encoding="utf-8") as f:
+        with open("assign_result.json", "w", encoding="utf-8") as f:
             json.dump(assign_results, f, ensure_ascii=False, indent=2)
 
         return assign_text_list

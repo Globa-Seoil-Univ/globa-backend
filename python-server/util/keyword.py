@@ -5,9 +5,12 @@ from transformers import BertModel
 from keybert import KeyBERT
 from kiwipiepy import Kiwi
 
+from util.log import Logger
+
 
 class KeywordUtil:
     def __init__(self):
+        self.logger = Logger(name="keyword_kr").logger
         self.model = BertModel.from_pretrained("skt/kobert-base-v1")
         self.kw_model = KeyBERT(self.model)
         self.kiwi = Kiwi()
