@@ -6,11 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
-@Getter
-@AllArgsConstructor
-@Builder
-@Jacksonized
-public class RequestCommentDto {
-    @NotBlank(message = "You must request content field")
-    private final String content;
+public record RequestCommentDto(
+        @NotBlank(message = "댓글 내용은 필수입니다.")
+        String content
+) {
 }

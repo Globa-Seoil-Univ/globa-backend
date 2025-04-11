@@ -23,7 +23,24 @@ public interface FolderShareJpaRepository extends JpaRepository<FolderShareEntit
             String roleName
     );
 
-    Boolean existsByFolder_FolderIdAndTargetUser(Long folderId, UserEntity user);
+    Boolean existsByTargetUser_UserIdAndFolder_FolderId(Long userId, Long folderId);
+
+    @Query(
+            "SELECT CASE WHEN EXISTS (" +
+                    "SELECT TRUE FROM FolderShareEntity fs " +
+                    "JOIN fs.role r " +
+                    "WHERE fs.targetUser.userId = :userId " +
+                        "AND fs.folder.folderId = :folderId " +
+                        "AND fs.invitationStatus = :status " +
+                        "AND r.roleName IN (:names) " +
+            ") THEN TRUE ELSE FALSE END"
+    )
+    Boolean existsByTargetUser_UserIdAndFolder_FolderIdAndRoleIn(
+            Long userId,
+            Long folderId,
+            InvitationStatus status,
+            List<String> names
+    );
 
     Page<FolderShareEntity> findByFolder_FolderIdOrderByCreatedTimeAsc(Long folderId, Pageable pageable);
 

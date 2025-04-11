@@ -51,7 +51,7 @@ public class InviteFolderShareService {
                 VerifyFolderCommand.of(ownerId, folderId)
         );
 
-        Boolean isInvited = folderShareRepository.isInvited(folderId, target);
+        Boolean isInvited = folderShareRepository.isInvited(targetId, folderId);
         if (isInvited) {
             throw new CustomException(ErrorCode.SHARE_USER_DUPLICATED);
         }

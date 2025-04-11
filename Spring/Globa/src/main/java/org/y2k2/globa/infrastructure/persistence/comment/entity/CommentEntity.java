@@ -54,26 +54,9 @@ public class CommentEntity {
     @Formula(value = "(SELECT CASE WHEN EXISTS (SELECT 1 FROM comment c WHERE c.parent_id = ce1_0.comment_id) THEN true ELSE false END)")
     private boolean hasReply;
 
-    public static CommentEntity create(UserEntity writer, HighlightEntity highlight, String content) {
-        CommentEntity entity = new CommentEntity();
-
-        entity.setUser(writer);
-        entity.setHighlight(highlight);
-        entity.setContent(content);
-        entity.setIsDeleted(false);
-
-        return entity;
-    }
-
-    public static CommentEntity createReply(UserEntity writer, HighlightEntity highlight, CommentEntity parent, String content) {
-        CommentEntity entity = new CommentEntity();
-
-        entity.setUser(writer);
-        entity.setHighlight(highlight);
-        entity.setParent(parent);
-        entity.setContent(content);
-        entity.setIsDeleted(false);
-
-        return entity;
+    public void updateComment(String content) {
+        if (content != null) {
+            this.content = content.trim();
+        }
     }
 }

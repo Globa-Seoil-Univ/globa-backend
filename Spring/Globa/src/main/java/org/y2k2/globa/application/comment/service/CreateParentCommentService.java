@@ -1,17 +1,16 @@
 package org.y2k2.globa.application.comment.service;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.hpsf.Section;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.y2k2.globa.application.comment.command.GetInfoForCommentCommand;
+import org.y2k2.globa.application.comment.dto.common.InfoForCommentDto;
+import org.y2k2.globa.application.comment.dto.request.RequestCommentDto;
 import org.y2k2.globa.application.comment.dto.request.RequestCommentWithIdsDto;
-import org.y2k2.globa.application.comment.dto.request.RequestFirstCommentDto;
 import org.y2k2.globa.application.comment.mapper.CommentMapper;
+import org.y2k2.globa.application.comment.usecase.GetInfoForCommentUseCase;
 import org.y2k2.globa.application.foldershare.command.VerifyFolderCommand;
-import org.y2k2.globa.application.foldershare.usecase.VerifyFolderAccessibleUseCase;
 import org.y2k2.globa.application.foldershare.usecase.VerifyWritableUseCase;
-import org.y2k2.globa.application.hightlight.mapper.HighlightMapper;
 import org.y2k2.globa.application.notification.command.CreateNotificationCommand;
 import org.y2k2.globa.application.notification.command.SendCommentNotificationCommand;
 import org.y2k2.globa.application.notification.dto.common.RequestNotificationWithFolderShareCommentDto;
@@ -33,54 +32,46 @@ import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 @Service
 @RequiredArgsConstructor
-public class CreateFirstCommentService {
-    private final VerifyWritableUseCase verifyWritableUseCase;
+public class CreateParentCommentService {
     private final FindUserUseCase findUserUseCase;
+    private final GetInfoForCommentUseCase getInfoForCommentUseCase;
+    private final VerifyWritableUseCase verifyWritableUseCase;
     private final CreateNotificationUseCase createNotificationUseCase;
     private final SendCommentNotificationUseCase sendCommentNotificationUseCase;
 
-    private final FolderShareRepository folderShareRepository;
-    private final SectionRepository sectionRepository;
     private final CommentRepository commentRepository;
-    private final HighlightRepository highlightRepository;
 
     @Transactional
-    public long create(RequestCommentWithIdsDto idsDto, RequestFirstCommentDto request) {
+    public void create(RequestCommentWithIdsDto idsDto, RequestCommentDto request) {
         verifyWritableUseCase.execute(
                 VerifyFolderCommand.of(idsDto.userId(), idsDto.folderId())
         );
 
         UserEntity user = findUserUseCase.execute(idsDto.userId());
-
-        boolean isAlreadyHighlighted = highlightRepository.hasHighlightInRange(
-                idsDto.sectionId(),
-                request.startIdx(),
-                request.endIdx()
+        InfoForCommentDto info = getInfoForCommentUseCase.execute(
+                GetInfoForCommentCommand.of(idsDto)
         );
-        if (isAlreadyHighlighted) {
-            throw new CustomException(ErrorCode.HIGHLIGHT_DUPLICATED);
-        }
 
-        SectionEntity section = sectionRepository.getSectionJoinFolderAndRecord(idsDto.sectionId(), idsDto.folderId(), idsDto.recordId())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SECTION));
-        HighlightEntity highlight = HighlightMapper.INSTANCE.toEntity(section, request.startIdx(), request.endIdx());
-        HighlightEntity savedHighlight = highlightRepository.save(highlight);
+        CommentEntity comment = CommentMapper.INSTANCE.toParentCommentEntity(
+                user,
+                info.highlight(),
+                request.content()
+        );
+        CommentEntity savedComment = commentRepository.save(comment);
 
-        CommentEntity comment = CommentMapper.INSTANCE.toParentCommentEntity(user, savedHighlight, request.content());
-        commentRepository.save(comment);
+        saveNotification(
+                user,
+                info.section(),
+                savedComment,
+                info.folderShare()
+        );
 
-        FolderShareEntity folderShare = folderShareRepository.getShareInvitation(idsDto.folderId(), idsDto.userId())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SHARE));
-
-        saveNotification(user, section, comment, folderShare);
         sendCommentNotificationUseCase.execute(SendCommentNotificationCommand.of(
                 user,
-                section.getRecord().getFolder(),
-                section.getRecord(),
-                folderShare
+                info.section().getRecord().getFolder(),
+                info.section().getRecord(),
+                info.folderShare()
         ));
-
-        return savedHighlight.getHighlightId();
     }
 
     private void saveNotification(

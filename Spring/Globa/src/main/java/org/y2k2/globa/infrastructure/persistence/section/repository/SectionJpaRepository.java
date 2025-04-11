@@ -30,5 +30,5 @@ public interface SectionJpaRepository extends JpaRepository<SectionEntity, Long>
                         "AND r.recordId = :recordId " +
                         "AND r.folder.folderId = :folderId "
     )
-    Optional<SectionEntity> findByAllJoin(Long sectionId, Long folderId, Long recordId);
+    Optional<SectionEntity> findByJoinFolderAndRecord(Long sectionId, Long folderId, Long recordId);
 }

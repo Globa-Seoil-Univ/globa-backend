@@ -50,8 +50,18 @@ public class FolderShareRepositoryImpl implements FolderShareRepository {
     }
 
     @Override
-    public Boolean isInvited(Long folderId, UserEntity user) {
-        return folderShareJpaRepository.existsByFolder_FolderIdAndTargetUser(folderId, user);
+    public Boolean isInvited(Long userId, Long folderId) {
+        return folderShareJpaRepository.existsByTargetUser_UserIdAndFolder_FolderId(userId, folderId);
+    }
+
+    @Override
+    public Boolean isWritable(Long userId, Long folderId) {
+        return folderShareJpaRepository.existsByTargetUser_UserIdAndFolder_FolderIdAndRoleIn(
+                userId,
+                folderId,
+                InvitationStatus.ACCEPT,
+                List.of(FolderRole.WRITER.getRoleName(), FolderRole.OWNER.getRoleName())
+        );
     }
 
     @Override

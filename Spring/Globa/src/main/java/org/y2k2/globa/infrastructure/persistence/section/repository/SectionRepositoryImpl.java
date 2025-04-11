@@ -35,7 +35,7 @@ public class SectionRepositoryImpl implements SectionRepository {
     }
 
     @Override
-    public Optional<SectionEntity> getSectionAllJoin(Long sectionId, Long folderId, Long recordId) {
-        return sectionJpaRepository.findByAllJoin(sectionId, folderId, recordId);
+    public Optional<SectionEntity> getSectionJoinFolderAndRecord(Long sectionId, Long folderId, Long recordId) {
+        return sectionJpaRepository.findByJoinFolderAndRecord(sectionId, folderId, recordId);
     }
 }
