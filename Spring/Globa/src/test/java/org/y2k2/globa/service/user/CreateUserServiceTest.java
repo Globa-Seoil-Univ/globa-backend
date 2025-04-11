@@ -27,6 +27,7 @@ import org.y2k2.globa.application.userrole.usecase.CreateUserRoleUseCase;
 import org.y2k2.globa.common.type.FolderRole;
 import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.common.util.jwt.JWT;
+import org.y2k2.globa.domain.role.type.UserRole;
 import org.y2k2.globa.domain.user.repository.UserRepository;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
@@ -190,7 +191,7 @@ public class CreateUserServiceTest {
 
         Mockito.doNothing()
                 .when(createUserRoleUseCase)
-                .execute(CreateUserRoleCommand.of(user, "USER"));
+                .execute(CreateUserRoleCommand.of(user, UserRole.USER));
 
         Mockito.when(createDefaultFolderUseCase.execute(CreateDefaultFolderCommand.of(folderRole, user)))
                 .thenReturn(null);

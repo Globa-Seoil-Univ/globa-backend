@@ -8,5 +8,7 @@ import java.util.Optional;
 public interface UserRoleRepository {
     void save(UserRoleEntity entity);
 
-    Optional<UserRoleEntity> getUserRole(UserEntity user);
+    Boolean isWritable(Long userId);
+
+    Optional<UserRoleEntity> getUserRole(Long userId);
 }

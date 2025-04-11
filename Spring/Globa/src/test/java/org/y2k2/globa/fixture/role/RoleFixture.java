@@ -19,7 +19,7 @@ public class RoleFixture extends AbstractFixture<RoleEntity> {
     }
 
     public RoleFixture withName(UserRole role) {
-        roleFactory.setRoleName(role.name());
+        roleFactory.setRoleName(role);
         return this;
     }
 }

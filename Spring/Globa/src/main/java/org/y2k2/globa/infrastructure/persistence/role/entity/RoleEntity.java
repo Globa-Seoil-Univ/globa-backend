@@ -3,6 +3,7 @@ package org.y2k2.globa.infrastructure.persistence.role.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.y2k2.globa.domain.role.type.UserRole;
 
 @Getter
 @Setter
@@ -14,6 +15,7 @@ public class RoleEntity {
     @Column(name = "role_id", columnDefinition = "SMALLINT")
     private Integer roleId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "name", nullable = false, length = 10)
-    private String name;
+    private UserRole name;
 }

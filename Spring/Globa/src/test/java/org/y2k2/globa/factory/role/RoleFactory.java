@@ -24,7 +24,7 @@ public class RoleFactory extends AbstractFactory<RoleEntity> {
     @Autowired
     private RoleTestRepositoryImpl roleRepository;
 
-    private String roleName = UserRole.USER.name();
+    private UserRole roleName = UserRole.USER;
 
     @Override
     protected RoleEntity create() {

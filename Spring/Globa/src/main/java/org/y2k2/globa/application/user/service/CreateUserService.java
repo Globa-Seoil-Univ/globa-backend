@@ -68,7 +68,7 @@ public class CreateUserService {
                 GetFolderRoleCommand.of(FolderRole.OWNER)
         );
 
-        createUserRoleUseCase.execute(CreateUserRoleCommand.of(newUser, UserRole.USER.name()));
+        createUserRoleUseCase.execute(CreateUserRoleCommand.of(newUser, UserRole.USER));
         defaultFolderUseCase.execute(CreateDefaultFolderCommand.of(folderRole, newUser));
 
         return newUser.getUserId();

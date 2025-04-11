@@ -2,10 +2,12 @@ package org.y2k2.globa.infrastructure.persistence.userrole.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.y2k2.globa.domain.role.type.UserRole;
 import org.y2k2.globa.domain.userrole.repository.UserRoleRepository;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.infrastructure.persistence.userrole.entity.UserRoleEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -19,7 +21,15 @@ public class UserRoleRepositoryImpl implements UserRoleRepository {
     }
 
     @Override
-    public Optional<UserRoleEntity> getUserRole(UserEntity user) {
-        return userRoleJpaRepository.findByUser(user);
+    public Boolean isWritable(Long userId) {
+        return userRoleJpaRepository.existsByUser_UserIdAndRole_NameIn(
+                userId,
+                List.of(UserRole.ADMIN, UserRole.EDITOR)
+        );
+    }
+
+    @Override
+    public Optional<UserRoleEntity> getUserRole(Long userId) {
+        return userRoleJpaRepository.findByUser_UserId(userId);
     }
 }
