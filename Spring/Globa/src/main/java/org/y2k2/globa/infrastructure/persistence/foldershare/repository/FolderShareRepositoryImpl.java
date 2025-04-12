@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-import org.y2k2.globa.common.type.FolderRole;
+import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStatus;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;

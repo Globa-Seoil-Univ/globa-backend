@@ -16,7 +16,7 @@ import org.y2k2.globa.application.notification.usecase.CreateNotificationUseCase
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
-import org.y2k2.globa.common.type.FolderRole;
+import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.domain.foldershare.repository.FolderShareRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
@@ -25,8 +25,6 @@ import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareE
 import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStatus;
 import org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

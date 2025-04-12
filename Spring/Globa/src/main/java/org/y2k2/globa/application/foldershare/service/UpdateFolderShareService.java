@@ -7,16 +7,12 @@ import org.y2k2.globa.application.folderrole.usecase.GetFolderRoleUseCase;
 import org.y2k2.globa.application.foldershare.command.VerifyFolderCommand;
 import org.y2k2.globa.application.foldershare.dto.request.RequestInviteDto;
 import org.y2k2.globa.application.foldershare.usecase.VerifyFolderOwnerUseCase;
-import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
-import org.y2k2.globa.common.type.FolderRole;
-import org.y2k2.globa.domain.folder.repository.FolderRepository;
+import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.domain.foldershare.repository.FolderShareRepository;
-import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
 import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
-import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 @Service
 @RequiredArgsConstructor

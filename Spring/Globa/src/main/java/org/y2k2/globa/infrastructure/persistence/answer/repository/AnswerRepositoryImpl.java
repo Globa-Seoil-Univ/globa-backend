@@ -25,12 +25,12 @@ public class AnswerRepositoryImpl implements AnswerRepository {
     }
 
     @Override
-    public Optional<AnswerEntity> getAnswer(Long answerId) {
+    public Optional<AnswerEntity> getAnswerById(Long answerId) {
         return answerJpaRepository.findByAnswerId(answerId);
     }
 
     @Override
-    public Optional<AnswerEntity> getAnswer(InquiryEntity inquiry) {
-        return answerJpaRepository.findByInquiry(inquiry);
+    public Optional<AnswerEntity> getAnswerByInquiryId(Long inquiryId) {
+        return answerJpaRepository.findByInquiry_InquiryId(inquiryId);
     }
 }

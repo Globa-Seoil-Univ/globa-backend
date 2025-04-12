@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface InquiryJpaRepository extends JpaRepository<InquiryEntity, Long> {
     Optional<InquiryEntity> findByInquiryId(Long inquiryId);
-    Page<InquiryEntity> findAllByUserOrderByInquiryIdDesc(UserEntity user, Pageable pageable);
-    Page<InquiryEntity> findAllByUserAndIsSolvedIsTrueOrderByInquiryIdDesc(UserEntity user, Pageable pageable);
-    Page<InquiryEntity> findAllByUserAndIsSolvedIsFalseOrderByInquiryIdDesc(UserEntity user, Pageable pageable);
+    Page<InquiryEntity> findAllByUser_UserIdOrderByInquiryIdDesc(Long userId, Pageable pageable);
+    Page<InquiryEntity> findAllByUser_UserIdAndIsSolvedIsTrueOrderByInquiryIdDesc(Long userId, Pageable pageable);
+    Page<InquiryEntity> findAllByUser_UserIdAndIsSolvedIsFalseOrderByInquiryIdDesc(Long userId, Pageable pageable);
 }

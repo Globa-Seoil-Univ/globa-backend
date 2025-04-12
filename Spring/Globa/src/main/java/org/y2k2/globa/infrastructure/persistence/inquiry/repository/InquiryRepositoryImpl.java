@@ -22,18 +22,18 @@ public class InquiryRepositoryImpl implements InquiryRepository {
     }
 
     @Override
-    public Page<InquiryEntity> getInquiries(UserEntity user, Pageable pageable) {
-        return inquiryJpaRepository.findAllByUserOrderByInquiryIdDesc(user, pageable);
+    public Page<InquiryEntity> getInquiries(Long userId, Pageable pageable) {
+        return inquiryJpaRepository.findAllByUser_UserIdOrderByInquiryIdDesc(userId, pageable);
     }
 
     @Override
-    public Page<InquiryEntity> getSolvedInquiries(UserEntity user, Pageable pageable) {
-        return inquiryJpaRepository.findAllByUserAndIsSolvedIsTrueOrderByInquiryIdDesc(user, pageable);
+    public Page<InquiryEntity> getSolvedInquiries(Long userId, Pageable pageable) {
+        return inquiryJpaRepository.findAllByUser_UserIdAndIsSolvedIsTrueOrderByInquiryIdDesc(userId, pageable);
     }
 
     @Override
-    public Page<InquiryEntity> getUnsolvedInquiries(UserEntity user, Pageable pageable) {
-        return inquiryJpaRepository.findAllByUserAndIsSolvedIsFalseOrderByInquiryIdDesc(user, pageable);
+    public Page<InquiryEntity> getUnsolvedInquiries(Long userId, Pageable pageable) {
+        return inquiryJpaRepository.findAllByUser_UserIdAndIsSolvedIsFalseOrderByInquiryIdDesc(userId, pageable);
     }
 
     @Override

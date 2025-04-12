@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.y2k2.globa.common.annotation.EnumValue;
-import org.y2k2.globa.common.type.FolderRole;
+import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 
 import java.util.List;
 

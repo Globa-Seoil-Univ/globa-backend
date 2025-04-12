@@ -21,7 +21,7 @@ import org.y2k2.globa.application.user.dto.request.RequestNameDto;
 import org.y2k2.globa.application.user.service.UpdateUserNameService;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 import org.y2k2.globa.application.user.usecase.UpdateUserUseCase;
-import org.y2k2.globa.common.type.FolderRole;
+import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;

@@ -9,7 +9,7 @@ import org.y2k2.globa.application.folderrole.usecase.GetFolderRoleUseCase;
 import org.y2k2.globa.application.user.dto.response.ResponseUserDto;
 import org.y2k2.globa.application.user.mapper.UserMapper;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
-import org.y2k2.globa.common.type.FolderRole;
+import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;

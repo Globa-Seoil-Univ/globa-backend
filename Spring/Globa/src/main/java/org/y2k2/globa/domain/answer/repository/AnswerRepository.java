@@ -9,6 +9,6 @@ public interface AnswerRepository {
     AnswerEntity save(AnswerEntity entity);
     void delete(AnswerEntity entity);
 
-    Optional<AnswerEntity> getAnswer(Long answerId);
-    Optional<AnswerEntity> getAnswer(InquiryEntity inquiry);
+    Optional<AnswerEntity> getAnswerById(Long answerId);
+    Optional<AnswerEntity> getAnswerByInquiryId(Long inquiryId);
 }

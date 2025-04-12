@@ -24,7 +24,7 @@ import org.y2k2.globa.application.user.service.CreateUserService;
 import org.y2k2.globa.application.user.usecase.*;
 import org.y2k2.globa.application.userrole.command.CreateUserRoleCommand;
 import org.y2k2.globa.application.userrole.usecase.CreateUserRoleUseCase;
-import org.y2k2.globa.common.type.FolderRole;
+import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.common.util.jwt.JWT;
 import org.y2k2.globa.domain.role.type.UserRole;

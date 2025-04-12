@@ -4,20 +4,14 @@ import lombok.Getter;
 
 @Getter
 public enum InquirySort {
-    S("s"),
-    R("r"),
-    N("n");
-
-    private final String value;
-
-    InquirySort(String value) {
-        this.value = value;
-    }
+    S,
+    R,
+    N;
 
     public static InquirySort from(String s) {
-        if (s.equals("s")) {
+        if (s.equalsIgnoreCase("s")) {
             return InquirySort.S;
-        } else if (s.equals("n")) {
+        } else if (s.equalsIgnoreCase("n")) {
             return InquirySort.N;
         } else {
             return InquirySort.R;

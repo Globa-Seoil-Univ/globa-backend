@@ -1,4 +1,4 @@
-package org.y2k2.globa.common.type;
+package org.y2k2.globa.infrastructure.persistence.folderrole.type;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
