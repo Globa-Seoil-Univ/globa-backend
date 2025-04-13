@@ -38,12 +38,12 @@ public class CreateDummyImageService {
                 .orElseThrow(() -> {
                     UserEntity user = findUserUseCase.execute(userId);
                     createUserRoleUseCase.execute(CreateUserRoleCommand.of(user, UserRole.USER));
-                    return new CustomException(ErrorCode.NOT_DESERVE_ADD_NOTICE);
+                    return new CustomException(ErrorCode.NOT_PERMISSION);
                 });
 
         UserRole roleName = userRole.getRole().getName();
         if (!(roleName.equals(UserRole.ADMIN) || roleName.equals(UserRole.EDITOR))) {
-            throw new CustomException(ErrorCode.NOT_DESERVE_ADD_NOTICE);
+            throw new CustomException(ErrorCode.NOT_PERMISSION);
         }
 
         FileDto file = fileStore.storeFile("notices/images/", dto.image());

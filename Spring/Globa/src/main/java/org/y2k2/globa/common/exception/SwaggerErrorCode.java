@@ -37,38 +37,38 @@ public class SwaggerErrorCode {
     public static final String INVALID_SNS_TOKEN_VALUE = "40140";
 
     /* 403 FORBIDDEN : 잘못된 접근 */
-    public static final String NOT_DESERVE_ADD_NOTICE = "NOT_DESERVE_ADD_NOTICE";
-    public static final String NOT_DESERVE_ADD_NOTICE_VALUE = "40320";
+    public static final String NOT_PERMISSION = "NOT_PERMISSION";
+    public static final String NOT_PERMISSION_VALUE = "40310";
     public static final String NOT_DESERVE_ACCESS_FOLDER = "NOT_DESERVE_ACCESS_FOLDER";
-    public static final String NOT_DESERVE_ACCESS_FOLDER_VALUE = "40321";
+    public static final String NOT_DESERVE_ACCESS_FOLDER_VALUE = "40311";
     public static final String NOT_DESERVE_POST_COMMENT = "NOT_DESERVE_POST_COMMENT";
-    public static final String NOT_DESERVE_POST_COMMENT_VALUE = "40323";
+    public static final String NOT_DESERVE_POST_COMMENT_VALUE = "40313";
     public static final String NOT_DESERVE_FCM = "NOT_DESERVE_FCM";
-    public static final String NOT_DESERVE_FCM_VALUE = "40324";
+    public static final String NOT_DESERVE_FCM_VALUE = "40314";
     public static final String NOT_DESERVE_DICTIONARY  = "NOT_DESERVE_DICTIONARY";
-    public static final String NOT_DESERVE_DICTIONARY_VALUE = "40325";
+    public static final String NOT_DESERVE_DICTIONARY_VALUE = "40315";
     public static final String NOT_DESERVE_ACCEPT_INVITATION  = "NOT_DESERVE_DICTIONARY";
-    public static final String NOT_DESERVE_ACCEPT_INVITATION_VALUE = "40326";
+    public static final String NOT_DESERVE_ACCEPT_INVITATION_VALUE = "40316";
     public static final String NOT_DESERVE_ACCESS_NOTIFICATION = "NOT_DESERVE_ACCESS_NOTIFICATION";
-    public static final String NOT_DESERVE_ACCESS_NOTIFICATION_VALUE = "40327";
+    public static final String NOT_DESERVE_ACCESS_NOTIFICATION_VALUE = "40317";
     public static final String MISMATCH_INQUIRY_OWNER = "MISMATCH_INQUIRY_OWNER";
-    public static final String MISMATCH_INQUIRY_OWNER_VALUE = "40340";
+    public static final String MISMATCH_INQUIRY_OWNER_VALUE = "40320";
     public static final String MISMATCH_FOLDER_OWNER = "MISMATCH_FOLDER_OWNER";
-    public static final String MISMATCH_FOLDER_OWNER_VALUE = "40341";
+    public static final String MISMATCH_FOLDER_OWNER_VALUE = "40321";
     public static final String MISMATCH_COMMENT_OWNER = "MISMATCH_COMMENT_OWNER";
-    public static final String MISMATCH_COMMENT_OWNER_VALUE = "40342";
+    public static final String MISMATCH_COMMENT_OWNER_VALUE = "40322";
     public static final String MISMATCH_ANALYSIS_OWNER = "MISMATCH_ANALYSIS_OWNER";
-    public static final String MISMATCH_ANALYSIS_OWNER_VALUE = "40344";
+    public static final String MISMATCH_ANALYSIS_OWNER_VALUE = "40323";
     public static final String MISMATCH_QUIZ_RECORD_ID = "MISMATCH_QUIZ_RECORD_ID";
-    public static final String MISMATCH_QUIZ_RECORD_ID_VALUE = "40346";
+    public static final String MISMATCH_QUIZ_RECORD_ID_VALUE = "40324";
     public static final String MISMATCH_RECORD_OWNER = "MISMATCH_RECORD_OWNER";
-    public static final String MISMATCH_RECORD_OWNER_VALUE = "40347";
+    public static final String MISMATCH_RECORD_OWNER_VALUE = "40325";
     public static final String MISMATCH_RECORD_FOLDER = "MISMATCH_RECORD_FOLDER";
-    public static final String MISMATCH_RECORD_FOLDER_VALUE = "40348";
+    public static final String MISMATCH_RECORD_FOLDER_VALUE = "40326";
     public static final String DELETED_USER = "DELETED_USER";
     public static final String DELETED_USER_VALUE = "40330";
     public static final String NOT_ALLOW_NOTIFICATION_SETTING = "NOT_ALLOW_NOTIFICATION_SETTING";
-    public static final String NOT_ALLOW_NOTIFICATION_SETTING_VALUE = "40360";
+    public static final String NOT_ALLOW_NOTIFICATION_SETTING_VALUE = "40340";
 
     /* 404 NOT_FOUND : 값이 없음 */
     public static final String NOT_FOUND = "NOT_FOUND";

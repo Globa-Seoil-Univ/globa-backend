@@ -1,14 +1,11 @@
 package org.y2k2.globa.application.answer.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
-@Getter
-@AllArgsConstructor
-public class RequestAnswerDto {
-    @NotBlank(message = "You must request title field")
-    private final String title;
-    @NotBlank(message = "You must request content field")
-    private final String content;
+public record RequestAnswerDto(
+        @NotBlank(message = "You must request title field")
+        String title,
+        @NotBlank(message = "You must request content field")
+        String content
+) {
 }

@@ -6,7 +6,7 @@ import org.y2k2.globa.application.comment.command.GetMyCommentCommand;
 import org.y2k2.globa.application.comment.dto.request.RequestCommentWithIdsDto;
 import org.y2k2.globa.application.comment.usecase.GetMyCommentUseCase;
 import org.y2k2.globa.application.foldershare.command.VerifyFolderCommand;
-import org.y2k2.globa.application.foldershare.usecase.VerifyWritableUseCase;
+import org.y2k2.globa.application.foldershare.usecase.VerifyFolderWritableUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.util.CustomTimestamp;
@@ -20,14 +20,14 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class DeleteCommentService {
-    private final VerifyWritableUseCase verifyWritableUseCase;
+    private final VerifyFolderWritableUseCase verifyFolderWritableUseCase;
     private final GetMyCommentUseCase getMyCommentUseCase;
 
     private final CommentRepository commentRepository;
     private final HighlightRepository highlightRepository;
 
     public void delete(RequestCommentWithIdsDto idsDto, Long commentId) {
-        verifyWritableUseCase.execute(VerifyFolderCommand.of(idsDto.userId(), idsDto.folderId()));
+        verifyFolderWritableUseCase.execute(VerifyFolderCommand.of(idsDto.userId(), idsDto.folderId()));
 
         CommentEntity comment = getMyCommentUseCase.execute(
                 GetMyCommentCommand.of(idsDto.userId(), idsDto.highlightId(), commentId)

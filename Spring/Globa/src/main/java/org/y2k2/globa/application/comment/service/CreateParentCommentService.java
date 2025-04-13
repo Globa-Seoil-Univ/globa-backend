@@ -10,22 +10,16 @@ import org.y2k2.globa.application.comment.dto.request.RequestCommentWithIdsDto;
 import org.y2k2.globa.application.comment.mapper.CommentMapper;
 import org.y2k2.globa.application.comment.usecase.GetInfoForCommentUseCase;
 import org.y2k2.globa.application.foldershare.command.VerifyFolderCommand;
-import org.y2k2.globa.application.foldershare.usecase.VerifyWritableUseCase;
+import org.y2k2.globa.application.foldershare.usecase.VerifyFolderWritableUseCase;
 import org.y2k2.globa.application.notification.command.CreateNotificationCommand;
 import org.y2k2.globa.application.notification.command.SendCommentNotificationCommand;
 import org.y2k2.globa.application.notification.dto.common.RequestNotificationWithFolderShareCommentDto;
 import org.y2k2.globa.application.notification.usecase.CreateNotificationUseCase;
 import org.y2k2.globa.application.notification.usecase.SendCommentNotificationUseCase;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
-import org.y2k2.globa.common.exception.CustomException;
-import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.domain.comment.repository.CommentRepository;
-import org.y2k2.globa.domain.foldershare.repository.FolderShareRepository;
-import org.y2k2.globa.domain.highlight.repository.HighlightRepository;
-import org.y2k2.globa.domain.section.repository.SectionRepository;
 import org.y2k2.globa.infrastructure.persistence.comment.entity.CommentEntity;
 import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
-import org.y2k2.globa.infrastructure.persistence.highlight.entity.HighlightEntity;
 import org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType;
 import org.y2k2.globa.infrastructure.persistence.section.entity.SectionEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
@@ -35,7 +29,7 @@ import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 public class CreateParentCommentService {
     private final FindUserUseCase findUserUseCase;
     private final GetInfoForCommentUseCase getInfoForCommentUseCase;
-    private final VerifyWritableUseCase verifyWritableUseCase;
+    private final VerifyFolderWritableUseCase verifyFolderWritableUseCase;
     private final CreateNotificationUseCase createNotificationUseCase;
     private final SendCommentNotificationUseCase sendCommentNotificationUseCase;
 
@@ -43,7 +37,7 @@ public class CreateParentCommentService {
 
     @Transactional
     public void create(RequestCommentWithIdsDto idsDto, RequestCommentDto request) {
-        verifyWritableUseCase.execute(
+        verifyFolderWritableUseCase.execute(
                 VerifyFolderCommand.of(idsDto.userId(), idsDto.folderId())
         );
 

@@ -26,7 +26,7 @@ public enum ErrorCode {
     INVALID_SNS_TOKEN(HttpStatus.UNAUTHORIZED,  "유효하지 않은 Sns Token 입니다.", "40140"),
 
     /* 403 FORBIDDEN : 잘못된 접근 */
-    NOT_DESERVE_ADD_NOTICE(HttpStatus.FORBIDDEN,"오직 admin 혹은 editor만 작성할 수 있습니다.","40310"),
+    NOT_PERMISSION(HttpStatus.FORBIDDEN,"오직 관리자와 편집자만 작성할 수 있습니다.","40310"),
     NOT_DESERVE_ACCESS_FOLDER(HttpStatus.FORBIDDEN,"해당 폴더에 대한 접근 권한이 없습니다.","40311"),
     NOT_DESERVE_POST_COMMENT(HttpStatus.FORBIDDEN,"댓글을 작성할 수 있는 권한이 없습니다.","40313"),
     NOT_DESERVE_FCM(HttpStatus.FORBIDDEN,"관리자 또는 편집자만 요청할 수 있습니다.","40314"),
@@ -36,10 +36,10 @@ public enum ErrorCode {
     MISMATCH_INQUIRY_OWNER(HttpStatus.FORBIDDEN, "해당 문의에 대한 소유권자가 아닙니다.", "40320"),
     MISMATCH_FOLDER_OWNER(HttpStatus.FORBIDDEN, "해당 폴더에 대한 소유권자가 아닙니다.", "40321"),
     MISMATCH_COMMENT_OWNER(HttpStatus.FORBIDDEN, "해당 댓글에 대한 소유권자가 아닙니다.", "40322"),
-    MISMATCH_ANALYSIS_OWNER(HttpStatus.FORBIDDEN, "해당 분석에 대한 소유권자가 아닙니다.", "40324"),
-    MISMATCH_QUIZ_RECORD_ID(HttpStatus.FORBIDDEN, "해당 문서의 퀴즈가 아닙니다.", "40326"),
-    MISMATCH_RECORD_OWNER(HttpStatus.FORBIDDEN, "해당 문서에 대한 소유권자가 아닙니다.", "40327"),
-    MISMATCH_RECORD_FOLDER(HttpStatus.FORBIDDEN, "해당 폴더의 문서가 아닙니다.", "40328"),
+    MISMATCH_ANALYSIS_OWNER(HttpStatus.FORBIDDEN, "해당 분석에 대한 소유권자가 아닙니다.", "40323"),
+    MISMATCH_QUIZ_RECORD_ID(HttpStatus.FORBIDDEN, "해당 문서의 퀴즈가 아닙니다.", "40324"),
+    MISMATCH_RECORD_OWNER(HttpStatus.FORBIDDEN, "해당 문서에 대한 소유권자가 아닙니다.", "40325"),
+    MISMATCH_RECORD_FOLDER(HttpStatus.FORBIDDEN, "해당 폴더의 문서가 아닙니다.", "40326"),
     DELETED_USER(HttpStatus.FORBIDDEN, "탈퇴된 유저입니다.", "40330"),
     NOT_ALLOW_NOTIFICATION_SETTING(HttpStatus.FORBIDDEN, "알림 설정이 허용되지 않았습니다.", "40340"),
 

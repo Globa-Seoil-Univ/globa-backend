@@ -1,16 +1,13 @@
 package org.y2k2.globa.application.comment.service;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.hpsf.Section;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.application.comment.dto.request.RequestCommentWithIdsDto;
 import org.y2k2.globa.application.comment.dto.request.RequestFirstCommentDto;
 import org.y2k2.globa.application.comment.mapper.CommentMapper;
 import org.y2k2.globa.application.foldershare.command.VerifyFolderCommand;
-import org.y2k2.globa.application.foldershare.usecase.VerifyFolderAccessibleUseCase;
-import org.y2k2.globa.application.foldershare.usecase.VerifyWritableUseCase;
+import org.y2k2.globa.application.foldershare.usecase.VerifyFolderWritableUseCase;
 import org.y2k2.globa.application.hightlight.mapper.HighlightMapper;
 import org.y2k2.globa.application.notification.command.CreateNotificationCommand;
 import org.y2k2.globa.application.notification.command.SendCommentNotificationCommand;
@@ -34,7 +31,7 @@ import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 @Service
 @RequiredArgsConstructor
 public class CreateFirstCommentService {
-    private final VerifyWritableUseCase verifyWritableUseCase;
+    private final VerifyFolderWritableUseCase verifyFolderWritableUseCase;
     private final FindUserUseCase findUserUseCase;
     private final CreateNotificationUseCase createNotificationUseCase;
     private final SendCommentNotificationUseCase sendCommentNotificationUseCase;
@@ -46,7 +43,7 @@ public class CreateFirstCommentService {
 
     @Transactional
     public long create(RequestCommentWithIdsDto idsDto, RequestFirstCommentDto request) {
-        verifyWritableUseCase.execute(
+        verifyFolderWritableUseCase.execute(
                 VerifyFolderCommand.of(idsDto.userId(), idsDto.folderId())
         );
 

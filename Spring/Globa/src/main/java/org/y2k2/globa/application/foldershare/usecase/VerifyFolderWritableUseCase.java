@@ -10,7 +10,7 @@ import org.y2k2.globa.domain.foldershare.repository.FolderShareRepository;
 
 @Component
 @RequiredArgsConstructor
-public class VerifyWritableUseCase implements VoidUseCase<VerifyFolderCommand> {
+public class VerifyFolderWritableUseCase implements VoidUseCase<VerifyFolderCommand> {
     private final FolderShareRepository folderShareRepository;
 
     @Override

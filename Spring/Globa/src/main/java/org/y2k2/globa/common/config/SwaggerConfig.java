@@ -68,7 +68,7 @@ public class SwaggerConfig {
         components.addExamples(ErrorCode.EXPIRED_REFRESH_TOKEN.getErrorCode(), createExample(ErrorCode.EXPIRED_REFRESH_TOKEN.getErrorCode(), "만료된 갱신 토큰입니다."));
 
         // 403 Errors
-        components.addExamples(ErrorCode.NOT_DESERVE_ADD_NOTICE.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_ADD_NOTICE.getErrorCode(), "공지 추가 권한이 없습니다."));
+        components.addExamples(ErrorCode.NOT_PERMISSION.getErrorCode(), createExample(ErrorCode.NOT_PERMISSION.getErrorCode(), "오직 관리자와 편집자만 작성할 수 있습니다."));
         components.addExamples(ErrorCode.NOT_DESERVE_ACCESS_FOLDER.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_ACCESS_FOLDER.getErrorCode(), "폴더 접근 권한이 없습니다."));
         components.addExamples(ErrorCode.NOT_DESERVE_POST_COMMENT.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_POST_COMMENT.getErrorCode(), "댓글 작성 권한이 없습니다."));
         components.addExamples(ErrorCode.NOT_DESERVE_FCM.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_FCM.getErrorCode(), "관리자 또는 편집자만 요청할 수 있습니다."));
