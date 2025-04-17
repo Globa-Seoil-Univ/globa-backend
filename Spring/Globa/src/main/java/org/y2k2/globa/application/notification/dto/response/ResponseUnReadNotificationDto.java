@@ -7,10 +7,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class ResponseUnreadCountDto {
-    Long all;
-    Long notice;
-    Long share;
-    Long document;
-    Long inquiry;
+public class ResponseUnReadNotificationDto {
+    Boolean hasUnRead;
 }

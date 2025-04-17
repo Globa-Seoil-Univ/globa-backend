@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.y2k2.globa.application.notification.dto.common.NotificationParameters;
 import org.y2k2.globa.domain.notification.repository.NotificationRepository;
 import org.y2k2.globa.infrastructure.persistence.notification.projection.NotificationProjection;
 import org.y2k2.globa.infrastructure.persistence.notification.projection.NotificationUnReadCountProjection;
@@ -39,8 +40,16 @@ public class NotificationRepositoryImpl implements NotificationRepository {
     }
 
     @Override
-    public Page<NotificationProjection> getNotifications(Long userId, boolean includeNotice, boolean includeInvite, boolean includeShare, boolean includeRecord, boolean includeInquiry, Pageable pageable) {
-        return notificationJpaRepository.findAllByReceiverOrTypeIdInOrderByNotificationIdDesc(userId, includeNotice, includeInvite, includeShare, includeRecord, includeInquiry, pageable);
+    public Page<NotificationProjection> getNotifications(Long userId, NotificationParameters parameters, Pageable pageable) {
+        return notificationJpaRepository.findAllByReceiverOrTypeIdInOrderByNotificationIdDesc(
+                userId,
+                parameters.getNotice(),
+                parameters.getInvite(),
+                parameters.getShare(),
+                parameters.getRecord(),
+                parameters.getInquiry(),
+                pageable
+        );
     }
 
     @Override

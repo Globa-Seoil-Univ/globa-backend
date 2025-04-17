@@ -2,6 +2,7 @@ package org.y2k2.globa.domain.notification.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.y2k2.globa.application.notification.dto.common.NotificationParameters;
 import org.y2k2.globa.infrastructure.persistence.notification.entity.NotificationEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.infrastructure.persistence.notification.projection.NotificationProjection;
@@ -19,11 +20,7 @@ public interface NotificationRepository {
 
     Page<NotificationProjection> getNotifications(
             Long userId,
-            boolean includeNotice,
-            boolean includeInvite,
-            boolean includeShare,
-            boolean includeRecord,
-            boolean includeInquiry,
+            NotificationParameters parameters,
             Pageable pageable
     );
 

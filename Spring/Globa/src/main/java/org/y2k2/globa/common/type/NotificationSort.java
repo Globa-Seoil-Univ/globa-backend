@@ -17,7 +17,7 @@ public enum NotificationSort {
     }
 
     public static NotificationSort valueOfString(String s) {
-        return switch (s) {
+        return switch (s.toLowerCase()) {
             case "n" -> NotificationSort.NOTICE;
             case "s" -> NotificationSort.SHARE;
             case "r" -> NotificationSort.RECORD;
