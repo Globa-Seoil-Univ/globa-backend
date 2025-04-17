@@ -6,9 +6,9 @@ import org.y2k2.globa.infrastructure.persistence.dictionary.entity.DictionaryEnt
 import java.util.List;
 
 public interface DictionaryRepository {
-    void deleteAll();
+    void truncate();
 
     void bulkInsert(List<DictionaryDto> dtos);
 
-    List<DictionaryEntity> getWords(String word, String engWord);
+    List<DictionaryEntity> getWords(String word);
 }

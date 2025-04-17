@@ -19,8 +19,8 @@ public class DictionaryRepositoryImpl implements DictionaryRepository {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public void deleteAll() {
-        dictionaryJpaRepository.deleteAllInBatch();
+    public void truncate() {
+        dictionaryJpaRepository.truncate();
     }
 
     @Override
@@ -52,7 +52,7 @@ public class DictionaryRepositoryImpl implements DictionaryRepository {
     }
 
     @Override
-    public List<DictionaryEntity> getWords(String word, String engWord) {
-        return dictionaryJpaRepository.findTop10ByWordStartingWithOrEngWordStartingWithOrderByDictionaryIdAsc(word, engWord);
+    public List<DictionaryEntity> getWords(String word) {
+        return dictionaryJpaRepository.findTop10ByWord(word, word);
     }
 }
