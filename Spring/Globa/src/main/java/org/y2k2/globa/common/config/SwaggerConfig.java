@@ -71,9 +71,7 @@ public class SwaggerConfig {
         components.addExamples(ErrorCode.NOT_PERMISSION.getErrorCode(), createExample(ErrorCode.NOT_PERMISSION.getErrorCode(), "오직 관리자와 편집자만 작성할 수 있습니다."));
         components.addExamples(ErrorCode.NOT_DESERVE_ACCESS_FOLDER.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_ACCESS_FOLDER.getErrorCode(), "폴더 접근 권한이 없습니다."));
         components.addExamples(ErrorCode.NOT_DESERVE_POST_COMMENT.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_POST_COMMENT.getErrorCode(), "댓글 작성 권한이 없습니다."));
-        components.addExamples(ErrorCode.NOT_DESERVE_FCM.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_FCM.getErrorCode(), "관리자 또는 편집자만 요청할 수 있습니다."));
-        components.addExamples(ErrorCode.NOT_DESERVE_DICTIONARY.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_DICTIONARY.getErrorCode(), "관리자 또는 편집자만 요청할 수 있습니다."));
-        components.addExamples(ErrorCode.NOT_DESERVE_DICTIONARY.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_ACCEPT_INVITATION.getErrorCode(), "초대를 수락할 수 있는 권한이 없습니다."));
+        components.addExamples(ErrorCode.NOT_DESERVE_ACCEPT_INVITATION.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_ACCEPT_INVITATION.getErrorCode(), "초대를 수락할 수 있는 권한이 없습니다."));
         components.addExamples(ErrorCode.NOT_DESERVE_ACCESS_NOTIFICATION.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_ACCESS_NOTIFICATION.getErrorCode(), "알림 접근 권한이 없습니다."));
 
         components.addExamples(ErrorCode.MISMATCH_INQUIRY_OWNER.getErrorCode(), createExample(ErrorCode.MISMATCH_INQUIRY_OWNER.getErrorCode(), "문의 작성자만 요청할 수 있습니다."));
@@ -84,7 +82,6 @@ public class SwaggerConfig {
         components.addExamples(ErrorCode.MISMATCH_RECORD_FOLDER.getErrorCode(), createExample(ErrorCode.MISMATCH_RECORD_FOLDER.getErrorCode(), "요청한 음성 파일은 해당 폴더에 속해있지 않습니다."));
 
         components.addExamples(ErrorCode.DELETED_USER.getErrorCode(), createExample(ErrorCode.DELETED_USER.getErrorCode(), "탈퇴된 사용자입니다."));
-        components.addExamples(ErrorCode.NOT_ALLOW_NOTIFICATION_SETTING.getErrorCode(), createExample(ErrorCode.NOT_ALLOW_NOTIFICATION_SETTING.getErrorCode(), "알림 설정이 허용되지 않았습니다."));
 
         // 404 Errors
         components.addExamples(ErrorCode.NOT_FOUND_USER.getErrorCode(), createExample(ErrorCode.NOT_FOUND_USER.getErrorCode(), "사용자를 찾을 수 없습니다."));
@@ -98,21 +95,18 @@ public class SwaggerConfig {
         components.addExamples(ErrorCode.NOT_FOUND_FOLDER.getErrorCode(), createExample(ErrorCode.NOT_FOUND_FOLDER.getErrorCode(), "폴더를 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_TARGET_FOLDER.getErrorCode(), createExample(ErrorCode.NOT_FOUND_TARGET_FOLDER.getErrorCode(), "대상 폴더를 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_SHARE.getErrorCode(), createExample(ErrorCode.NOT_FOUND_SHARE.getErrorCode(), "공유 초대를 찾을 수 없습니다."));
-        components.addExamples(ErrorCode.NOT_FOUND_FOLDER_FIREBASE.getErrorCode(), createExample(ErrorCode.NOT_FOUND_FOLDER_FIREBASE.getErrorCode(), "Firebase Storage에서 폴더를 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_HIGHLIGHT.getErrorCode(), createExample(ErrorCode.NOT_FOUND_HIGHLIGHT.getErrorCode(), "하이라이트를 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_PARENT_COMMENT.getErrorCode(), createExample(ErrorCode.NOT_FOUND_PARENT_COMMENT.getErrorCode(), "부모 댓글을 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_RECORD.getErrorCode(), createExample(ErrorCode.NOT_FOUND_RECORD.getErrorCode(), "레코드를 찾을 수 없습니다."));
-        components.addExamples(ErrorCode.NOT_FOUND_ANALYSIS.getErrorCode(), createExample(ErrorCode.NOT_FOUND_ANALYSIS.getErrorCode(), "분석을 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_QUIZ.getErrorCode(), createExample(ErrorCode.NOT_FOUND_QUIZ.getErrorCode(), "퀴즈를 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_RECORD_FIREBASE.getErrorCode(), createExample(ErrorCode.NOT_FOUND_RECORD_FIREBASE.getErrorCode(), "Firebase Storage에서 음성을 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_SECTION.getErrorCode(), createExample(ErrorCode.NOT_FOUND_SECTION.getErrorCode(), "섹션을 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_COMMENT.getErrorCode(), createExample(ErrorCode.NOT_FOUND_COMMENT.getErrorCode(), "댓글을 찾을 수 없습니다."));
 
-        // 409 Errors
+        // 409 Error
         components.addExamples(ErrorCode.HIGHLIGHT_DUPLICATED.getErrorCode(), createExample(ErrorCode.HIGHLIGHT_DUPLICATED.getErrorCode(), "댓글 하이라이트 중복입니다."));
         components.addExamples(ErrorCode.INQUIRY_ANSWER_DUPLICATED.getErrorCode(), createExample(ErrorCode.INQUIRY_ANSWER_DUPLICATED.getErrorCode(), "문의 답변이 이미 존재합니다."));
         components.addExamples(ErrorCode.SHARE_USER_DUPLICATED.getErrorCode(), createExample(ErrorCode.SHARE_USER_DUPLICATED.getErrorCode(), "이미 초대한 사용자입니다."));
-        components.addExamples(ErrorCode.NOTIFICATION_READ_DUPLICATED.getErrorCode() , createExample(ErrorCode.NOTIFICATION_READ_DUPLICATED.getErrorCode() , "이미 읽은 알림입니다."));
 
         // 500 Errors
         components.addResponses("500", createApiResponse(exceptionSchema, "Internal Server Error", createExample(ErrorCode.INTERNAL_SERVER_ERROR.getErrorCode(), "서버 내부 오류가 발생하였습니다.")));

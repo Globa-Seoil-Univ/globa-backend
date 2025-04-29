@@ -42,15 +42,11 @@ public class SwaggerErrorCode {
     public static final String NOT_DESERVE_ACCESS_FOLDER = "NOT_DESERVE_ACCESS_FOLDER";
     public static final String NOT_DESERVE_ACCESS_FOLDER_VALUE = "40311";
     public static final String NOT_DESERVE_POST_COMMENT = "NOT_DESERVE_POST_COMMENT";
-    public static final String NOT_DESERVE_POST_COMMENT_VALUE = "40313";
-    public static final String NOT_DESERVE_FCM = "NOT_DESERVE_FCM";
-    public static final String NOT_DESERVE_FCM_VALUE = "40314";
-    public static final String NOT_DESERVE_DICTIONARY  = "NOT_DESERVE_DICTIONARY";
-    public static final String NOT_DESERVE_DICTIONARY_VALUE = "40315";
-    public static final String NOT_DESERVE_ACCEPT_INVITATION  = "NOT_DESERVE_DICTIONARY";
-    public static final String NOT_DESERVE_ACCEPT_INVITATION_VALUE = "40316";
+    public static final String NOT_DESERVE_POST_COMMENT_VALUE = "40312";
+    public static final String NOT_DESERVE_ACCEPT_INVITATION  = "NOT_DESERVE_ACCEPT_INVITATION";
+    public static final String NOT_DESERVE_ACCEPT_INVITATION_VALUE = "40313";
     public static final String NOT_DESERVE_ACCESS_NOTIFICATION = "NOT_DESERVE_ACCESS_NOTIFICATION";
-    public static final String NOT_DESERVE_ACCESS_NOTIFICATION_VALUE = "40317";
+    public static final String NOT_DESERVE_ACCESS_NOTIFICATION_VALUE = "40314";
     public static final String MISMATCH_INQUIRY_OWNER = "MISMATCH_INQUIRY_OWNER";
     public static final String MISMATCH_INQUIRY_OWNER_VALUE = "40320";
     public static final String MISMATCH_FOLDER_OWNER = "MISMATCH_FOLDER_OWNER";
@@ -67,8 +63,6 @@ public class SwaggerErrorCode {
     public static final String MISMATCH_RECORD_FOLDER_VALUE = "40326";
     public static final String DELETED_USER = "DELETED_USER";
     public static final String DELETED_USER_VALUE = "40330";
-    public static final String NOT_ALLOW_NOTIFICATION_SETTING = "NOT_ALLOW_NOTIFICATION_SETTING";
-    public static final String NOT_ALLOW_NOTIFICATION_SETTING_VALUE = "40340";
 
     /* 404 NOT_FOUND : 값이 없음 */
     public static final String NOT_FOUND = "NOT_FOUND";
@@ -96,22 +90,18 @@ public class SwaggerErrorCode {
     public static final String NOT_FOUND_TARGET_FOLDER_VALUE = "40453";
     public static final String NOT_FOUND_SHARE = "NOT_FOUND_SHARE";
     public static final String NOT_FOUND_SHARE_VALUE = "40454";
-    public static final String NOT_FOUND_FOLDER_FIREBASE = "NOT_FOUND_FOLDER_FIREBASE";
-    public static final String NOT_FOUND_FOLDER_FIREBASE_VALUE = "40455";
     public static final String NOT_FOUND_HIGHLIGHT = "NOT_FOUND_HIGHLIGHT";
     public static final String NOT_FOUND_HIGHLIGHT_VALUE = "40460";
     public static final String NOT_FOUND_PARENT_COMMENT = "NOT_FOUND_PARENT_COMMENT";
     public static final String NOT_FOUND_PARENT_COMMENT_VALUE = "40470";
     public static final String NOT_FOUND_RECORD = "NOT_FOUND_RECORD";
     public static final String NOT_FOUND_RECORD_VALUE = "40480";
-    public static final String NOT_FOUND_ANALYSIS = "NOT_FOUND_ANALYSIS";
-    public static final String NOT_FOUND_ANALYSIS_VALUE = "40481";
     public static final String NOT_FOUND_QUIZ = "NOT_FOUND_QUIZ";
-    public static final String NOT_FOUND_QUIZ_VALUE = "40482";
+    public static final String NOT_FOUND_QUIZ_VALUE = "40481";
     public static final String NOT_FOUND_RECORD_FIREBASE = "NOT_FOUND_RECORD_FIREBASE";
-    public static final String NOT_FOUND_RECORD_FIREBASE_VALUE = "40483";
+    public static final String NOT_FOUND_RECORD_FIREBASE_VALUE = "40482";
     public static final String NOT_FOUND_SECTION = "NOT_FOUND_SECTION";
-    public static final String NOT_FOUND_SECTION_VALUE = "40484";
+    public static final String NOT_FOUND_SECTION_VALUE = "40483";
     public static final String NOT_FOUND_COMMENT = "NOT_FOUND_COMMENT";
     public static final String NOT_FOUND_COMMENT_VALUE = "40490";
 
@@ -122,8 +112,6 @@ public class SwaggerErrorCode {
     public static final String INQUIRY_ANSWER_DUPLICATED_VALUE = "40930";
     public static final String SHARE_USER_DUPLICATED = "SHARE_USER_DUPLICATED";
     public static final String SHARE_USER_DUPLICATED_VALUE = "40940";
-    public static final String NOTIFICATION_READ_DUPLICATED = "NOTIFICATION_READ_DUPLICATED";
-    public static final String NOTIFICATION_READ_DUPLICATED_VALUE = "40950";
 
     /* 500 SERVER ERROR : 서버 단 에러 */
     public static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";

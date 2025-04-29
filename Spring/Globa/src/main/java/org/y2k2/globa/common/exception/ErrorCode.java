@@ -21,18 +21,15 @@ public enum ErrorCode {
     /* 401 UNAUTHORIZED : 허락되지 않은 사용자 */
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 Access 토큰입니다.", "40110"),
     SIGNATURE(HttpStatus.UNAUTHORIZED, "토큰이 일치하지 않습니다.", "40120"),
-    EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED,  "Refresh 토큰이 만료" +
-            "되었습니다.", "40130"),
+    EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED,  "Refresh 토큰이 만료되었습니다.", "40130"),
     INVALID_SNS_TOKEN(HttpStatus.UNAUTHORIZED,  "유효하지 않은 Sns Token 입니다.", "40140"),
 
     /* 403 FORBIDDEN : 잘못된 접근 */
     NOT_PERMISSION(HttpStatus.FORBIDDEN,"오직 관리자와 편집자만 작성할 수 있습니다.","40310"),
     NOT_DESERVE_ACCESS_FOLDER(HttpStatus.FORBIDDEN,"해당 폴더에 대한 접근 권한이 없습니다.","40311"),
-    NOT_DESERVE_POST_COMMENT(HttpStatus.FORBIDDEN,"댓글을 작성할 수 있는 권한이 없습니다.","40313"),
-    NOT_DESERVE_FCM(HttpStatus.FORBIDDEN,"관리자 또는 편집자만 요청할 수 있습니다.","40314"),
-    NOT_DESERVE_DICTIONARY(HttpStatus.FORBIDDEN,"관리자 또는 편집자만 요청할 수 있습니다.","40315"),
-    NOT_DESERVE_ACCEPT_INVITATION(HttpStatus.FORBIDDEN,"초대를 수락할 수 있는 권한이 없습니다.","40316"),
-    NOT_DESERVE_ACCESS_NOTIFICATION(HttpStatus.FORBIDDEN,"알림에 대한 접근 권한이 없습니다. ","40317"),
+    NOT_DESERVE_POST_COMMENT(HttpStatus.FORBIDDEN,"댓글을 작성할 수 있는 권한이 없습니다.","40312"),
+    NOT_DESERVE_ACCEPT_INVITATION(HttpStatus.FORBIDDEN,"초대를 수락할 수 있는 권한이 없습니다.","40313"),
+    NOT_DESERVE_ACCESS_NOTIFICATION(HttpStatus.FORBIDDEN,"알림에 대한 접근 권한이 없습니다. ","40314"),
     MISMATCH_INQUIRY_OWNER(HttpStatus.FORBIDDEN, "해당 문의에 대한 소유권자가 아닙니다.", "40320"),
     MISMATCH_FOLDER_OWNER(HttpStatus.FORBIDDEN, "해당 폴더에 대한 소유권자가 아닙니다.", "40321"),
     MISMATCH_COMMENT_OWNER(HttpStatus.FORBIDDEN, "해당 댓글에 대한 소유권자가 아닙니다.", "40322"),
@@ -41,8 +38,6 @@ public enum ErrorCode {
     MISMATCH_RECORD_OWNER(HttpStatus.FORBIDDEN, "해당 문서에 대한 소유권자가 아닙니다.", "40325"),
     MISMATCH_RECORD_FOLDER(HttpStatus.FORBIDDEN, "해당 폴더의 문서가 아닙니다.", "40326"),
     DELETED_USER(HttpStatus.FORBIDDEN, "탈퇴된 유저입니다.", "40330"),
-    NOT_ALLOW_NOTIFICATION_SETTING(HttpStatus.FORBIDDEN, "알림 설정이 허용되지 않았습니다.", "40340"),
-
 
     /* 404 NOT_FOUND : 값이 없음 */
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다.", "40410"),
@@ -56,22 +51,18 @@ public enum ErrorCode {
     NOT_FOUND_FOLDER(HttpStatus.NOT_FOUND, "폴더를 찾을 수 없습니다.", "40450"),
     NOT_FOUND_TARGET_FOLDER(HttpStatus.NOT_FOUND, "대상 폴더를 찾을 수 없습니다. ", "40451"),
     NOT_FOUND_SHARE(HttpStatus.NOT_FOUND, "공유 이력을 찾을 수 없습니다.", "40452"),
-    NOT_FOUND_FOLDER_FIREBASE(HttpStatus.NOT_FOUND, "해당 폴더를 파이어베이스에서 찾을 수 없습니다.", "40453"),
     NOT_FOUND_HIGHLIGHT(HttpStatus.NOT_FOUND, "하이라이트를 찾을 수 없습니다.", "40460"),
     NOT_FOUND_PARENT_COMMENT(HttpStatus.NOT_FOUND, "부모 댓글을 찾을 수 없습니다.", "40470"),
     NOT_FOUND_RECORD(HttpStatus.NOT_FOUND, "문서를 찾을 수 없습니다.", "40480"),
-    NOT_FOUND_ANALYSIS(HttpStatus.NOT_FOUND, "분석을 찾을 수 없습니다.", "40481"),
-    NOT_FOUND_QUIZ(HttpStatus.NOT_FOUND, "퀴즈를 차즐 수 없습니다.", "40482"),
-    NOT_FOUND_RECORD_FIREBASE(HttpStatus.NOT_FOUND, "해당 문서를 파이어베이스에서 찾을 수 없습니다.", "40483"),
-    NOT_FOUND_SECTION(HttpStatus.NOT_FOUND, "섹션을 찾을 수 없습니다.", "40484"),
+    NOT_FOUND_QUIZ(HttpStatus.NOT_FOUND, "퀴즈를 차즐 수 없습니다.", "40481"),
+    NOT_FOUND_RECORD_FIREBASE(HttpStatus.NOT_FOUND, "해당 문서를 파이어베이스에서 찾을 수 없습니다.", "40482"),
+    NOT_FOUND_SECTION(HttpStatus.NOT_FOUND, "섹션을 찾을 수 없습니다.", "40483"),
     NOT_FOUND_COMMENT(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다.", "40490"),
-
 
     /* 409 CONFLICT : 충돌 */
     HIGHLIGHT_DUPLICATED(HttpStatus.CONFLICT, "해당 댓글에 이미 하이라이트가 존재합니다.", "40910"),
     INQUIRY_ANSWER_DUPLICATED(HttpStatus.CONFLICT, "답변이 이미 존재합니다.", "40920"),
     SHARE_USER_DUPLICATED(HttpStatus.CONFLICT, "해당 유저에게는 이미 공유되었거나, 공유 요청이 전송된 상태입니다.", "40930"),
-    NOTIFICATION_READ_DUPLICATED(HttpStatus.CONFLICT, "이미 읽은 알림입니다 ", "40940"),
 
     /* 500 SERVER ERROR : 서버 단 에러 */
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "예기치 못한 서버 에러가 발생하였습니다.", "500"),
