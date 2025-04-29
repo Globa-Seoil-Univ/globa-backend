@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.factory.AbstractFactory;
-import org.y2k2.globa.infrastructure.persistence.folderrole.FolderRoleTestRepositoryImpl;
+import org.y2k2.globa.infrastructure.persistence.folderrole.repository.FolderRoleTestRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
 import org.y2k2.globa.infrastructure.persistence.folderrole.repository.FolderRoleRepositoryImpl;
 

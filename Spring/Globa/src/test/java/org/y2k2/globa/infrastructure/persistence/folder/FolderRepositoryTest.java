@@ -21,7 +21,7 @@ import org.y2k2.globa.fixture.foldershare.FolderShareFixture;
 import org.y2k2.globa.fixture.user.UserFixture;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.folder.repository.FolderRepositoryImpl;
-import org.y2k2.globa.infrastructure.persistence.folderrole.FolderRoleTestRepositoryImpl;
+import org.y2k2.globa.infrastructure.persistence.folderrole.repository.FolderRoleTestRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
 import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
@@ -53,25 +53,15 @@ public class FolderRepositoryTest {
     private FolderFixture folderFixture;
     @Autowired
     private FolderRoleFixture folderRoleFixture;
-    @Autowired
-    private FolderShareFixture folderShareFixture;
 
     private UserEntity user;
     private FolderEntity folder;
-    private FolderRoleEntity folderRole;
-    private FolderShareEntity folderShare;
 
     @BeforeEach
     void setUp() {
         user = userFixture.create();
         folder = folderFixture.withUser(user).create();
-        folderRole = folderRoleFixture.create();
-        folderShare = folderShareFixture
-                .withOwner(user)
-                .withTarget(user)
-                .withFolder(folder)
-                .withRole(folderRole)
-                .create();
+        folderRoleFixture.create();
     }
 
     @Test
@@ -95,5 +85,57 @@ public class FolderRepositoryTest {
     void deleteFolder() {
         folderRepository.delete(folder);
         Assertions.assertThat(folderRepository.getFolder(folder.getFolderId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("폴더 조회 - 성공")
+    void getFolder() {
+        FolderEntity finedFolder = folderRepository.getFolder(folder.getFolderId()).orElseThrow();
+
+        Assertions.assertThat(finedFolder.getFolderId()).isEqualTo(folder.getFolderId());
+        Assertions.assertThat(finedFolder.getTitle()).isEqualTo(folder.getTitle());
+        Assertions.assertThat(finedFolder.getUser().getUserId()).isEqualTo(folder.getUser().getUserId());
+    }
+
+    @Test
+    @DisplayName("폴더 조회 - 실패 (존재하지 않는 폴더 ID)")
+    void getFolderNotFound() {
+        Long nonExistentFolderId = 999L;
+        Assertions.assertThat(folderRepository.getFolder(nonExistentFolderId)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("기본 폴더 조회 - 성공")
+    void getDefaultFolder() {
+        FolderEntity defaultFolder = folderRepository.getDefaultFolder(user.getUserId()).orElseThrow();
+
+        Assertions.assertThat(defaultFolder.getFolderId()).isEqualTo(folder.getFolderId());
+        Assertions.assertThat(defaultFolder.getTitle()).isEqualTo(folder.getTitle());
+        Assertions.assertThat(defaultFolder.getUser().getUserId()).isEqualTo(folder.getUser().getUserId());
+    }
+
+    @Test
+    @DisplayName("기본 폴더 조회 - 실패 (존재하지 않는 사용자 ID)")
+    void getDefaultFolderNotFound() {
+        Long nonExistentUserId = 999L;
+        Assertions.assertThat(folderRepository.getDefaultFolder(nonExistentUserId)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("기본 폴더를 제외한 폴더 조회 - 성공")
+    void getFolderWithoutDefaultFolder() {
+        FolderEntity newFolder = folderFixture.withUser(user).create();
+        FolderEntity finedFolder = folderRepository.getFolderWithoutDefaultFolder(newFolder.getFolderId(), user).orElseThrow();
+
+        Assertions.assertThat(finedFolder.getFolderId()).isEqualTo(newFolder.getFolderId());
+        Assertions.assertThat(finedFolder.getTitle()).isEqualTo(newFolder.getTitle());
+        Assertions.assertThat(finedFolder.getUser().getUserId()).isEqualTo(newFolder.getUser().getUserId());
+    }
+
+    @Test
+    @DisplayName("기본 폴더를 제외한 폴더 조회 - 실패 (존재하지 않는 폴더 ID)")
+    void getFolderWithoutDefaultFolderNotFound() {
+        Long nonExistentFolderId = 999L;
+        Assertions.assertThat(folderRepository.getFolderWithoutDefaultFolder(nonExistentFolderId, user)).isEmpty();
     }
 }

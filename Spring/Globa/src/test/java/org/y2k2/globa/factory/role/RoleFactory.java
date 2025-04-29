@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.domain.role.type.UserRole;
 import org.y2k2.globa.factory.AbstractFactory;
-import org.y2k2.globa.infrastructure.persistence.role.RoleTestRepositoryImpl;
+import org.y2k2.globa.infrastructure.persistence.role.repository.RoleTestRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.role.entity.RoleEntity;
 import org.y2k2.globa.infrastructure.persistence.study.repository.StudyRepositoryImpl;
 

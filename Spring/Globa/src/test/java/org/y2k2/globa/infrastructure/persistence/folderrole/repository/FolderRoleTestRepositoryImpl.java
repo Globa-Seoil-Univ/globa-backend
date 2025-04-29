@@ -1,4 +1,4 @@
-package org.y2k2.globa.infrastructure.persistence.folderrole;
+package org.y2k2.globa.infrastructure.persistence.folderrole.repository;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;

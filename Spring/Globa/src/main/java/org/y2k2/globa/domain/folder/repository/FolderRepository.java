@@ -1,17 +1,13 @@
 package org.y2k2.globa.domain.folder.repository;
 
-import org.springframework.data.domain.Page;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
-import java.awt.print.Pageable;
 import java.util.Optional;
 
 public interface FolderRepository {
     FolderEntity save(FolderEntity entity);
     void delete(FolderEntity entity);
-
-    Page<FolderEntity> getFolders(UserEntity user, Pageable pageable);
 
     Optional<FolderEntity> getFolder(Long folderId);
     Optional<FolderEntity> getDefaultFolder(Long userId);

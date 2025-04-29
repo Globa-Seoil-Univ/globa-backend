@@ -1,4 +1,4 @@
-package org.y2k2.globa.infrastructure.persistence.keyword;
+package org.y2k2.globa.infrastructure.persistence.keyword.repository;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;

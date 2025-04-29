@@ -24,12 +24,6 @@ public class FolderRepositoryImpl implements FolderRepository {
     public void delete(FolderEntity entity) { folderJpaRepository.delete(entity); }
 
     @Override
-    public Page<FolderEntity> getFolders(UserEntity user, Pageable pageable) {
-        // TODO : Folder + FolderShare Join을 통해 ACCEPT Folder 로직 추가
-        return Page.empty();
-    }
-
-    @Override
     public Optional<FolderEntity> getFolder(Long folderId) {
         return folderJpaRepository.findFirstByFolderId(folderId);
     }

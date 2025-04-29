@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.factory.AbstractFactory;
-import org.y2k2.globa.infrastructure.persistence.keyword.KeywordTestRepositoryImpl;
+import org.y2k2.globa.infrastructure.persistence.keyword.repository.KeywordTestRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.keyword.entity.KeywordEntity;
 import org.y2k2.globa.infrastructure.persistence.keyword.repository.KeywordRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;

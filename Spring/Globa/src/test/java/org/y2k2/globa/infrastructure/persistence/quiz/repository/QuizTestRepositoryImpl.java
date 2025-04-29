@@ -1,4 +1,4 @@
-package org.y2k2.globa.infrastructure.persistence.quiz;
+package org.y2k2.globa.infrastructure.persistence.quiz.repository;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
