@@ -1,4 +1,4 @@
-package org.y2k2.globa.service.user;
+package org.y2k2.globa.application.user.service;
 
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitraryIntrospector;
@@ -14,13 +14,12 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.y2k2.globa.application.folder.command.CreateDefaultFolderCommand;
 import org.y2k2.globa.application.folder.usecase.CreateDefaultFolderUseCase;
-import org.y2k2.globa.application.folderrole.command.GetFolderRoleCommand;
-import org.y2k2.globa.application.folderrole.usecase.GetFolderRoleUseCase;
+import org.y2k2.globa.application.folderrole.command.FolderRoleCommand;
+import org.y2k2.globa.application.folderrole.usecase.FindFolderRoleUseCase;
 import org.y2k2.globa.application.user.command.CreateJWTCommand;
 import org.y2k2.globa.application.user.command.CreateUserCommand;
 import org.y2k2.globa.application.user.command.VerifySnsCommand;
 import org.y2k2.globa.application.user.dto.request.RequestUserPostDTO;
-import org.y2k2.globa.application.user.service.CreateUserService;
 import org.y2k2.globa.application.user.usecase.*;
 import org.y2k2.globa.application.userrole.command.CreateUserRoleCommand;
 import org.y2k2.globa.application.userrole.usecase.CreateUserRoleUseCase;
@@ -47,7 +46,7 @@ public class CreateUserServiceTest {
     @Mock
     private FindActiveUserIdUseCase findActiveUserIdUseCase;
     @Mock
-    private GetFolderRoleUseCase getFolderRoleUseCase;
+    private FindFolderRoleUseCase findFolderRoleUseCase;
     @Mock
     private CreateUserUseCase createUserUseCase;
     @Mock
@@ -152,7 +151,7 @@ public class CreateUserServiceTest {
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
                 .build()
                 .giveMeBuilder(FolderRoleEntity.class)
-                .set("roleName", FolderRole.OWNER.getRoleName())
+                .set("roleName", FolderRole.OWNER)
                 .sample();
         UserEntity user = FixtureMonkey.builder()
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
@@ -186,8 +185,8 @@ public class CreateUserServiceTest {
         Mockito.when(createUserUseCase.execute(ArgumentMatchers.any(CreateUserCommand.class)))
                 .thenReturn(user);
 
-        Mockito.when(getFolderRoleUseCase.execute(ArgumentMatchers.any(GetFolderRoleCommand.class)))
-                .thenReturn(folderRole);
+        Mockito.when(findFolderRoleUseCase.execute(ArgumentMatchers.any(FolderRoleCommand.class)))
+                .thenReturn(Optional.of(folderRole));
 
         Mockito.doNothing()
                 .when(createUserRoleUseCase)

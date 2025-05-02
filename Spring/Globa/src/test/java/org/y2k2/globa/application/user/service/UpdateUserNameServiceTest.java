@@ -1,4 +1,4 @@
-package org.y2k2.globa.service.user;
+package org.y2k2.globa.application.user.service;
 
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitraryIntrospector;
@@ -14,11 +14,10 @@ import org.y2k2.globa.application.folder.command.CreateDefaultFolderCommand;
 import org.y2k2.globa.application.folder.command.UpdateFolderNameCommand;
 import org.y2k2.globa.application.folder.usecase.CreateDefaultFolderUseCase;
 import org.y2k2.globa.application.folder.usecase.UpdateFolderNameUseCase;
-import org.y2k2.globa.application.folderrole.command.GetFolderRoleCommand;
-import org.y2k2.globa.application.folderrole.usecase.GetFolderRoleUseCase;
+import org.y2k2.globa.application.folderrole.command.FolderRoleCommand;
+import org.y2k2.globa.application.folderrole.usecase.FindFolderRoleUseCase;
 import org.y2k2.globa.application.user.command.UpdateUserCommand;
 import org.y2k2.globa.application.user.dto.request.RequestNameDto;
-import org.y2k2.globa.application.user.service.UpdateUserNameService;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 import org.y2k2.globa.application.user.usecase.UpdateUserUseCase;
 import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
@@ -38,7 +37,7 @@ public class UpdateUserNameServiceTest {
     @Mock
     private FindUserUseCase findUserUseCase;
     @Mock
-    private GetFolderRoleUseCase getFolderRoleUseCase;
+    private FindFolderRoleUseCase findFolderRoleUseCase;
     @Mock
     private UpdateUserUseCase updateUserUseCase;
     @Mock
@@ -65,7 +64,7 @@ public class UpdateUserNameServiceTest {
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
                 .build()
                 .giveMeBuilder(FolderRoleEntity.class)
-                .set("roleName", FolderRole.OWNER.getRoleName())
+                .set("roleName", FolderRole.OWNER)
                 .sample();
 
         FolderEntity folder = FixtureMonkey.builder()
@@ -86,8 +85,8 @@ public class UpdateUserNameServiceTest {
         Mockito.when(folderRepository.getDefaultFolder(user.getUserId()))
                 .thenReturn(Optional.of(folder));
 
-        Mockito.when(getFolderRoleUseCase.execute(Mockito.any(GetFolderRoleCommand.class)))
-                .thenReturn(folderRole);
+        Mockito.when(findFolderRoleUseCase.execute(Mockito.any(FolderRoleCommand.class)))
+                .thenReturn(Optional.of(folderRole));
 
         Mockito.doNothing()
                 .when(updateFolderNameUseCase)
@@ -128,7 +127,7 @@ public class UpdateUserNameServiceTest {
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
                 .build()
                 .giveMeBuilder(FolderRoleEntity.class)
-                .set("roleName", FolderRole.OWNER.getRoleName())
+                .set("roleName", FolderRole.OWNER)
                 .sample();
 
         FolderEntity folder = FixtureMonkey.builder()
@@ -146,8 +145,8 @@ public class UpdateUserNameServiceTest {
                 .when(updateUserUseCase)
                 .execute(Mockito.any(UpdateUserCommand.class));
 
-        Mockito.when(getFolderRoleUseCase.execute(Mockito.any(GetFolderRoleCommand.class)))
-                .thenReturn(folderRole);
+        Mockito.when(findFolderRoleUseCase.execute(Mockito.any(FolderRoleCommand.class)))
+                .thenReturn(Optional.of(folderRole));
 
         Mockito.when(createDefaultFolderUseCase.execute(Mockito.any(CreateDefaultFolderCommand.class)))
                 .thenReturn(folder);

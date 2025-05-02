@@ -1,16 +1,16 @@
-package org.y2k2.globa.application.user;
+package org.y2k2.globa.application.user.usecase;
 
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.BeanArbitraryIntrospector;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
@@ -20,17 +20,13 @@ import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import java.util.Optional;
 
 @Slf4j
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 public class FindUserUseCaseTest {
+    @InjectMocks
     private FindUserUseCase findUserUseCase;
 
-    @MockBean
+    @Mock
     private UserRepository userRepository;
-
-    @BeforeEach
-    void setUp() {
-        findUserUseCase = new FindUserUseCase(userRepository);
-    }
 
     /**
      * 유저 조회 테스트

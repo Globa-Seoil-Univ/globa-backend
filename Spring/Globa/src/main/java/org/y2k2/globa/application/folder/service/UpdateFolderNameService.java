@@ -19,7 +19,7 @@ public class UpdateFolderNameService {
     private final FolderShareRepository folderShareRepository;
 
     public void update(Long folderId, String title, Long userId) {
-        if (folderShareRepository.isOwner(userId, folderId)) {
+        if (!folderShareRepository.isOwner(userId, folderId)) {
             throw new CustomException(ErrorCode.MISMATCH_FOLDER_OWNER);
         }
 

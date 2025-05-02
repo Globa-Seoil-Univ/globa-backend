@@ -1,6 +1,7 @@
 package org.y2k2.globa.infrastructure.persistence.foldershare.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
 
 import lombok.Getter;

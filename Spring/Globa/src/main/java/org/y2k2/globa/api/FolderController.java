@@ -65,7 +65,7 @@ public class FolderController {
     @GetMapping
     public ResponseEntity<ResponseFolderDto> getFolders(
             @RequestParam(required = false, defaultValue = "1", value = "page") int page,
-            @RequestParam(required = false, defaultValue = "100", value = "count") int count,
+            @RequestParam(required = false, defaultValue = "10", value = "count") int count,
             @AuthenticationPrincipal CustomUserDetails details
     )
     { return ResponseEntity.status(HttpStatus.OK).body(getFoldersService.getFolders(page, count, details.getUserId())); }
@@ -164,6 +164,7 @@ public class FolderController {
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.MISMATCH_FOLDER_OWNER, ref = SwaggerErrorCode.MISMATCH_FOLDER_OWNER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),

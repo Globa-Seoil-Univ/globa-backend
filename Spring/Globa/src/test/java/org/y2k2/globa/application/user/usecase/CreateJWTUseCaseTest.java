@@ -1,16 +1,16 @@
-package org.y2k2.globa.application.user;
+package org.y2k2.globa.application.user.usecase;
 
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitraryIntrospector;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.y2k2.globa.application.user.command.CreateJWTCommand;
 import org.y2k2.globa.application.user.usecase.CreateJWTUseCase;
 import org.y2k2.globa.common.util.jwt.JWT;
@@ -19,20 +19,16 @@ import org.y2k2.globa.common.util.redis.RedisKey;
 import org.y2k2.globa.common.util.redis.RedisStore;
 
 @Slf4j
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 public class CreateJWTUseCaseTest {
+    @InjectMocks
     private CreateJWTUseCase createJWTUseCase;
 
-    @MockBean
+    @Mock
     private JWTProvider jwtProvider;
 
-    @MockBean
+    @Mock
     private RedisStore redisStore;
-
-    @BeforeEach
-    void setUp() {
-        createJWTUseCase = new CreateJWTUseCase(jwtProvider, redisStore);
-    }
 
     @Test
     @DisplayName("JWT 생성 - 성공")

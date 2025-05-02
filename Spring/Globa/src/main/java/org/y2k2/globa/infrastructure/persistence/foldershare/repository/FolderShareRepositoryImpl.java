@@ -45,7 +45,7 @@ public class FolderShareRepositoryImpl implements FolderShareRepository {
                 userId,
                 folderId,
                 InvitationStatus.ACCEPT,
-                FolderRole.OWNER.getRoleName()
+                FolderRole.OWNER
         );
     }
 
@@ -60,7 +60,7 @@ public class FolderShareRepositoryImpl implements FolderShareRepository {
                 userId,
                 folderId,
                 InvitationStatus.ACCEPT,
-                List.of(FolderRole.WRITER.getRoleName(), FolderRole.OWNER.getRoleName())
+                List.of(FolderRole.EDITOR, FolderRole.OWNER)
         );
     }
 
@@ -72,7 +72,6 @@ public class FolderShareRepositoryImpl implements FolderShareRepository {
     @Override
     public Page<FolderShareEntity> getInvitationsForFolderExcludingDefault(Long userId, Pageable pageable) {
         return folderShareJpaRepository.findByInvitationsForFolderExcludingDefault(userId, InvitationStatus.ACCEPT, pageable);
-
     }
 
     @Override

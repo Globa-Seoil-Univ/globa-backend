@@ -25,7 +25,7 @@ public class FolderRoleFactory extends AbstractFactory<FolderRoleEntity> {
     @Autowired
     private FolderRoleTestRepositoryImpl folderRoleRepository;
 
-    private String roleName = FolderRole.OWNER.getRoleName();
+    private FolderRole roleName = FolderRole.OWNER;
 
     @Override
     protected FolderRoleEntity create() {

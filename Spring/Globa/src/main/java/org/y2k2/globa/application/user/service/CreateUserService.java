@@ -5,8 +5,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.application.folder.command.CreateDefaultFolderCommand;
 import org.y2k2.globa.application.folder.usecase.CreateDefaultFolderUseCase;
-import org.y2k2.globa.application.folderrole.command.GetFolderRoleCommand;
-import org.y2k2.globa.application.folderrole.usecase.GetFolderRoleUseCase;
+import org.y2k2.globa.application.folderrole.command.FolderRoleCommand;
+import org.y2k2.globa.application.folderrole.usecase.CreateFolderRoleUseCase;
+import org.y2k2.globa.application.folderrole.usecase.FindFolderRoleUseCase;
 import org.y2k2.globa.application.user.command.CreateJWTCommand;
 import org.y2k2.globa.application.user.command.CreateUserCommand;
 import org.y2k2.globa.application.user.command.VerifySnsCommand;
@@ -32,11 +33,12 @@ import java.util.Random;
 public class CreateUserService {
     private final VerifyGoogleUseCase googleUseCase;
     private final VerifyKakaoUseCase kakaoUseCase;
-    private final GetFolderRoleUseCase getFolderRoleUseCase;
+    private final FindFolderRoleUseCase findFolderRoleUseCase;
     private final FindActiveUserIdUseCase findActiveUserIdUseCase;
     private final CreateUserUseCase createUserUseCase;
     private final CreateJWTUseCase createJWTUseCase;
     private final CreateUserRoleUseCase createUserRoleUseCase;
+    private final CreateFolderRoleUseCase createFolderRoleUseCase;
     private final CreateDefaultFolderUseCase defaultFolderUseCase;
 
     private final UserRepository userRepository;
@@ -64,9 +66,9 @@ public class CreateUserService {
         UserEntity newUser = createUserUseCase.execute(
                 CreateUserCommand.from(dto, uniqueCode)
         );
-        FolderRoleEntity folderRole = getFolderRoleUseCase.execute(
-                GetFolderRoleCommand.of(FolderRole.OWNER)
-        );
+        FolderRoleEntity folderRole = findFolderRoleUseCase.execute(
+                FolderRoleCommand.of(FolderRole.OWNER)
+        ).orElseGet(() -> createFolderRoleUseCase.execute(FolderRoleCommand.of(FolderRole.OWNER)));
 
         createUserRoleUseCase.execute(CreateUserRoleCommand.of(newUser, UserRole.USER));
         defaultFolderUseCase.execute(CreateDefaultFolderCommand.of(folderRole, newUser));

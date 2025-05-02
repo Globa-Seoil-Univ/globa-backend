@@ -1,4 +1,4 @@
-package org.y2k2.globa.service.user;
+package org.y2k2.globa.application.user.service;
 
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.BeanArbitraryIntrospector;

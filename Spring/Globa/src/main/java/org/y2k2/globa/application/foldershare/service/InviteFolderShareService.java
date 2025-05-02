@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.y2k2.globa.application.folderrole.command.GetFolderRoleCommand;
-import org.y2k2.globa.application.folderrole.usecase.GetFolderRoleUseCase;
+import org.y2k2.globa.application.folderrole.command.FolderRoleCommand;
+import org.y2k2.globa.application.folderrole.usecase.CreateFolderRoleUseCase;
+import org.y2k2.globa.application.folderrole.usecase.FindFolderRoleUseCase;
 import org.y2k2.globa.application.foldershare.command.VerifyFolderCommand;
 import org.y2k2.globa.application.foldershare.dto.request.RequestInviteDto;
 import org.y2k2.globa.application.foldershare.mapper.FolderShareMapper;
@@ -32,7 +33,8 @@ public class InviteFolderShareService {
     private final ApplicationEventPublisher publisher;
 
     private final FindUserUseCase findUserUseCase;
-    private final GetFolderRoleUseCase getFolderRoleUseCase;
+    private final FindFolderRoleUseCase findFolderRoleUseCase;
+    private final CreateFolderRoleUseCase createFolderRoleUseCase;
     private final CreateNotificationUseCase createNotificationUseCase;
     private final VerifyFolderOwnerUseCase verifyFolderOwnerUseCase;
 
@@ -54,8 +56,10 @@ public class InviteFolderShareService {
             throw new CustomException(ErrorCode.SHARE_USER_DUPLICATED);
         }
 
-        FolderRoleEntity folderRole = getFolderRoleUseCase.execute(
-                GetFolderRoleCommand.of(FolderRole.from(dto.role()))
+        FolderRoleEntity folderRole = findFolderRoleUseCase.execute(
+                FolderRoleCommand.of(FolderRole.from(dto.role()))
+        ).orElseGet(
+                () -> createFolderRoleUseCase.execute(FolderRoleCommand.of(FolderRole.from(dto.role())))
         );
         FolderShareEntity folderShare = FolderShareMapper.INSTANCE.toEntity(
                 folder,

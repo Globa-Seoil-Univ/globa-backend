@@ -2,6 +2,7 @@ package org.y2k2.globa.application.folder.usecase;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.application.folder.command.CreateDefaultFolderCommand;
 import org.y2k2.globa.application.folder.mapper.FolderMapper;
 import org.y2k2.globa.application.foldershare.mapper.FolderShareMapper;
@@ -19,6 +20,7 @@ public class CreateDefaultFolderUseCase implements UseCase<CreateDefaultFolderCo
     private final FolderShareRepository folderShareRepository;
 
     @Override
+    @Transactional
     public FolderEntity execute(CreateDefaultFolderCommand command) {
         FolderEntity folder = FolderMapper.INSTANCE.toEntity(command.user(), command.user().getName());
         FolderEntity createdFolder = folderRepository.save(folder);

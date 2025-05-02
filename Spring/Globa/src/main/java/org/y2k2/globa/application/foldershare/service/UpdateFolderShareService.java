@@ -2,8 +2,9 @@ package org.y2k2.globa.application.foldershare.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.y2k2.globa.application.folderrole.command.GetFolderRoleCommand;
-import org.y2k2.globa.application.folderrole.usecase.GetFolderRoleUseCase;
+import org.y2k2.globa.application.folderrole.command.FolderRoleCommand;
+import org.y2k2.globa.application.folderrole.usecase.CreateFolderRoleUseCase;
+import org.y2k2.globa.application.folderrole.usecase.FindFolderRoleUseCase;
 import org.y2k2.globa.application.foldershare.command.VerifyFolderCommand;
 import org.y2k2.globa.application.foldershare.dto.request.RequestInviteDto;
 import org.y2k2.globa.application.foldershare.usecase.VerifyFolderOwnerUseCase;
@@ -17,7 +18,8 @@ import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareE
 @Service
 @RequiredArgsConstructor
 public class UpdateFolderShareService {
-    private final GetFolderRoleUseCase getFolderRoleUseCase;
+    private final FindFolderRoleUseCase findFolderRoleUseCase;
+    private final CreateFolderRoleUseCase createFolderRoleUseCase;
     private final VerifyFolderOwnerUseCase verifyFolderOwnerUseCase;
 
     private final FolderShareRepository folderShareRepository;
@@ -33,8 +35,10 @@ public class UpdateFolderShareService {
 
         FolderShareEntity folderShare = folderShareRepository.getShareInvitation(folderId, targetId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SHARE));
-        FolderRoleEntity folderRole = getFolderRoleUseCase.execute(
-                GetFolderRoleCommand.of(FolderRole.from(dto.role()))
+        FolderRoleEntity folderRole = findFolderRoleUseCase.execute(
+                FolderRoleCommand.of(FolderRole.from(dto.role()))
+        ).orElseGet(
+                () -> createFolderRoleUseCase.execute(FolderRoleCommand.of(FolderRole.from(dto.role())))
         );
 
         folderShare.setRole(folderRole);

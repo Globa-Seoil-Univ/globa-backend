@@ -1,4 +1,4 @@
-package org.y2k2.globa.application.user;
+package org.y2k2.globa.application.user.usecase;
 
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -7,7 +7,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.*;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -18,20 +21,20 @@ import org.y2k2.globa.application.user.usecase.VerifyKakaoUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 @Slf4j
 public class VerifyKakaoUseCaseTest {
     private static final String KAKAO_USER_INFO_URL = "https://kapi.kakao.com/v2/user/me";
-
     private VerifySnsCommand command;
+
+    @InjectMocks
     private VerifyKakaoUseCase validateKakaoSnsUseCase;
 
-    @MockBean
+    @Mock
     private RestTemplate restTemplate;
 
     @BeforeEach
     void setUp() {
-        validateKakaoSnsUseCase = new VerifyKakaoUseCase(restTemplate);
         command = new VerifySnsCommand("12345", "valid_token");
     }
 

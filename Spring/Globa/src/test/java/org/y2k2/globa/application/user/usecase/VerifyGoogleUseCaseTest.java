@@ -1,4 +1,4 @@
-package org.y2k2.globa.application.user;
+package org.y2k2.globa.application.user.usecase;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -9,27 +9,28 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.y2k2.globa.application.user.command.VerifySnsCommand;
 import org.y2k2.globa.application.user.usecase.VerifyGoogleUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 
 @Slf4j
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 public class VerifyGoogleUseCaseTest {
     private VerifySnsCommand command;
 
+    @InjectMocks
     private VerifyGoogleUseCase verifyGoogleUseCase;
 
-    @MockBean
+    @Mock
     private FirebaseAuth firebaseAuth;
 
     @BeforeEach
     void setUp() {
-        verifyGoogleUseCase = new VerifyGoogleUseCase(firebaseAuth);
         command = new VerifySnsCommand("token", "snsId");
     }
 

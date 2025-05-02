@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
 import org.y2k2.globa.domain.folderrole.repository.FolderRoleRepository;
+import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 
 import java.util.Optional;
 
@@ -18,7 +19,7 @@ public class FolderRoleRepositoryImpl implements FolderRoleRepository {
     }
 
     @Override
-    public Optional<FolderRoleEntity> getRole(String roleName) {
+    public Optional<FolderRoleEntity> getRole(FolderRole roleName) {
         return folderRoleJpaRepository.findByRoleName(roleName);
     }
 }

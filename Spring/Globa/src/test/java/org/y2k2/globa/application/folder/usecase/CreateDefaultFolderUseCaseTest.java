@@ -1,4 +1,4 @@
-package org.y2k2.globa.application.folder;
+package org.y2k2.globa.application.folder.usecase;
 
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.BeanArbitraryIntrospector;
@@ -9,7 +9,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -25,25 +28,21 @@ import org.y2k2.globa.fixture.folderrole.FolderRoleFixture;
 import org.y2k2.globa.fixture.user.UserFixture;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
+import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
 import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStatus;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
-@Slf4j
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 public class CreateDefaultFolderUseCaseTest {
+    @InjectMocks
     private CreateDefaultFolderUseCase createDefaultFolderUseCase;
 
-    @MockBean
+    @Mock
     private FolderRepository folderRepository;
 
-    @MockBean
+    @Mock
     private FolderShareRepository folderShareRepository;
-
-    @BeforeEach
-    void setUp() {
-        createDefaultFolderUseCase = new CreateDefaultFolderUseCase(folderRepository, folderShareRepository);
-    }
 
     @Test
     @DisplayName("기본 폴더 생성 - 성공")
@@ -60,7 +59,7 @@ public class CreateDefaultFolderUseCaseTest {
                 .build()
                 .giveMeBuilder(FolderRoleEntity.class)
                 .set("roleId", 1L)
-                .set("roleName", "USER")
+                .set("roleName", FolderRole.OWNER)
                 .set("createdTime", new CustomTimestamp().getTimestamp())
                 .sample();
 

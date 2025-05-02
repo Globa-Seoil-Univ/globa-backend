@@ -6,12 +6,10 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum FolderRole {
-    OWNER("소유자"),
-    READER("뷰어"),
-    WRITER("편집자"),
+    OWNER,
+    READER,
+    EDITOR,
     ;
-
-    private final String roleName;
 
     public static FolderRole from(String roleName) {
         for (FolderRole folderRole : values()) {

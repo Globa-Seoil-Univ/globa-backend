@@ -1,4 +1,4 @@
-package org.y2k2.globa.application.user;
+package org.y2k2.globa.application.user.usecase;
 
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitraryIntrospector;
@@ -8,9 +8,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.y2k2.globa.application.user.command.VerifyJWTCommand;
 import org.y2k2.globa.application.user.usecase.VerifyJWTUseCase;
 import org.y2k2.globa.common.exception.CustomException;
@@ -20,22 +21,22 @@ import org.y2k2.globa.common.util.redis.RedisKey;
 import org.y2k2.globa.common.util.redis.RedisStore;
 
 @Slf4j
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 public class VerifyJWTUseCaseTest {
     Long userId = 1L;
-
     private VerifyJWTCommand command;
+
+    @InjectMocks
     private VerifyJWTUseCase verifyJWTUseCase;
 
-    @MockBean
+    @Mock
     private JWTProvider jwtProvider;
 
-    @MockBean
+    @Mock
     private RedisStore redisStore;
 
     @BeforeEach
     void setUp() {
-        verifyJWTUseCase = new VerifyJWTUseCase(jwtProvider, redisStore);
         command = FixtureMonkey.builder()
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
                 .build()
@@ -53,9 +54,6 @@ public class VerifyJWTUseCaseTest {
 
         Mockito.when(jwtProvider.isExpired(command.accessToken()))
                 .thenReturn(true);
-
-        Mockito.when(jwtProvider.isExpired(command.refreshToken()))
-                .thenReturn(false);
 
         Long response = verifyJWTUseCase.execute(command);
 
@@ -80,9 +78,6 @@ public class VerifyJWTUseCaseTest {
                 .thenReturn(command.refreshToken());
 
         Mockito.when(jwtProvider.isExpired(command.accessToken()))
-                .thenReturn(false);
-
-        Mockito.when(jwtProvider.isExpired(command.refreshToken()))
                 .thenReturn(false);
 
         Assertions.assertThatThrownBy(() -> verifyJWTUseCase.execute(command))

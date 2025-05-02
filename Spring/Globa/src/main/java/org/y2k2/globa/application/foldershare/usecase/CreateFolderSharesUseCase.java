@@ -17,13 +17,13 @@ public class CreateFolderSharesUseCase implements UseCase<CreateFolderSharesComm
 
     @Override
     public List<FolderShareEntity> execute(CreateFolderSharesCommand command) {
-        List<FolderShareEntity> folderShares = command.targetUsers().stream().map(
+        List<FolderShareEntity> folderShares = command.targets().stream().map(
                 target -> FolderShareMapper.INSTANCE.toEntity(
                         command.folder(),
                         command.status(),
-                        command.role(),
+                        target.role(),
                         command.ownerUser(),
-                        target
+                        target.user()
                 )
         ).toList();
 

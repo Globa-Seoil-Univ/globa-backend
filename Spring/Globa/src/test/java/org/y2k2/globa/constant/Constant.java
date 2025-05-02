@@ -9,6 +9,7 @@ public enum Constant {
     JWT_HEADER("Authorization"),
 
     USER_PREFIX("/user"),
+    FOLDER_PREFIX("/folder"),
     ;
 
     private final String value;

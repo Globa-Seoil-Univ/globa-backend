@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStatus;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
@@ -20,7 +21,7 @@ public interface FolderShareJpaRepository extends JpaRepository<FolderShareEntit
             Long userId,
             Long folderId,
             InvitationStatus status,
-            String roleName
+            FolderRole roleName
     );
 
     Boolean existsByTargetUser_UserIdAndFolder_FolderId(Long userId, Long folderId);
@@ -39,7 +40,7 @@ public interface FolderShareJpaRepository extends JpaRepository<FolderShareEntit
             Long userId,
             Long folderId,
             InvitationStatus status,
-            List<String> names
+            List<FolderRole> names
     );
 
     Page<FolderShareEntity> findByFolder_FolderIdOrderByCreatedTimeAsc(Long folderId, Pageable pageable);
@@ -51,7 +52,7 @@ public interface FolderShareJpaRepository extends JpaRepository<FolderShareEntit
                         "SELECT MIN(f2.folderId) FROM FolderEntity f2 " +
                             "WHERE f2.user.userId = :userId"+
                     ") " +
-                    "AND fs.ownerUser.userId = :userId OR fs.targetUser.userId = :userId " +
+                    "AND (fs.ownerUser.userId = :userId OR fs.targetUser.userId = :userId) " +
                     "AND fs.invitationStatus = :status"
     )
     Page<FolderShareEntity> findByInvitationsForFolderExcludingDefault(Long userId, InvitationStatus status, Pageable pageable);

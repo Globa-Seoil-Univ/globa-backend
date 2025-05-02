@@ -9,8 +9,9 @@ import org.y2k2.globa.application.folder.command.CreateDefaultFolderCommand;
 import org.y2k2.globa.application.folder.dto.response.ResponseFolderDto;
 import org.y2k2.globa.application.folder.mapper.FolderMapper;
 import org.y2k2.globa.application.folder.usecase.CreateDefaultFolderUseCase;
-import org.y2k2.globa.application.folderrole.command.GetFolderRoleCommand;
-import org.y2k2.globa.application.folderrole.usecase.GetFolderRoleUseCase;
+import org.y2k2.globa.application.folderrole.command.FolderRoleCommand;
+import org.y2k2.globa.application.folderrole.usecase.CreateFolderRoleUseCase;
+import org.y2k2.globa.application.folderrole.usecase.FindFolderRoleUseCase;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
@@ -27,8 +28,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GetFoldersService {
     private final FindUserUseCase findUserUseCase;
-    private final GetFolderRoleUseCase getFolderRoleUseCase;
+    private final FindFolderRoleUseCase findFolderRoleUseCase;
     private final CreateDefaultFolderUseCase createDefaultFolderUseCase;
+    private final CreateFolderRoleUseCase createFolderRoleUseCase;
 
     private final FolderRepository folderRepository;
     private final FolderShareRepository folderShareRepository;
@@ -41,13 +43,12 @@ public class GetFoldersService {
             pageable = PageRequest.of(0, count - 1);
 
             UserEntity user = findUserUseCase.execute(userId);
-            FolderRoleEntity folderRole = getFolderRoleUseCase.execute(
-                    GetFolderRoleCommand.of(FolderRole.OWNER)
-            );
+            FolderRoleEntity folderRole = findFolderRoleUseCase.execute(
+                    FolderRoleCommand.of(FolderRole.OWNER)
+            ).orElseGet(() -> createFolderRoleUseCase.execute(FolderRoleCommand.of(FolderRole.OWNER)));
 
             FolderEntity defaultFolder = folderRepository.getDefaultFolder(userId)
                     .orElseGet(() -> createDefaultFolderUseCase.execute(CreateDefaultFolderCommand.of(folderRole, user)));
-
             folders.add(defaultFolder);
         } else {
             pageable = PageRequest.of(page - 1, count);
@@ -67,6 +68,6 @@ public class GetFoldersService {
                 .map(FolderMapper.INSTANCE::toResponseInFolderDto)
                 .toList();
 
-        return new ResponseFolderDto(dtos, folderShareEntities.getTotalElements());
+        return new ResponseFolderDto(dtos, folderShareEntities.getTotalElements() + 1);
     }
 }

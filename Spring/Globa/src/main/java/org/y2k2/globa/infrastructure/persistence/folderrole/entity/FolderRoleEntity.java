@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import org.hibernate.annotations.*;
+import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 
 import java.time.LocalDateTime;
 
@@ -20,8 +21,9 @@ public class FolderRoleEntity {
     @Column(name = "role_id", columnDefinition = "INT UNSIGNED")
     private Long roleId;
 
-    @Column(name = "role_name", nullable = false, unique = true, length = 3)
-    private String roleName;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role_name", nullable = false)
+    private FolderRole roleName;
 
     @CreationTimestamp
     @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

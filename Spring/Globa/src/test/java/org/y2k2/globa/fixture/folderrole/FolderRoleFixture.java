@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.y2k2.globa.factory.folderrole.FolderRoleFactory;
 import org.y2k2.globa.fixture.AbstractFixture;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
+import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 
 @Component
 @Getter
@@ -16,5 +17,10 @@ public class FolderRoleFixture extends AbstractFixture<FolderRoleEntity> {
     @Override
     protected FolderRoleEntity build() {
         return folderRoleFactory.createAndSave();
+    }
+
+    public FolderRoleFixture withRole(FolderRole role) {
+        folderRoleFactory.setRoleName(role);
+        return this;
     }
 }

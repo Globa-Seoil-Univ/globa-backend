@@ -21,4 +21,9 @@ public class FolderFixture extends AbstractFixture<FolderEntity> {
         folderFactory.setUser(user);
         return this;
     }
+
+    public FolderFixture withTitle(String title) {
+        folderFactory.setTitle(title);
+        return this;
+    }
 }

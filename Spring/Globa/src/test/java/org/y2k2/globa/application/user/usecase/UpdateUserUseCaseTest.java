@@ -1,16 +1,15 @@
-package org.y2k2.globa.application.user;
+package org.y2k2.globa.application.user.usecase;
 
 import com.navercorp.fixturemonkey.FixtureMonkey;
-import com.navercorp.fixturemonkey.api.introspector.BeanArbitraryIntrospector;
 import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitraryIntrospector;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.y2k2.globa.application.common.dto.file.FileDto;
 import org.y2k2.globa.application.user.command.UpdateUserCommand;
 import org.y2k2.globa.application.user.usecase.UpdateUserUseCase;
@@ -18,17 +17,13 @@ import org.y2k2.globa.domain.user.repository.UserRepository;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 @Slf4j
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 public class UpdateUserUseCaseTest {
+    @InjectMocks
     private UpdateUserUseCase updateUserUseCase;
 
-    @MockBean
+    @Mock
     private UserRepository userRepository;
-
-    @BeforeEach
-    void setUp() {
-        updateUserUseCase = new UpdateUserUseCase(userRepository);
-    }
 
     @Test
     @DisplayName("유저 수정 - 성공")
