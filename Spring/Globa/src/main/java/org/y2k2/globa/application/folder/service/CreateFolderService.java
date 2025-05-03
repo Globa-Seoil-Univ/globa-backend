@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.application.folder.dto.request.RequestFolderPostDto;
 import org.y2k2.globa.application.folder.mapper.FolderMapper;
 import org.y2k2.globa.application.folderrole.command.FolderRoleCommand;
-import org.y2k2.globa.application.folderrole.usecase.CreateFolderRoleUseCase;
 import org.y2k2.globa.application.folderrole.usecase.FindFolderRoleUseCase;
 import org.y2k2.globa.application.foldershare.command.CreateFolderSharesCommand;
 import org.y2k2.globa.application.foldershare.command.TargetFolderShareCommand;
@@ -32,7 +31,6 @@ import java.util.Optional;
 public class CreateFolderService {
     private final FindUserUseCase findUserUseCase;
     private final FindFolderRoleUseCase findFolderRoleUseCase;
-    private final CreateFolderRoleUseCase createFolderRoleUseCase;
     private final CreateFolderSharesUseCase createFolderSharesUsecase;
 
     private final FolderRepository folderRepository;
@@ -42,9 +40,7 @@ public class CreateFolderService {
         UserEntity ownerUser = findUserUseCase.execute(userId);
         FolderRoleEntity role = findFolderRoleUseCase.execute(
                 FolderRoleCommand.of(FolderRole.OWNER)
-        ).orElseGet(
-                () -> createFolderRoleUseCase.execute(FolderRoleCommand.of(FolderRole.OWNER))
-        );
+        ).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER_ROLE));
 
         FolderEntity folder = FolderMapper.INSTANCE.toEntity(ownerUser, title);
         FolderEntity createdFolder = folderRepository.save(folder);
@@ -78,10 +74,10 @@ public class CreateFolderService {
 
         FolderRoleEntity reader = findFolderRoleUseCase.execute(
                 FolderRoleCommand.of(FolderRole.READER)
-        ).orElseGet(() -> createFolderRoleUseCase.execute(FolderRoleCommand.of(FolderRole.READER)));
+        ).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER_ROLE));
         FolderRoleEntity editor = findFolderRoleUseCase.execute(
                 FolderRoleCommand.of(FolderRole.EDITOR)
-        ).orElseGet(() -> createFolderRoleUseCase.execute(FolderRoleCommand.of(FolderRole.EDITOR)));
+        ).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER_ROLE));
 
         List<TargetFolderShareCommand> shareTargetCommands = shareTargets.stream()
                 .map(target -> {

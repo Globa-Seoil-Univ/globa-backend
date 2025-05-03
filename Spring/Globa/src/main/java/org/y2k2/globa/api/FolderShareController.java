@@ -94,7 +94,9 @@ public class FolderShareController {
                     @ApiResponse(responseCode = "409", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SHARE_USER_DUPLICATED, ref = SwaggerErrorCode.SHARE_USER_DUPLICATED_VALUE),
                     })),
-                    @ApiResponse(responseCode = "500", ref = "500")
+                    @ApiResponse(responseCode = "500", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_FOLDER_ROLE, ref = SwaggerErrorCode.NOT_FOUND_FOLDER_ROLE_VALUE),
+                    }))
             }
     )
     @PostMapping("/user/{userId}")
@@ -131,7 +133,9 @@ public class FolderShareController {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_SHARE, ref = SwaggerErrorCode.NOT_FOUND_SHARE_VALUE),
                     })),
-                    @ApiResponse(responseCode = "500", ref = "500")
+                    @ApiResponse(responseCode = "500", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_FOLDER_ROLE, ref = SwaggerErrorCode.NOT_FOUND_FOLDER_ROLE_VALUE),
+                    }))
             }
     )
     @PatchMapping("/user/{userId}")

@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.application.folder.command.CreateDefaultFolderCommand;
 import org.y2k2.globa.application.folder.usecase.CreateDefaultFolderUseCase;
 import org.y2k2.globa.application.folderrole.command.FolderRoleCommand;
-import org.y2k2.globa.application.folderrole.usecase.CreateFolderRoleUseCase;
 import org.y2k2.globa.application.folderrole.usecase.FindFolderRoleUseCase;
 import org.y2k2.globa.application.user.command.CreateJWTCommand;
 import org.y2k2.globa.application.user.command.CreateUserCommand;
@@ -38,7 +37,6 @@ public class CreateUserService {
     private final CreateUserUseCase createUserUseCase;
     private final CreateJWTUseCase createJWTUseCase;
     private final CreateUserRoleUseCase createUserRoleUseCase;
-    private final CreateFolderRoleUseCase createFolderRoleUseCase;
     private final CreateDefaultFolderUseCase defaultFolderUseCase;
 
     private final UserRepository userRepository;
@@ -68,7 +66,7 @@ public class CreateUserService {
         );
         FolderRoleEntity folderRole = findFolderRoleUseCase.execute(
                 FolderRoleCommand.of(FolderRole.OWNER)
-        ).orElseGet(() -> createFolderRoleUseCase.execute(FolderRoleCommand.of(FolderRole.OWNER)));
+        ).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER_ROLE));
 
         createUserRoleUseCase.execute(CreateUserRoleCommand.of(newUser, UserRole.USER));
         defaultFolderUseCase.execute(CreateDefaultFolderCommand.of(folderRole, newUser));

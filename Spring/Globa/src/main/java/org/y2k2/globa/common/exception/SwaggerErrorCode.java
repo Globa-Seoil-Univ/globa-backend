@@ -119,11 +119,13 @@ public class SwaggerErrorCode {
     public static final String FAILED_FILE_UPLOAD = "FAILED_FILE_UPLOAD";
     public static final String FAILED_FILE_UPLOAD_VALUE = "50010";
     public static final String REDIS_TIMEOUT = "REDIS_TIMEOUT";
-    public static final String REDIS_TIMEOUT_VALUE = "50030";
+    public static final String REDIS_TIMEOUT_VALUE = "50020";
     public static final String FAILED_FOLDER_CREATE = "FAILED_FOLDER_CREATE";
-    public static final String FAILED_FOLDER_CREATE_VALUE = "50040";
+    public static final String FAILED_FOLDER_CREATE_VALUE = "50030";
     public static final String FAILED_EXCEL = "FAILED_EXCEL";
-    public static final String FAILED_EXCEL_VALUE = "50060";
+    public static final String FAILED_EXCEL_VALUE = "50040";
     public static final String NOT_FOUND_KEYWORD_EXCEL = "NOT_FOUND_KEYWORD_EXCEL";
-    public static final String NOT_FOUND_KEYWORD_EXCEL_VALUE = "50070";
+    public static final String NOT_FOUND_KEYWORD_EXCEL_VALUE = "50050";
+    public static final String NOT_FOUND_FOLDER_ROLE = "50060";
+    public static final String NOT_FOUND_FOLDER_ROLE_VALUE = "50050";
 }

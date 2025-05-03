@@ -113,6 +113,9 @@ public class SwaggerConfig {
         components.addExamples(ErrorCode.FAILED_FILE_UPLOAD.getErrorCode(), createExample(ErrorCode.FAILED_FILE_UPLOAD.getErrorCode(), "파이어베이스 파일 업로드 오류가 발생하였습니다."));
         components.addExamples(ErrorCode.REDIS_TIMEOUT.getErrorCode(), createExample(ErrorCode.REDIS_TIMEOUT.getErrorCode(), "레디스에 연결하지 못했습니다."));
         components.addExamples(ErrorCode.FAILED_FOLDER_CREATE.getErrorCode(), createExample(ErrorCode.FAILED_FOLDER_CREATE.getErrorCode(), "파이어베이스 폴더 생성 오류가 발생하였습니다."));
+        components.addExamples(ErrorCode.FAILED_EXCEL.getErrorCode(), createExample(ErrorCode.FAILED_EXCEL.getErrorCode(), "엑셀 변환 과정에서 오류가 발생하였습니다."));
+        components.addExamples(ErrorCode.NOT_FOUND_KEYWORD_EXCEL.getErrorCode(), createExample(ErrorCode.NOT_FOUND_KEYWORD_EXCEL.getErrorCode(), "키워드 엑셀 파일을 찾을 수 없습니다."));
+        components.addExamples(ErrorCode.NOT_FOUND_FOLDER_ROLE.getErrorCode(), createExample(ErrorCode.NOT_FOUND_FOLDER_ROLE.getErrorCode(), "폴더 권한을 찾을 수 없습니다."));
     }
 
     private ApiResponse createApiResponse(Schema schema, String description, Example example) {

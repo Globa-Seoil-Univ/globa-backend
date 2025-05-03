@@ -17,11 +17,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.y2k2.globa.application.folder.dto.request.RequestFolderPostDto;
 import org.y2k2.globa.application.folder.mapper.FolderMapper;
 import org.y2k2.globa.application.folderrole.command.FolderRoleCommand;
-import org.y2k2.globa.application.folderrole.usecase.CreateFolderRoleUseCase;
 import org.y2k2.globa.application.folderrole.usecase.FindFolderRoleUseCase;
 import org.y2k2.globa.application.foldershare.command.CreateFolderSharesCommand;
 import org.y2k2.globa.application.foldershare.usecase.CreateFolderSharesUseCase;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
+import org.y2k2.globa.common.exception.CustomException;
+import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.domain.user.repository.UserRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
@@ -44,8 +45,6 @@ public class CreateFolderServiceTest {
     private FindUserUseCase findUserUseCase;
     @Mock
     private FindFolderRoleUseCase findFolderRoleUseCase;
-    @Mock
-    private CreateFolderRoleUseCase createFolderRoleUseCase;
     @Mock
     private CreateFolderSharesUseCase createFolderSharesUseCase;
     @Mock
@@ -202,44 +201,24 @@ public class CreateFolderServiceTest {
     void createFolderWithoutRole() {
         String title = "Test Folder";
         FolderEntity folder = FolderMapper.INSTANCE.toEntity(user, title);
-        List<FolderShareEntity> folderShares = FixtureMonkey.builder()
-                .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)
-                .build()
-                .giveMeBuilder(FolderShareEntity.class)
-                .set("folder", folder)
-                .set("invitationStatus", InvitationStatus.ACCEPT)
-                .set("role", owner)
-                .set("ownerUser", user)
-                .sampleList(1);
 
         Mockito.when(findUserUseCase.execute(user.getUserId()))
                 .thenReturn(user);
         Mockito.when(findFolderRoleUseCase.execute(ArgumentMatchers.eq(new FolderRoleCommand(FolderRole.OWNER))))
                 .thenReturn(Optional.empty());
-        Mockito.when(createFolderRoleUseCase.execute(ArgumentMatchers.any(FolderRoleCommand.class)))
-                .thenReturn(owner);
-        Mockito.when(folderRepository.save(ArgumentMatchers.any(FolderEntity.class)))
-                .thenReturn(folder);
-        Mockito.when(createFolderSharesUseCase.execute(ArgumentMatchers.any(CreateFolderSharesCommand.class)))
-                .thenReturn(folderShares);
 
-        FolderShareEntity createdFolderShare = createFolderService.create(title, user.getUserId());
-
-        Assertions.assertThat(createdFolderShare.getFolder().getFolderId()).isEqualTo(folder.getFolderId());
-        Assertions.assertThat(createdFolderShare.getFolder().getTitle()).isEqualTo(title);
-        Assertions.assertThat(createdFolderShare.getRole().getRoleName()).isEqualTo(owner.getRoleName());
-        Assertions.assertThat(createdFolderShare.getOwnerUser().getUserId()).isEqualTo(user.getUserId());
-        Assertions.assertThat(createdFolderShare.getInvitationStatus()).isEqualTo(InvitationStatus.ACCEPT);
+        // createFolderService 호출 시 에러 확인
+        Assertions.assertThatThrownBy(() -> createFolderService.create(title, user.getUserId()))
+                .isInstanceOf(CustomException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND_FOLDER_ROLE);
 
         Mockito.verify(findUserUseCase, Mockito.times(1))
                 .execute(user.getUserId());
         Mockito.verify(findFolderRoleUseCase, Mockito.times(1))
                 .execute(ArgumentMatchers.any(FolderRoleCommand.class));
-        Mockito.verify(createFolderRoleUseCase, Mockito.times(1))
-                .execute(ArgumentMatchers.any(FolderRoleCommand.class));
-        Mockito.verify(folderRepository, Mockito.times(1))
+        Mockito.verify(folderRepository, Mockito.times(0))
                 .save(ArgumentMatchers.any(FolderEntity.class));
-        Mockito.verify(createFolderSharesUseCase, Mockito.times(1))
+        Mockito.verify(createFolderSharesUseCase, Mockito.times(0))
                 .execute(ArgumentMatchers.any(CreateFolderSharesCommand.class));
     }
 }

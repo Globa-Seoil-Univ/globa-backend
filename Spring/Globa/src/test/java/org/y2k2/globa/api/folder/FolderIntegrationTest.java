@@ -86,6 +86,10 @@ public class FolderIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("폴더 조회 - 성공 (폴더 없음)")
     void getFoldersEmpty() throws Exception {
+        folderRoleFixture
+                .withRole(FolderRole.OWNER)
+                .create();
+
         MvcResult result = mockMvc.perform(
                 MockMvcRequestBuilders.get(Constant.FOLDER_PREFIX.getValue())
                         .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
@@ -315,6 +319,9 @@ public class FolderIntegrationTest extends IntegrationTest {
                 .withRole(FolderRole.OWNER)
                 .create();
         folderRoleFixture
+                .withRole(FolderRole.READER)
+                .create();
+        folderRoleFixture
                 .withRole(FolderRole.EDITOR)
                 .create();
         RequestFolderPostDto request = new RequestFolderPostDto(
@@ -349,21 +356,11 @@ public class FolderIntegrationTest extends IntegrationTest {
                                 .content(objectMapper.writeValueAsString(request))
                 )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.header().exists("Location"))
-                .andExpect(MockMvcResultMatchers.header().string("Location", "/folder"));
-
-        // Cache 확인
-        FolderRoleEntity cachedRole = Objects.requireNonNull(cacheManager.getCache("folderRole"))
-                .get(FolderRole.OWNER.name(), FolderRoleEntity.class);
-
-        Assertions.assertThat(cachedRole).isNotNull();
-        Assertions.assertThat(cachedRole.getRoleId()).isNotNull();
-        Assertions.assertThat(cachedRole.getRoleName()).isEqualTo(FolderRole.OWNER);
+                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
     }
 
     @Test
-    @DisplayName("폴더 생성 - 성공 (공유 O, 폴더 권한 X)")
+    @DisplayName("폴더 생성 - 실패 (공유 O, 폴더 권한 X)")
     void createFolderWithShareWithoutRole() throws Exception {
         String title = "New Folder";
         String code = userFixture
@@ -385,29 +382,7 @@ public class FolderIntegrationTest extends IntegrationTest {
                                 .content(objectMapper.writeValueAsString(request))
                 )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.header().exists("Location"))
-                .andExpect(MockMvcResultMatchers.header().string("Location", "/folder"));
-
-        // Cache 확인
-        FolderRoleEntity cachedOwnerRole = Objects.requireNonNull(cacheManager.getCache("folderRole"))
-                .get(FolderRole.OWNER.name(), FolderRoleEntity.class);
-
-        FolderRoleEntity cachedEditorRole = Objects.requireNonNull(cacheManager.getCache("folderRole"))
-                .get(FolderRole.EDITOR.name(), FolderRoleEntity.class);
-
-        Assertions.assertThat(cachedOwnerRole)
-                .satisfies(role -> {
-                    Assertions.assertThat(role).isNotNull();
-                    Assertions.assertThat(role.getRoleId()).isNotNull();
-                    Assertions.assertThat(role.getRoleName()).isEqualTo(FolderRole.OWNER);
-                });
-        Assertions.assertThat(cachedEditorRole)
-                .satisfies(role -> {
-                    Assertions.assertThat(role).isNotNull();
-                    Assertions.assertThat(role.getRoleId()).isNotNull();
-                    Assertions.assertThat(role.getRoleName()).isEqualTo(FolderRole.EDITOR);
-                });
+                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
     }
 
     @Test

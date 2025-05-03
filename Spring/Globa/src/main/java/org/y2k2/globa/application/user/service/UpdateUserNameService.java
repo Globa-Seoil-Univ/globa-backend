@@ -8,12 +8,13 @@ import org.y2k2.globa.application.folder.command.UpdateFolderNameCommand;
 import org.y2k2.globa.application.folder.usecase.CreateDefaultFolderUseCase;
 import org.y2k2.globa.application.folder.usecase.UpdateFolderNameUseCase;
 import org.y2k2.globa.application.folderrole.command.FolderRoleCommand;
-import org.y2k2.globa.application.folderrole.usecase.CreateFolderRoleUseCase;
 import org.y2k2.globa.application.folderrole.usecase.FindFolderRoleUseCase;
 import org.y2k2.globa.application.user.command.UpdateUserCommand;
 import org.y2k2.globa.application.user.dto.request.RequestNameDto;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 import org.y2k2.globa.application.user.usecase.UpdateUserUseCase;
+import org.y2k2.globa.common.exception.CustomException;
+import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
@@ -25,7 +26,6 @@ import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 public class UpdateUserNameService {
     private final FindUserUseCase findUserUseCase;
     private final FindFolderRoleUseCase findFolderRoleUseCase;
-    private final CreateFolderRoleUseCase createFolderRoleUseCase;
     private final UpdateUserUseCase updateUserUseCase;
     private final UpdateFolderNameUseCase updateFolderNameUseCase;
     private final CreateDefaultFolderUseCase createDefaultFolderUseCase;
@@ -37,7 +37,7 @@ public class UpdateUserNameService {
         UserEntity user = findUserUseCase.execute(userId);
         FolderRoleEntity folderRole = findFolderRoleUseCase.execute(
                 FolderRoleCommand.of(FolderRole.OWNER)
-        ).orElseGet(() -> createFolderRoleUseCase.execute(FolderRoleCommand.of(FolderRole.OWNER)));
+        ).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER_ROLE));
 
         updateUserUseCase.execute(
                 UpdateUserCommand.builder()

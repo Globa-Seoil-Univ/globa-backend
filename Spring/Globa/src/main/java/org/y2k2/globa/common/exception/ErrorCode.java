@@ -71,6 +71,7 @@ public enum ErrorCode {
     FAILED_FOLDER_CREATE(HttpStatus.INTERNAL_SERVER_ERROR, "파이어베이스에서 폴더 생성에 오류가 실패하였습니다.","50030"),
     FAILED_EXCEL(HttpStatus.INTERNAL_SERVER_ERROR, "엑셀 변환 과정에서 오류가 발생하였습니다.","50040"),
     NOT_FOUND_KEYWORD_EXCEL(HttpStatus.INTERNAL_SERVER_ERROR, "키워드 엑셀 파일을 찾을 수 없습니다.","50050"),
+    NOT_FOUND_FOLDER_ROLE(HttpStatus.INTERNAL_SERVER_ERROR, "폴더 권한을 찾을 수 없습니다.", "50051"),
     ;
 
     private final HttpStatus httpStatus;

@@ -59,7 +59,9 @@ public class FolderController {
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
                     })),
-                    @ApiResponse(responseCode = "500", ref = "500")
+                    @ApiResponse(responseCode = "500", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_FOLDER_ROLE, ref = SwaggerErrorCode.NOT_FOUND_FOLDER_ROLE_VALUE),
+                    }))
             }
     )
     @GetMapping
@@ -95,6 +97,7 @@ public class FolderController {
                     })),
                     @ApiResponse(responseCode = "500", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.FAILED_FOLDER_CREATE, ref = SwaggerErrorCode.FAILED_FOLDER_CREATE_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_FOLDER_ROLE, ref = SwaggerErrorCode.NOT_FOUND_FOLDER_ROLE_VALUE),
                     }))
             }
     )
