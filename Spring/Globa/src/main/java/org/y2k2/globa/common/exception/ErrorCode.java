@@ -42,7 +42,6 @@ public enum ErrorCode {
     /* 404 NOT_FOUND : 값이 없음 */
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다.", "40410"),
     NOT_FOUND_TARGET_USER(HttpStatus.NOT_FOUND, "대상 유저를 찾을 수 없습니다.", "40411"),
-    NOT_FOUND_ROLE(HttpStatus.NOT_FOUND, "권한을 찾을 수 없습니다. ", "40412"),
     NOT_FOUND_INQUIRY(HttpStatus.NOT_FOUND, "문의를 찾을 수 없습니다.", "40420"),
     NOT_FOUND_NOTICE(HttpStatus.NOT_FOUND, "공지를 찾을 수 없습니다.", "40430"),
     NOT_FOUND_NOTIFICATION(HttpStatus.NOT_FOUND, "알림을 찾을 수 없습니다.", "40431"),
@@ -72,6 +71,7 @@ public enum ErrorCode {
     FAILED_EXCEL(HttpStatus.INTERNAL_SERVER_ERROR, "엑셀 변환 과정에서 오류가 발생하였습니다.","50040"),
     NOT_FOUND_KEYWORD_EXCEL(HttpStatus.INTERNAL_SERVER_ERROR, "키워드 엑셀 파일을 찾을 수 없습니다.","50050"),
     NOT_FOUND_FOLDER_ROLE(HttpStatus.INTERNAL_SERVER_ERROR, "폴더 권한을 찾을 수 없습니다.", "50051"),
+    NOT_FOUND_USER_ROLE(HttpStatus.INTERNAL_SERVER_ERROR, "유저 권한을 찾을 수 없습니다.", "50052"),
     ;
 
     private final HttpStatus httpStatus;

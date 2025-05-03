@@ -71,8 +71,6 @@ public class SwaggerErrorCode {
     public static final String NOT_FOUND_USER_VALUE = "40410";
     public static final String NOT_FOUND_TARGET_USER = "NOT_FOUND_TARGET_USER";
     public static final String NOT_FOUND_TARGET_USER_VALUE = "40411";
-    public static final String NOT_FOUND_ROLE = "NOT_FOUND_ROLE";
-    public static final String NOT_FOUND_ROLE_VALUE = "40412";
     public static final String NOT_FOUND_INQUIRY = "NOT_FOUND_INQUIRY";
     public static final String NOT_FOUND_INQUIRY_VALUE = "40420";
     public static final String NOT_FOUND_NOTICE = "NOT_FOUND_NOTICE";
@@ -128,4 +126,6 @@ public class SwaggerErrorCode {
     public static final String NOT_FOUND_KEYWORD_EXCEL_VALUE = "50050";
     public static final String NOT_FOUND_FOLDER_ROLE = "50060";
     public static final String NOT_FOUND_FOLDER_ROLE_VALUE = "50050";
+    public static final String NOT_FOUND_USER_ROLE = "NOT_FOUND_USER_ROLE";
+    public static final String NOT_FOUND_USER_ROLE_VALUE = "50051";
 }

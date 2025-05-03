@@ -22,7 +22,7 @@ public class CreateUserRoleUseCase implements VoidUseCase<CreateUserRoleCommand>
     @Override
     public void execute(CreateUserRoleCommand command) {
         RoleEntity role = roleRepository.getRole(command.roleName())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_ROLE));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER_ROLE));
 
         UserRoleEntity userRole = UserRoleMapper.INSTANCE.toEntity(command.user(), role);
         userRoleRepository.save(userRole);

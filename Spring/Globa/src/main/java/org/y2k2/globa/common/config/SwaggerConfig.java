@@ -86,7 +86,6 @@ public class SwaggerConfig {
         // 404 Errors
         components.addExamples(ErrorCode.NOT_FOUND_USER.getErrorCode(), createExample(ErrorCode.NOT_FOUND_USER.getErrorCode(), "사용자를 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_TARGET_USER.getErrorCode(), createExample(ErrorCode.NOT_FOUND_TARGET_USER.getErrorCode(), "대상 사용자를 찾을 수 없습니다."));
-        components.addExamples(ErrorCode.NOT_FOUND_ROLE.getErrorCode(), createExample(ErrorCode.NOT_FOUND_ROLE.getErrorCode(), "권한을 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_INQUIRY.getErrorCode(), createExample(ErrorCode.NOT_FOUND_INQUIRY.getErrorCode(), "문의 사항을 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_NOTICE.getErrorCode(), createExample(ErrorCode.NOT_FOUND_NOTICE.getErrorCode(), "공지를 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_NOTIFICATION.getErrorCode(), createExample(ErrorCode.NOT_FOUND_NOTIFICATION.getErrorCode(), "알림을 찾을 수 없습니다."));
@@ -116,6 +115,7 @@ public class SwaggerConfig {
         components.addExamples(ErrorCode.FAILED_EXCEL.getErrorCode(), createExample(ErrorCode.FAILED_EXCEL.getErrorCode(), "엑셀 변환 과정에서 오류가 발생하였습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_KEYWORD_EXCEL.getErrorCode(), createExample(ErrorCode.NOT_FOUND_KEYWORD_EXCEL.getErrorCode(), "키워드 엑셀 파일을 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_FOLDER_ROLE.getErrorCode(), createExample(ErrorCode.NOT_FOUND_FOLDER_ROLE.getErrorCode(), "폴더 권한을 찾을 수 없습니다."));
+        components.addExamples(ErrorCode.NOT_FOUND_USER_ROLE.getErrorCode(), createExample(ErrorCode.NOT_FOUND_USER_ROLE.getErrorCode(), "유저 권한을 찾을 수 없습니다."));
     }
 
     private ApiResponse createApiResponse(Schema schema, String description, Example example) {
