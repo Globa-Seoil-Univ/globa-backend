@@ -35,8 +35,8 @@ public class RecordRepositoryImpl implements RecordRepository {
     }
 
     @Override
-    public List<String> getAllPath(FolderEntity folder) {
-        return recordJpaRepository.findAllPaths(folder);
+    public List<String> getAllPath(Long folderId) {
+        return recordJpaRepository.findAllPaths(folderId);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class RecordRepositoryImpl implements RecordRepository {
 
     @Override
     public Page<RecordSearchProjection> getRecordByKeyword(Long userId, String keyword, Pageable pageable) {
-        return recordJpaRepository.findAllSharedOrOwnedRecordsByKeyword(userId, keyword, pageable);
+        return recordJpaRepository.findAllSharedOrOwnedRecordsByKeyword(userId, keyword, InvitationStatus.ACCEPT, pageable);
     }
 
     @Override

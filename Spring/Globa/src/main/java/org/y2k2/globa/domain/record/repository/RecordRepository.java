@@ -15,7 +15,7 @@ public interface RecordRepository {
     void delete(RecordEntity entity);
 
     List<Long> getAllRecordId(Long userId);
-    List<String> getAllPath(FolderEntity folder);
+    List<String> getAllPath(Long folderId);
 
     Page<RecordEntity> getRecordsByFolderId(Long folderId, Pageable pageable);
     Page<RecordEntity> getAccessibleRecord(Long userId, Pageable pageable);

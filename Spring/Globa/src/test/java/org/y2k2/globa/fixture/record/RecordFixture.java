@@ -27,4 +27,9 @@ public class RecordFixture extends AbstractFixture<RecordEntity> {
         recordFactory.setFolder(folder);
         return this;
     }
+
+    public RecordFixture withPath(String path) {
+        recordFactory.setPath(path);
+        return this;
+    }
 }

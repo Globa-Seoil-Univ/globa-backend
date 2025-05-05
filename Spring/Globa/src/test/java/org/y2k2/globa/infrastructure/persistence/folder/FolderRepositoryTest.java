@@ -22,8 +22,6 @@ import org.y2k2.globa.fixture.user.UserFixture;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.folder.repository.FolderRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.folderrole.repository.FolderRoleTestRepositoryImpl;
-import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
-import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 @Slf4j

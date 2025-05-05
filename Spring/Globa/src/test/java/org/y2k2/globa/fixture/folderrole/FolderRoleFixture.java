@@ -9,7 +9,6 @@ import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEnt
 import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 
 @Component
-@Getter
 public class FolderRoleFixture extends AbstractFixture<FolderRoleEntity> {
     @Autowired
     private FolderRoleFactory folderRoleFactory;

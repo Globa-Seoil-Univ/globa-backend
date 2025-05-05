@@ -23,11 +23,9 @@ public interface RecordJpaRepository extends JpaRepository<RecordEntity, Long> {
 
     @Query(
             value = "SELECT r.path FROM RecordEntity r " +
-                    "JOIN FolderShareEntity fs ON r.folder = fs.folder " +
-                    "WHERE fs.ownerUser.userId = :userId OR fs.targetUser.userId = :userId " +
-                    "AND r.folder = :folder"
+                    "WHERE r.folder.folderId = :folderId"
     )
-    List<String> findAllPaths(FolderEntity folder);
+    List<String> findAllPaths(Long folderId);
 
     Page<RecordEntity> findAllByFolderFolderId(Long folderId, Pageable pageable);
 
@@ -48,7 +46,7 @@ public interface RecordJpaRepository extends JpaRepository<RecordEntity, Long> {
                     "JOIN FolderEntity f ON f = r.folder " +
                     "JOIN FolderShareEntity fs ON fs.folder = f " +
                     "WHERE (f.user.userId = :userId OR fs.targetUser.userId = :userId) " +
-                    "AND fs.invitationStatus = 'ACCEPT' " +
+                    "AND fs.invitationStatus = :status " +
                     "AND r.title LIKE CONCAT('%', :keyword, '%') " +
                     "ORDER BY (CASE WHEN r.title LIKE CONCAT(:keyword, '%') THEN 0 ELSE 1 END)" +
                     ", r.createdTime DESC",
@@ -58,10 +56,10 @@ public interface RecordJpaRepository extends JpaRepository<RecordEntity, Long> {
                     "JOIN UserEntity u " +
                     "JOIN FolderShareEntity fs " +
                     "WHERE (f.user.userId = :userId OR fs.targetUser.userId = :userId) " +
-                    "AND fs.invitationStatus = 'ACCEPT' " +
+                    "AND fs.invitationStatus = :status " +
                     "AND r.title LIKE CONCAT('%', :keyword, '%')"
     )
-    Page<RecordSearchProjection> findAllSharedOrOwnedRecordsByKeyword(Long userId, String keyword, Pageable pageable);
+    Page<RecordSearchProjection> findAllSharedOrOwnedRecordsByKeyword(Long userId, String keyword, InvitationStatus status, Pageable pageable);
 
     @Query(
             value = "SELECT r " +
