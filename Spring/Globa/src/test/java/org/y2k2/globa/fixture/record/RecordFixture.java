@@ -18,6 +18,11 @@ public class RecordFixture extends AbstractFixture<RecordEntity> {
         return recordFactory.createAndSave();
     }
 
+    public RecordFixture withTitle(String title) {
+        recordFactory.setTitle(title);
+        return this;
+    }
+
     public RecordFixture withUser(UserEntity user) {
         recordFactory.setUser(user);
         return this;

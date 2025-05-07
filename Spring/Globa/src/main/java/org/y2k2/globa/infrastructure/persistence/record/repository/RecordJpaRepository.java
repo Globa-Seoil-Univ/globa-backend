@@ -40,24 +40,24 @@ public interface RecordJpaRepository extends JpaRepository<RecordEntity, Long> {
 
     @Query(
             value = "SELECT DISTINCT u.userId AS userId, u.name AS name, u.profilePath AS profilePath" +
-                    ", r.recordId AS recordId, f.folderId AS folderId, r.title AS title, r.createdTime AS createdTime " +
+                        ", r.recordId AS recordId, f.folderId AS folderId, r.title AS title, r.createdTime AS createdTime " +
                     "FROM RecordEntity r " +
                     "JOIN UserEntity u ON u = r.user " +
                     "JOIN FolderEntity f ON f = r.folder " +
                     "JOIN FolderShareEntity fs ON fs.folder = f " +
-                    "WHERE (f.user.userId = :userId OR fs.targetUser.userId = :userId) " +
-                    "AND fs.invitationStatus = :status " +
-                    "AND r.title LIKE CONCAT('%', :keyword, '%') " +
+                    "WHERE fs.invitationStatus = :status " +
+                        "AND (fs.targetUser.userId = :userId OR fs.ownerUser.userId = :userId) " +
+                        "AND r.title LIKE CONCAT('%', :keyword, '%') " +
                     "ORDER BY (CASE WHEN r.title LIKE CONCAT(:keyword, '%') THEN 0 ELSE 1 END)" +
                     ", r.createdTime DESC",
             countQuery = "SELECT COUNT(r) " +
                     "FROM RecordEntity r " +
-                    "JOIN FolderEntity f " +
-                    "JOIN UserEntity u " +
-                    "JOIN FolderShareEntity fs " +
-                    "WHERE (f.user.userId = :userId OR fs.targetUser.userId = :userId) " +
-                    "AND fs.invitationStatus = :status " +
-                    "AND r.title LIKE CONCAT('%', :keyword, '%')"
+                    "JOIN FolderEntity f ON f = r.folder " +
+                    "JOIN UserEntity u ON u = r.user " +
+                    "JOIN FolderShareEntity fs ON fs.folder = f " +
+                    "WHERE fs.invitationStatus = :status " +
+                        "AND (fs.targetUser.userId = :userId OR fs.ownerUser.userId = :userId) " +
+                        "AND r.title LIKE CONCAT('%', :keyword, '%') "
     )
     Page<RecordSearchProjection> findAllSharedOrOwnedRecordsByKeyword(Long userId, String keyword, InvitationStatus status, Pageable pageable);
 

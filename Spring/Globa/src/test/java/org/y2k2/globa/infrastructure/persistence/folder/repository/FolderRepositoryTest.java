@@ -1,4 +1,4 @@
-package org.y2k2.globa.infrastructure.persistence.folder;
+package org.y2k2.globa.infrastructure.persistence.folder.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -66,9 +66,6 @@ public class FolderRepositoryTest {
     @DisplayName("폴더 생성 - 성공")
     void createFolder() {
         UserEntity newUser = userFixture
-                .withCode("QWERTY")
-                .withFcmToken("FCM_TOKEN2")
-                .withSnsId("SNS_ID2")
                 .create();
         FolderEntity newFolder = folderFixture.withUser(newUser).create();
         FolderEntity savedFolder = folderRepository.save(newFolder);

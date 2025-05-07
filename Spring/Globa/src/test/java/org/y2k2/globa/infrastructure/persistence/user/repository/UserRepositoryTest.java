@@ -1,4 +1,4 @@
-package org.y2k2.globa.infrastructure.persistence.user;
+package org.y2k2.globa.infrastructure.persistence.user.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;

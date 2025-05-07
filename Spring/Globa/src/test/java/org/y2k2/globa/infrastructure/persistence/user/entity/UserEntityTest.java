@@ -1,4 +1,4 @@
-package org.y2k2.globa.infrastructure.persistence.user;
+package org.y2k2.globa.infrastructure.persistence.user.entity;
 
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.BeanArbitraryIntrospector;

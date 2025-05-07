@@ -14,6 +14,8 @@ import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.infrastructure.persistence.user.repository.UserRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.user.type.SnsKind;
 
+import java.util.UUID;
+
 @Slf4j
 @Getter
 @Setter
@@ -29,9 +31,9 @@ public class UserFactory extends AbstractFactory<UserEntity> {
     @Setter(AccessLevel.NONE)
     private UserEntity lastUser;
 
-    private String code = "ABCDEF";
+    private String code;
+    private String snsId;
     private String name = "TESTNAME";
-    private String snsId = "1234567890";
     private SnsKind snsKind = SnsKind.GOOGLE;
     private String profilePath = "profilePath";
     private String profileType = "image/jpeg";
@@ -50,9 +52,13 @@ public class UserFactory extends AbstractFactory<UserEntity> {
 
     @Override
     protected UserEntity setDefaultValues(UserEntity entity) {
+        code = getRandomString(6);
+        snsId = getRandomString(30);
+        fcmToken = getRandomString(20);
+
         entity.setCode(code);
-        entity.setName(name);
         entity.setSnsId(snsId);
+        entity.setName(name);
         entity.setSnsKind(snsKind);
         entity.setProfilePath(profilePath);
         entity.setProfileType(profileType);
@@ -76,5 +82,13 @@ public class UserFactory extends AbstractFactory<UserEntity> {
         } else {
             throw new RuntimeException("UserRepository is null, entity will not be persisted");
         }
+    }
+
+    private String getRandomString(Integer count) {
+        if (count == null || count <= 0) {
+            count = 10;
+        }
+
+        return UUID.randomUUID().toString().substring(0, count);
     }
 }

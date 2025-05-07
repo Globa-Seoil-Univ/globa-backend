@@ -139,7 +139,6 @@ public class FolderIntegrationTest extends IntegrationTest {
                 .withTitle("New Folder 02")
                 .create();
 
-
         FolderRoleEntity owner = folderRoleFixture
                 .withRole(FolderRole.OWNER)
                 .create();
@@ -310,9 +309,6 @@ public class FolderIntegrationTest extends IntegrationTest {
     void createFolderWithShare() throws Exception {
         String title = "New Folder";
         String code = userFixture
-                .withSnsId("987654321")
-                .withCode("QWERTY")
-                .withFcmToken(null)
                 .create()
                 .getCode();
         folderRoleFixture
@@ -364,9 +360,6 @@ public class FolderIntegrationTest extends IntegrationTest {
     void createFolderWithShareWithoutRole() throws Exception {
         String title = "New Folder";
         String code = userFixture
-                .withSnsId("456456456")
-                .withCode("ZXCZXC")
-                .withFcmToken(null)
                 .create()
                 .getCode();
         RequestFolderPostDto request = new RequestFolderPostDto(
