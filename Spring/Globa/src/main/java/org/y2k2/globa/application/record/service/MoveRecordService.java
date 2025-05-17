@@ -13,7 +13,6 @@ import org.y2k2.globa.application.record.usecase.MoveRecordUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
-import org.y2k2.globa.domain.record.repository.RecordRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 
@@ -26,7 +25,6 @@ public class MoveRecordService {
     private final MoveRecordUseCase moveRecordUseCase;
 
     private final FolderRepository folderRepository;
-    private final RecordRepository recordRepository;
 
     public void move(Long folderId, Long recordId, RequestRecordMoveDto dto, Long userId) {
         RecordEntity record = findOwnRecordUseCase.execute(

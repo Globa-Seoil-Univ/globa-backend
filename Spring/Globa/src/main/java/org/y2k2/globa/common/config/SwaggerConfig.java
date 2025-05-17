@@ -100,6 +100,7 @@ public class SwaggerConfig {
         components.addExamples(ErrorCode.NOT_FOUND_QUIZ.getErrorCode(), createExample(ErrorCode.NOT_FOUND_QUIZ.getErrorCode(), "퀴즈를 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_RECORD_FIREBASE.getErrorCode(), createExample(ErrorCode.NOT_FOUND_RECORD_FIREBASE.getErrorCode(), "Firebase Storage에서 음성을 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_SECTION.getErrorCode(), createExample(ErrorCode.NOT_FOUND_SECTION.getErrorCode(), "섹션을 찾을 수 없습니다."));
+        components.addExamples(ErrorCode.NOT_FOUND_ANALYSIS.getErrorCode(), createExample(ErrorCode.NOT_FOUND_ANALYSIS.getErrorCode(), "분석을 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_COMMENT.getErrorCode(), createExample(ErrorCode.NOT_FOUND_COMMENT.getErrorCode(), "댓글을 찾을 수 없습니다."));
 
         // 409 Error

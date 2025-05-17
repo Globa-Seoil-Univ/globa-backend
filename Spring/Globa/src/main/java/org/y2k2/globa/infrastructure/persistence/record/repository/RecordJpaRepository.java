@@ -34,7 +34,7 @@ public interface RecordJpaRepository extends JpaRepository<RecordEntity, Long> {
                     "JOIN FolderShareEntity fs ON r.folder = fs.folder " +
                     "WHERE " +
                         "fs.targetUser.userId = :userId AND fs.invitationStatus = :status " +
-                    "ORDER BY r.createdTime"
+                    "ORDER BY r.recordId DESC"
     )
     Page<RecordEntity> findAllByAccessibleRecord(Long userId, InvitationStatus status, Pageable pageable);
 
@@ -49,7 +49,7 @@ public interface RecordJpaRepository extends JpaRepository<RecordEntity, Long> {
                         "AND (fs.targetUser.userId = :userId OR fs.ownerUser.userId = :userId) " +
                         "AND r.title LIKE CONCAT('%', :keyword, '%') " +
                     "ORDER BY (CASE WHEN r.title LIKE CONCAT(:keyword, '%') THEN 0 ELSE 1 END)" +
-                    ", r.createdTime DESC",
+                    ", r.recordId DESC",
             countQuery = "SELECT COUNT(r) " +
                     "FROM RecordEntity r " +
                     "JOIN FolderEntity f ON f = r.folder " +
@@ -66,8 +66,8 @@ public interface RecordJpaRepository extends JpaRepository<RecordEntity, Long> {
                     "FROM RecordEntity r " +
                     "JOIN FolderShareEntity fs ON r.folder = fs.folder " +
                     "WHERE fs.targetUser.userId = :userId AND fs.ownerUser.userId != :userId " +
-                    "AND fs.invitationStatus = :status " +
-                    "ORDER BY r.createdTime DESC"
+                        "AND fs.invitationStatus = :status " +
+                    "ORDER BY r.recordId DESC"
     )
     Page<RecordEntity> findReceivingRecordsByUserOrderByCreatedTimeDesc(Long userId, InvitationStatus status, Pageable pageable);
 
@@ -75,8 +75,8 @@ public interface RecordJpaRepository extends JpaRepository<RecordEntity, Long> {
             value = "SELECT DISTINCT r FROM RecordEntity r " +
                     "JOIN FolderShareEntity fs ON r.folder = fs.folder " +
                     "WHERE fs.targetUser.userId != :userId AND fs.ownerUser.userId = :userId " +
-                    "AND fs.invitationStatus = :status " +
-                    "ORDER BY r.createdTime DESC"
+                        "AND fs.invitationStatus = :status " +
+                    "ORDER BY r.recordId DESC"
     )
     Page<RecordEntity> findSharingRecordsByUserOrderByCreatedTimeDesc(Long userId, InvitationStatus status, Pageable pageable);
 }

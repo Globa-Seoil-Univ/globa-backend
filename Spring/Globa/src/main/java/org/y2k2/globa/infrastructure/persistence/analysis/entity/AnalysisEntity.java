@@ -20,7 +20,7 @@ public class AnalysisEntity {
     @Column(name = "analysis_id", columnDefinition = "INT UNSIGNED")
     private Long analysisId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "section_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private SectionEntity section;

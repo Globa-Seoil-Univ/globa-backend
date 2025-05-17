@@ -100,6 +100,8 @@ public class SwaggerErrorCode {
     public static final String NOT_FOUND_RECORD_FIREBASE_VALUE = "40482";
     public static final String NOT_FOUND_SECTION = "NOT_FOUND_SECTION";
     public static final String NOT_FOUND_SECTION_VALUE = "40483";
+    public static final String NOT_FOUND_ANALYSIS = "NOT_FOUND_ANALYSIS";
+    public static final String NOT_FOUND_ANALYSIS_VALUE = "40484";
     public static final String NOT_FOUND_COMMENT = "NOT_FOUND_COMMENT";
     public static final String NOT_FOUND_COMMENT_VALUE = "40490";
 

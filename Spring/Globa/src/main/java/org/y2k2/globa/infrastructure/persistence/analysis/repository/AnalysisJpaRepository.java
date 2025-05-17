@@ -7,7 +7,5 @@ import org.y2k2.globa.infrastructure.persistence.section.entity.SectionEntity;
 import java.util.List;
 
 public interface AnalysisJpaRepository extends JpaRepository<AnalysisEntity, Long> {
-    List<AnalysisEntity> findALlBySectionIn(List<Long> sectionIds);
-
-    List<AnalysisEntity> findAllBySection(SectionEntity section);
+    List<AnalysisEntity> findAllBySectionIn(List<Long> sectionIds);
 }

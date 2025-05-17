@@ -56,6 +56,7 @@ public enum ErrorCode {
     NOT_FOUND_QUIZ(HttpStatus.NOT_FOUND, "퀴즈를 차즐 수 없습니다.", "40481"),
     NOT_FOUND_RECORD_FIREBASE(HttpStatus.NOT_FOUND, "해당 문서를 파이어베이스에서 찾을 수 없습니다.", "40482"),
     NOT_FOUND_SECTION(HttpStatus.NOT_FOUND, "섹션을 찾을 수 없습니다.", "40483"),
+    NOT_FOUND_ANALYSIS(HttpStatus.NOT_FOUND, "분석을 찾을 수 없습니다.", "40484"),
     NOT_FOUND_COMMENT(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다.", "40490"),
 
     /* 409 CONFLICT : 충돌 */

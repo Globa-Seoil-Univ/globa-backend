@@ -9,5 +9,4 @@ public interface AnalysisRepository {
     void deleteAll(List<AnalysisEntity> entities);
 
     List<AnalysisEntity> getAllSections(List<Long> sectionIds);
-    List<AnalysisEntity> getAllSections(SectionEntity section);
 }

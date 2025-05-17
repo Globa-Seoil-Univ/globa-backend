@@ -41,7 +41,7 @@ public class GetRecordsService {
         boolean isOwner = folder.getUser().getUserId().equals(userId);
 
         return new ResponseRecordsByFolderDto(
-                records.stream().map(RecordMapper.INSTANCE::toRequestRecordDto).toList(),
+                records.stream().map(RecordMapper.INSTANCE::toIntroRecordDto).toList(),
                 isOwner,
                 records.getTotalElements()
         );

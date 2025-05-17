@@ -9,10 +9,10 @@ import org.y2k2.globa.application.folder.dto.response.ResponseDetailFolderDto;
 import org.y2k2.globa.application.folder.mapper.FolderMapper;
 import org.y2k2.globa.application.foldershare.command.VerifyFolderCommand;
 import org.y2k2.globa.application.foldershare.usecase.VerifyFolderAccessibleUseCase;
-import org.y2k2.globa.application.record.command.GetRecordCommand;
+import org.y2k2.globa.application.record.command.AggregateRecordCommand;
 import org.y2k2.globa.application.record.dto.response.ResponseRecordDetailDto;
 import org.y2k2.globa.application.record.mapper.RecordMapper;
-import org.y2k2.globa.application.record.usecase.GetRecordUseCase;
+import org.y2k2.globa.application.record.usecase.AggregateRecordUseCase;
 import org.y2k2.globa.application.section.command.GetSectionsCommand;
 import org.y2k2.globa.application.section.dto.response.ResponseSectionDto;
 import org.y2k2.globa.application.section.usecase.GetSectionsUseCase;
@@ -37,7 +37,7 @@ public class GetRecordService {
     private final GetSectionsUseCase getSectionsUseCase;
     private final GetAnalysisUseCase getAnalysisUseCase;
     private final GetSummariesUseCase getSummariesUseCase;
-    private final GetRecordUseCase getRecordUseCase;
+    private final AggregateRecordUseCase aggregateRecordUseCase;
 
     private final RecordRepository recordRepository;
     private final HighlightRepository highlightRepository;
@@ -75,8 +75,8 @@ public class GetRecordService {
                 sections.stream().map(SectionEntity::getSectionId).toList()
         );
 
-        List<ResponseSectionDto> combinedSections = getRecordUseCase.execute(
-                GetRecordCommand.of(
+        List<ResponseSectionDto> combinedSections = aggregateRecordUseCase.execute(
+                AggregateRecordCommand.of(
                         sections,
                         analysis,
                         highlights,
