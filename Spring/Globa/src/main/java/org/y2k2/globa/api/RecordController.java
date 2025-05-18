@@ -35,8 +35,8 @@ public class RecordController {
     private final GetRecordService getRecordService;
     private final GetAnalysisService getAnalysisService;
     private final SearchRecordService searchRecordService;
-    private final GetReceivingRecordService getReceivingRecordService;
-    private final GetSharingRecordService getSharingRecordService;
+    private final GetReceivingRecordsService getReceivingRecordsService;
+    private final GetSharingRecordsService getSharingRecordsService;
     private final CreateRecordService createRecordService;
     private final UpdateShareLinkStatusService updateShareLinkStatusService;
     private final UpdateRecordNameService updateRecordNameService;
@@ -80,8 +80,8 @@ public class RecordController {
     }
 
     @Operation(
-            summary = "최신 문서 조회",
-            description = "폴더와 상관 없이 최신 문서를 가져옵니다.",
+            summary = "최근 문서 조회",
+            description = "폴더와 상관 없이 최근 문서를 가져옵니다.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -103,7 +103,7 @@ public class RecordController {
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
-    @GetMapping("/record")
+    @GetMapping("/record/recent")
     public ResponseEntity<ResponseRecordsDto> getRecentRecords(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "count", defaultValue = "10") int count,
@@ -178,7 +178,7 @@ public class RecordController {
                     @PathVariable(value = "folder_id") Long folderId,
                     @PathVariable(value = "record_id") Long recordId,
                     @AuthenticationPrincipal CustomUserDetails details
-    ) { return ResponseEntity.ok(getAnalysisService.get(recordId, folderId, details.getUserId())); }
+    ) { return ResponseEntity.ok(getAnalysisService.get(folderId, recordId, details.getUserId())); }
 
     @Operation(
             summary = "문서 검색",
@@ -208,7 +208,7 @@ public class RecordController {
     public ResponseEntity<ResponseRecordSearchDto> searchRecord(
             @RequestParam(value = "page", defaultValue = "1", required = false) int page,
             @RequestParam(value = "count", defaultValue = "10", required = false) int count,
-            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false, defaultValue = "") String keyword,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         return ResponseEntity.ok(searchRecordService.search(keyword, page, count, details.getUserId()));
@@ -244,7 +244,7 @@ public class RecordController {
             @RequestParam(required = false, defaultValue = "10") int count,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
-        return ResponseEntity.ok(getReceivingRecordService.get(page, count, details.getUserId()));
+        return ResponseEntity.ok(getReceivingRecordsService.get(page, count, details.getUserId()));
     }
 
     @Operation(
@@ -277,11 +277,10 @@ public class RecordController {
             @RequestParam(required = false, defaultValue = "10") int count,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
-        return ResponseEntity.ok(getSharingRecordService.get(page, count, details.getUserId()));
+        return ResponseEntity.ok(getSharingRecordsService.get(page, count, details.getUserId()));
     }
 
     @Operation(
-            deprecated = true,
             summary = "문서 추가",
             description = """
                    폴더에 녹음 파일을 추가합니다. <br />
@@ -313,7 +312,7 @@ public class RecordController {
             }
     )
     @PostMapping("/folder/{folder_id}/record")
-    public ResponseEntity<Void> createdRecord(
+    public ResponseEntity<Void> createRecord(
                             @PathVariable(value = "folder_id") Long folderId,
                             @Valid @RequestBody RequestPostRecordDto dto,
                             @AuthenticationPrincipal CustomUserDetails details

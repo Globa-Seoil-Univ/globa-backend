@@ -10,6 +10,7 @@ public enum Constant {
 
     USER_PREFIX("/user"),
     FOLDER_PREFIX("/folder"),
+    RECORD_PREFIX("/folder/{folderId}/record"),
     ;
 
     private final String value;

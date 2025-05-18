@@ -29,7 +29,7 @@ public class GetAnalysisService {
     private final QuizAttemptRepository quizAttemptRepository;
     private final KeywordRepository keywordRepository;
 
-    public ResponseAnalysisDto get(Long recordId, Long folderId, Long userId) {
+    public ResponseAnalysisDto get(Long folderId, Long recordId, Long userId) {
         verifyFolderAccessibleUseCase.execute(
                 VerifyFolderCommand.of(userId, folderId)
         );

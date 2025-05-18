@@ -13,14 +13,14 @@ import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 
 @Service
 @RequiredArgsConstructor
-public class GetReceivingRecordService {
+public class GetSharingRecordsService {
     private final CombineRecordsAndKeywordsUseCase combineRecordsAndKeywordsUseCase;
 
     private final RecordRepository recordRepository;
 
     public ResponseRecordsDto get(int page, int count, Long userId) {
         Pageable pageable = PageRequest.of(page - 1, count);
-        Page<RecordEntity> records = recordRepository.getInvitedRecord(userId, pageable);
+        Page<RecordEntity> records = recordRepository.getOwnedRecord(userId, pageable);
 
         return combineRecordsAndKeywordsUseCase.execute(
                 CombineRecordsAndKeywordsCommand.of(
