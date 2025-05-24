@@ -44,6 +44,7 @@ public interface RecordMapper {
     @Mapping(source = "record.title", target = "title")
     @Mapping(source = "record.path", target = "path")
     @Mapping(source = "record.size", target = "size")
+    @Mapping(source = "record.isShare", target = "isShare")
     @Mapping(source = "folder", target = "folder")
     @Mapping(source = "sections", target = "sections")
     @Mapping(source = "record.createdTime", target = "createdTime", qualifiedBy = { CustomTimestampTranslator.class, MapCreatedTime.class })

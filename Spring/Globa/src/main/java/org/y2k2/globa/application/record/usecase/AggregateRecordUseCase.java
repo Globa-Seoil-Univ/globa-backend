@@ -1,6 +1,7 @@
 package org.y2k2.globa.application.record.usecase;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.application.analysis.dto.response.ResponseRecordAnalysisDto;
 import org.y2k2.globa.application.analysis.mapper.AnalysisMapper;
@@ -25,6 +26,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class AggregateRecordUseCase implements UseCase<AggregateRecordCommand, List<ResponseSectionDto>> {
+    @Cacheable(value = "aggregateRecord", key = "#command.recordId()")
     @Override
     public List<ResponseSectionDto> execute(AggregateRecordCommand command) {
         List<ResponseSectionDto> responseSections = new ArrayList<>();

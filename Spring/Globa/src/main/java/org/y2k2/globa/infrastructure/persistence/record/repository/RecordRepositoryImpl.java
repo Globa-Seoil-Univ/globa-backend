@@ -30,6 +30,11 @@ public class RecordRepositoryImpl implements RecordRepository {
     }
 
     @Override
+    public Boolean existsById(Long recordId) {
+        return recordJpaRepository.existsById(recordId);
+    }
+
+    @Override
     public List<Long> getAllRecordId(Long userId) {
         return recordJpaRepository.findAllRecordId(userId);
     }

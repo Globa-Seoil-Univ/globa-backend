@@ -6,6 +6,7 @@ import org.y2k2.globa.factory.foldershare.FolderShareFactory;
 import org.y2k2.globa.fixture.AbstractFixture;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
+import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
 import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStatus;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;

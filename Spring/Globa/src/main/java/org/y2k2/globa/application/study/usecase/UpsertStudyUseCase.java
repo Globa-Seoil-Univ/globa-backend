@@ -22,7 +22,7 @@ public class UpsertStudyUseCase implements VoidUseCase<UpsertStudyCommand> {
                                 .build()
                 );
 
-        if (study.getRecord() != null) {
+        if (study.getStudyTime() != null) {
             study.setStudyTime(study.getStudyTime() + command.studyTime());
         } else {
             study.setStudyTime(command.studyTime());

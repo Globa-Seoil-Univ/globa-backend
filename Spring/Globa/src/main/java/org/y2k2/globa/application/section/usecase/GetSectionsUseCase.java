@@ -15,7 +15,6 @@ import java.util.List;
 public class GetSectionsUseCase implements UseCase<GetSectionsCommand, List<SectionEntity>> {
     private final SectionRepository sectionRepository;
 
-    @Cacheable(value = "sections", key = "#command.recordId")
     @Override
     public List<SectionEntity> execute(GetSectionsCommand command) {
         return sectionRepository.getAllSortedSections(command.recordId());

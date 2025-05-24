@@ -70,6 +70,8 @@ dependencies {
 
     // Development & Annotation Processing
     compileOnly 'org.projectlombok:lombok'
+    compileJava.options.encoding = 'UTF-8'
+    compileTestJava.options.encoding = 'UTF-8'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'

@@ -22,4 +22,8 @@ public class FolderRoleFixture extends AbstractFixture<FolderRoleEntity> {
         folderRoleFactory.setRoleName(role);
         return this;
     }
+
+    public FolderRoleEntity getEntity(FolderRole folderRole) {
+        return folderRoleFactory.getEntity(folderRole);
+    }
 }

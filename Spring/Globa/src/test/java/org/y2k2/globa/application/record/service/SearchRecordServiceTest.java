@@ -15,7 +15,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.y2k2.globa.application.record.dto.response.ResponseRecordSearchDto;
-import org.y2k2.globa.application.record.mapper.RecordMapper;
 import org.y2k2.globa.application.user.dto.common.UserIntroDto;
 import org.y2k2.globa.domain.record.repository.RecordRepository;
 import org.y2k2.globa.infrastructure.persistence.record.projection.RecordSearchProjection;
@@ -68,7 +67,7 @@ public class SearchRecordServiceTest {
                 .allSatisfy(record -> {
                     Assertions.assertThat(record.getRecordId()).isNotNull();
                     Assertions.assertThat(record.getUploader()).isInstanceOf(UserIntroDto.class);
-                    Assertions.assertThat(record.getUploader().getUserId()).isNotNull();
+                    Assertions.assertThat(record.getUploader().userId()).isNotNull();
                     Assertions.assertThat(record.getFolderId()).isNotNull();
                 });
     }

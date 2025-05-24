@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.y2k2.globa.application.record.command.FindOwnRecordCommand;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
+import org.y2k2.globa.domain.foldershare.repository.FolderShareRepository;
 import org.y2k2.globa.domain.record.repository.RecordRepository;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 
@@ -26,6 +27,8 @@ public class FindOwnRecordUseCaseTest {
 
     @Mock
     private RecordRepository recordRepository;
+    @Mock
+    private FolderShareRepository folderShareRepository;
 
     @Test
     @DisplayName("문서 조회 - 성공")
@@ -44,6 +47,37 @@ public class FindOwnRecordUseCaseTest {
 
         Mockito.when(recordRepository.getRecord(command.recordId()))
                 .thenReturn(Optional.of(record));
+
+        Mockito.when(folderShareRepository.isOwner(command.userId(), command.folderId()))
+                .thenReturn(false);
+
+        RecordEntity result = findOwnRecordUseCase.execute(command);
+
+        Assertions.assertThat(result).isEqualTo(record);
+        Mockito.verify(recordRepository, Mockito.times(1))
+                .getRecord(command.recordId());
+    }
+
+    @Test
+    @DisplayName("문서 조회 - 성공 (소유자 권한)")
+    void findWithOwnerPermission() {
+        RecordEntity record = FixtureMonkey.builder()
+                .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)
+                .defaultNotNull(true)
+                .build()
+                .giveMeOne(RecordEntity.class);
+
+        FindOwnRecordCommand command = FindOwnRecordCommand.of(
+                record.getUser().getUserId(),
+                record.getFolder().getFolderId(),
+                record.getRecordId()
+        );
+
+        Mockito.when(recordRepository.getRecord(command.recordId()))
+                .thenReturn(Optional.of(record));
+
+        Mockito.when(folderShareRepository.isOwner(command.userId(), command.folderId()))
+                .thenReturn(true);
 
         RecordEntity result = findOwnRecordUseCase.execute(command);
 
@@ -69,6 +103,8 @@ public class FindOwnRecordUseCaseTest {
 
         Mockito.when(recordRepository.getRecord(command.recordId()))
                 .thenReturn(Optional.of(record));
+        Mockito.when(folderShareRepository.isOwner(command.userId(), command.folderId()))
+                .thenReturn(false);
 
         Assertions.assertThatThrownBy(() -> findOwnRecordUseCase.execute(command))
                 .isInstanceOf(CustomException.class)
@@ -95,6 +131,8 @@ public class FindOwnRecordUseCaseTest {
 
         Mockito.when(recordRepository.getRecord(command.recordId()))
                 .thenReturn(Optional.of(record));
+        Mockito.when(folderShareRepository.isOwner(command.userId(), command.folderId()))
+                .thenReturn(false);
 
         Assertions.assertThatThrownBy(() -> findOwnRecordUseCase.execute(command))
                 .isInstanceOf(CustomException.class)

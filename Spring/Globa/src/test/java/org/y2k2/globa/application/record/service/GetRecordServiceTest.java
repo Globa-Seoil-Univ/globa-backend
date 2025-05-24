@@ -124,6 +124,7 @@ public class GetRecordServiceTest {
         // 단순 데이터(객체) 조합 코드이기 때문에 사용
         List<ResponseSectionDto> combinedRecords = usecase.execute(
                 AggregateRecordCommand.of(
+                        recordId,
                         sections,
                         analyses,
                         highlights,
@@ -186,6 +187,7 @@ public class GetRecordServiceTest {
         // 단순 데이터(객체) 조합 코드이기 때문에 사용
         List<ResponseSectionDto> combinedRecords = usecase.execute(
                 AggregateRecordCommand.of(
+                        recordId,
                         sections,
                         analyses,
                         highlights,

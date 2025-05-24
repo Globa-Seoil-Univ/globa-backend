@@ -47,4 +47,9 @@ public class FolderRoleFactory extends AbstractFactory<FolderRoleEntity> {
             throw new RuntimeException("FolderRoleRepository is null, entity will not be persisted");
         }
     }
+
+    public FolderRoleEntity getEntity(FolderRole folderRole) {
+        return folderRoleRepository.getRole(folderRole)
+                .orElseThrow(() -> new RuntimeException("FolderRole not found. Please check the database."));
+    }
 }

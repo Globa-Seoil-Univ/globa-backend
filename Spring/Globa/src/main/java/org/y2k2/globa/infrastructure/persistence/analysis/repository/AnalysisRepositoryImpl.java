@@ -20,6 +20,6 @@ public class AnalysisRepositoryImpl implements AnalysisRepository {
 
     @Override
     public List<AnalysisEntity> getAllSections(List<Long> sectionIds) {
-        return analysisJpaRepository.findAllBySectionIn(sectionIds);
+        return analysisJpaRepository.findAllBySection_SectionIdIn(sectionIds);
     }
 }

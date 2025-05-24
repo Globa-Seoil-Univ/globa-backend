@@ -21,4 +21,9 @@ public class KeywordFixture extends AbstractFixture<KeywordEntity> {
         keywordFactory.setRecord(record);
         return this;
     }
+
+    public KeywordFixture withWord(String word) {
+        keywordFactory.setWord(word);
+        return this;
+    }
 }

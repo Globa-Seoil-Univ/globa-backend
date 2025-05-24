@@ -14,6 +14,8 @@ public interface RecordRepository {
     RecordEntity save(RecordEntity entity);
     void delete(RecordEntity entity);
 
+    Boolean existsById(Long recordId);
+
     List<Long> getAllRecordId(Long userId);
     List<String> getAllPath(Long folderId);
 

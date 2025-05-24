@@ -74,8 +74,6 @@ public class UserIntegrationTest extends IntegrationTest {
     @Autowired
     private FolderFixture folderFixture;
     @Autowired
-    private FolderRoleFixture folderRoleFixture;
-    @Autowired
     private RoleFixture roleFixture;
 
     @MockBean
@@ -131,8 +129,6 @@ public class UserIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("내 정보 조회 - 성공 (기본 폴더가 없는 경우)")
     void getUserWithoutDefaultFolder() throws Exception {
-        folderRoleFixture.create();
-
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue())
                                 .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
@@ -309,7 +305,6 @@ public class UserIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("회원가입 - 성공 (카카오)")
     void signupKakao() throws Exception {
-        folderRoleFixture.create();
         roleFixture
                 .withName(UserRole.USER)
                 .create();
@@ -346,7 +341,6 @@ public class UserIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("회원가입 - 실패 (카카오)")
     void signupFailAuthKakao() throws Exception {
-        folderRoleFixture.create();
         roleFixture
                 .withName(UserRole.USER)
                 .create();
@@ -379,7 +373,6 @@ public class UserIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("회원가입 - 성공 (구글)")
     void signupGoogle() throws Exception {
-        folderRoleFixture.create();
         roleFixture
                 .withName(UserRole.USER)
                 .create();
@@ -416,7 +409,6 @@ public class UserIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("회원가입 - 실패 (구글)")
     void signupFailAuthGoogle() throws Exception {
-        folderRoleFixture.create();
         roleFixture
                 .withName(UserRole.USER)
                 .create();
@@ -449,7 +441,6 @@ public class UserIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("회원가입 - 실패 (SNS 종류 없음)")
     void signupFailSnsKind() throws Exception {
-        folderRoleFixture.create();
         roleFixture
                 .withName(UserRole.USER)
                 .create();
@@ -715,8 +706,6 @@ public class UserIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("이름 수정 - 성공 (기본 폴더가 없는 경우)")
     void modifyNameWithoutDefaultFolder() throws Exception {
-        folderRoleFixture.create();
-
         RequestNameDto request = new RequestNameDto(
                 "NEW_NAME"
         );

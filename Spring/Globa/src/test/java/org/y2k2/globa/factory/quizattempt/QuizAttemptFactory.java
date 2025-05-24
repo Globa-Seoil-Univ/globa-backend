@@ -31,8 +31,6 @@ public class QuizAttemptFactory extends AbstractFactory<QuizAttemptEntity> {
     private QuizEntity quiz;
     private UserEntity user;
     private Boolean isCorrect;
-
-
     private LocalDateTime createdTime = new CustomTimestamp().getTimestamp();
 
     @Override
@@ -59,10 +57,6 @@ public class QuizAttemptFactory extends AbstractFactory<QuizAttemptEntity> {
     }
 
     public QuizAttemptEntity updateAndSave(QuizAttemptEntity entity) {
-        entity.setQuiz(quiz);
-        entity.setUser(user);
-        entity.setIsCorrect(isCorrect);
-        entity.setCreatedTime(createdTime);
         return saveEntity(entity);
     }
 }

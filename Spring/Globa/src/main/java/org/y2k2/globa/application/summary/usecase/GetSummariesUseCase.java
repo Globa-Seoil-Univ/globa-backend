@@ -15,12 +15,6 @@ import java.util.List;
 public class GetSummariesUseCase implements UseCase<GetSummariesCommand, List<SummaryEntity>> {
     private final SummaryRepository summaryRepository;
 
-    @Cacheable(
-            value = "summaries",
-            key = "#command.sectionIds.stream().sorted().collect(" +
-                        "T(java.util.stream.Collectors).joining(':')" +
-                    ")"
-    )
     @Override
     public List<SummaryEntity> execute(GetSummariesCommand command) {
         return summaryRepository.getSummaryInSections(

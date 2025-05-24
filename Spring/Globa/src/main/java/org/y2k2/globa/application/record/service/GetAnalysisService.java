@@ -11,8 +11,11 @@ import org.y2k2.globa.application.quiz.dto.response.ResponseQuizGradeDto;
 import org.y2k2.globa.application.quiz.mapper.QuizMapper;
 import org.y2k2.globa.application.study.dto.response.ResponseStudyTimesDto;
 import org.y2k2.globa.application.study.mapper.StudyMapper;
+import org.y2k2.globa.common.exception.CustomException;
+import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.domain.keyword.repository.KeywordRepository;
 import org.y2k2.globa.domain.quizattemp.repository.QuizAttemptRepository;
+import org.y2k2.globa.domain.record.repository.RecordRepository;
 import org.y2k2.globa.domain.study.repository.StudyRepository;
 import org.y2k2.globa.infrastructure.persistence.keyword.projection.KeywordProjection;
 import org.y2k2.globa.infrastructure.persistence.quizattemp.projection.QuizGradeProjection;
@@ -25,6 +28,7 @@ import java.util.List;
 public class GetAnalysisService {
     private final VerifyFolderAccessibleUseCase verifyFolderAccessibleUseCase;
 
+    private final RecordRepository recordRepository;
     private final StudyRepository studyRepository;
     private final QuizAttemptRepository quizAttemptRepository;
     private final KeywordRepository keywordRepository;
@@ -33,6 +37,10 @@ public class GetAnalysisService {
         verifyFolderAccessibleUseCase.execute(
                 VerifyFolderCommand.of(userId, folderId)
         );
+
+        if (!recordRepository.existsById(recordId)) {
+            throw new CustomException(ErrorCode.NOT_FOUND_RECORD);
+        }
 
         List<StudyEntity> studies = studyRepository.getAllStudies(userId, recordId);
         List<QuizGradeProjection> quizzes = quizAttemptRepository.getQuizAttemptByUserAndRecordId(userId, recordId);

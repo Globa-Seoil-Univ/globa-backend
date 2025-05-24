@@ -340,10 +340,10 @@ public class RecordController {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.MISMATCH_FOLDER_OWNER, ref = SwaggerErrorCode.MISMATCH_FOLDER_OWNER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_RECORD_OWNER, ref = SwaggerErrorCode.MISMATCH_RECORD_OWNER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_RECORD_FOLDER, ref = SwaggerErrorCode.MISMATCH_RECORD_FOLDER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_WRITEABLE, ref = SwaggerErrorCode.NOT_DESERVE_WRITEABLE_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
@@ -382,6 +382,7 @@ public class RecordController {
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_RECORD_FOLDER, ref = SwaggerErrorCode.MISMATCH_RECORD_FOLDER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_RECORD_OWNER, ref = SwaggerErrorCode.MISMATCH_RECORD_OWNER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_WRITEABLE, ref = SwaggerErrorCode.NOT_DESERVE_WRITEABLE_VALUE)
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),
@@ -459,7 +460,7 @@ public class RecordController {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.MISMATCH_RECORD_FOLDER, ref = SwaggerErrorCode.MISMATCH_RECORD_FOLDER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER, ref = SwaggerErrorCode.NOT_DESERVE_ACCESS_FOLDER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_RECORD_OWNER, ref = SwaggerErrorCode.MISMATCH_RECORD_OWNER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -471,7 +472,7 @@ public class RecordController {
             }
     )
     @PatchMapping("/folder/{folder_id}/record/{record_id}/study")
-    public ResponseEntity<Void> modifyStudyTime(
+    public ResponseEntity<Void> upsertStudyTime(
             @PathVariable(value = "folder_id") Long folderId,
             @PathVariable(value = "record_id") Long recordId,
             @Valid @RequestBody RequestStudyDto dto,
@@ -496,7 +497,7 @@ public class RecordController {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.MISMATCH_FOLDER_OWNER, ref = SwaggerErrorCode.MISMATCH_FOLDER_OWNER_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_WRITEABLE, ref = SwaggerErrorCode.NOT_DESERVE_WRITEABLE_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_RECORD_FOLDER, ref = SwaggerErrorCode.MISMATCH_RECORD_FOLDER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_RECORD_OWNER, ref = SwaggerErrorCode.MISMATCH_RECORD_OWNER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),

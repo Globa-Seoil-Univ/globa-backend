@@ -1,6 +1,7 @@
 package org.y2k2.globa.application.comment.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.application.comment.dto.request.RequestCommentWithIdsDto;
@@ -41,6 +42,7 @@ public class CreateFirstCommentService {
     private final CommentRepository commentRepository;
     private final HighlightRepository highlightRepository;
 
+    @CacheEvict(value = "aggregateRecord", key = "#idsDto.recordId()")
     @Transactional
     public long create(RequestCommentWithIdsDto idsDto, RequestFirstCommentDto request) {
         verifyFolderWritableUseCase.execute(

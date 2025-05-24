@@ -17,7 +17,7 @@ public class VerifyFolderWritableUseCase implements VoidUseCase<VerifyFolderComm
     public void execute(VerifyFolderCommand command) {
         Boolean isWritable = folderShareRepository.isWritable(command.userId(), command.folderId());
         if (!isWritable) {
-            throw new CustomException(ErrorCode.NOT_DESERVE_POST_COMMENT);
+            throw new CustomException(ErrorCode.NOT_DESERVE_WRITEABLE);
         }
     }
 }

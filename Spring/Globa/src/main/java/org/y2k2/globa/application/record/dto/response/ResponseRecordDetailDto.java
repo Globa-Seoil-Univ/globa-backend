@@ -10,6 +10,7 @@ public record ResponseRecordDetailDto(
         String title,
         String path,
         String size,
+        Boolean isShare,
         ResponseDetailFolderDto folder,
         List<ResponseSectionDto> sections,
         String createdTime

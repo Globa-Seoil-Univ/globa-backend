@@ -18,9 +18,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.y2k2.globa.annotation.WithAccount;
 import org.y2k2.globa.api.IntegrationTest;
 import org.y2k2.globa.application.folder.dto.request.RequestFolderNameDto;
 import org.y2k2.globa.application.folder.dto.request.RequestFolderPostDto;
@@ -36,8 +33,6 @@ import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
 import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
-import org.y2k2.globa.util.JWTTestProvider;
-import org.y2k2.globa.util.RedisTestStore;
 
 import java.util.List;
 import java.util.Objects;
@@ -56,13 +51,15 @@ public class FolderIntegrationTest extends IntegrationTest {
     @Autowired
     private UserFixture userFixture;
     @Autowired
-    private FolderRoleFixture folderRoleFixture;
-    @Autowired
     private FolderFixture folderFixture;
+    @Autowired
+    private FolderRoleFixture folderRoleFixture;
     @Autowired
     private FolderShareFixture folderShareFixture;
 
     private UserEntity user;
+    private FolderRoleEntity owner;
+    private FolderRoleEntity reader;
 
     @BeforeEach
     void setUp() {
@@ -74,6 +71,9 @@ public class FolderIntegrationTest extends IntegrationTest {
 
         user = userFixture.create();
         setSecurityContext(user);
+
+        owner = folderRoleFixture.getEntity(FolderRole.OWNER);
+        reader = folderRoleFixture.getEntity(FolderRole.READER);
     }
 
     @AfterEach
@@ -86,10 +86,6 @@ public class FolderIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("폴더 조회 - 성공 (폴더 없음)")
     void getFoldersEmpty() throws Exception {
-        folderRoleFixture
-                .withRole(FolderRole.OWNER)
-                .create();
-
         MvcResult result = mockMvc.perform(
                 MockMvcRequestBuilders.get(Constant.FOLDER_PREFIX.getValue())
                         .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
@@ -137,13 +133,6 @@ public class FolderIntegrationTest extends IntegrationTest {
         FolderEntity newFolder02 = folderFixture
                 .withUser(user)
                 .withTitle("New Folder 02")
-                .create();
-
-        FolderRoleEntity owner = folderRoleFixture
-                .withRole(FolderRole.OWNER)
-                .create();
-        FolderRoleEntity reader = folderRoleFixture
-                .withRole(FolderRole.READER)
                 .create();
 
         folderShareFixture
@@ -220,13 +209,6 @@ public class FolderIntegrationTest extends IntegrationTest {
                 .withTitle("New Folder 02")
                 .create();
 
-        FolderRoleEntity owner = folderRoleFixture
-                .withRole(FolderRole.OWNER)
-                .create();
-        FolderRoleEntity reader = folderRoleFixture
-                .withRole(FolderRole.READER)
-                .create();
-
         folderShareFixture
                 .withFolder(defaultFolder)
                 .withOwner(user)
@@ -287,10 +269,6 @@ public class FolderIntegrationTest extends IntegrationTest {
         String title = "New Folder";
         RequestFolderPostDto request = new RequestFolderPostDto(title, null);
 
-        folderRoleFixture
-                .withRole(FolderRole.OWNER)
-                .create();
-
         mockMvc.perform(
                 MockMvcRequestBuilders.post(Constant.FOLDER_PREFIX.getValue())
                         .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
@@ -311,15 +289,6 @@ public class FolderIntegrationTest extends IntegrationTest {
         String code = userFixture
                 .create()
                 .getCode();
-        folderRoleFixture
-                .withRole(FolderRole.OWNER)
-                .create();
-        folderRoleFixture
-                .withRole(FolderRole.READER)
-                .create();
-        folderRoleFixture
-                .withRole(FolderRole.EDITOR)
-                .create();
         RequestFolderPostDto request = new RequestFolderPostDto(
                 title,
                 List.of(new RequestFolderPostDto.ShareTarget(FolderRole.EDITOR.toString(), code))
@@ -339,57 +308,14 @@ public class FolderIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("폴더 생성 - 성공 (공유 X, 폴더 권한 X)")
-    void createFolderWithoutRole() throws Exception {
-        String title = "New Folder";
-        RequestFolderPostDto request = new RequestFolderPostDto(title, null);
-
-        mockMvc.perform(
-                        MockMvcRequestBuilders.post(Constant.FOLDER_PREFIX.getValue())
-                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
-                                .accept(MediaType.APPLICATION_JSON)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request))
-                )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
-    }
-
-    @Test
-    @DisplayName("폴더 생성 - 실패 (공유 O, 폴더 권한 X)")
-    void createFolderWithShareWithoutRole() throws Exception {
-        String title = "New Folder";
-        String code = userFixture
-                .create()
-                .getCode();
-        RequestFolderPostDto request = new RequestFolderPostDto(
-                title,
-                List.of(new RequestFolderPostDto.ShareTarget(FolderRole.EDITOR.toString(), code))
-        );
-
-        mockMvc.perform(
-                        MockMvcRequestBuilders.post(Constant.FOLDER_PREFIX.getValue())
-                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
-                                .accept(MediaType.APPLICATION_JSON)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request))
-                )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
-    }
-
-    @Test
     @DisplayName("폴더 이름 수정 - 성공")
     void updateFolderName() throws Exception {
         FolderEntity folder = folderFixture
                 .withUser(user)
                 .create();
-        FolderRoleEntity folderRole = folderRoleFixture
-                .withRole(FolderRole.OWNER)
-                .create();
         folderShareFixture
                 .withFolder(folder)
-                .withRole(folderRole)
+                .withRole(owner)
                 .withOwner(user)
                 .withTarget(user)
                 .create();
@@ -443,12 +369,9 @@ public class FolderIntegrationTest extends IntegrationTest {
         FolderEntity folder = folderFixture
                 .withUser(user)
                 .create();
-        FolderRoleEntity folderRole = folderRoleFixture
-                .withRole(FolderRole.OWNER)
-                .create();
         folderShareFixture
                 .withFolder(folder)
-                .withRole(folderRole)
+                .withRole(owner)
                 .withOwner(user)
                 .withTarget(user)
                 .create();
@@ -468,12 +391,9 @@ public class FolderIntegrationTest extends IntegrationTest {
         FolderEntity folder = folderFixture
                 .withUser(user)
                 .create();
-        FolderRoleEntity folderRole = folderRoleFixture
-                .withRole(FolderRole.OWNER)
-                .create();
         folderShareFixture
                 .withFolder(folder)
-                .withRole(folderRole)
+                .withRole(owner)
                 .withOwner(user)
                 .withTarget(user)
                 .create();

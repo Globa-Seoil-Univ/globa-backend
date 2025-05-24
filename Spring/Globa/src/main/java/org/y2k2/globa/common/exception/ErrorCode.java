@@ -27,7 +27,7 @@ public enum ErrorCode {
     /* 403 FORBIDDEN : 잘못된 접근 */
     NOT_PERMISSION(HttpStatus.FORBIDDEN,"오직 관리자와 편집자만 작성할 수 있습니다.","40310"),
     NOT_DESERVE_ACCESS_FOLDER(HttpStatus.FORBIDDEN,"해당 폴더에 대한 접근 권한이 없습니다.","40311"),
-    NOT_DESERVE_POST_COMMENT(HttpStatus.FORBIDDEN,"댓글을 작성할 수 있는 권한이 없습니다.","40312"),
+    NOT_DESERVE_WRITEABLE(HttpStatus.FORBIDDEN,"해당 폴더에 대한 편집 권한이 없습니다.","40312"),
     NOT_DESERVE_ACCEPT_INVITATION(HttpStatus.FORBIDDEN,"초대를 수락할 수 있는 권한이 없습니다.","40313"),
     NOT_DESERVE_ACCESS_NOTIFICATION(HttpStatus.FORBIDDEN,"알림에 대한 접근 권한이 없습니다. ","40314"),
     MISMATCH_INQUIRY_OWNER(HttpStatus.FORBIDDEN, "해당 문의에 대한 소유권자가 아닙니다.", "40320"),

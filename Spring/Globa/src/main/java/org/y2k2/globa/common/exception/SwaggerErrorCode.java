@@ -41,8 +41,8 @@ public class SwaggerErrorCode {
     public static final String NOT_PERMISSION_VALUE = "40310";
     public static final String NOT_DESERVE_ACCESS_FOLDER = "NOT_DESERVE_ACCESS_FOLDER";
     public static final String NOT_DESERVE_ACCESS_FOLDER_VALUE = "40311";
-    public static final String NOT_DESERVE_POST_COMMENT = "NOT_DESERVE_POST_COMMENT";
-    public static final String NOT_DESERVE_POST_COMMENT_VALUE = "40312";
+    public static final String NOT_DESERVE_WRITEABLE = "NOT_DESERVE_WRITEABLE";
+    public static final String NOT_DESERVE_WRITEABLE_VALUE = "40312";
     public static final String NOT_DESERVE_ACCEPT_INVITATION  = "NOT_DESERVE_ACCEPT_INVITATION";
     public static final String NOT_DESERVE_ACCEPT_INVITATION_VALUE = "40313";
     public static final String NOT_DESERVE_ACCESS_NOTIFICATION = "NOT_DESERVE_ACCESS_NOTIFICATION";

@@ -158,7 +158,7 @@ public class CommentController {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_POST_COMMENT, ref = SwaggerErrorCode.NOT_DESERVE_POST_COMMENT_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_WRITEABLE, ref = SwaggerErrorCode.NOT_DESERVE_WRITEABLE_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
@@ -207,7 +207,7 @@ public class CommentController {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_POST_COMMENT, ref = SwaggerErrorCode.NOT_DESERVE_POST_COMMENT_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_WRITEABLE, ref = SwaggerErrorCode.NOT_DESERVE_WRITEABLE_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
@@ -257,7 +257,7 @@ public class CommentController {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_POST_COMMENT, ref = SwaggerErrorCode.NOT_DESERVE_POST_COMMENT_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_WRITEABLE, ref = SwaggerErrorCode.NOT_DESERVE_WRITEABLE_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
@@ -313,7 +313,7 @@ public class CommentController {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_POST_COMMENT, ref = SwaggerErrorCode.NOT_DESERVE_POST_COMMENT_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_WRITEABLE, ref = SwaggerErrorCode.NOT_DESERVE_WRITEABLE_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_COMMENT_OWNER, ref = SwaggerErrorCode.MISMATCH_COMMENT_OWNER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),
@@ -364,7 +364,7 @@ public class CommentController {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_POST_COMMENT, ref = SwaggerErrorCode.NOT_DESERVE_POST_COMMENT_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_WRITEABLE, ref = SwaggerErrorCode.NOT_DESERVE_WRITEABLE_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_COMMENT_OWNER, ref = SwaggerErrorCode.MISMATCH_COMMENT_OWNER_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
                     })),

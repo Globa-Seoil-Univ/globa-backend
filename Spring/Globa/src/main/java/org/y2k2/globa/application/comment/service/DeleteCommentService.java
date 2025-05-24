@@ -1,6 +1,9 @@
 package org.y2k2.globa.application.comment.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.y2k2.globa.application.comment.command.GetMyCommentCommand;
 import org.y2k2.globa.application.comment.dto.request.RequestCommentWithIdsDto;
@@ -16,6 +19,7 @@ import org.y2k2.globa.infrastructure.persistence.comment.entity.CommentEntity;
 import org.y2k2.globa.infrastructure.persistence.highlight.entity.HighlightEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +29,8 @@ public class DeleteCommentService {
 
     private final CommentRepository commentRepository;
     private final HighlightRepository highlightRepository;
+
+    private final CacheManager cacheManager;
 
     public void delete(RequestCommentWithIdsDto idsDto, Long commentId) {
         verifyFolderWritableUseCase.execute(VerifyFolderCommand.of(idsDto.userId(), idsDto.folderId()));
@@ -47,6 +53,9 @@ public class DeleteCommentService {
 
             commentRepository.deleteAll(deletedComments);
             highlightRepository.delete(highlight);
+
+            Optional.ofNullable(cacheManager.getCache("aggregateRecord"))
+                    .ifPresent(cache -> cache.evict(idsDto.recordId()));
         } else {
             comment.setIsDeleted(true);
             comment.setDeletedTime(new CustomTimestamp().getTimestamp());

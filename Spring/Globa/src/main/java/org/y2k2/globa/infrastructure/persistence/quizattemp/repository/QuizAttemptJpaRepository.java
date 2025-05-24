@@ -12,14 +12,13 @@ import java.util.List;
 
 public interface QuizAttemptJpaRepository extends JpaRepository<QuizAttemptEntity, Long> {
     @Query(
-            value = "SELECT " +
-                    "(SUM(CASE WHEN qa.isCorrect = TRUE THEN 1 ELSE 0 END) / COUNT(qa.isCorrect)) * 100 AS quizGrade, " +
-                    "DATE(qa.createdTime) AS createdTime " +
+            value = "SELECT (CAST(SUM(CASE WHEN qa.isCorrect THEN 1 ELSE 0 END) AS FLOAT) / CAST(COUNT(qa.isCorrect) AS FLOAT)) * 100 AS quizGrade, " +
+                    "FUNCTION('DATE', qa.createdTime) AS createdTime " +
                     "FROM QuizAttemptEntity qa " +
                     "WHERE qa.user.userId = :userId " +
-                    "AND qa.isCorrect IS NOT NULL " +
-                    "AND qa.createdTime >= :intervalDay " +
-                    "GROUP BY DATE(qa.createdTime)"
+                        "AND qa.isCorrect IS NOT NULL " +
+                        "AND qa.createdTime >= :intervalDay " +
+                    "GROUP BY FUNCTION('DATE', qa.createdTime)"
     )
     List<QuizGradeProjection> findQuizGradeByUserInDays(
             @Param("userId") Long userId,
@@ -27,14 +26,14 @@ public interface QuizAttemptJpaRepository extends JpaRepository<QuizAttemptEntit
     );
 
     @Query(
-            value = "SELECT (SUM(CASE WHEN qa.isCorrect THEN 1 ELSE 0 END) / COUNT(qa.isCorrect)) * 100 AS quizGrade" +
-                    ", qa.createdTime AS createdTime " +
+            value = "SELECT (CAST(SUM(CASE WHEN qa.isCorrect THEN 1 ELSE 0 END) AS FLOAT) / CAST(COUNT(qa.isCorrect) AS FLOAT)) * 100 AS quizGrade, " +
+                    "FUNCTION('DATE', qa.createdTime) AS createdTime " +
                     "FROM QuizAttemptEntity qa " +
-                    "JOIN qa.quiz q ON qa.quiz = q " +
+                    "JOIN qa.quiz q " +
                     "WHERE qa.user.userId = :userId " +
-                    "AND qa.isCorrect IS NOT NULL " +
-                    "AND q.record.recordId = :recordId " +
-                    "GROUP BY DATE(qa.createdTime)"
+                        "AND qa.isCorrect IS NOT NULL " +
+                        "AND q.record.recordId = :recordId " +
+                    "GROUP BY FUNCTION('DATE', qa.createdTime)"
     )
     List<QuizGradeProjection> findQuizGradeByUserAndRecordId(Long userId, Long recordId);
 }

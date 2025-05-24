@@ -70,7 +70,7 @@ public class SwaggerConfig {
         // 403 Errors
         components.addExamples(ErrorCode.NOT_PERMISSION.getErrorCode(), createExample(ErrorCode.NOT_PERMISSION.getErrorCode(), "오직 관리자와 편집자만 작성할 수 있습니다."));
         components.addExamples(ErrorCode.NOT_DESERVE_ACCESS_FOLDER.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_ACCESS_FOLDER.getErrorCode(), "폴더 접근 권한이 없습니다."));
-        components.addExamples(ErrorCode.NOT_DESERVE_POST_COMMENT.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_POST_COMMENT.getErrorCode(), "댓글 작성 권한이 없습니다."));
+        components.addExamples(ErrorCode.NOT_DESERVE_WRITEABLE.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_WRITEABLE.getErrorCode(), "폴더 편집 권한이 없습니다."));
         components.addExamples(ErrorCode.NOT_DESERVE_ACCEPT_INVITATION.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_ACCEPT_INVITATION.getErrorCode(), "초대를 수락할 수 있는 권한이 없습니다."));
         components.addExamples(ErrorCode.NOT_DESERVE_ACCESS_NOTIFICATION.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_ACCESS_NOTIFICATION.getErrorCode(), "알림 접근 권한이 없습니다."));
 

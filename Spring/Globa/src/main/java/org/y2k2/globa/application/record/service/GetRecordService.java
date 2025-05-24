@@ -77,6 +77,7 @@ public class GetRecordService {
 
         List<ResponseSectionDto> combinedSections = aggregateRecordUseCase.execute(
                 AggregateRecordCommand.of(
+                        record.getRecordId(),
                         sections,
                         analysis,
                         highlights,
