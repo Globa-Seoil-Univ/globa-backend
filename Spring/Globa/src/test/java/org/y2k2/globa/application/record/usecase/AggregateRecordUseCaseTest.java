@@ -75,16 +75,16 @@ public class AggregateRecordUseCaseTest {
         Assertions.assertThat(response).isNotNull();
         Assertions.assertThat(response.size()).isEqualTo(command.sections().size());
 
-        Assertions.assertThat(response.getFirst()).satisfies(section -> {
-            Assertions.assertThat(section.sectionId()).isEqualTo(command.sections().getFirst().getSectionId());
+        Assertions.assertThat(response.get(0)).satisfies(section -> {
+            Assertions.assertThat(section.sectionId()).isEqualTo(command.sections().get(0).getSectionId());
             Assertions.assertThat(section.analyses().analysisId()).isIn(command.analyses().stream()
                     .map(AnalysisEntity::getAnalysisId)
                     .toList());
-            Assertions.assertThat(section.summaries().getFirst().content())
+            Assertions.assertThat(section.summaries().get(0).content())
                     .isIn(command.summaries().stream()
                             .map(SummaryEntity::getContent)
                             .toList());
-            Assertions.assertThat(section.analyses().highlights().getFirst().highlightId())
+            Assertions.assertThat(section.analyses().highlights().get(0).highlightId())
                     .isIn(command.highlights().stream()
                             .map(HighlightEntity::getHighlightId)
                             .toList());
@@ -107,7 +107,7 @@ public class AggregateRecordUseCaseTest {
                 .defaultNotNull(true)
                 .build()
                 .giveMeBuilder(AnalysisEntity.class)
-                .set("section", sections.getFirst())
+                .set("section", sections.get(0))
                 .set("section.sectionId", 2L)
                 .sampleList(1);
 

@@ -90,14 +90,14 @@ public class GetAnalysisServiceTest {
         Assertions.assertThat(response)
                 .satisfies(r -> {
                     Assertions.assertThat(r.studyTimes()).isNotNull();
-                    Assertions.assertThat(r.studyTimes().getFirst().studyTime()).isEqualTo(studies.getFirst().getStudyTime());
+                    Assertions.assertThat(r.studyTimes().get(0).studyTime()).isEqualTo(studies.get(0).getStudyTime());
 
                     Assertions.assertThat(r.quizGrades()).isNotNull();
-                    Assertions.assertThat(r.quizGrades().getFirst().quizGrade()).isEqualTo(quizzes.getFirst().getQuizGrade());
+                    Assertions.assertThat(r.quizGrades().get(0).quizGrade()).isEqualTo(quizzes.get(0).getQuizGrade());
 
                     Assertions.assertThat(r.keywords()).isNotNull();
-                    Assertions.assertThat(r.keywords().getFirst().word()).isEqualTo(keywords.getFirst().getWord());
-                    Assertions.assertThat(r.keywords().getFirst().importance()).isEqualTo(keywords.getFirst().getImportance());
+                    Assertions.assertThat(r.keywords().get(0).word()).isEqualTo(keywords.get(0).getWord());
+                    Assertions.assertThat(r.keywords().get(0).importance()).isEqualTo(keywords.get(0).getImportance());
                 });
     }
 

@@ -161,7 +161,7 @@ public class GetRecordServiceTest {
 
         Assertions.assertThat(response.sections()).isNotNull();
         Assertions.assertThat(response.sections().size()).isEqualTo(sections.size());
-        Assertions.assertThat(response.sections().getFirst())
+        Assertions.assertThat(response.sections().get(0))
                 .satisfies(section -> {
                     Assertions.assertThat(section.sectionId()).isIn(sections.get(0).getSectionId());
                     Assertions.assertThat(section.title()).isIn(sections.get(0).getTitle());
@@ -219,7 +219,7 @@ public class GetRecordServiceTest {
 
         Assertions.assertThat(response.sections()).isNotNull();
         Assertions.assertThat(response.sections().size()).isEqualTo(sections.size());
-        Assertions.assertThat(response.sections().getFirst())
+        Assertions.assertThat(response.sections().get(0))
                 .satisfies(section -> {
                     Assertions.assertThat(section.sectionId()).isIn(sections.get(0).getSectionId());
                     Assertions.assertThat(section.title()).isIn(sections.get(0).getTitle());

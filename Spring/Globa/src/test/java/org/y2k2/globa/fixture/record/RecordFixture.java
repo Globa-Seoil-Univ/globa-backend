@@ -37,4 +37,9 @@ public class RecordFixture extends AbstractFixture<RecordEntity> {
         recordFactory.setPath(path);
         return this;
     }
+
+    public RecordFixture withIsShare(Boolean isShare) {
+        recordFactory.setShare(isShare);
+        return this;
+    }
 }
