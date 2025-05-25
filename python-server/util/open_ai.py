@@ -7,8 +7,9 @@ from util.whisper import STTResults
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import json
 import os
-from typing import List, Dict, Any
+from typing import List, Optional
 from datetime import datetime
+from util.whisper import WhisperManager
 
 load_dotenv()
 
@@ -434,7 +435,9 @@ class OpenAIUtil:
 
         return corrected_results
 
-    def correct_spelling(self, stt_results: List[STTResults], language: str) -> List[STTResults]:
+
+
+    def correct_spelling(self, stt_results: List[STTResults], language: str, reference_text: Optional[str] = None) -> List[STTResults]:
         """
         STT 결과의 맞춤법과 오타를 수정하는 함수
 
@@ -553,6 +556,44 @@ class OpenAIUtil:
                 self.logger.error(f"배치 {i + 1}~{min(i + BATCH_SIZE, len(stt_results))} 맞춤법 수정 중 오류 발생: {str(e)}")
                 # 오류 발생 시 원본 배치 결과 추가
                 corrected_results.extend(batch)
+
+        # 맞춤법 수정 후 성능 지표 계산
+        if reference_text:
+            self.logger.info("맞춤법 수정 후 성능 지표 계산 중...")
+
+            # WhisperManager의 calculate_metrics 함수 활용
+            whisper_manager = WhisperManager()
+
+            # 맞춤법 수정 전 성능 지표 계산
+            before_metrics = whisper_manager.calculate_metrics(stt_results, reference_text)
+
+            # 맞춤법 수정 후 성능 지표 계산
+            after_metrics = whisper_manager.calculate_metrics(corrected_results, reference_text)
+
+            # 성능 향상 계산
+            improvement_metrics = {
+                "corrected_wer": after_metrics["wer"],
+                "corrected_cer": after_metrics["cer"],
+                "corrected_bleu": after_metrics.get("bleu", 0.0),
+                "wer_improvement": before_metrics["wer"] - after_metrics["wer"],
+                "cer_improvement": before_metrics["cer"] - after_metrics["cer"],
+                "bleu_improvement": after_metrics.get("bleu", 0.0) - before_metrics.get("bleu", 0.0)
+            }
+
+            # 리소스 모니터에 맞춤법 수정 후 지표 기록
+            with open("resource.txt", 'a', encoding='utf-8') as f:
+                f.write("\n[맞춤법 수정 후 성능 지표]\n")
+                f.write(
+                    f"- 맞춤법 수정 후 WER: {after_metrics['wer']:.4f} (개선: {improvement_metrics['wer_improvement']:.4f})\n")
+                f.write(
+                    f"- 맞춤법 수정 후 CER: {after_metrics['cer']:.4f} (개선: {improvement_metrics['cer_improvement']:.4f})\n")
+                if "bleu" in after_metrics:
+                    f.write(
+                        f"- 맞춤법 수정 후 BLEU: {after_metrics['bleu']:.4f} (개선: {improvement_metrics['bleu_improvement']:.4f})\n")
+
+            self.logger.info(f"맞춤법 수정 후 WER: {after_metrics['wer']:.4f}, CER: {after_metrics['cer']:.4f}")
+            self.logger.info(
+                f"성능 개선 - WER: {improvement_metrics['wer_improvement']:.4f}, CER: {improvement_metrics['cer_improvement']:.4f}")
 
         # 결과를 JSON 파일로 저장
         try:
