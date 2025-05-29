@@ -236,6 +236,7 @@ public class FolderShareController {
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_SHARE_ID, ref = SwaggerErrorCode.MISMATCH_SHARE_ID_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_FOLDER_ID, ref = SwaggerErrorCode.MISMATCH_FOLDER_ID_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.INVITE_ACCEPT_BAD_REQUEST, ref = SwaggerErrorCode.INVITE_ACCEPT_BAD_REQUEST_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.SHARE_INVITATION_NOT_PENDING, ref = SwaggerErrorCode.SHARE_INVITATION_NOT_PENDING_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),

@@ -33,9 +33,8 @@ public class UpdateFolderShareService {
 
         FolderShareEntity folderShare = folderShareRepository.getShareInvitation(folderId, targetId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SHARE));
-        FolderRoleEntity folderRole = findFolderRoleUseCase.execute(
-                FolderRoleCommand.of(FolderRole.from(dto.role()))
-        ).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER_ROLE));
+        FolderRoleEntity folderRole = findFolderRoleUseCase.execute(FolderRoleCommand.of(FolderRole.from(dto.role())))
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER_ROLE));
 
         folderShare.setRole(folderRole);
         folderShareRepository.save(folderShare);

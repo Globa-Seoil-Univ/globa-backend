@@ -43,7 +43,7 @@ public interface FolderShareJpaRepository extends JpaRepository<FolderShareEntit
             List<FolderRole> names
     );
 
-    Page<FolderShareEntity> findByFolder_FolderIdOrderByCreatedTimeAsc(Long folderId, Pageable pageable);
+    Page<FolderShareEntity> findByFolder_FolderIdOrderByShareIdAsc(Long folderId, Pageable pageable);
 
     @Query(
             "SELECT fs FROM FolderShareEntity fs " +

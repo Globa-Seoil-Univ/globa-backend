@@ -66,7 +66,7 @@ public class FolderShareRepositoryImpl implements FolderShareRepository {
 
     @Override
     public Page<FolderShareEntity> getShareInvitations(Long folderId, Pageable pageable) {
-        return folderShareJpaRepository.findByFolder_FolderIdOrderByCreatedTimeAsc(folderId, pageable);
+        return folderShareJpaRepository.findByFolder_FolderIdOrderByShareIdAsc(folderId, pageable);
     }
 
     @Override
@@ -92,10 +92,5 @@ public class FolderShareRepositoryImpl implements FolderShareRepository {
     @Override
     public Optional<FolderShareEntity> getShareInvitationWithFolder(Long folderId, Long userId) {
         return folderShareJpaRepository.findByFolderAndTargetUserJoinFolder(folderId, userId);
-    }
-
-    @Override
-    public Optional<FolderShareEntity> getShareInvitationWithRole(FolderEntity folder, UserEntity user) {
-        return folderShareJpaRepository.findByFolderAndTargetUserJoinRole(folder, user);
     }
 }

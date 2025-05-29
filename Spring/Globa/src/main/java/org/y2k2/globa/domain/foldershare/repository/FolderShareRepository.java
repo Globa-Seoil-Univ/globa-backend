@@ -33,5 +33,4 @@ public interface FolderShareRepository {
 
     Optional<FolderShareEntity> getShareInvitation(Long folderId, Long userId);
     Optional<FolderShareEntity> getShareInvitationWithFolder(Long folderId, Long userId);
-    Optional<FolderShareEntity> getShareInvitationWithRole(FolderEntity folder, UserEntity user);
 }

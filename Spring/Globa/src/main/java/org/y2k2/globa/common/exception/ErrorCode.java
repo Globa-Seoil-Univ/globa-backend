@@ -17,6 +17,7 @@ public enum ErrorCode {
     MISMATCH_FOLDER_ID(HttpStatus.BAD_REQUEST, "요청한 Folder Id가 일치하지 않습니다.", "40040"),
     INVALID_SNS_KIND(HttpStatus.BAD_REQUEST, "유효하지 않은 Sns Kind 입니다.", "40050"),
     MISMATCH_SHARE_ID(HttpStatus.BAD_REQUEST, "요청한 공유 ID가 일치하지 않습니다.", "40060"),
+    SHARE_INVITATION_NOT_PENDING(HttpStatus.BAD_REQUEST, "이미 수락된 초대입니다.", "40070"),
 
     /* 401 UNAUTHORIZED : 허락되지 않은 사용자 */
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 Access 토큰입니다.", "40110"),

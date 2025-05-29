@@ -25,6 +25,8 @@ public class SwaggerErrorCode {
     public static final String INVALID_SNS_KIND_VALUE = "40050";
     public static final String MISMATCH_SHARE_ID = "MISMATCH_SHARE_ID";
     public static final String MISMATCH_SHARE_ID_VALUE = "40060";
+    public static final String SHARE_INVITATION_NOT_PENDING = "SHARE_INVITATION_NOT_PENDING";
+    public static final String SHARE_INVITATION_NOT_PENDING_VALUE = "40070";
 
     /* 401 UNAUTHORIZED : 허락되지 않은 사용자 */
     public static final String INVALID_TOKEN = "INVALID_TOKEN";

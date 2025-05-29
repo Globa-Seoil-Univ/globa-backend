@@ -9,7 +9,6 @@ import org.y2k2.globa.application.foldershare.command.VerifyFolderCommand;
 import org.y2k2.globa.application.foldershare.dto.response.ResponseFolderShareUserDto;
 import org.y2k2.globa.application.foldershare.mapper.FolderShareMapper;
 import org.y2k2.globa.application.foldershare.usecase.VerifyFolderOwnerUseCase;
-import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.domain.foldershare.repository.FolderShareRepository;
 import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
 
