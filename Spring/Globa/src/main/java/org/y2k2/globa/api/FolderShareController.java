@@ -111,8 +111,8 @@ public class FolderShareController {
     }
 
     @Operation(
-            summary = "사용자 공유 초대 변경",
-            description = "폴더에 사용자를 공유 초대를 변경합니다.",
+            summary = "사용자 접근 권한 변경",
+            description = "특정 폴더의 사용자 접근 권한을 변경합니다.",
             responses = {
                     @ApiResponse(
                             responseCode = "204",
@@ -196,7 +196,6 @@ public class FolderShareController {
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_SHARE_ID, ref = SwaggerErrorCode.MISMATCH_SHARE_ID_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.MISMATCH_FOLDER_ID, ref = SwaggerErrorCode.MISMATCH_FOLDER_ID_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.INVITE_ACCEPT_BAD_REQUEST, ref = SwaggerErrorCode.INVITE_ACCEPT_BAD_REQUEST_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
@@ -204,7 +203,6 @@ public class FolderShareController {
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCEPT_INVITATION, ref = SwaggerErrorCode.NOT_DESERVE_ACCEPT_INVITATION_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_TARGET_USER, ref = SwaggerErrorCode.NOT_FOUND_TARGET_USER_VALUE),
@@ -234,16 +232,13 @@ public class FolderShareController {
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN, ref = SwaggerErrorCode.EXPIRED_ACCESS_TOKEN_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.MISMATCH_SHARE_ID, ref = SwaggerErrorCode.MISMATCH_SHARE_ID_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.MISMATCH_FOLDER_ID, ref = SwaggerErrorCode.MISMATCH_FOLDER_ID_VALUE),
                             @ExampleObject(name = SwaggerErrorCode.INVITE_ACCEPT_BAD_REQUEST, ref = SwaggerErrorCode.INVITE_ACCEPT_BAD_REQUEST_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.SHARE_INVITATION_NOT_PENDING, ref = SwaggerErrorCode.SHARE_INVITATION_NOT_PENDING_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.SIGNATURE, ref = SwaggerErrorCode.SIGNATURE_VALUE),
                     })),
                     @ApiResponse(responseCode = "403", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.DELETED_USER, ref = SwaggerErrorCode.DELETED_USER_VALUE),
-                            @ExampleObject(name = SwaggerErrorCode.NOT_DESERVE_ACCEPT_INVITATION, ref = SwaggerErrorCode.NOT_DESERVE_ACCEPT_INVITATION_VALUE),
                     })),
                     @ApiResponse(responseCode = "404", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_USER, ref = SwaggerErrorCode.NOT_FOUND_USER_VALUE),

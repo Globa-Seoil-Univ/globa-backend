@@ -14,10 +14,8 @@ public enum ErrorCode {
     INVITE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "자기 자신을 초대할 수 없습니다.", "40020"),
     INVITE_ACCEPT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "이미 수락된 초대입니다.", "40021"),
     NOT_INCLUDE_HIGHLIGHT_COMMENT(HttpStatus.BAD_REQUEST, "해당 하이라이트 댓글이 아닙니다.", "40030"),
-    MISMATCH_FOLDER_ID(HttpStatus.BAD_REQUEST, "요청한 Folder Id가 일치하지 않습니다.", "40040"),
     INVALID_SNS_KIND(HttpStatus.BAD_REQUEST, "유효하지 않은 Sns Kind 입니다.", "40050"),
     MISMATCH_SHARE_ID(HttpStatus.BAD_REQUEST, "요청한 공유 ID가 일치하지 않습니다.", "40060"),
-    SHARE_INVITATION_NOT_PENDING(HttpStatus.BAD_REQUEST, "이미 수락된 초대입니다.", "40070"),
 
     /* 401 UNAUTHORIZED : 허락되지 않은 사용자 */
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 Access 토큰입니다.", "40110"),
@@ -29,7 +27,6 @@ public enum ErrorCode {
     NOT_PERMISSION(HttpStatus.FORBIDDEN,"오직 관리자와 편집자만 작성할 수 있습니다.","40310"),
     NOT_DESERVE_ACCESS_FOLDER(HttpStatus.FORBIDDEN,"해당 폴더에 대한 접근 권한이 없습니다.","40311"),
     NOT_DESERVE_WRITEABLE(HttpStatus.FORBIDDEN,"해당 폴더에 대한 편집 권한이 없습니다.","40312"),
-    NOT_DESERVE_ACCEPT_INVITATION(HttpStatus.FORBIDDEN,"초대를 수락할 수 있는 권한이 없습니다.","40313"),
     NOT_DESERVE_ACCESS_NOTIFICATION(HttpStatus.FORBIDDEN,"알림에 대한 접근 권한이 없습니다. ","40314"),
     MISMATCH_INQUIRY_OWNER(HttpStatus.FORBIDDEN, "해당 문의에 대한 소유권자가 아닙니다.", "40320"),
     MISMATCH_FOLDER_OWNER(HttpStatus.FORBIDDEN, "해당 폴더에 대한 소유권자가 아닙니다.", "40321"),

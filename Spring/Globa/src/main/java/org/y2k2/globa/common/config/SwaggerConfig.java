@@ -58,10 +58,8 @@ public class SwaggerConfig {
         components.addExamples(ErrorCode.NOT_MATCH_REFRESH_TOKEN.getErrorCode(), createExample(ErrorCode.NOT_MATCH_REFRESH_TOKEN.getErrorCode(), "갱신 토큰이 일치하지 않습니다."));
         components.addExamples(ErrorCode.INVITE_BAD_REQUEST.getErrorCode(), createExample(ErrorCode.INVITE_BAD_REQUEST.getErrorCode(), "자신을 초대할 수 없습니다."));
         components.addExamples(ErrorCode.INVITE_ACCEPT_BAD_REQUEST.getErrorCode(), createExample(ErrorCode.INVITE_ACCEPT_BAD_REQUEST.getErrorCode(), "이미 초대된 사용자입니다."));
-        components.addExamples(ErrorCode.MISMATCH_FOLDER_ID.getErrorCode(), createExample(ErrorCode.MISMATCH_FOLDER_ID.getErrorCode(), "요청한 Folder Id와 DB의 정보가 일치하지 않습니다."));
         components.addExamples(ErrorCode.INVALID_SNS_KIND.getErrorCode(), createExample(ErrorCode.INVALID_SNS_KIND.getErrorCode(), "유효하지 않은 Sns Kind입니다."));
         components.addExamples(ErrorCode.MISMATCH_SHARE_ID.getErrorCode(), createExample(ErrorCode.MISMATCH_SHARE_ID.getErrorCode(), "요청한 Share Id와 DB의 정보가 일치하지 않습니다."));
-        components.addExamples(ErrorCode.SHARE_INVITATION_NOT_PENDING.getErrorCode(), createExample(ErrorCode.SHARE_INVITATION_NOT_PENDING.getErrorCode(), "이미 수락된 초대입니다."));
 
         // 401 Errors
         components.addExamples(ErrorCode.INVALID_TOKEN.getErrorCode(), createExample(ErrorCode.INVALID_TOKEN.getErrorCode(), "유효하지 않은 토큰입니다."));
@@ -72,7 +70,6 @@ public class SwaggerConfig {
         components.addExamples(ErrorCode.NOT_PERMISSION.getErrorCode(), createExample(ErrorCode.NOT_PERMISSION.getErrorCode(), "오직 관리자와 편집자만 작성할 수 있습니다."));
         components.addExamples(ErrorCode.NOT_DESERVE_ACCESS_FOLDER.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_ACCESS_FOLDER.getErrorCode(), "폴더 접근 권한이 없습니다."));
         components.addExamples(ErrorCode.NOT_DESERVE_WRITEABLE.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_WRITEABLE.getErrorCode(), "폴더 편집 권한이 없습니다."));
-        components.addExamples(ErrorCode.NOT_DESERVE_ACCEPT_INVITATION.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_ACCEPT_INVITATION.getErrorCode(), "초대를 수락할 수 있는 권한이 없습니다."));
         components.addExamples(ErrorCode.NOT_DESERVE_ACCESS_NOTIFICATION.getErrorCode(), createExample(ErrorCode.NOT_DESERVE_ACCESS_NOTIFICATION.getErrorCode(), "알림 접근 권한이 없습니다."));
 
         components.addExamples(ErrorCode.MISMATCH_INQUIRY_OWNER.getErrorCode(), createExample(ErrorCode.MISMATCH_INQUIRY_OWNER.getErrorCode(), "문의 작성자만 요청할 수 있습니다."));

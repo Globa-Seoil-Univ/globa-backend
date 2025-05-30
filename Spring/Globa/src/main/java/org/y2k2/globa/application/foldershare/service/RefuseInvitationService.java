@@ -21,10 +21,6 @@ public class RefuseInvitationService {
         FolderShareEntity folderShare = folderShareRepository.getShareInvitation(folderId, userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_SHARE));
 
-        if (!folderShare.getInvitationStatus().equals(InvitationStatus.PENDING)) {
-            throw new CustomException(ErrorCode.SHARE_INVITATION_NOT_PENDING);
-        }
-
         verifyInvitationUseCase.execute(
                 VerifyInvitationCommand.of(folderShare, folderId, shareId, userId)
         );

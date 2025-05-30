@@ -80,64 +80,6 @@ public class VerifyInvitationUseCaseTest {
     }
 
     @Test
-    @DisplayName("초대 검증 - 실패 (초대 대상 X)")
-    void verifyInvitationNotMine() {
-        FolderShareEntity folderShareEntity = FixtureMonkey
-                .builder()
-                .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)
-                .defaultNotNull(true)
-                .build()
-                .giveMeBuilder(FolderShareEntity.class)
-                .set("targetUser.userId", 1L)
-                .set("invitationStatus", InvitationStatus.PENDING)
-                .sample();
-
-        VerifyInvitationCommand command = FixtureMonkey
-                .builder()
-                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
-                .build()
-                .giveMeBuilder(VerifyInvitationCommand.class)
-                .set("folderShare", folderShareEntity)
-                .set("shareId", folderShareEntity.getShareId())
-                .set("targetId", 999L) // 다른 targetId 사용
-                .set("folderId", folderShareEntity.getFolder().getFolderId())
-                .sample();
-
-        Assertions.assertThatThrownBy(() -> verifyInvitationUseCase.execute(command))
-                .isInstanceOf(CustomException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_DESERVE_ACCEPT_INVITATION);
-    }
-
-    @Test
-    @DisplayName("초대 검증 - 실패 (folderId 불일치)")
-    void verifyInvitationFolderIdMismatch() {
-        FolderShareEntity folderShareEntity = FixtureMonkey
-                .builder()
-                .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)
-                .defaultNotNull(true)
-                .build()
-                .giveMeBuilder(FolderShareEntity.class)
-                .set("folder.folderId", 1L)
-                .set("invitationStatus", InvitationStatus.PENDING)
-                .sample();
-
-        VerifyInvitationCommand command = FixtureMonkey
-                .builder()
-                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
-                .build()
-                .giveMeBuilder(VerifyInvitationCommand.class)
-                .set("folderShare", folderShareEntity)
-                .set("shareId", folderShareEntity.getShareId())
-                .set("targetId", folderShareEntity.getTargetUser().getUserId())
-                .set("folderId", 999L) // 다른 folderId 사용
-                .sample();
-
-        Assertions.assertThatThrownBy(() -> verifyInvitationUseCase.execute(command))
-                .isInstanceOf(CustomException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.MISMATCH_FOLDER_ID);
-    }
-
-    @Test
     @DisplayName("초대 검증 - 실패 (이미 수락된 초대)")
     void verifyInvitationAlreadyAccepted() {
         FolderShareEntity folderShareEntity = FixtureMonkey

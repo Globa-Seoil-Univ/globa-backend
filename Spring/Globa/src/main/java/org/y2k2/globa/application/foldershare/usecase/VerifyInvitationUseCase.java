@@ -17,16 +17,10 @@ public class VerifyInvitationUseCase implements VoidUseCase<VerifyInvitationComm
         FolderShareEntity folderShare = command.folderShare();
 
         boolean isShareIdMismatch = !folderShare.getShareId().equals(command.shareId());
-        boolean isNotMineInvitation = !folderShare.getTargetUser().getUserId().equals(command.targetId());
-        boolean isFolderIdMismatch = !folderShare.getFolder().getFolderId().equals(command.folderId());
         boolean isAlreadyAccepted = folderShare.getInvitationStatus().equals(InvitationStatus.ACCEPT);
 
         if (isShareIdMismatch) {
             throw new CustomException(ErrorCode.MISMATCH_SHARE_ID);
-        } else if (isNotMineInvitation) {
-            throw new CustomException(ErrorCode.NOT_DESERVE_ACCEPT_INVITATION);
-        } else if (isFolderIdMismatch) {
-            throw new CustomException(ErrorCode.MISMATCH_FOLDER_ID);
         } else if (isAlreadyAccepted) {
             throw new CustomException(ErrorCode.INVITE_ACCEPT_BAD_REQUEST);
         }
