@@ -237,3 +237,6 @@ out/
 
 ### word ###
 /Spring/Globa/word/*
+
+### test sql ###
+/Spring/Globa/src/test/resources/data.sql
