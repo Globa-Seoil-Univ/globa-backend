@@ -32,8 +32,11 @@ public interface CommentJpaRepository extends JpaRepository<CommentEntity, Long>
     @Query(value = "SELECT comment_id, parent_id, highlight_id, " +
                     "user_id, content, is_deleted, created_time, deleted_time, false AS hasReply " +
                         "FROM comment " +
-                        "WHERE highlight_id = ( " +
-                            "SELECT highlight_id FROM comment WHERE comment_id = :commentId " +
-                        ") AND is_deleted = TRUE OR comment_id = :commentId", nativeQuery = true)
+                        "WHERE (" +
+                                    "highlight_id = ( " +
+                                        "SELECT highlight_id FROM comment WHERE comment_id = :commentId " +
+                                    ") AND is_deleted = TRUE" +
+                                ")" +
+                            "OR comment_id = :commentId", nativeQuery = true)
     List<CommentEntity> findAllSelfOrChildDeletedByCommentId(Long commentId);
 }

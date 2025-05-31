@@ -6,55 +6,28 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
 import org.y2k2.globa.domain.record.repository.RecordRepository;
-import org.y2k2.globa.factory.folder.FolderFactory;
-import org.y2k2.globa.factory.folderrole.FolderRoleFactory;
-import org.y2k2.globa.factory.foldershare.FolderShareFactory;
-import org.y2k2.globa.factory.record.RecordFactory;
-import org.y2k2.globa.factory.user.UserFactory;
 import org.y2k2.globa.fixture.folder.FolderFixture;
 import org.y2k2.globa.fixture.folderrole.FolderRoleFixture;
 import org.y2k2.globa.fixture.foldershare.FolderShareFixture;
 import org.y2k2.globa.fixture.record.RecordFixture;
 import org.y2k2.globa.fixture.user.UserFixture;
+import org.y2k2.globa.infrastructure.persistence.config.RepositoryIntegrationTest;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
-import org.y2k2.globa.infrastructure.persistence.folderrole.repository.FolderRoleTestRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStatus;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 import org.y2k2.globa.infrastructure.persistence.record.projection.RecordSearchProjection;
-import org.y2k2.globa.infrastructure.persistence.record.repository.RecordRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 import java.util.List;
 
 @Slf4j
-@Import({
-        RecordRepositoryImpl.class,
-        FolderRoleTestRepositoryImpl.class,
-        UserFixture.class,
-        RecordFixture.class,
-        FolderFixture.class,
-        FolderRoleFixture.class,
-        FolderShareFixture.class,
-        UserFactory.class,
-        RecordFactory.class,
-        FolderFactory.class,
-        FolderRoleFactory.class,
-        FolderShareFactory.class,
-        FolderRoleFactory.class,
-})
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ActiveProfiles("test")
+@RepositoryIntegrationTest
 public class RecordRepositoryTest {
     @Autowired
     private RecordRepository recordRepository;

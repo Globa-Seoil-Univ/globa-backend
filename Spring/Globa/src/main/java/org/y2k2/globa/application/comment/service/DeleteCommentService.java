@@ -39,7 +39,7 @@ public class DeleteCommentService {
                 GetMyCommentCommand.of(idsDto.userId(), idsDto.highlightId(), commentId)
         );
 
-        Boolean isLastComment = commentRepository.hasDeletedCommentInHighlight(commentId);
+        Boolean isLastComment = commentRepository.isLastAliveComment(commentId);
 
         if (isLastComment) {
             List<CommentEntity> deletedComments = commentRepository.getAllDeletedComment(commentId);

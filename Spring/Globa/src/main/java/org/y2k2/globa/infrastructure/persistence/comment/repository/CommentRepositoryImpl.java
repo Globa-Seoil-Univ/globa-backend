@@ -58,7 +58,7 @@ public class CommentRepositoryImpl implements CommentRepository {
     }
 
     @Override
-    public Boolean hasDeletedCommentInHighlight(Long commentId) {
+    public Boolean isLastAliveComment(Long commentId) {
         return commentJpaRepository.existsSelfOrChildDeletedByCommentId(commentId);
     }
 }

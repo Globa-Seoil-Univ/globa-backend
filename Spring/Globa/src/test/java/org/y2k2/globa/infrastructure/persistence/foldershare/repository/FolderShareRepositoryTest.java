@@ -6,26 +6,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
 import org.y2k2.globa.domain.foldershare.repository.FolderShareRepository;
-import org.y2k2.globa.factory.folder.FolderFactory;
-import org.y2k2.globa.factory.folderrole.FolderRoleFactory;
-import org.y2k2.globa.factory.foldershare.FolderShareFactory;
-import org.y2k2.globa.factory.user.UserFactory;
 import org.y2k2.globa.fixture.folder.FolderFixture;
 import org.y2k2.globa.fixture.folderrole.FolderRoleFixture;
 import org.y2k2.globa.fixture.foldershare.FolderShareFixture;
 import org.y2k2.globa.fixture.user.UserFixture;
+import org.y2k2.globa.infrastructure.persistence.config.RepositoryIntegrationTest;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
-import org.y2k2.globa.infrastructure.persistence.folder.repository.FolderRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
-import org.y2k2.globa.infrastructure.persistence.folderrole.repository.FolderRoleTestRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
 import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStatus;
@@ -35,23 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-@Import({
-        FolderShareRepositoryImpl.class,
-        FolderRoleTestRepositoryImpl.class,
-        FolderRepositoryImpl.class,
-        UserFixture.class,
-        FolderFixture.class,
-        FolderRoleFixture.class,
-        FolderShareFixture.class,
-        UserFactory.class,
-        FolderFactory.class,
-        FolderRoleFactory.class,
-        FolderShareFactory.class,
-        FolderRoleFactory.class,
-})
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ActiveProfiles("test")
+@RepositoryIntegrationTest
 public class FolderShareRepositoryTest {
     @Autowired
     private FolderShareRepository folderShareRepository;
