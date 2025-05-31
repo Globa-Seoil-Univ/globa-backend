@@ -1,5 +1,6 @@
 import os
 import gc
+import re
 import time
 import json
 import psutil
@@ -570,3 +571,367 @@ class WhisperManager:
         self.logger.info(f"앙상블 결과 조합 완료: {len(final_results)}개 세그먼트 생성")
         return final_results
 
+    def ensemble_stt_bagging(self, path: str, lan: str):
+        """배깅(Bagging) 방식으로 앙상블 STT 수행"""
+        self.logger.info("배깅 방식 앙상블 STT 시작")
+
+        # 참조 텍스트 로드
+        reference_text = self.load_reference_text(path)
+
+        # 리소스 모니터링 시작
+        self.resource_monitor.start_monitoring()
+
+        # 언어별 프롬프트
+        if lan == "ko":
+            prompt = "너는 이제부터 한국어로 대화하는 회의, 강의, 모임 등 사람들과의 대화를 한국어 텍스트로 변환해야하는 역할이야."
+        elif lan == "ja":
+            prompt = "あなたは、会議、講義、会議など、人々との会話をテキストに変換する役割です。"
+        else:
+            prompt = "Now your role is to convert conversations from conferences, lectures, meetings, etc. into text."
+
+        # 모니터링 스레드 설정
+        import threading
+        stop_monitoring = False
+
+        def monitor_resources():
+            while not stop_monitoring:
+                self.resource_monitor.sample_resource_usage()
+                time.sleep(0.5)
+
+        monitor_thread = threading.Thread(target=monitor_resources)
+        monitor_thread.daemon = True
+        monitor_thread.start()
+
+        try:
+            # 배깅을 위한 다양한 설정 정의
+            bagging_configs = [
+                {
+                    "name": "config1",
+                    "beam_size": 10,
+                    "temperature": 0.0,
+                    "vad_filter": True,
+                    "vad_parameters": {
+                        "min_silence_duration_ms": 500,
+                        "threshold": 0.5,
+                        "speech_pad_ms": 200
+                    },
+                    "best_of": 5
+                },
+                {
+                    "name": "config2",
+                    "beam_size": 5,
+                    "temperature": 0.1,
+                    "vad_filter": True,
+                    "vad_parameters": {
+                        "min_silence_duration_ms": 400,
+                        "threshold": 0.4,
+                        "speech_pad_ms": 300
+                    },
+                    "best_of": 3
+                },
+                {
+                    "name": "config3",
+                    "beam_size": 7,
+                    "temperature": 0.0,
+                    "vad_filter": True,
+                    "vad_parameters": {
+                        "min_silence_duration_ms": 600,
+                        "threshold": 0.6,
+                        "speech_pad_ms": 250
+                    },
+                    "best_of": 7
+                }
+            ]
+
+            # 각 설정으로 독립적인 추론 수행
+            all_segments = []
+
+            for config in bagging_configs:
+                self.logger.info(f"{config['name']} 설정으로 처리 중...")
+
+                segments, info = self.model.transcribe(
+                    path,
+                    initial_prompt=prompt,
+                    beam_size=config["beam_size"],
+                    language=lan,
+                    temperature=config["temperature"],
+                    condition_on_previous_text=True,
+                    max_new_tokens=128,
+                    vad_filter=True,  # VAD 필터 반드시 활성화
+                    vad_parameters={
+                        "min_silence_duration_ms": 300,  # 더 짧은 침묵도 감지 (기존 500ms)
+                        "threshold": 0.3,  # 더 민감하게 설정 (기존 0.5)
+                        "speech_pad_ms": 150  # 패딩 축소 (기존 200ms)
+                    },
+                    word_timestamps=True,  # 단어별 타임스탬프 활성화
+                    repetition_penalty=1.2,
+                    no_repeat_ngram_size=3,
+                    best_of=config["best_of"],
+                    suppress_blank=True,
+                    suppress_tokens=[-1],
+                )
+
+                # 결과 수집
+                config_segments = []
+                for segment in segments:
+                    result = STTResults(
+                        text=segment.text,
+                        start=segment.start,
+                        end=segment.end
+                    )
+                    config_segments.append((config["name"], result))
+
+                all_segments.extend(config_segments)
+                self.logger.info(f"{config['name']} 설정: {len(config_segments)}개 세그먼트 생성")
+
+            # 배깅 결합 알고리즘을 사용하여 최종 결과 생성
+            combined_results  = self._bagging_combine_results(all_segments)
+
+            # 추가: 긴 세그먼트 분할 처리
+            final_results = self.segment_long_transcriptions(combined_results)
+
+            self.logger.info(f"배깅 앙상블 최종 결과: {len(final_results)}개 세그먼트")
+
+        except Exception as e:
+            self.logger.error(f"배깅 앙상블 처리 중 오류 발생: {e}")
+            raise
+        finally:
+            # 모니터링 중지
+            stop_monitoring = True
+            monitor_thread.join(timeout=1.0)
+
+        # 리소스 모니터링 종료
+        resource_metrics = self.resource_monitor.stop_monitoring()
+
+        # 성능 지표 계산
+        if reference_text:
+            performance_metrics = self.calculate_metrics(final_results, reference_text)
+            all_metrics = {**resource_metrics, **performance_metrics}
+        else:
+            all_metrics = resource_metrics
+
+        # 지표 기록
+        model_info = {**self.model_info, "ensemble_method": "bagging"}
+        self.resource_monitor.log_resources(all_metrics, model_info)
+
+        # 결과 저장
+        file_name = os.path.basename(path)
+        output_path = f"./bagging_{file_name}.json"
+        self.save_stt_results_to_json(final_results, output_path)
+        self.logger.info(f"배깅 앙상블 STT 결과가 {output_path}에 저장되었습니다.")
+
+        return final_results
+
+    def _bagging_combine_results(self, all_segments):
+        """배깅 방식으로 여러 설정의 결과를 결합"""
+        self.logger.info("배깅 결합 알고리즘 시작")
+
+        # 시간 구간별로 세그먼트 그룹화
+        time_groups = {}
+
+        # 시간 구간 양자화 함수 (0.5초 단위로 반올림)
+        def quantize_time(start, end):
+            return (round(start * 2) / 2, round(end * 2) / 2)
+
+        # 모든 세그먼트를 시간 구간별로 그룹화
+        for config_name, segment in all_segments:
+            time_key = quantize_time(segment.start, segment.end)
+
+            if time_key not in time_groups:
+                time_groups[time_key] = []
+
+            time_groups[time_key].append((config_name, segment))
+
+        # 각 시간 구간에서 최적의 세그먼트 선택
+        final_segments = []
+
+        for time_key in sorted(time_groups.keys()):
+            candidates = time_groups[time_key]
+
+            if len(candidates) == 1:
+                # 후보가 하나뿐이면 그대로 사용
+                final_segments.append(candidates[0][1])
+            else:
+                # 여러 후보에서 최적 선택
+                selected_segment = self._select_best_segment(candidates)
+                final_segments.append(selected_segment)
+
+        # 인접한 세그먼트 병합 처리
+        merged_segments = self._merge_adjacent_segments(final_segments)
+
+        self.logger.info(f"배깅 결합 완료: 원본 {len(final_segments)}개 → 병합 후 {len(merged_segments)}개")
+        return merged_segments
+
+    def _select_best_segment(self, candidates):
+        """여러 후보 중에서 최적의 세그먼트 선택"""
+        if len(candidates) == 1:
+            return candidates[0][1]
+
+        # 여러 기준으로 세그먼트 평가
+        scores = []
+
+        for config_name, segment in candidates:
+            score = 0
+
+            # 1. 텍스트 길이 (적절한 길이에 높은 점수)
+            text_len = len(segment.text.split())
+            if 3 <= text_len <= 50:  # 적절한 길이
+                score += 30
+            elif text_len < 3:  # 너무 짧음
+                score += 10
+            else:  # 너무 긺
+                score += 20
+
+            # 2. 특수 문자 비율 (낮을수록 좋음)
+            special_char_ratio = len(re.findall(r'[^\w\s]', segment.text)) / max(len(segment.text), 1)
+            score += (1 - special_char_ratio) * 20
+
+            # 3. 반복 단어 비율 (높을수록 좋음)
+            words = segment.text.split()
+            unique_ratio = len(set(words)) / max(len(words), 1)
+            score += unique_ratio * 20
+
+            # 4. 설정별 가중치
+            if config_name == "config1":
+                score += 30  # 기본 설정에 높은 가중치
+            elif config_name == "config2":
+                score += 25
+            else:
+                score += 20
+
+            scores.append((score, segment))
+
+        # 가장 높은 점수의 세그먼트 반환
+        best_segment = max(scores, key=lambda x: x[0])[1]
+        return best_segment
+
+    def _merge_adjacent_segments(self, segments):
+        """인접한 세그먼트 병합"""
+        if not segments:
+            return []
+
+        merged = []
+        current = segments[0]
+
+        for next_seg in segments[1:]:
+            # 세그먼트 간 간격이 0.3초 이내이면 병합 고려
+            time_gap = next_seg.start - current.end
+
+            if time_gap <= 0.3:
+                # 문장 종결자로 끝나지 않으면 병합
+                if not current.text.rstrip().endswith(('.', '!', '?', '。', '！', '？')):
+                    current = STTResults(
+                        text=f"{current.text.rstrip()} {next_seg.text.lstrip()}",
+                        start=current.start,
+                        end=next_seg.end
+                    )
+                    continue
+
+            # 병합하지 않는 경우
+            merged.append(current)
+            current = next_seg
+
+        # 마지막 세그먼트 추가
+        merged.append(current)
+
+        return merged
+
+    def segment_long_transcriptions(self, results):
+        """긴 음성 인식 결과를 적절한 크기로 분할하는 함수"""
+        self.logger.info("긴 세그먼트 분할 처리 시작")
+
+        segmented_results = []
+        max_segment_duration = 15.0  # 최대 세그먼트 길이 (초)
+
+        for result in results:
+            duration = result.end - result.start
+
+            if duration <= max_segment_duration:
+                segmented_results.append(result)
+                continue
+
+            # 긴 세그먼트를 처리
+            self.logger.warning(f"비정상적으로 긴 세그먼트 발견: {duration:.2f}초 ({result.start:.2f} ~ {result.end:.2f})")
+
+            # 텍스트 기반 분할 시도
+            segments = self._text_based_segmentation(result.text, result.start, result.end)
+            if segments and len(segments) > 1:
+                segmented_results.extend(segments)
+                self.logger.info(f"텍스트 기반 분할 완료: 1개 → {len(segments)}개 세그먼트")
+            else:
+                # 텍스트 분할이 효과적이지 않으면 시간 기준으로 강제 분할
+                segments = self._time_based_segmentation(result, max_segment_duration)
+                segmented_results.extend(segments)
+                self.logger.info(f"시간 기반 강제 분할 완료: 1개 → {len(segments)}개 세그먼트")
+
+        self.logger.info(f"세그먼트 분할 완료: 최종 {len(segmented_results)}개 세그먼트")
+        return segmented_results
+
+    def _text_based_segmentation(self, text, start_time, end_time):
+        """텍스트 내용 기반으로 세그먼트 분할"""
+        # 문장 종결 표현 찾기
+        import re
+        sentence_endings = re.finditer(r'[.!?。！？]+\s*', text)
+        positions = [match.end() for match in sentence_endings]
+
+        if not positions:
+            return None  # 분할할 문장 종결 표현이 없음
+
+        # 총 문자 길이
+        total_len = len(text)
+        duration = end_time - start_time
+
+        segments = []
+        last_pos = 0
+
+        for pos in positions:
+            # 문장 비율로 시간 계산
+            segment_ratio = (pos - last_pos) / total_len
+            segment_duration = duration * segment_ratio
+
+            segment_start = start_time if last_pos == 0 else start_time + (last_pos / total_len) * duration
+            segment_end = segment_start + segment_duration
+
+            segments.append(STTResults(
+                text=text[last_pos:pos].strip(),
+                start=segment_start,
+                end=segment_end
+            ))
+
+            last_pos = pos
+
+        # 마지막 부분 처리
+        if last_pos < total_len:
+            segments.append(STTResults(
+                text=text[last_pos:].strip(),
+                start=start_time + (last_pos / total_len) * duration,
+                end=end_time
+            ))
+
+        return segments
+
+    def _time_based_segmentation(self, result, max_duration):
+        """시간 기준으로 강제 분할"""
+        duration = result.end - result.start
+        num_segments = max(2, int(duration / max_duration) + 1)
+
+        segments = []
+        text = result.text
+        total_len = len(text)
+
+        for i in range(num_segments):
+            segment_start = result.start + (duration / num_segments) * i
+            segment_end = result.start + (duration / num_segments) * (i + 1)
+
+            # 텍스트도 비슷한 비율로 분할 (완벽하진 않지만 근사치)
+            text_start = int((i / num_segments) * total_len)
+            text_end = int(((i + 1) / num_segments) * total_len)
+            segment_text = text[text_start:text_end].strip()
+
+            segments.append(STTResults(
+                text=segment_text,
+                start=segment_start,
+                end=segment_end
+            ))
+
+        return segments
