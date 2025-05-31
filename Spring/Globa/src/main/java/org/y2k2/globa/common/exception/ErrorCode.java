@@ -13,7 +13,6 @@ public enum ErrorCode {
     NOT_MATCH_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "Refresh 토큰이 일치하지 않습니다.", "40012"),
     INVITE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "자기 자신을 초대할 수 없습니다.", "40020"),
     INVITE_ACCEPT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "이미 수락된 초대입니다.", "40021"),
-    NOT_INCLUDE_HIGHLIGHT_COMMENT(HttpStatus.BAD_REQUEST, "해당 하이라이트 댓글이 아닙니다.", "40030"),
     INVALID_SNS_KIND(HttpStatus.BAD_REQUEST, "유효하지 않은 Sns Kind 입니다.", "40050"),
     MISMATCH_SHARE_ID(HttpStatus.BAD_REQUEST, "요청한 공유 ID가 일치하지 않습니다.", "40060"),
 

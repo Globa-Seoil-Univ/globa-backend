@@ -17,8 +17,6 @@ public class SwaggerErrorCode {
     public static final String INVITE_BAD_REQUEST_VALUE = "40020";
     public static final String INVITE_ACCEPT_BAD_REQUEST = "INVITE_ACCEPT_BAD_REQUEST";
     public static final String INVITE_ACCEPT_BAD_REQUEST_VALUE = "40021";
-    public static final String NOT_INCLUDE_HIGHLIGHT_COMMENT = "NOT_INCLUDE_HIGHLIGHT_COMMENT";
-    public static final String NOT_INCLUDE_HIGHLIGHT_COMMENT_VALUE = "40030";
     public static final String INVALID_SNS_KIND = "INVALID_SNS_KIND";
     public static final String INVALID_SNS_KIND_VALUE = "40050";
     public static final String MISMATCH_SHARE_ID = "MISMATCH_SHARE_ID";

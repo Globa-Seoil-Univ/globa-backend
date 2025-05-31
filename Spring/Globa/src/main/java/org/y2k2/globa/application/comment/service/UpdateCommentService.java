@@ -26,7 +26,7 @@ public class UpdateCommentService {
                 GetMyCommentCommand.of(idsDto.userId(), idsDto.highlightId(), commentId)
         );
 
-        comment.updateComment(request.content());
+        comment.updateContent(request.content());
         commentRepository.save(comment);
     }
 }

@@ -16,7 +16,6 @@ import java.util.Optional;
 public class CommentRepositoryImpl implements CommentRepository {
     private final CommentJpaRepository commentJpaRepository;
 
-
     @Override
     public CommentEntity save(CommentEntity entity) {
         return commentJpaRepository.save(entity);
@@ -55,6 +54,11 @@ public class CommentRepositoryImpl implements CommentRepository {
     @Override
     public List<CommentEntity> getAllDeletedComment(Long commentId) {
         return commentJpaRepository.findAllSelfOrChildDeletedByCommentId(commentId);
+    }
+
+    @Override
+    public Boolean isExistParentComment(Long highlightId, Long commentId) {
+        return commentJpaRepository.isExistParentComment(highlightId, commentId);
     }
 
     @Override

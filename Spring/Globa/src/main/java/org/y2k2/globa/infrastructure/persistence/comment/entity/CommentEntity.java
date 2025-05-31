@@ -54,7 +54,7 @@ public class CommentEntity {
     @Formula(value = "(SELECT CASE WHEN EXISTS (SELECT 1 FROM comment c WHERE c.parent_id = ce1_0.comment_id) THEN true ELSE false END)")
     private boolean hasReply;
 
-    public void updateComment(String content) {
+    public void updateContent(String content) {
         if (content != null) {
             this.content = content.trim();
         }

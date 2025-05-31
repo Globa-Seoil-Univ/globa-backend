@@ -37,12 +37,9 @@ public class GetRepliesService {
             throw new CustomException(ErrorCode.NOT_FOUND_HIGHLIGHT);
         }
 
-        CommentEntity parentComment = commentRepository.getParentComment(dto.highlightId(), dto.parentId())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_PARENT_COMMENT));
-
-        boolean isParentCommentInHighlight = parentComment.getHighlight().getHighlightId().equals(dto.highlightId());
-        if (!isParentCommentInHighlight) {
-            throw new CustomException(ErrorCode.NOT_INCLUDE_HIGHLIGHT_COMMENT);
+        Boolean isExistParentComment = commentRepository.isExistParentComment(dto.highlightId(), dto.parentId());
+        if (!isExistParentComment) {
+            throw new CustomException(ErrorCode.NOT_FOUND_PARENT_COMMENT);
         }
 
         Pageable pageable = PageRequest.of(page - 1, count);

@@ -17,6 +17,16 @@ public interface CommentJpaRepository extends JpaRepository<CommentEntity, Long>
     Page<CommentEntity> findByParent_CommentIdOrderByCommentIdAsc(Long parentId, Pageable pageable);
 
     @Query(
+            value = "SELECT CASE WHEN EXISTS ( " +
+                        "SELECT TRUE FROM CommentEntity c " +
+                        "WHERE c.highlight.highlightId = :highlightId " +
+                        "AND c.commentId = :commentId " +
+                        "AND c.parent IS NULL " +
+                    ") THEN TRUE ELSE FALSE END"
+    )
+    Boolean isExistParentComment(Long highlightId, Long commentId);
+
+    @Query(
             value = "SELECT CASE WHEN NOT EXISTS ( " +
                         "SELECT TRUE FROM CommentEntity c1 " +
                         "WHERE c1.highlight.highlightId = (" +

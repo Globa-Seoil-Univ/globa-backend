@@ -21,5 +21,6 @@ public interface CommentRepository {
     Page<CommentEntity> getChildComments(Long parentId, Pageable pageable);
     List<CommentEntity> getAllDeletedComment(Long commentId);
 
+    Boolean isExistParentComment(Long highlightId, Long commentId);
     Boolean isLastAliveComment(Long commentId);
 }
