@@ -14,12 +14,6 @@ import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 public class FindUserUseCase implements UseCase<Long, UserEntity> {
     private final UserRepository userRepository;
 
-    @Cacheable(
-            value = "user",
-            key = "#userId",
-            condition = "#userId != null",
-            unless = "#result == null"
-    )
     @Override
     public UserEntity execute(Long userId) {
         UserEntity user = userRepository.getUserByUserId(userId)

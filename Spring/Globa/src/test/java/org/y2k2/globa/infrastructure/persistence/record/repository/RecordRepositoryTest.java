@@ -54,43 +54,80 @@ public class RecordRepositoryTest {
 
     @BeforeEach
     public void setUp() {
-        user = userFixture.create();
-        otherUser = userFixture
-                .withName("Other User")
-                .create();
-        folder = folderFixture
-                .withUser(user)
-                .withTitle("Test Folder")
-                .create();
-        otherFolder = folderFixture
-                .withUser(otherUser)
-                .withTitle("Other User Folder")
-                .create();
-        owner = folderRoleFixture
-                .withRole(FolderRole.OWNER)
-                .create();
-        editor = folderRoleFixture
-                .withRole(FolderRole.EDITOR)
-                .create();
-        reader = folderRoleFixture
-                .withRole(FolderRole.READER)
-                .create();
-        folderShareFixture
-                .withFolder(folder)
-                .withOwner(user)
-                .withTarget(user)
-                .withRole(owner)
-                .create();
-        folderShareFixture
-                .withFolder(otherFolder)
-                .withOwner(otherUser)
-                .withTarget(otherUser)
-                .withRole(owner)
-                .create();
-        record = recordFixture
-                .withUser(user)
-                .withFolder(folder)
-                .create();
+        user = userFixture.save(
+                UserFixture
+                        .builder()
+                        .build()
+        );
+        otherUser = userFixture.save(
+                UserFixture
+                        .builder()
+                        .name("Other User")
+                        .build()
+        );
+        folder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .title("Test Folder")
+                        .build()
+        );
+        otherFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(otherUser)
+                        .title("Other User Folder")
+                        .build()
+        );
+
+        owner = folderRoleFixture.save(
+                FolderRoleFixture
+                        .builder()
+                        .role(FolderRole.OWNER)
+                        .build()
+        );
+        editor = folderRoleFixture.save(
+                FolderRoleFixture
+                        .builder()
+                        .role(FolderRole.EDITOR)
+                        .build()
+        );
+        reader = folderRoleFixture.save(
+                FolderRoleFixture
+                        .builder()
+                        .role(FolderRole.READER)
+                        .build()
+        );
+
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(folder)
+                        .owner(user)
+                        .target(user)
+                        .role(owner)
+                        .build()
+        );
+
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(otherFolder)
+                        .owner(otherUser)
+                        .target(otherUser)
+                        .role(owner)
+                        .build()
+        );
+
+        record = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(user)
+                        .folder(folder)
+                        .title("Test title record")
+                        .path("/" + folder.getFolderId() + "/test_record.ogg")
+                        .build()
+        );
     }
 
     @Test
@@ -131,11 +168,14 @@ public class RecordRepositoryTest {
     @DisplayName("자신 소유 문서 ID 조회 - 성공 (외부 폴더 포함)")
     void getAllRecordId() {
         Long userId = user.getUserId();
-        RecordEntity myOwnRecord = recordFixture
-                .withTitle("test title record2")
-                .withUser(user)
-                .withFolder(folder)
-                .create();
+        RecordEntity myOwnRecord = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(user)
+                        .folder(folder)
+                        .title("test title record2")
+                        .build()
+        );
         RecordEntity otherUserRecord = createRecordAndShare(otherFolder, otherUser, user, editor, InvitationStatus.ACCEPT);
 
         List<Long> recordIds = recordRepository.getAllRecordId(userId);
@@ -155,11 +195,15 @@ public class RecordRepositoryTest {
     @Test
     @DisplayName("문서 경로 조회 - 성공 (공유 사용자 포함)")
     void getAllPath() {
-        RecordEntity myOwnRecord = recordFixture
-                .withTitle("test title record2")
-                .withUser(user)
-                .withFolder(folder)
-                .create();
+        RecordEntity myOwnRecord = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(user)
+                        .folder(folder)
+                        .title("test title record2")
+                        .path("/" + folder.getFolderId() + "/my_own_record.ogg")
+                        .build()
+        );
         RecordEntity otherUserRecord = createRecordAndShare(folder, otherUser, user, editor, InvitationStatus.ACCEPT);
 
         List<String> paths = recordRepository.getAllPath(folder.getFolderId());
@@ -338,22 +382,32 @@ public class RecordRepositoryTest {
     void getSharingRecord() {
         RecordEntity twoRecord = createRecordAndShare(folder, user, otherUser, reader, InvitationStatus.ACCEPT);
 
-        FolderEntity noShareFolder = folderFixture
-                .withUser(user)
-                .withTitle("No Share Folder")
-                .create();
-        folderShareFixture
-                .withFolder(noShareFolder)
-                .withOwner(user)
-                .withTarget(user)
-                .withRole(owner)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
-        RecordEntity noShareRecord = recordFixture
-                .withTitle("no share record")
-                .withUser(user)
-                .withFolder(noShareFolder)
-                .create();
+        FolderEntity noShareFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .title("No Share Folder")
+                        .build()
+        );
+
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(noShareFolder)
+                        .owner(user)
+                        .target(user)
+                        .role(owner)
+                        .build()
+        );
+
+        RecordEntity noShareRecord = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(user)
+                        .folder(noShareFolder)
+                        .title("No Share Record")
+                        .build()
+        );
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<RecordEntity> response = recordRepository.getOwnedRecord(user.getUserId(), pageable);
@@ -386,19 +440,25 @@ public class RecordRepositoryTest {
             FolderRoleEntity role,
             InvitationStatus status
     ) {
-        folderShareFixture
-                .withFolder(folder)
-                .withOwner(owner)
-                .withTarget(target)
-                .withRole(role)
-                .withInvitationStatus(status)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(folder)
+                        .owner(owner)
+                        .target(target)
+                        .role(role)
+                        .status(status)
+                        .build()
+        );
 
-        return recordFixture
-                .withTitle("test title record2")
-                .withUser(target)
-                .withFolder(folder)
-                .withPath("/" + folder.getFolderId() + "/other_record.ogg")
-                .create();
+        return recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(target)
+                        .folder(folder)
+                        .title("test title record2")
+                        .path("/" + folder.getFolderId() + "/other_record.ogg")
+                        .build()
+        );
     }
 }

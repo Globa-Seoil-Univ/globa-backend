@@ -59,7 +59,6 @@ public class FolderIntegrationTest extends IntegrationTest {
 
     private UserEntity user;
     private FolderRoleEntity owner;
-    private FolderRoleEntity reader;
 
     @BeforeEach
     void setUp() {
@@ -69,11 +68,14 @@ public class FolderIntegrationTest extends IntegrationTest {
             Objects.requireNonNull(cacheManager.getCache(cacheName)).clear();
         });
 
-        user = userFixture.create();
+        user = userFixture.save(
+                UserFixture
+                        .builder()
+                        .build()
+        );
         setSecurityContext(user);
 
         owner = folderRoleFixture.getEntity(FolderRole.OWNER);
-        reader = folderRoleFixture.getEntity(FolderRole.READER);
     }
 
     @AfterEach
@@ -122,37 +124,56 @@ public class FolderIntegrationTest extends IntegrationTest {
     @DisplayName("폴더 조회 - 성공 (기본 폴더 포함)")
     void getFolders() throws Exception {
         String title = "Default Folder";
-        FolderEntity defaultFolder = folderFixture
-                .withUser(user)
-                .withTitle(title)
-                .create();
-        FolderEntity newFolder01 = folderFixture
-                .withUser(user)
-                .withTitle("New Folder 01")
-                .create();
-        FolderEntity newFolder02 = folderFixture
-                .withUser(user)
-                .withTitle("New Folder 02")
-                .create();
 
-        folderShareFixture
-                .withFolder(defaultFolder)
-                .withOwner(user)
-                .withTarget(user)
-                .withRole(owner)
-                .create();
-        folderShareFixture
-                .withFolder(newFolder01)
-                .withOwner(user)
-                .withTarget(user)
-                .withRole(reader)
-                .create();
-        folderShareFixture
-                .withFolder(newFolder02)
-                .withOwner(user)
-                .withTarget(user)
-                .withRole(reader)
-                .create();
+        FolderEntity defaultFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .title(title)
+                        .build()
+        );
+        FolderEntity newFolder01 = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .title("New Folder 01")
+                        .build()
+        );
+        FolderEntity newFolder02 = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .title("New Folder 02")
+                        .build()
+        );
+
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(defaultFolder)
+                        .owner(user)
+                        .target(user)
+                        .role(owner)
+                        .build()
+        );
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(newFolder01)
+                        .owner(user)
+                        .target(user)
+                        .role(owner)
+                        .build()
+        );
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(newFolder02)
+                        .owner(user)
+                        .target(user)
+                        .role(owner)
+                        .build()
+        );
 
         MvcResult result = mockMvc.perform(
                 MockMvcRequestBuilders.get(Constant.FOLDER_PREFIX.getValue())
@@ -196,37 +217,55 @@ public class FolderIntegrationTest extends IntegrationTest {
     @DisplayName("폴더 조회 - 성공 (기본 폴더 미포함)")
     void getFoldersWithoutDefault() throws Exception {
         String title = "Default Folder";
-        FolderEntity defaultFolder = folderFixture
-                .withUser(user)
-                .withTitle(title)
-                .create();
-        FolderEntity newFolder01 = folderFixture
-                .withUser(user)
-                .withTitle("New Folder 01")
-                .create();
-        FolderEntity newFolder02 = folderFixture
-                .withUser(user)
-                .withTitle("New Folder 02")
-                .create();
+        FolderEntity defaultFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .title(title)
+                        .build()
+        );
+        FolderEntity newFolder01 = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .title("New Folder 01")
+                        .build()
+        );
+        FolderEntity newFolder02 = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .title("New Folder 02")
+                        .build()
+        );
 
-        folderShareFixture
-                .withFolder(defaultFolder)
-                .withOwner(user)
-                .withTarget(user)
-                .withRole(owner)
-                .create();
-        folderShareFixture
-                .withFolder(newFolder01)
-                .withOwner(user)
-                .withTarget(user)
-                .withRole(reader)
-                .create();
-        folderShareFixture
-                .withFolder(newFolder02)
-                .withOwner(user)
-                .withTarget(user)
-                .withRole(reader)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(defaultFolder)
+                        .owner(user)
+                        .target(user)
+                        .role(owner)
+                        .build()
+        );
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(newFolder01)
+                        .owner(user)
+                        .target(user)
+                        .role(owner)
+                        .build()
+        );
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(newFolder02)
+                        .owner(user)
+                        .target(user)
+                        .role(owner)
+                        .build()
+        );
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get(Constant.FOLDER_PREFIX.getValue())
@@ -286,9 +325,11 @@ public class FolderIntegrationTest extends IntegrationTest {
     @DisplayName("폴더 생성 - 성공 (공유 O)")
     void createFolderWithShare() throws Exception {
         String title = "New Folder";
-        String code = userFixture
-                .create()
-                .getCode();
+        String code = userFixture.save(
+                UserFixture
+                        .builder()
+                        .build()
+        ).getCode();
         RequestFolderPostDto request = new RequestFolderPostDto(
                 title,
                 List.of(new RequestFolderPostDto.ShareTarget(FolderRole.EDITOR.toString(), code))
@@ -310,15 +351,21 @@ public class FolderIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("폴더 이름 수정 - 성공")
     void updateFolderName() throws Exception {
-        FolderEntity folder = folderFixture
-                .withUser(user)
-                .create();
-        folderShareFixture
-                .withFolder(folder)
-                .withRole(owner)
-                .withOwner(user)
-                .withTarget(user)
-                .create();
+        FolderEntity folder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .build()
+        );
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(folder)
+                        .owner(user)
+                        .target(user)
+                        .role(owner)
+                        .build()
+        );
         RequestFolderNameDto request = FixtureMonkey.builder()
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
                 .plugin(new JakartaValidationPlugin())
@@ -339,9 +386,12 @@ public class FolderIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("폴더 이름 수정 - 실패 (권한 X)")
     void updateFolderNameWithoutAuth() throws Exception {
-        FolderEntity folder = folderFixture
-                .withUser(user)
-                .create();
+        FolderEntity folder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .build()
+        );
         RequestFolderNameDto request = FixtureMonkey.builder()
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
                 .plugin(new JakartaValidationPlugin())
@@ -363,18 +413,29 @@ public class FolderIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("폴더 삭제 - 성공")
     void deleteFolder() throws Exception {
-        FolderEntity _defaultFolder = folderFixture
-                .withUser(user)
-                .create();
-        FolderEntity folder = folderFixture
-                .withUser(user)
-                .create();
-        folderShareFixture
-                .withFolder(folder)
-                .withRole(owner)
-                .withOwner(user)
-                .withTarget(user)
-                .create();
+        // 기본폴더 생성
+        folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .build()
+        );
+
+        FolderEntity folder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .build()
+        );
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(folder)
+                        .owner(user)
+                        .target(user)
+                        .role(owner)
+                        .build()
+        );
 
         mockMvc.perform(
                         MockMvcRequestBuilders.delete(Constant.FOLDER_PREFIX.getValue() + "/{folderId}", folder.getFolderId())
@@ -388,15 +449,21 @@ public class FolderIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("폴더 삭제 - 실패 (기본 폴더)")
     void deleteDefaultFolder() throws Exception {
-        FolderEntity folder = folderFixture
-                .withUser(user)
-                .create();
-        folderShareFixture
-                .withFolder(folder)
-                .withRole(owner)
-                .withOwner(user)
-                .withTarget(user)
-                .create();
+        FolderEntity folder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .build()
+        );
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(folder)
+                        .owner(user)
+                        .target(user)
+                        .role(owner)
+                        .build()
+        );
 
         mockMvc.perform(
                         MockMvcRequestBuilders.delete(Constant.FOLDER_PREFIX.getValue() + "/{folderId}", folder.getFolderId())
@@ -411,9 +478,12 @@ public class FolderIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("폴더 삭제 - 실패 (권한 없음)")
     void deleteFolderWithoutAuth() throws Exception {
-        FolderEntity folder = folderFixture
-                .withUser(user)
-                .create();
+        FolderEntity folder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .build()
+        );
 
         mockMvc.perform(
                         MockMvcRequestBuilders.delete(Constant.FOLDER_PREFIX.getValue() + "/{folderId}", folder.getFolderId())

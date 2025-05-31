@@ -1,6 +1,7 @@
 package org.y2k2.globa.application.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.y2k2.globa.application.common.dto.file.FileDto;
 import org.y2k2.globa.application.user.command.UpdateUserCommand;
@@ -21,6 +22,11 @@ public class UpdateUserProfileImgService {
     private final FileStore fileStore;
 
     @FileCleanup
+    @CacheEvict(
+            value = "user",
+            key = "#userId",
+            condition = "#userId != null"
+    )
     public void update(RequestProfileImageDto dto, Long userId) {
         UserEntity user = findUserUseCase.execute(userId);
 

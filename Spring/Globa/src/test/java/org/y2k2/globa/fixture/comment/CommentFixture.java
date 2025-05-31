@@ -1,45 +1,72 @@
 package org.y2k2.globa.fixture.comment;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
-import org.y2k2.globa.factory.comment.CommentFactory;
-import org.y2k2.globa.fixture.AbstractFixture;
+import org.y2k2.globa.domain.comment.repository.CommentRepository;
+import org.y2k2.globa.fixture.Fixture;
 import org.y2k2.globa.infrastructure.persistence.comment.entity.CommentEntity;
+import org.y2k2.globa.infrastructure.persistence.comment.repository.CommentRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.highlight.entity.HighlightEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
+@Import(CommentRepositoryImpl.class)
 @Component
-public class CommentFixture extends AbstractFixture<CommentEntity> {
+public class CommentFixture implements Fixture<CommentEntity> {
     @Autowired
-    private CommentFactory commentFactory;
+    private CommentRepository commentRepository;
+
+    public static CommentBuilder builder() {
+        return new CommentBuilder();
+    }
 
     @Override
-    protected CommentEntity build() {
-        return commentFactory.createAndSave();
+    public CommentEntity save(CommentEntity entity) {
+        return commentRepository.save(entity);
     }
 
-    public CommentFixture withContent(String content) {
-        commentFactory.setContent(content);
-        return this;
-    }
+    public static class CommentBuilder {
+        private String content;
+        private HighlightEntity highlight;
+        private CommentEntity parent;
+        private UserEntity user;
+        private boolean isDeleted = false;
 
-    public CommentFixture withHighlight(HighlightEntity highlight) {
-        commentFactory.setHighlight(highlight);
-        return this;
-    }
+        private CommentBuilder() {}
 
-    public CommentFixture withParent(CommentEntity parent) {
-        commentFactory.setParent(parent);
-        return this;
-    }
+        public CommentBuilder content(String content) {
+            this.content = content;
+            return this;
+        }
 
-    public CommentFixture withUser(UserEntity user) {
-        commentFactory.setUser(user);
-        return this;
-    }
+        public CommentBuilder highlight(HighlightEntity highlight) {
+            this.highlight = highlight;
+            return this;
+        }
 
-    public CommentFixture withDeleted(boolean isDeleted) {
-        commentFactory.setDeleted(isDeleted);
-        return this;
+        public CommentBuilder parent(CommentEntity parent) {
+            this.parent = parent;
+            return this;
+        }
+
+        public CommentBuilder user(UserEntity user) {
+            this.user = user;
+            return this;
+        }
+
+        public CommentBuilder deleted(boolean isDeleted) {
+            this.isDeleted = isDeleted;
+            return this;
+        }
+
+        public CommentEntity build() {
+            CommentEntity entity = new CommentEntity();
+            entity.setContent(this.content);
+            entity.setHighlight(this.highlight);
+            entity.setParent(this.parent);
+            entity.setUser(this.user);
+            entity.setIsDeleted(this.isDeleted);
+            return entity;
+        }
     }
 }

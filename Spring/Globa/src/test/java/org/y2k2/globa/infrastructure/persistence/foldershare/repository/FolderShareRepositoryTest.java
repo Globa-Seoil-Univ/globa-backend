@@ -49,42 +49,67 @@ public class FolderShareRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        myUser = userFixture.create();
-        otherUser = userFixture
-                .withName("Other User")
-                .create();
-        myDefaultFolder = folderFixture
-                .withUser(myUser)
-                .create();
-        owner = folderRoleFixture
-                .withRole(FolderRole.OWNER)
-                .create();
-        editor = folderRoleFixture
-                .withRole(FolderRole.EDITOR)
-                .create();
-        reader = folderRoleFixture
-                .withRole(FolderRole.READER)
-                .create();
+        myUser = userFixture.save(
+                UserFixture
+                        .builder()
+                        .build()
+        );
+        otherUser = userFixture.save(
+                UserFixture
+                        .builder()
+                        .name("Other User")
+                        .build()
+        );
+        myDefaultFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(myUser)
+                        .build()
+        );
+        owner = folderRoleFixture.save(
+                FolderRoleFixture
+                        .builder()
+                        .role(FolderRole.OWNER)
+                        .build()
+        );
+        editor = folderRoleFixture.save(
+                FolderRoleFixture
+                        .builder()
+                        .role(FolderRole.EDITOR)
+                        .build()
+        );
+        reader = folderRoleFixture.save(
+                FolderRoleFixture
+                        .builder()
+                        .role(FolderRole.READER)
+                        .build()
+        );
 
-        folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(myUser)
-                .withRole(owner)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(myUser)
+                        .role(owner)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
     }
 
     @Test
     @DisplayName("폴더 공유 생성 - 성공")
     void createFolderShare() {
-        FolderShareEntity folderShare = folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(myUser)
-                .withRole(owner)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        FolderShareEntity folderShare = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(myUser)
+                        .role(owner)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
         log.info("Saved Folder Share = {}", folderShare.getShareId());
 
@@ -98,20 +123,26 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("여러 개 폴더 공유 생성 - 성공")
     void createMultipleFolderShares() {
-        FolderShareEntity myShare = folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(myUser)
-                .withRole(owner)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
-        FolderShareEntity otherShare = folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        FolderShareEntity myShare = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(myUser)
+                        .role(owner)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
+        FolderShareEntity otherShare = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(editor)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         List<FolderShareEntity> savedShares = folderShareRepository.saveAll(List.of(myShare, otherShare));
 
@@ -136,13 +167,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("폴더 공유 삭제 - 성공")
     void deleteFolderShare() {
-        FolderShareEntity folderShare = folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        FolderShareEntity folderShare = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(editor)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
         log.info("Deleting Folder Share Id = {}", folderShare.getShareId());
 
@@ -152,13 +186,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("폴더 접근 가능 여부 확인 - 성공")
     void isAccessible() {
-        FolderShareEntity folderShare = folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        FolderShareEntity folderShare = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(editor)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
         Boolean isAccessible = folderShareRepository.isAccessible(otherUser.getUserId(), myDefaultFolder.getFolderId());
 
@@ -169,13 +206,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("폴더 접근 불가능 여부 확인 - 성공 (Pending 상태)")
     void isNotAccessibleByPending() {
-        folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(editor)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         Boolean isAccessible = folderShareRepository.isAccessible(otherUser.getUserId(), myDefaultFolder.getFolderId());
 
@@ -195,13 +235,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("폴더 소유자 여부 확인 - 성공")
     void isOwner() {
-        folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(myUser)
-                .withRole(owner)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(myUser)
+                        .role(owner)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
         Boolean isMyOwner = folderShareRepository.isOwner(myUser.getUserId(), myDefaultFolder.getFolderId());
         log.info("Is My Owner: {}", isMyOwner);
@@ -212,13 +255,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("폴더 소유자 여부 확인 - 성공 (EDITOR 권한)")
     void isNotOwner() {
-        folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(editor)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
         Boolean isMyOwner = folderShareRepository.isOwner(otherUser.getUserId(), myDefaultFolder.getFolderId());
         log.info("Is My Owner: {}", isMyOwner);
@@ -229,13 +275,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("폴더 소유자 여부 확인 - 성공 (READER 권한)")
     void isNotOwnerByReader() {
-        folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(reader)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(reader)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
         Boolean isMyOwner = folderShareRepository.isOwner(otherUser.getUserId(), myDefaultFolder.getFolderId());
         log.info("Is My Owner: {}", isMyOwner);
@@ -255,13 +304,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("폴더 소유 여부 확인 - 성공 (Pending 상태)")
     void isNotOwnerByPending() {
-        folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(editor)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         Boolean isMyOwner = folderShareRepository.isOwner(otherUser.getUserId(), myDefaultFolder.getFolderId());
         log.info("Is My Owner: {}", isMyOwner);
@@ -272,13 +324,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("폴더 초대 여부 확인 - 성공")
     void isInvited() {
-        folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(editor)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
         Boolean isInvited = folderShareRepository.isInvited(otherUser.getUserId(), myDefaultFolder.getFolderId());
         log.info("Is Invited: {}", isInvited);
@@ -289,13 +344,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("폴더 초대 여부 확인 - 성공 (Pending 상태)")
     void isInvitedByPending() {
-        folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(editor)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         Boolean isInvited = folderShareRepository.isInvited(otherUser.getUserId(), myDefaultFolder.getFolderId());
         log.info("Is Invited: {}", isInvited);
@@ -315,13 +373,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("폴더 편집 권한 여부 확인 - 성공 (OWNER 권한)")
     void isWritable() {
-        folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(myUser)
-                .withRole(owner)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(myUser)
+                        .role(owner)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
         Boolean isWritable = folderShareRepository.isWritable(myUser.getUserId(), myDefaultFolder.getFolderId());
         log.info("Is Writable: {}", isWritable);
@@ -332,13 +393,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("폴더 편집 권한 여부 확인 - 성공 (EDITOR 권한)")
     void isWritableByEditor() {
-        folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(editor)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
         Boolean isWritable = folderShareRepository.isWritable(otherUser.getUserId(), myDefaultFolder.getFolderId());
         log.info("Is Writable: {}", isWritable);
@@ -349,13 +413,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("폴더 편집 권한 여부 확인 - 성공 (READER 권한)")
     void isNotWritableByReader() {
-        folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(reader)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(reader)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
         Boolean isWritable = folderShareRepository.isWritable(otherUser.getUserId(), myDefaultFolder.getFolderId());
         log.info("Is Writable: {}", isWritable);
@@ -366,13 +433,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("폴더 편집 권한 여부 확인 - 성공 (Pending 상태)")
     void isNotWritableByPending() {
-        folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(editor)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         Boolean isWritable = folderShareRepository.isWritable(otherUser.getUserId(), myDefaultFolder.getFolderId());
         log.info("Is Writable: {}", isWritable);
@@ -392,13 +462,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("폴더 공유 초대 조회 - 성공")
     void getShareInvitations() {
-        folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(editor)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<FolderShareEntity> invitations = folderShareRepository.getShareInvitations(myDefaultFolder.getFolderId(), pageable);
@@ -420,27 +493,39 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("기본 폴더를 제외한 초대 조회 - 성공")
     void getShareInvitationsWithoutDefault() {
-        FolderEntity twiceMyFolder = folderFixture
-                .withUser(myUser)
-                .create();
-        FolderShareEntity twiceMyShare = folderShareFixture
-                .withFolder(twiceMyFolder)
-                .withOwner(myUser)
-                .withTarget(myUser)
-                .withRole(owner)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        FolderEntity twiceMyFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(myUser)
+                        .build()
+        );
+        FolderShareEntity twiceMyShare = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(twiceMyFolder)
+                        .owner(myUser)
+                        .target(myUser)
+                        .role(owner)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
-        FolderEntity otherFolder = folderFixture
-                .withUser(otherUser)
-                .create();
-        FolderShareEntity otherShare = folderShareFixture
-                .withFolder(otherFolder)
-                .withOwner(otherUser)
-                .withTarget(myUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        FolderEntity otherFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(otherUser)
+                        .build()
+        );
+        FolderShareEntity otherShare = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(otherFolder)
+                        .owner(otherUser)
+                        .target(myUser)
+                        .role(editor)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
         folderShareRepository.saveAll(List.of(twiceMyShare, otherShare));
 
@@ -466,27 +551,39 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("기본 폴더를 제외한 초대 조회 - 성공 (Pending 상태)")
     void getShareInvitationsWithoutDefaultByPending() {
-        FolderEntity twiceMyFolder = folderFixture
-                .withUser(myUser)
-                .create();
-        FolderShareEntity twiceMyShare = folderShareFixture
-                .withFolder(twiceMyFolder)
-                .withOwner(myUser)
-                .withTarget(myUser)
-                .withRole(owner)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        FolderEntity twiceMyFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(myUser)
+                        .build()
+        );
+        FolderShareEntity twiceMyShare = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(twiceMyFolder)
+                        .owner(myUser)
+                        .target(myUser)
+                        .role(owner)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
-        FolderEntity otherFolder = folderFixture
-                .withUser(otherUser)
-                .create();
-        FolderShareEntity otherShare = folderShareFixture
-                .withFolder(otherFolder)
-                .withOwner(otherUser)
-                .withTarget(myUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        FolderEntity otherFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(otherUser)
+                        .build()
+        );
+        FolderShareEntity otherShare = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(otherFolder)
+                        .owner(otherUser)
+                        .target(myUser)
+                        .role(editor)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         folderShareRepository.saveAll(List.of(twiceMyShare, otherShare));
 
@@ -517,13 +614,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("특정 폴더 초대 조회 - 성공")
     void getAllShareInvitations() {
-        folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(editor)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         List<FolderShareEntity> allInvitations = folderShareRepository.getAllShareInvitations(myDefaultFolder.getFolderId());
 
@@ -544,13 +644,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("자신을 제외한 특정 폴더 초대 조회 - 성공 (Pending 상태)")
     void getAllShareInvitationsExcludingSelfByPending() {
-        folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(editor)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         List<FolderShareEntity> allInvitations = folderShareRepository.getAllShareInvitationsWithoutMe(myDefaultFolder.getFolderId(), myUser.getUserId());
 
@@ -566,13 +669,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("자신을 제외한 특정 폴더 초대 조회 - 성공 (Accept 상태)")
     void getAllShareInvitationsExcludingSelfByAccept() {
-        folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(editor)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
         List<FolderShareEntity> allInvitations = folderShareRepository.getAllShareInvitationsWithoutMe(myDefaultFolder.getFolderId(), myUser.getUserId());
 
@@ -606,13 +712,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("특정 폴더와 사용자로 폴더 공유 조회 - 성공 (Accept 상태)")
     void getShareInvitation() {
-        FolderShareEntity folderShare = folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        FolderShareEntity folderShare = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(editor)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
         Optional<FolderShareEntity> foundShare = folderShareRepository.getShareInvitation(
                 myDefaultFolder.getFolderId(),
@@ -632,13 +741,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("특정 폴더와 사용자로 폴더 공유 조회 - 성공 (Pending 상태)")
     void getShareInvitationByPending() {
-        FolderShareEntity folderShare = folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        FolderShareEntity folderShare = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(editor)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         Optional<FolderShareEntity> foundShare = folderShareRepository.getShareInvitation(
                 myDefaultFolder.getFolderId(),
@@ -671,13 +783,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("특정 폴더와 사용자로 폴더 공유 조회 (Folder Join) - 성공")
     void getShareInvitationJoinFolder() {
-        FolderShareEntity folderShare = folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        FolderShareEntity folderShare = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(editor)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
         Optional<FolderShareEntity> foundShare = folderShareRepository.getShareInvitationWithFolder(
                 myDefaultFolder.getFolderId(),
@@ -699,13 +814,16 @@ public class FolderShareRepositoryTest {
     @Test
     @DisplayName("특정 폴더와 사용자로 폴더 공유 조회 (Folder Join) - 성공 (Pending 상태)")
     void getShareInvitationJoinFolderByPending() {
-        FolderShareEntity folderShare = folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(otherUser)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        FolderShareEntity folderShare = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(otherUser)
+                        .role(editor)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         Optional<FolderShareEntity> foundShare = folderShareRepository.getShareInvitationWithFolder(
                 myDefaultFolder.getFolderId(),

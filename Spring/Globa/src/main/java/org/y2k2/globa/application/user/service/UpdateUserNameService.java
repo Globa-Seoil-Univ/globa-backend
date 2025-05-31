@@ -1,6 +1,7 @@
 package org.y2k2.globa.application.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.application.folder.command.CreateDefaultFolderCommand;
@@ -33,6 +34,11 @@ public class UpdateUserNameService {
     private final FolderRepository folderRepository;
 
     @Transactional
+    @CacheEvict(
+            value = "user",
+            key = "#userId",
+            condition = "#userId != null"
+    )
     public void update(RequestNameDto dto, Long userId) {
         UserEntity user = findUserUseCase.execute(userId);
         FolderRoleEntity folderRole = findFolderRoleUseCase.execute(

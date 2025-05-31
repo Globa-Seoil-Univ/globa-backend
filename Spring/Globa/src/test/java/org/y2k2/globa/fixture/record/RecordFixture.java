@@ -1,45 +1,73 @@
 package org.y2k2.globa.fixture.record;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
-import org.y2k2.globa.factory.record.RecordFactory;
-import org.y2k2.globa.fixture.AbstractFixture;
+import org.y2k2.globa.domain.record.repository.RecordRepository;
+import org.y2k2.globa.fixture.Fixture;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
+import org.y2k2.globa.infrastructure.persistence.record.repository.RecordRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
+@Import(RecordRepositoryImpl.class)
 @Component
-public class RecordFixture extends AbstractFixture<RecordEntity> {
+public class RecordFixture implements Fixture<RecordEntity> {
     @Autowired
-    private RecordFactory recordFactory;
+    private RecordRepository recordRepository;
 
     @Override
-    protected RecordEntity build() {
-        return recordFactory.createAndSave();
+    public RecordEntity save(RecordEntity entity) {
+        return recordRepository.save(entity);
     }
 
-    public RecordFixture withTitle(String title) {
-        recordFactory.setTitle(title);
-        return this;
+    public static RecordBuilder builder() {
+        return new RecordBuilder();
     }
 
-    public RecordFixture withUser(UserEntity user) {
-        recordFactory.setUser(user);
-        return this;
-    }
+    public static class RecordBuilder {
+        private String title = "Default Title";
+        private UserEntity user;
+        private FolderEntity folder;
+        private String path = "/default/path";
+        private Boolean isShare = false;
 
-    public RecordFixture withFolder(FolderEntity folder) {
-        recordFactory.setFolder(folder);
-        return this;
-    }
+        private RecordBuilder() {}
 
-    public RecordFixture withPath(String path) {
-        recordFactory.setPath(path);
-        return this;
-    }
+        public RecordBuilder title(String title) {
+            this.title = title;
+            return this;
+        }
 
-    public RecordFixture withIsShare(Boolean isShare) {
-        recordFactory.setShare(isShare);
-        return this;
+        public RecordBuilder user(UserEntity user) {
+            this.user = user;
+            return this;
+        }
+
+        public RecordBuilder folder(FolderEntity folder) {
+            this.folder = folder;
+            return this;
+        }
+
+        public RecordBuilder path(String path) {
+            this.path = path;
+            return this;
+        }
+
+        public RecordBuilder isShare(Boolean isShare) {
+            this.isShare = isShare;
+            return this;
+        }
+
+        public RecordEntity build() {
+            RecordEntity entity = new RecordEntity();
+            entity.setTitle(title);
+            entity.setUser(user);
+            entity.setFolder(folder);
+            entity.setPath(path);
+            entity.setSize("1000");
+            entity.setIsShare(isShare);
+            return entity;
+        }
     }
 }

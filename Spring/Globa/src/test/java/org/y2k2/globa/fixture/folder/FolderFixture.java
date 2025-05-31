@@ -1,29 +1,50 @@
 package org.y2k2.globa.fixture.folder;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
-import org.y2k2.globa.factory.folder.FolderFactory;
-import org.y2k2.globa.fixture.AbstractFixture;
+import org.y2k2.globa.domain.folder.repository.FolderRepository;
+import org.y2k2.globa.fixture.Fixture;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
+import org.y2k2.globa.infrastructure.persistence.folder.repository.FolderRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
+@Import(FolderRepositoryImpl.class)
 @Component
-public class FolderFixture extends AbstractFixture<FolderEntity> {
+public class FolderFixture implements Fixture<FolderEntity> {
     @Autowired
-    private FolderFactory folderFactory;
+    private FolderRepository folderRepository;
+
+    public static FolderBuilder builder() {
+        return new FolderBuilder();
+    }
 
     @Override
-    protected FolderEntity build() {
-        return folderFactory.createAndSave();
+    public FolderEntity save(FolderEntity entity) {
+        return folderRepository.save(entity);
     }
 
-    public FolderFixture withUser(UserEntity user) {
-        folderFactory.setUser(user);
-        return this;
-    }
+    public static class FolderBuilder {
+        private String title = "Default Folder Title";
+        private UserEntity user;
 
-    public FolderFixture withTitle(String title) {
-        folderFactory.setTitle(title);
-        return this;
+        private FolderBuilder() {}
+
+        public FolderBuilder title(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public FolderBuilder user(UserEntity user) {
+            this.user = user;
+            return this;
+        }
+
+        public FolderEntity build() {
+            FolderEntity folder = new FolderEntity();
+            folder.setTitle(title);
+            folder.setUser(user);
+            return folder;
+        }
     }
 }

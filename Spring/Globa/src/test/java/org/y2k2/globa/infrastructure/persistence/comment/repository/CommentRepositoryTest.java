@@ -44,6 +44,7 @@ public class CommentRepositoryTest {
     @Autowired
     private FolderRoleFixture folderRoleFixture;
     @Autowired
+
     private FolderShareFixture folderShareFixture;
     @Autowired
     private RecordFixture recordFixture;
@@ -59,32 +60,54 @@ public class CommentRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        myUser = userFixture.create();
-        FolderEntity myDefaultFolder = folderFixture
-                .withUser(myUser)
-                .create();
-        FolderRoleEntity owner = folderRoleFixture
-                .withRole(FolderRole.OWNER)
-                .create();
+        myUser = userFixture.save(
+                UserFixture
+                        .builder()
+                        .build()
+        );
+        FolderEntity myDefaultFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(myUser)
+                        .build()
+        );
+        FolderRoleEntity owner = folderRoleFixture.save(
+                FolderRoleFixture
+                        .builder()
+                        .role(FolderRole.OWNER)
+                        .build()
+        );
 
-        folderShareFixture
-                .withFolder(myDefaultFolder)
-                .withOwner(myUser)
-                .withTarget(myUser)
-                .withRole(owner)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .folder(myDefaultFolder)
+                        .owner(myUser)
+                        .target(myUser)
+                        .role(owner)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
-        RecordEntity myRecord = recordFixture
-                .withUser(myUser)
-                .withFolder(myDefaultFolder)
-                .create();
-        SectionEntity section = sectionFixture
-                .withRecord(myRecord)
-                .create();
-        highlight = highlightFixture
-                .withSection(section)
-                .create();
+        RecordEntity myRecord = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(myUser)
+                        .folder(myDefaultFolder)
+                        .build()
+        );
+        SectionEntity section = sectionFixture.save(
+                SectionFixture
+                        .builder()
+                        .record(myRecord)
+                        .build()
+        );
+        highlight = highlightFixture.save(
+                HighlightFixture
+                        .builder()
+                        .section(section)
+                        .build()
+        );
     }
 
     @Test
@@ -92,14 +115,15 @@ public class CommentRepositoryTest {
     void createComment() {
         String content = "This is a comment.";
 
-        CommentEntity comment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(content)
-                .withDeleted(false)
-                .create();
+        CommentEntity comment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(content)
+                .deleted(false)
+                .build();
 
-        CommentEntity savedComment = commentRepository.save(comment);
+        CommentEntity savedComment = commentFixture.save(comment);
 
         log.info("Saved Comment = {}", savedComment.getCommentId());
 
@@ -115,12 +139,13 @@ public class CommentRepositoryTest {
     void deleteComment() {
         String content = "This is a comment to be deleted.";
 
-        CommentEntity comment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(content)
-                .withDeleted(false)
-                .create();
+        CommentEntity comment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(content)
+                .deleted(false)
+                .build();
 
         CommentEntity savedComment = commentRepository.save(comment);
         log.info("Saved Comment = {}", savedComment.getCommentId());
@@ -137,18 +162,20 @@ public class CommentRepositoryTest {
         String content1 = "This is the first comment.";
         String content2 = "This is the second comment.";
 
-        CommentEntity comment1 = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(content1)
-                .withDeleted(false)
-                .create();
-        CommentEntity comment2 = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(content2)
-                .withDeleted(false)
-                .create();
+        CommentEntity comment1 = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(content1)
+                .deleted(false)
+                .build();
+        CommentEntity comment2 = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(content2)
+                .deleted(false)
+                .build();
 
         commentRepository.save(comment1);
         commentRepository.save(comment2);
@@ -166,12 +193,13 @@ public class CommentRepositoryTest {
     void getComment() {
         String content = "This is a comment to be retrieved.";
 
-        CommentEntity comment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(content)
-                .withDeleted(false)
-                .create();
+        CommentEntity comment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(content)
+                .deleted(false)
+                .build();
 
         CommentEntity savedComment = commentRepository.save(comment);
         log.info("Saved Comment = {}", savedComment.getCommentId());
@@ -202,12 +230,13 @@ public class CommentRepositoryTest {
     void getParentComment() {
         String content = "This is a parent comment.";
 
-        CommentEntity parentComment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(content)
-                .withDeleted(false)
-                .create();
+        CommentEntity parentComment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(content)
+                .deleted(false)
+                .build();
 
         CommentEntity savedParentComment = commentRepository.save(parentComment);
         log.info("Saved Parent Comment = {}", savedParentComment.getCommentId());
@@ -238,18 +267,21 @@ public class CommentRepositoryTest {
         String content1 = "This is the first parent comment.";
         String content2 = "This is the second parent comment.";
 
-        CommentEntity parentComment1 = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(content1)
-                .withDeleted(false)
-                .create();
-        CommentEntity parentComment2 = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(content2)
-                .withDeleted(false)
-                .create();
+        CommentEntity parentComment1 = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(content1)
+                .deleted(false)
+                .build();
+
+        CommentEntity parentComment2 = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(content2)
+                .deleted(false)
+                .build();
 
         commentRepository.save(parentComment1);
         commentRepository.save(parentComment2);
@@ -280,30 +312,34 @@ public class CommentRepositoryTest {
         String childContent1 = "This is the first child comment.";
         String childContent2 = "This is the second child comment.";
 
-        CommentEntity parentComment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(parentContent)
-                .withDeleted(false)
-                .create();
+        CommentEntity parentComment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(parentContent)
+                .deleted(false)
+                .build();
 
         CommentEntity savedParentComment = commentRepository.save(parentComment);
         log.info("Saved Parent Comment = {}", savedParentComment.getCommentId());
 
-        CommentEntity childComment1 = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withParent(savedParentComment)
-                .withContent(childContent1)
-                .withDeleted(false)
-                .create();
-        CommentEntity childComment2 = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withParent(savedParentComment)
-                .withContent(childContent2)
-                .withDeleted(false)
-                .create();
+        CommentEntity childComment1 = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .parent(savedParentComment)
+                .content(childContent1)
+                .deleted(false)
+                .build();
+
+        CommentEntity childComment2 = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .parent(savedParentComment)
+                .content(childContent2)
+                .deleted(false)
+                .build();
 
         commentRepository.save(childComment1);
         commentRepository.save(childComment2);
@@ -346,12 +382,13 @@ public class CommentRepositoryTest {
     void getAllDeletedComment() {
         String content = "This is a comment to be deleted.";
 
-        CommentEntity comment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(content)
-                .withDeleted(true)
-                .create();
+        CommentEntity comment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(content)
+                .deleted(true)
+                .build();
 
         CommentEntity savedComment = commentRepository.save(comment);
         log.info("Saved Comment = {}", savedComment.getCommentId());
@@ -370,23 +407,25 @@ public class CommentRepositoryTest {
         String parentContent = "This is a parent comment.";
         String childContent = "This is a child comment.";
 
-        CommentEntity parentComment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(parentContent)
-                .withDeleted(false)
-                .create();
+        CommentEntity parentComment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(parentContent)
+                .deleted(false)
+                .build();
 
         CommentEntity savedParentComment = commentRepository.save(parentComment);
         log.info("Saved Parent Comment = {}", savedParentComment.getCommentId());
 
-        CommentEntity childComment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withParent(savedParentComment)
-                .withContent(childContent)
-                .withDeleted(true)
-                .create();
+        CommentEntity childComment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .parent(savedParentComment)
+                .content(childContent)
+                .deleted(true)
+                .build();
 
         commentRepository.save(childComment);
 
@@ -404,23 +443,25 @@ public class CommentRepositoryTest {
         String parentContent = "This is a parent comment.";
         String childContent = "This is a child comment.";
 
-        CommentEntity parentComment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(parentContent)
-                .withDeleted(true)
-                .create();
+        CommentEntity parentComment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(parentContent)
+                .deleted(true)
+                .build();
 
         CommentEntity savedParentComment = commentRepository.save(parentComment);
         log.info("Saved Parent Comment = {}", savedParentComment.getCommentId());
 
-        CommentEntity childComment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withParent(savedParentComment)
-                .withContent(childContent)
-                .withDeleted(false)
-                .create();
+        CommentEntity childComment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .parent(savedParentComment)
+                .content(childContent)
+                .deleted(false)
+                .build();
 
         CommentEntity savedChildComment = commentRepository.save(childComment);
 
@@ -447,12 +488,13 @@ public class CommentRepositoryTest {
     void isLastAliveComment() {
         String content = "This is a comment to check if it's the last alive comment.";
 
-        CommentEntity comment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(content)
-                .withDeleted(false)
-                .create();
+        CommentEntity comment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(content)
+                .deleted(false)
+                .build();
 
         CommentEntity savedComment = commentRepository.save(comment);
         log.info("Saved Comment = {}", savedComment.getCommentId());
@@ -468,23 +510,25 @@ public class CommentRepositoryTest {
         String parentContent = "This is a parent comment.";
         String childContent = "This is a child comment.";
 
-        CommentEntity parentComment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(parentContent)
-                .withDeleted(false)
-                .create();
+        CommentEntity parentComment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(parentContent)
+                .deleted(false)
+                .build();
 
         CommentEntity savedParentComment = commentRepository.save(parentComment);
         log.info("Saved Parent Comment = {}", savedParentComment.getCommentId());
 
-        CommentEntity childComment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withParent(savedParentComment)
-                .withContent(childContent)
-                .withDeleted(true)
-                .create();
+        CommentEntity childComment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .parent(savedParentComment)
+                .content(childContent)
+                .deleted(true)
+                .build();
 
         commentRepository.save(childComment);
 
@@ -499,23 +543,25 @@ public class CommentRepositoryTest {
         String parentContent = "This is a parent comment.";
         String childContent = "This is a child comment.";
 
-        CommentEntity parentComment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(parentContent)
-                .withDeleted(false)
-                .create();
+        CommentEntity parentComment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(parentContent)
+                .deleted(false)
+                .build();
 
         CommentEntity savedParentComment = commentRepository.save(parentComment);
         log.info("Saved Parent Comment = {}", savedParentComment.getCommentId());
 
-        CommentEntity childComment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withParent(savedParentComment)
-                .withContent(childContent)
-                .withDeleted(false)
-                .create();
+        CommentEntity childComment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .parent(savedParentComment)
+                .content(childContent)
+                .deleted(false)
+                .build();
 
         commentRepository.save(childComment);
 
@@ -530,23 +576,27 @@ public class CommentRepositoryTest {
         String parentContent = "This is a parent comment.";
         String childContent = "This is a child comment.";
 
-        CommentEntity parentComment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(parentContent)
-                .withDeleted(true)
-                .create();
+        CommentEntity parentComment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(parentContent)
+                .deleted(true)
+                .build();
 
         CommentEntity savedParentComment = commentRepository.save(parentComment);
         log.info("Saved Parent Comment = {}", savedParentComment.getCommentId());
 
-        CommentEntity childComment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withParent(savedParentComment)
-                .withContent(childContent)
-                .withDeleted(false)
-                .create();
+        CommentEntity childComment = commentFixture.save(
+                CommentFixture
+                        .builder()
+                        .user(myUser)
+                        .highlight(highlight)
+                        .parent(savedParentComment)
+                        .content(childContent)
+                        .deleted(false)
+                        .build()
+        );
 
         commentRepository.save(childComment);
 
@@ -561,23 +611,25 @@ public class CommentRepositoryTest {
         String parentContent = "This is a parent comment.";
         String childContent = "This is a child comment.";
 
-        CommentEntity parentComment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(parentContent)
-                .withDeleted(false)
-                .create();
+        CommentEntity parentComment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(parentContent)
+                .deleted(false)
+                .build();
 
         CommentEntity savedParentComment = commentRepository.save(parentComment);
         log.info("Saved Parent Comment = {}", savedParentComment.getCommentId());
 
-        CommentEntity childComment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withParent(savedParentComment)
-                .withContent(childContent)
-                .withDeleted(false)
-                .create();
+        CommentEntity childComment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .parent(savedParentComment)
+                .content(childContent)
+                .deleted(false)
+                .build();
 
         commentRepository.save(childComment);
 
@@ -593,30 +645,34 @@ public class CommentRepositoryTest {
         String childContent1 = "This is the first child comment.";
         String childContent2 = "This is the second child comment.";
 
-        CommentEntity parentComment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(parentContent)
-                .withDeleted(false)
-                .create();
+        CommentEntity parentComment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(parentContent)
+                .deleted(false)
+                .build();
 
         CommentEntity savedParentComment = commentRepository.save(parentComment);
         log.info("Saved Parent Comment = {}", savedParentComment.getCommentId());
 
-        CommentEntity childComment1 = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withParent(savedParentComment)
-                .withContent(childContent1)
-                .withDeleted(true) // Deleted Comment
-                .create();
-        CommentEntity childComment2 = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withParent(savedParentComment)
-                .withContent(childContent2)
-                .withDeleted(false)
-                .create();
+        CommentEntity childComment1 = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .parent(savedParentComment)
+                .content(childContent1)
+                .deleted(true)
+                .build();
+
+        CommentEntity childComment2 = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .parent(savedParentComment)
+                .content(childContent2)
+                .deleted(false)
+                .build();
 
         commentRepository.save(childComment1);
         commentRepository.save(childComment2);
@@ -633,30 +689,34 @@ public class CommentRepositoryTest {
         String childContent1 = "This is the first child comment.";
         String childContent2 = "This is the second child comment.";
 
-        CommentEntity parentComment = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withContent(parentContent)
-                .withDeleted(false)
-                .create();
+        CommentEntity parentComment = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .content(parentContent)
+                .deleted(false)
+                .build();
 
         CommentEntity savedParentComment = commentRepository.save(parentComment);
         log.info("Saved Parent Comment = {}", savedParentComment.getCommentId());
 
-        CommentEntity childComment1 = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withParent(savedParentComment)
-                .withContent(childContent1)
-                .withDeleted(false)
-                .create();
-        CommentEntity childComment2 = commentFixture
-                .withUser(myUser)
-                .withHighlight(highlight)
-                .withParent(savedParentComment)
-                .withContent(childContent2)
-                .withDeleted(false)
-                .create();
+        CommentEntity childComment1 = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .parent(savedParentComment)
+                .content(childContent1)
+                .deleted(false)
+                .build();
+
+        CommentEntity childComment2 = CommentFixture
+                .builder()
+                .user(myUser)
+                .highlight(highlight)
+                .parent(savedParentComment)
+                .content(childContent2)
+                .deleted(false)
+                .build();
 
         commentRepository.save(childComment1);
         commentRepository.save(childComment2);

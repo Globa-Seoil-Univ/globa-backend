@@ -59,33 +59,54 @@ public class FolderShareintegrationTest extends IntegrationTest {
 
     @BeforeEach
     public void setUp() {
-        user = userFixture.create();
-        otherUser = userFixture.create();
+        user = userFixture.save(
+                UserFixture
+                        .builder()
+                        .build()
+        );
+        otherUser = userFixture.save(
+                UserFixture
+                        .builder()
+                        .name("Other User")
+                        .build()
+        );
         owner = folderRoleFixture.getEntity(FolderRole.OWNER);
         editor = folderRoleFixture.getEntity(FolderRole.EDITOR);
         reader = folderRoleFixture.getEntity(FolderRole.READER);
 
-        myFolder = folderFixture
-                .withUser(user)
-                .create();
-        otherFolder = folderFixture
-                .withUser(otherUser)
-                .create();
+        myFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .build()
+        );
+        otherFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(otherUser)
+                        .build()
+        );
 
-        folderShareFixture.
-                withOwner(user)
-                .withTarget(user)
-                .withFolder(myFolder)
-                .withRole(owner)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(otherUser)
-                .withFolder(otherFolder)
-                .withRole(owner)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(user)
+                        .target(user)
+                        .folder(myFolder)
+                        .role(owner)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(otherUser)
+                        .folder(otherFolder)
+                        .role(owner)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
         setSecurityContext(user);
     }
@@ -98,13 +119,16 @@ public class FolderShareintegrationTest extends IntegrationTest {
         int page = 1,
                 count = 10;
 
-        folderShareFixture
-                .withOwner(user)
-                .withTarget(otherUser)
-                .withFolder(myFolder)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(user)
+                        .target(otherUser)
+                        .folder(myFolder)
+                        .role(editor)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         MvcResult result = mockMvc
                 .perform(
@@ -181,13 +205,16 @@ public class FolderShareintegrationTest extends IntegrationTest {
         int page = 1,
             count = 10;
 
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(user)
-                .withFolder(otherFolder)
-                .withRole(editor)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(user)
+                        .folder(otherFolder)
+                        .role(editor)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
         mockMvc
                 .perform(
@@ -275,13 +302,16 @@ public class FolderShareintegrationTest extends IntegrationTest {
         RequestInviteDto request = new RequestInviteDto(FolderRole.READER.name());
 
         // 이미 초대된 사용자로 설정
-        folderShareFixture
-                .withOwner(user)
-                .withTarget(otherUser)
-                .withFolder(myFolder)
-                .withRole(reader)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(user)
+                        .target(otherUser)
+                        .folder(myFolder)
+                        .role(reader)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         mockMvc
                 .perform(
@@ -323,13 +353,16 @@ public class FolderShareintegrationTest extends IntegrationTest {
         RequestInviteDto request = new RequestInviteDto(FolderRole.EDITOR.name());
 
         // 이미 초대된 사용자로 설정
-        folderShareFixture
-                .withOwner(user)
-                .withTarget(otherUser)
-                .withFolder(myFolder)
-                .withRole(reader)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(user)
+                        .target(otherUser)
+                        .folder(myFolder)
+                        .role(reader)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         mockMvc
                 .perform(
@@ -411,13 +444,16 @@ public class FolderShareintegrationTest extends IntegrationTest {
         RequestInviteDto request = new RequestInviteDto("INVALID_ROLE"); // 잘못된 역할
 
         // 이미 초대된 사용자로 설정
-        folderShareFixture
-                .withOwner(user)
-                .withTarget(otherUser)
-                .withFolder(myFolder)
-                .withRole(reader)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(user)
+                        .target(otherUser)
+                        .folder(myFolder)
+                        .role(reader)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         mockMvc
                 .perform(
@@ -458,13 +494,16 @@ public class FolderShareintegrationTest extends IntegrationTest {
         Long targetUserId = otherUser.getUserId();
 
         // 이미 초대된 사용자로 설정
-        folderShareFixture
-                .withOwner(user)
-                .withTarget(otherUser)
-                .withFolder(myFolder)
-                .withRole(reader)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(user)
+                        .target(otherUser)
+                        .folder(myFolder)
+                        .role(reader)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         mockMvc
                 .perform(
@@ -555,13 +594,16 @@ public class FolderShareintegrationTest extends IntegrationTest {
         Long folderId = otherFolder.getFolderId();
 
         // 초대된 사용자로 설정
-        FolderShareEntity invitation = folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(user)
-                .withFolder(otherFolder)
-                .withRole(reader)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        FolderShareEntity invitation = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(user)
+                        .folder(otherFolder)
+                        .role(reader)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         mockMvc
                 .perform(
@@ -598,23 +640,34 @@ public class FolderShareintegrationTest extends IntegrationTest {
         Long folderId = otherFolder.getFolderId();
 
         // 초대된 사용자로 설정
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(user)
-                .withFolder(otherFolder)
-                .withRole(reader)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(user)
+                        .folder(otherFolder)
+                        .role(reader)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         // 다른 사용자의 초대
-        UserEntity otherUser2 = userFixture.create();
-        FolderShareEntity fakeInvitation = folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(otherUser2)
-                .withFolder(otherFolder)
-                .withRole(reader)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        UserEntity otherUser2 = userFixture.save(
+                UserFixture
+                        .builder()
+                        .name("Another User")
+                        .build()
+        );
+        FolderShareEntity fakeInvitation = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(otherUser2)
+                        .folder(otherFolder)
+                        .role(reader)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         mockMvc
                 .perform(
@@ -634,13 +687,16 @@ public class FolderShareintegrationTest extends IntegrationTest {
         Long folderId = otherFolder.getFolderId();
 
         // 이미 수락된 초대 설정
-        FolderShareEntity invitation = folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(user)
-                .withFolder(otherFolder)
-                .withRole(reader)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        FolderShareEntity invitation = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(user)
+                        .folder(otherFolder)
+                        .role(reader)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
         mockMvc
                 .perform(
@@ -660,13 +716,16 @@ public class FolderShareintegrationTest extends IntegrationTest {
         Long folderId = otherFolder.getFolderId();
 
         // 초대된 사용자로 설정
-        FolderShareEntity invitation = folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(user)
-                .withFolder(otherFolder)
-                .withRole(reader)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        FolderShareEntity invitation = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(user)
+                        .folder(otherFolder)
+                        .role(reader)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         mockMvc
                 .perform(
@@ -703,23 +762,34 @@ public class FolderShareintegrationTest extends IntegrationTest {
         Long folderId = otherFolder.getFolderId();
 
         // 초대된 사용자로 설정
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(user)
-                .withFolder(otherFolder)
-                .withRole(reader)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(user)
+                        .folder(otherFolder)
+                        .role(reader)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         // 다른 사용자의 초대
-        UserEntity otherUser2 = userFixture.create();
-        FolderShareEntity fakeInvitation = folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(otherUser2)
-                .withFolder(otherFolder)
-                .withRole(reader)
-                .withInvitationStatus(InvitationStatus.PENDING)
-                .create();
+        UserEntity otherUser2 = userFixture.save(
+                UserFixture
+                        .builder()
+                        .name("Another User")
+                        .build()
+        );
+        FolderShareEntity fakeInvitation = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(otherUser2)
+                        .folder(otherFolder)
+                        .role(reader)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
 
         mockMvc
                 .perform(
@@ -739,13 +809,16 @@ public class FolderShareintegrationTest extends IntegrationTest {
         Long folderId = otherFolder.getFolderId();
 
         // 이미 수락된 초대 설정
-        FolderShareEntity invitation = folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(user)
-                .withFolder(otherFolder)
-                .withRole(reader)
-                .withInvitationStatus(InvitationStatus.ACCEPT)
-                .create();
+        FolderShareEntity invitation = folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(user)
+                        .folder(otherFolder)
+                        .role(reader)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
 
         mockMvc
                 .perform(

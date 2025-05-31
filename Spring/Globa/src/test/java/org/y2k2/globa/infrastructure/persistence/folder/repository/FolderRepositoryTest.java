@@ -12,6 +12,7 @@ import org.y2k2.globa.fixture.folderrole.FolderRoleFixture;
 import org.y2k2.globa.fixture.user.UserFixture;
 import org.y2k2.globa.infrastructure.persistence.config.RepositoryIntegrationTest;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
+import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 @Slf4j
@@ -32,17 +33,38 @@ public class FolderRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        user = userFixture.create();
-        folder = folderFixture.withUser(user).create();
-        folderRoleFixture.create();
+        user = userFixture.save(
+                UserFixture
+                        .builder()
+                        .build()
+        );
+        folder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .build()
+        );
+        folderRoleFixture.save(
+                FolderRoleFixture.builder()
+                        .role(FolderRole.OWNER)
+                        .build()
+        );
     }
 
     @Test
     @DisplayName("폴더 생성 - 성공")
     void createFolder() {
-        UserEntity newUser = userFixture
-                .create();
-        FolderEntity newFolder = folderFixture.withUser(newUser).create();
+        UserEntity newUser = userFixture.save(
+                UserFixture
+                        .builder()
+                        .name("New User")
+                        .build()
+        );
+        FolderEntity newFolder = FolderFixture
+                .builder()
+                .title("New Folder")
+                .user(newUser)
+                .build();
         FolderEntity savedFolder = folderRepository.save(newFolder);
 
         Assertions.assertThat(savedFolder.getFolderId()).isNotNull();
@@ -94,7 +116,14 @@ public class FolderRepositoryTest {
     @Test
     @DisplayName("기본 폴더를 제외한 폴더 조회 - 성공")
     void getFolderWithoutDefaultFolder() {
-        FolderEntity newFolder = folderFixture.withUser(user).create();
+        FolderEntity newFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .title("New Folder")
+                        .user(user)
+                        .build()
+        );
+
         FolderEntity finedFolder = folderRepository.getFolderWithoutDefaultFolder(newFolder.getFolderId(), user).orElseThrow();
 
         Assertions.assertThat(finedFolder.getFolderId()).isEqualTo(newFolder.getFolderId());

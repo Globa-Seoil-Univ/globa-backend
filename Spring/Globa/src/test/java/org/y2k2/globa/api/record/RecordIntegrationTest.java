@@ -122,41 +122,69 @@ public class RecordIntegrationTest extends IntegrationTest {
     public void setUp() {
         Optional.ofNullable(cacheManager.getCache("aggregateRecord")).ifPresent(Cache::clear);
 
-        user = userFixture.create();
-        otherUser = userFixture.create();
+        user = userFixture.save(
+                UserFixture
+                        .builder()
+                        .build()
+        );
+        otherUser = userFixture.save(
+                UserFixture
+                        .builder()
+                        .name("Other User")
+                        .build()
+        );
         owner = folderRoleFixture.getEntity(FolderRole.OWNER);
         editor = folderRoleFixture.getEntity(FolderRole.EDITOR);
         reader = folderRoleFixture.getEntity(FolderRole.READER);
 
-        myFolder = folderFixture
-                .withUser(user)
-                .create();
-        myRecord = recordFixture
-                .withUser(user)
-                .withFolder(myFolder)
-                .withPath("/1/myrecord.ogg")
-                .create();
-        otherFolder = folderFixture
-                .withUser(otherUser)
-                .create();
-        otherRecord = recordFixture
-                .withUser(otherUser)
-                .withFolder(otherFolder)
-                .withPath("/1/otherrecord.ogg")
-                .create();
+        myFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .build()
+        );
+        myRecord = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(user)
+                        .folder(myFolder)
+                        .path("/1/myrecord.ogg")
+                        .build()
+        );
 
-        folderShareFixture.
-                withOwner(user)
-                .withTarget(user)
-                .withFolder(myFolder)
-                .withRole(owner)
-                .create();
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(otherUser)
-                .withFolder(otherFolder)
-                .withRole(owner)
-                .create();
+        otherFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(otherUser)
+                        .build()
+        );
+        otherRecord = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(otherUser)
+                        .folder(otherFolder)
+                        .path("/1/otherrecord.ogg")
+                        .build()
+        );
+
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(user)
+                        .target(user)
+                        .folder(myFolder)
+                        .role(owner)
+                        .build()
+        );
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(otherUser)
+                        .folder(otherFolder)
+                        .role(owner)
+                        .build()
+        );
 
         setSecurityContext(user);
     }
@@ -170,24 +198,30 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("폴더 내 문서 조회 - 성공 (내 폴더 O)")
     @WithAccount
     void getRecordsInFolder() throws Exception {
-        RecordEntity otherRecord = recordFixture
-                .withUser(otherUser)
-                .withFolder(myFolder)
-                .withIsShare(false)
-                .create();
+        RecordEntity otherRecord = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(otherUser)
+                        .folder(myFolder)
+                        .build()
+        );
+        RecordEntity myOtherRecord = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(user)
+                        .folder(myFolder)
+                        .build()
+        );
 
-        RecordEntity myOtherRecord = recordFixture
-                .withUser(user)
-                .withFolder(myFolder)
-                .withIsShare(false)
-                .create();
-
-        folderShareFixture
-                .withOwner(user)
-                .withTarget(otherUser)
-                .withFolder(myFolder)
-                .withRole(editor)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(user)
+                        .target(otherUser)
+                        .folder(myFolder)
+                        .role(editor)
+                        .build()
+        );
 
         MvcResult result = mockMvc.perform(
                 MockMvcRequestBuilders.get(Constant.RECORD_PREFIX.getValue(), myFolder.getFolderId())
@@ -227,25 +261,32 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("폴더 내 문서 조회 - 성공 (내 폴더 X)")
     @WithAccount
     void getRecordsInFolderNotMyFolder() throws Exception {
-        RecordEntity myRecordInOtherFolder = recordFixture
-                .withUser(user)
-                .withFolder(otherFolder)
-                .withIsShare(false)
-                .create();
+        RecordEntity myRecordInOtherFolder = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(user)
+                        .folder(otherFolder)
+                        .build()
+        );
 
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(otherUser)
-                .withFolder(otherFolder)
-                .withRole(owner)
-                .create();
-
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(user)
-                .withFolder(otherFolder)
-                .withRole(editor)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(otherUser)
+                        .folder(otherFolder)
+                        .role(owner)
+                        .build()
+        );
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(user)
+                        .folder(otherFolder)
+                        .role(editor)
+                        .build()
+        );
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get(Constant.RECORD_PREFIX.getValue(), otherFolder.getFolderId())
@@ -285,24 +326,29 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("폴더 내 문서 조회 - 실패 (내 폴더 X, 권한 X)")
     @WithAccount
     void getRecordsInFolderNotMyFolderWithoutPermission() throws Exception {
-        recordFixture
-                .withUser(user)
-                .withFolder(otherFolder)
-                .withIsShare(false)
-                .create();
-
-        recordFixture
-                .withUser(otherUser)
-                .withFolder(otherFolder)
-                .withIsShare(false)
-                .create();
-
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(otherUser)
-                .withFolder(otherFolder)
-                .withRole(owner)
-                .create();
+        recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(user)
+                        .folder(otherFolder)
+                        .build()
+        );
+        recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(otherUser)
+                        .folder(otherFolder)
+                        .build()
+        );
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(otherUser)
+                        .folder(otherFolder)
+                        .role(owner)
+                        .build()
+        );
 
         mockMvc.perform(
                         MockMvcRequestBuilders.get(Constant.RECORD_PREFIX.getValue(), otherFolder.getFolderId())
@@ -320,19 +366,25 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("최근 문서 조회 - 성공")
     @WithAccount
     void getRecentRecords() throws Exception {
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(otherUser)
-                .withFolder(otherFolder)
-                .withRole(owner)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(otherUser)
+                        .folder(otherFolder)
+                        .role(owner)
+                        .build()
+        );
 
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(user)
-                .withFolder(otherFolder)
-                .withRole(reader)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(user)
+                        .folder(otherFolder)
+                        .role(reader)
+                        .build()
+        );
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get("/record/recent")
@@ -403,51 +455,77 @@ public class RecordIntegrationTest extends IntegrationTest {
         String[] summaries = {"summary content 1", "summary content 2", "summary content 3"};
         String[] analyses = {"analysis content 1", "analysis content 2"};
 
-        SectionEntity firstSection = sectionFixture
-                .withRecord(myRecord)
-                .withTitle(sectionTitles[0])
-                .withStartTime(0L)
-                .withEndTime(10L)
-                .create();
-        SectionEntity secondSection = sectionFixture
-                .withRecord(myRecord)
-                .withTitle(sectionTitles[1])
-                .withStartTime(11L)
-                .withEndTime(20L)
-                .create();
+        SectionEntity firstSection = sectionFixture.save(
+                SectionFixture
+                        .builder()
+                        .record(myRecord)
+                        .title(sectionTitles[0])
+                        .startTime(0L)
+                        .endTime(10L)
+                        .build()
+        );
+        SectionEntity secondSection = sectionFixture.save(
+                SectionFixture
+                        .builder()
+                        .record(myRecord)
+                        .title(sectionTitles[1])
+                        .startTime(11L)
+                        .endTime(20L)
+                        .build()
+        );
+        summaryFixture.save(
+                SummaryFixture
+                        .builder()
+                        .section(firstSection)
+                        .content(summaries[0])
+                        .build()
+        );
+        summaryFixture.save(
+                SummaryFixture
+                        .builder()
+                        .section(firstSection)
+                        .content(summaries[1])
+                        .build()
+        );
+        summaryFixture.save(
+                SummaryFixture
+                        .builder()
+                        .section(secondSection)
+                        .content(summaries[2])
+                        .build()
+        );
 
-        summaryFixture
-                .withSection(firstSection)
-                .withContent(summaries[0])
-                .create();
-        summaryFixture
-                .withSection(firstSection)
-                .withContent(summaries[1])
-                .create();
-        summaryFixture
-                .withSection(secondSection)
-                .withContent(summaries[2])
-                .create();
+        analysisFixture.save(
+                AnalysisFixture
+                        .builder()
+                        .section(firstSection)
+                        .content(analyses[0])
+                        .build()
+        );
+        analysisFixture.save(
+                AnalysisFixture
+                        .builder()
+                        .section(secondSection)
+                        .content(analyses[1])
+                        .build()
+        );
 
-        analysisFixture
-                .withSection(firstSection)
-                .withContent(analyses[0])
-                .create();
-        analysisFixture
-                .withSection(secondSection)
-                .withContent(analyses[1])
-                .create();
-
-        HighlightEntity highlight1 = highlightFixture
-                .withSection(firstSection)
-                .withStartIndex(0L)
-                .withEndIndex(5L)
-                .create();
-        HighlightEntity highlight2 = highlightFixture
-                .withSection(secondSection)
-                .withStartIndex(10L)
-                .withEndIndex(15L)
-                .create();
+        HighlightEntity highlight1 = highlightFixture.save(
+                HighlightFixture
+                        .builder()
+                        .section(firstSection)
+                        .startIndex(0L)
+                        .endIndex(5L)
+                        .build()
+        );
+        HighlightEntity highlight2 = highlightFixture.save(
+                HighlightFixture
+                        .builder()
+                        .section(secondSection)
+                        .startIndex(10L)
+                        .endIndex(15L)
+                        .build()
+        );
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get(
@@ -516,12 +594,15 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 상세 조회 - 성공 (공유된 폴더의 문서)")
     @WithAccount
     void getRecordInSharedFolder() throws Exception {
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(user)
-                .withFolder(otherFolder)
-                .withRole(editor)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(user)
+                        .folder(otherFolder)
+                        .role(editor)
+                        .build()
+        );
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get(
@@ -552,11 +633,14 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 상세 조회 - 성공 (링크 공유)")
     @WithAccount
     void getRecordWithLinkShare() throws Exception {
-        RecordEntity sharedRecord = recordFixture
-                .withUser(otherUser)
-                .withFolder(otherFolder)
-                .withIsShare(true)
-                .create();
+        RecordEntity sharedRecord = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(otherUser)
+                        .folder(otherFolder)
+                        .isShare(true) // 링크 공유 설정
+                        .build()
+        );
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get(
@@ -605,22 +689,29 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 상세 조회 - 실패 (권한 X)")
     @WithAccount
     void getRecordWithoutPermission() throws Exception {
-        FolderEntity otherFolder = folderFixture
-                .withUser(otherUser)
-                .create();
+        FolderEntity otherFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(otherUser)
+                        .build()
+        );
+        RecordEntity otherRecord = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(otherUser)
+                        .folder(otherFolder)
+                        .build()
+        );
 
-        RecordEntity otherRecord = recordFixture
-                .withUser(otherUser)
-                .withFolder(otherFolder)
-                .withIsShare(false)
-                .create();
-
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(otherUser)
-                .withFolder(otherFolder)
-                .withRole(owner)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(otherUser)
+                        .folder(otherFolder)
+                        .role(owner)
+                        .build()
+        );
 
         mockMvc.perform(
                         MockMvcRequestBuilders.get(
@@ -643,48 +734,72 @@ public class RecordIntegrationTest extends IntegrationTest {
         String[] keywords = {"keyword1", "keyword2"};
 
         // 오늘 기준 스터디 기록 1개 생성
-        StudyEntity study = studyFixture
-                .withUser(user)
-                .withRecord(myRecord)
-                .create();
+        StudyEntity study = studyFixture.save(
+                StudyFixture
+                        .builder()
+                        .user(user)
+                        .record(myRecord)
+                        .build()
+        );
 
-        QuizEntity quiz1 = quizFixture
-                .withRecord(myRecord)
-                .create();
-        QuizEntity quiz2 = quizFixture
-                .withRecord(myRecord)
-                .create();
+        QuizEntity quiz1 = quizFixture.save(
+                QuizFixture
+                        .builder()
+                        .record(myRecord)
+                        .build()
+        );
+        QuizEntity quiz2 = quizFixture.save(
+                QuizFixture
+                        .builder()
+                        .record(myRecord)
+                        .build()
+        );
 
         // 어제 기준 퀴즈 시도 기록 1개 생성
-        QuizAttemptEntity yesterdayQuiz = quizAttemptFixture
-                .withUser(user)
-                .withQuiz(quiz1)
-                .withIsCorrect(true)
-                .create();
+        QuizAttemptEntity yesterdayQuiz = quizAttemptFixture.save(
+                QuizAttemptFixture
+                        .builder()
+                        .user(user)
+                        .quiz(quiz1)
+                        .isCorrect(true)
+                        .build()
+        );
 
         yesterdayQuiz.setCreatedTime(new CustomTimestamp().getTimestamp().minusDays(1));
-        quizAttemptFixture.update(yesterdayQuiz);
+        quizAttemptFixture.save(yesterdayQuiz);
 
         // 오늘 기준 퀴즈 시도 기록 2개 생성
-        quizAttemptFixture
-                .withUser(user)
-                .withQuiz(quiz1)
-                .withIsCorrect(true)
-                .create();
-        quizAttemptFixture
-                .withUser(user)
-                .withQuiz(quiz2)
-                .withIsCorrect(false)
-                .create();
+        quizAttemptFixture.save(
+                QuizAttemptFixture
+                        .builder()
+                        .user(user)
+                        .quiz(quiz1)
+                        .isCorrect(true)
+                        .build()
+        );
+        quizAttemptFixture.save(
+                QuizAttemptFixture
+                        .builder()
+                        .user(user)
+                        .quiz(quiz2)
+                        .isCorrect(false)
+                        .build()
+        );
 
-        keywordFixture
-                .withRecord(myRecord)
-                .withWord(keywords[0])
-                .create();
-        keywordFixture
-                .withRecord(myRecord)
-                .withWord(keywords[1])
-                .create();
+        keywordFixture.save(
+                KeywordFixture
+                        .builder()
+                        .record(myRecord)
+                        .word(keywords[0])
+                        .build()
+        );
+        keywordFixture.save(
+                KeywordFixture
+                        .builder()
+                        .record(myRecord)
+                        .word(keywords[1])
+                        .build()
+        );
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get(
@@ -775,16 +890,22 @@ public class RecordIntegrationTest extends IntegrationTest {
     void searchRecords() throws Exception {
         String keyword = "test";
 
-        recordFixture
-                .withUser(user)
-                .withFolder(myFolder)
-                .withTitle("test title 1")
-                .create();
-        recordFixture
-                .withUser(user)
-                .withFolder(myFolder)
-                .withTitle("test title 2")
-                .create();
+        recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(user)
+                        .folder(myFolder)
+                        .title("test title 1")
+                        .build()
+        );
+        recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(user)
+                        .folder(myFolder)
+                        .title("test title 2")
+                        .build()
+        );
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get("/record/search")
@@ -855,12 +976,15 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("공유 받는 문서 조회 - 성공")
     @WithAccount
     void getReceivingRecord() throws Exception {
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(user)
-                .withFolder(otherFolder)
-                .withRole(reader)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(user)
+                        .folder(otherFolder)
+                        .role(reader)
+                        .build()
+        );
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get("/record/receiving")
@@ -931,12 +1055,15 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("공유 하는 문서 조회 - 성공")
     @WithAccount
     void getSharingRecord() throws Exception {
-        folderShareFixture
-                .withOwner(user)
-                .withTarget(otherUser)
-                .withFolder(myFolder)
-                .withRole(reader)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(user)
+                        .target(otherUser)
+                        .folder(myFolder)
+                        .role(reader)
+                        .build()
+        );
 
         MvcResult result = mockMvc.perform(
                         MockMvcRequestBuilders.get("/record/sharing")
@@ -1161,11 +1288,13 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 링크 공유 - 성공 (소유자 권한)")
     @WithAccount
     void createRecordLinkShareAsOwner() throws Exception {
-        RecordEntity otherRecordInMyFolder = recordFixture
-                .withUser(otherUser)
-                .withFolder(myFolder)
-                .withIsShare(false)
-                .create();
+        RecordEntity otherRecordInMyFolder = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(otherUser)
+                        .folder(myFolder)
+                        .build()
+        );
 
         mockMvc.perform(
                         MockMvcRequestBuilders.post(
@@ -1243,12 +1372,15 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 링크 공유 - 실패 (문서 소유 X)")
     @WithAccount
     void createRecordLinkShareNotMyRecord() throws Exception {
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(user)
-                .withFolder(otherFolder)
-                .withRole(reader)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(user)
+                        .folder(otherFolder)
+                        .role(reader)
+                        .build()
+        );
 
         mockMvc.perform(
                         MockMvcRequestBuilders.post(
@@ -1267,11 +1399,14 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 링크 공유 - 실패 (다른 폴더에 있는 문서)")
     @WithAccount
     void createRecordLinkShareNotMatched() throws Exception {
-        RecordEntity otherRecord = recordFixture
-                .withUser(user)
-                .withFolder(otherFolder)
-                .withIsShare(false)
-                .create();
+        RecordEntity otherRecord = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(user)
+                        .folder(otherFolder)
+                        .isShare(false)
+                        .build()
+        );
 
         mockMvc.perform(
                         MockMvcRequestBuilders.post(
@@ -1290,19 +1425,24 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 링크 공유 - 실패 (편집 권한 X)")
     @WithAccount
     void createRecordLinkShareWithoutPermission() throws Exception {
-        RecordEntity otherRecord = recordFixture
-                .withUser(user)
-                .withFolder(otherFolder)
-                .withIsShare(false)
-                .create();
+        RecordEntity otherRecord = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(user)
+                        .folder(otherFolder)
+                        .build()
+        );
 
         // 나중에 reader 권한으로 변경된 경우
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(user)
-                .withFolder(otherFolder)
-                .withRole(reader)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(user)
+                        .folder(otherFolder)
+                        .role(reader)
+                        .build()
+        );
 
         mockMvc.perform(
                         MockMvcRequestBuilders.post(
@@ -1367,11 +1507,13 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 이름 수정 - 성공 (소유자 권한)")
     @WithAccount
     void updateRecordTitleAsOwner() throws Exception {
-        RecordEntity otherRecordInMyFolder = recordFixture
-                .withUser(otherUser)
-                .withFolder(myFolder)
-                .withIsShare(false)
-                .create();
+        RecordEntity otherRecordInMyFolder = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(otherUser)
+                        .folder(myFolder)
+                        .build()
+        );
 
         RequestRecordNameDto request = new RequestRecordNameDto("new title");
 
@@ -1485,19 +1627,24 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 이름 수정 - 실패 (편집 권한 X)")
     @WithAccount
     void updateRecordTitleWithoutPermission() throws Exception {
-        RecordEntity otherRecord = recordFixture
-                .withUser(user)
-                .withFolder(otherFolder)
-                .withIsShare(false)
-                .create();
+        RecordEntity otherRecord = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(user)
+                        .folder(otherFolder)
+                        .build()
+        );
 
         // 나중에 reader 권한으로 변경된 경우
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(user)
-                .withFolder(otherFolder)
-                .withRole(reader)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(user)
+                        .folder(otherFolder)
+                        .role(reader)
+                        .build()
+        );
 
         mockMvc.perform(
                         MockMvcRequestBuilders.post(
@@ -1516,17 +1663,22 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 폴더 이동 - 성공")
     @WithAccount
     void moveRecord() throws Exception {
-        FolderEntity newMyFolder = folderFixture
-                .withUser(user)
-                .withTitle("new folder")
-                .create();
-
-        folderShareFixture
-                .withOwner(user)
-                .withTarget(user)
-                .withFolder(newMyFolder)
-                .withRole(owner)
-                .create();
+        FolderEntity newMyFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .title("new folder")
+                        .build()
+        );
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(user)
+                        .target(user)
+                        .folder(newMyFolder)
+                        .role(owner)
+                        .build()
+        );
 
         String oldPath = myRecord.getPath();
         RequestRecordMoveDto request = new RequestRecordMoveDto(newMyFolder.getFolderId());
@@ -1589,23 +1741,30 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 폴더 이동 - 성공 (소유자 권한)")
     @WithAccount
     void moveRecordAsOwner() throws Exception {
-        RecordEntity otherRecordInMyFolder = recordFixture
-                .withUser(otherUser)
-                .withFolder(myFolder)
-                .withIsShare(false)
-                .create();
+        RecordEntity otherRecordInMyFolder = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(otherUser)
+                        .folder(myFolder)
+                        .build()
+        );
+        FolderEntity newMyFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .title("new folder")
+                        .build()
+        );
 
-        FolderEntity newMyFolder = folderFixture
-                .withUser(user)
-                .withTitle("new folder")
-                .create();
-
-        folderShareFixture
-                .withOwner(user)
-                .withTarget(user)
-                .withFolder(newMyFolder)
-                .withRole(owner)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(user)
+                        .target(user)
+                        .folder(newMyFolder)
+                        .role(owner)
+                        .build()
+        );
 
         String oldPath = otherRecordInMyFolder.getPath();
         RequestRecordMoveDto request = new RequestRecordMoveDto(newMyFolder.getFolderId());
@@ -1668,10 +1827,13 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 폴더 이동 - 실패 (문서 X)")
     @WithAccount
     void moveRecordNotFound() throws Exception {
-        FolderEntity newMyFolder = folderFixture
-                .withUser(user)
-                .withTitle("new folder")
-                .create();
+        FolderEntity newMyFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .title("new folder")
+                        .build()
+        );
 
         RequestRecordMoveDto request = new RequestRecordMoveDto(newMyFolder.getFolderId());
 
@@ -1693,10 +1855,13 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 폴더 이동 - 실패 (문서 소유 X)")
     @WithAccount
     void moveRecordNotMyRecord() throws Exception {
-        FolderEntity newMyFolder = folderFixture
-                .withUser(user)
-                .withTitle("new folder")
-                .create();
+        FolderEntity newMyFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .title("new folder")
+                        .build()
+        );
 
         RequestRecordMoveDto request = new RequestRecordMoveDto(newMyFolder.getFolderId());
 
@@ -1718,10 +1883,13 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 폴더 이동 - 실패 (문서와 폴더 ID 불일치)")
     @WithAccount
     void moveRecordNotMyFolder() throws Exception {
-        FolderEntity newMyFolder = folderFixture
-                .withUser(user)
-                .withTitle("new folder")
-                .create();
+        FolderEntity newMyFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .title("new folder")
+                        .build()
+        );
 
         RequestRecordMoveDto request = new RequestRecordMoveDto(newMyFolder.getFolderId());
 
@@ -1763,23 +1931,30 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 폴더 이동 - 실패 (폴더 소유 권한 X)")
     @WithAccount
     void moveRecordWithoutPermission() throws Exception {
-        RecordEntity otherRecord = recordFixture
-                .withUser(user)
-                .withFolder(otherFolder)
-                .withIsShare(false)
-                .create();
+        RecordEntity otherRecord = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(user)
+                        .folder(otherFolder)
+                        .build()
+        );
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(user)
+                        .folder(otherFolder)
+                        .role(editor)
+                        .build()
+        );
 
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(user)
-                .withFolder(otherFolder)
-                .withRole(editor)
-                .create();
-
-        FolderEntity newMyFolder = folderFixture
-                .withUser(otherUser)
-                .withTitle("new folder")
-                .create();
+        FolderEntity newMyFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .title("new folder")
+                        .build()
+        );
 
         RequestRecordMoveDto request = new RequestRecordMoveDto(newMyFolder.getFolderId());
 
@@ -1801,17 +1976,23 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 폴더 이동 - 실패 (타겟 폴더 접근 권한 X)")
     @WithAccount
     void moveRecordWithoutPermissionToTargetFolder() throws Exception {
-        FolderEntity newMyFolder = folderFixture
-                .withUser(user)
-                .withTitle("new folder")
-                .create();
+        FolderEntity newMyFolder = folderFixture.save(
+                FolderFixture
+                        .builder()
+                        .user(user)
+                        .title("new folder")
+                        .build()
+        );
 
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(otherUser)
-                .withFolder(newMyFolder)
-                .withRole(owner)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(otherUser)
+                        .folder(newMyFolder)
+                        .role(owner)
+                        .build()
+        );
 
         RequestRecordMoveDto request = new RequestRecordMoveDto(newMyFolder.getFolderId());
 
@@ -2051,11 +2232,13 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 삭제 - 성공 (소유자 권한)")
     @WithAccount
     void deleteRecordAsOwner() throws Exception {
-        RecordEntity otherRecordInMyFolder = recordFixture
-                .withUser(otherUser)
-                .withFolder(myFolder)
-                .withIsShare(false)
-                .create();
+        RecordEntity otherRecordInMyFolder = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(otherUser)
+                        .folder(myFolder)
+                        .build()
+        );
 
         Mockito.doNothing()
                 .when(fileStore)
@@ -2140,19 +2323,24 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 삭제 - 실패 (폴더 편집 권한 X)")
     @WithAccount
     void deleteRecordWithoutPermission() throws Exception {
-        RecordEntity otherRecord = recordFixture
-                .withUser(user)
-                .withFolder(otherFolder)
-                .withIsShare(false)
-                .create();
+        RecordEntity otherRecord = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(user)
+                        .folder(otherFolder)
+                        .build()
+        );
 
         // 나중에 reader 권한으로 변경된 경우
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(user)
-                .withFolder(otherFolder)
-                .withRole(reader)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(user)
+                        .folder(otherFolder)
+                        .role(reader)
+                        .build()
+        );
 
         mockMvc.perform(
                         MockMvcRequestBuilders.delete(
@@ -2212,11 +2400,14 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 링크 공유 삭제 - 성공 (소유자 권한)")
     @WithAccount
     void deleteRecordLinkShareAsOwner() throws Exception {
-        RecordEntity otherRecordInMyFolder = recordFixture
-                .withUser(otherUser)
-                .withFolder(myFolder)
-                .withIsShare(true)
-                .create();
+        RecordEntity otherRecordInMyFolder = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(otherUser)
+                        .folder(myFolder)
+                        .isShare(true) // 링크 공유가 활성화된 문서
+                        .build()
+        );
 
         mockMvc.perform(
                         MockMvcRequestBuilders.delete(
@@ -2294,12 +2485,15 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 링크 공유 삭제 - 실패 (문서 소유 X)")
     @WithAccount
     void deleteRecordLinkShareNotMyRecord() throws Exception {
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(user)
-                .withFolder(otherFolder)
-                .withRole(reader)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(user)
+                        .folder(otherFolder)
+                        .role(reader)
+                        .build()
+        );
 
         mockMvc.perform(
                         MockMvcRequestBuilders.post(
@@ -2318,11 +2512,14 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 링크 공유 삭제 - 실패 (다른 폴더에 있는 문서)")
     @WithAccount
     void deleteRecordLinkShareNotMatched() throws Exception {
-        RecordEntity otherRecord = recordFixture
-                .withUser(user)
-                .withFolder(otherFolder)
-                .withIsShare(false)
-                .create();
+        RecordEntity otherRecord = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(user)
+                        .folder(otherFolder)
+                        .isShare(true) // 링크 공유가 활성화된 문서
+                        .build()
+        );
 
         mockMvc.perform(
                         MockMvcRequestBuilders.post(
@@ -2341,19 +2538,25 @@ public class RecordIntegrationTest extends IntegrationTest {
     @DisplayName("문서 링크 공유 삭제 - 실패 (편집 권한 X)")
     @WithAccount
     void deleteRecordLinkShareWithoutPermission() throws Exception {
-        RecordEntity otherRecord = recordFixture
-                .withUser(user)
-                .withFolder(otherFolder)
-                .withIsShare(false)
-                .create();
+        RecordEntity otherRecord = recordFixture.save(
+                RecordFixture
+                        .builder()
+                        .user(user)
+                        .folder(otherFolder)
+                        .isShare(true) // 링크 공유가 활성화된 문서
+                        .build()
+        );
 
         // 나중에 reader 권한으로 변경된 경우
-        folderShareFixture
-                .withOwner(otherUser)
-                .withTarget(user)
-                .withFolder(otherFolder)
-                .withRole(reader)
-                .create();
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(otherUser)
+                        .target(user)
+                        .folder(otherFolder)
+                        .role(reader)
+                        .build()
+        );
 
         mockMvc.perform(
                         MockMvcRequestBuilders.post(

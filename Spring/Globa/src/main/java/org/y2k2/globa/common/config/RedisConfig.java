@@ -29,13 +29,4 @@ public class RedisConfig {
         LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(redisConfiguration);
         return lettuceConnectionFactory;
     }
-
-    @Bean
-    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new StringRedisSerializer());
-        redisTemplate.setConnectionFactory(redisConnectionFactory());
-        return redisTemplate;
-    }
 }

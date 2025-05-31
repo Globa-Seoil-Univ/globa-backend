@@ -1,48 +1,74 @@
 package org.y2k2.globa.fixture.foldershare;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
-import org.y2k2.globa.factory.foldershare.FolderShareFactory;
-import org.y2k2.globa.fixture.AbstractFixture;
+import org.y2k2.globa.domain.foldershare.repository.FolderShareRepository;
+import org.y2k2.globa.fixture.Fixture;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
-import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
+import org.y2k2.globa.infrastructure.persistence.foldershare.repository.FolderShareRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStatus;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
+@Import(FolderShareRepositoryImpl.class)
 @Component
-public class FolderShareFixture extends AbstractFixture<FolderShareEntity> {
+public class FolderShareFixture implements Fixture<FolderShareEntity> {
     @Autowired
-    private FolderShareFactory folderShareFactory;
+    private FolderShareRepository folderShareRepository;
 
     @Override
-    protected FolderShareEntity build() {
-        return folderShareFactory.createAndSave();
+    public FolderShareEntity save(FolderShareEntity entity) {
+        return folderShareRepository.save(entity);
     }
 
-    public FolderShareFixture withInvitationStatus(InvitationStatus status) {
-        folderShareFactory.setInvitationStatus(status);
-        return this;
+    public static FolderShareBuilder builder() {
+        return new FolderShareBuilder();
     }
 
-    public FolderShareFixture withFolder(FolderEntity folder) {
-        folderShareFactory.setFolder(folder);
-        return this;
-    }
+    public static class FolderShareBuilder {
+        private InvitationStatus status = InvitationStatus.ACCEPT;
+        private FolderEntity folder;
+        private UserEntity owner;
+        private UserEntity target;
+        private FolderRoleEntity role;
 
-    public FolderShareFixture withOwner(UserEntity user) {
-        folderShareFactory.setOwner(user);
-        return this;
-    }
+        private FolderShareBuilder() {}
 
-    public FolderShareFixture withTarget(UserEntity user) {
-        folderShareFactory.setTarget(user);
-        return this;
-    }
+        public FolderShareBuilder status(InvitationStatus status) {
+            this.status = status;
+            return this;
+        }
 
-    public FolderShareFixture withRole(FolderRoleEntity role) {
-        folderShareFactory.setRole(role);
-        return this;
+        public FolderShareBuilder folder(FolderEntity folder) {
+            this.folder = folder;
+            return this;
+        }
+
+        public FolderShareBuilder owner(UserEntity owner) {
+            this.owner = owner;
+            return this;
+        }
+
+        public FolderShareBuilder target(UserEntity target) {
+            this.target = target;
+            return this;
+        }
+
+        public FolderShareBuilder role(FolderRoleEntity role) {
+            this.role = role;
+            return this;
+        }
+
+        public FolderShareEntity build() {
+            FolderShareEntity folderShare = new FolderShareEntity();
+            folderShare.setInvitationStatus(status);
+            folderShare.setFolder(folder);
+            folderShare.setOwnerUser(owner);
+            folderShare.setTargetUser(target);
+            folderShare.setRole(role);
+            return folderShare;
+        }
     }
 }

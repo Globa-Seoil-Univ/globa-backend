@@ -1,6 +1,7 @@
 package org.y2k2.globa.application.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.y2k2.globa.application.folder.command.CreateDefaultFolderCommand;
 import org.y2k2.globa.application.folder.usecase.CreateDefaultFolderUseCase;
@@ -26,6 +27,12 @@ public class GetUserService {
 
     private final FolderRepository folderRepository;
 
+    @Cacheable(
+            value = "user",
+            key = "#userId",
+            condition = "#userId != null",
+            unless = "#result == null"
+    )
     public ResponseUserDto getUser(Long userId) {
         UserEntity user = findUserUseCase.execute(userId);
         FolderRoleEntity folderRole = findFolderRoleUseCase.execute(
