@@ -28,6 +28,8 @@ import org.y2k2.globa.common.util.jwt.JWT;
 import org.y2k2.globa.constant.Constant;
 import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 
+import java.nio.charset.StandardCharsets;
+
 @Slf4j
 @ActiveProfiles("test")
 @Import(ControllerConfig.class)
@@ -141,7 +143,11 @@ public class FolderShareControllerTest {
                                 .content(objectMapper.writeValueAsString(dto))
                                 .accept(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andDo(result -> {
+                    log.error("Error response: {}",
+                            result.getResponse().getContentAsString(StandardCharsets.UTF_8));
+                });
 
         Mockito.verify(inviteFolderShareService, Mockito.times(0))
                 .invite(folderId, targetId, dto, ownerId);
@@ -198,7 +204,11 @@ public class FolderShareControllerTest {
                                 .content(objectMapper.writeValueAsString(dto))
                                 .accept(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andDo(result -> {
+                    log.error("Error response: {}",
+                            result.getResponse().getContentAsString(StandardCharsets.UTF_8));
+                });
 
         Mockito.verify(updateFolderShareService, Mockito.times(0))
                 .update(folderId, targetId, dto, ownerId);

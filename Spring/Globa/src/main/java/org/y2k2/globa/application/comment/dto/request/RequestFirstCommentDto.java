@@ -7,15 +7,15 @@ import org.hibernate.validator.constraints.Length;
 
 public record RequestFirstCommentDto(
         @NotNull(message = "시작 인덱스는 필수입니다.")
-        @Min(value = -1, message = "You must greater equal than 0")
+        @Positive(message = "시작 인덱스는 1 이상이어야 합니다.")
         Long startIdx,
 
         @NotNull(message = "끝 인덱스는 필수입니다.")
-        @Min(value = -1, message = "You must greater equal than 0")
+        @Positive(message = "끝 인덱스는 1 이상이어야 합니다.")
         Long endIdx,
 
         @NotBlank(message = "내용은 필수입니다.")
-        @Length(min = 1, message = "You must greater than 1 length")
+        @Length(min = 1, message = "내용은 최소 1자 이상이어야 합니다.")
         String content
 ) {
     @AssertTrue(message = "시작 인덱스와 끝 인덱스는 같을 수 없습니다.")

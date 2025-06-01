@@ -95,11 +95,11 @@ public class GetRepliesServiceTest {
                 .isNotNull();
 
         Assertions
-                .assertThat(response.getTotal())
+                .assertThat(response.total())
                 .isEqualTo(replies.size());
 
         Assertions
-                .assertThat(response.getComments())
+                .assertThat(response.comments())
                 .allSatisfy(reply -> {
                     Assertions
                             .assertThat(reply.getCommentId())

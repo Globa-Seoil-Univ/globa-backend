@@ -37,6 +37,8 @@ import org.y2k2.globa.application.user.service.*;
 import org.y2k2.globa.common.util.jwt.JWT;
 import org.y2k2.globa.constant.Constant;
 
+import java.nio.charset.StandardCharsets;
+
 
 @Slf4j
 @ActiveProfiles("test")
@@ -360,7 +362,7 @@ public class UserControllerTest {
     }
 
     @Test
-    @DisplayName("프로필 이미지 수정 실패 (비어있는 파일)")
+    @DisplayName("프로필 이미지 수정 - 실패 (비어있는 파일)")
     @WithAccount
     void failedModifyUserProfileImgTest() throws Exception {
         RequestProfileImageDto request = FixtureMonkey.builder()
@@ -396,7 +398,11 @@ public class UserControllerTest {
                                     return req;
                                 })
                 )
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andDo(result -> {
+                    log.error("Error response: {}",
+                            result.getResponse().getContentAsString(StandardCharsets.UTF_8));
+                });
 
         Mockito.verify(updateUserProfileImgService, Mockito.times(0))
                 .update(ArgumentMatchers.any(RequestProfileImageDto.class), ArgumentMatchers.any(Long.class));

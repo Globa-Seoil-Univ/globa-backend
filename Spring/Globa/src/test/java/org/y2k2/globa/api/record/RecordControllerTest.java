@@ -34,6 +34,7 @@ import org.y2k2.globa.application.study.dto.request.RequestStudyDto;
 import org.y2k2.globa.common.util.jwt.JWT;
 import org.y2k2.globa.constant.Constant;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 @Slf4j
@@ -606,7 +607,11 @@ public class RecordControllerTest {
                                 .content(objectMapper.writeValueAsString(request))
                                 .accept(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andDo(result -> {
+                    log.error("Error response: {}",
+                            result.getResponse().getContentAsString(StandardCharsets.UTF_8));
+                });
 
         Mockito.verify(createRecordService, Mockito.times(0))
                 .create(folderId, request, userId);
@@ -696,7 +701,11 @@ public class RecordControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
                 )
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andDo(result -> {
+                    log.error("Error response: {}",
+                            result.getResponse().getContentAsString(StandardCharsets.UTF_8));
+                });
 
         Mockito.verify(updateRecordNameService, Mockito.times(0))
                 .update(folderId, recordId, request.title(), userId);
@@ -761,7 +770,11 @@ public class RecordControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
                 )
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andDo(result -> {
+                    log.error("Error response: {}",
+                            result.getResponse().getContentAsString(StandardCharsets.UTF_8));
+                });
 
         Mockito.verify(moveRecordService, Mockito.times(0))
                 .move(folderId, recordId, request, userId);
@@ -826,7 +839,11 @@ public class RecordControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
                 )
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andDo(result -> {
+                    log.error("Error response: {}",
+                            result.getResponse().getContentAsString(StandardCharsets.UTF_8));
+                });;
 
         Mockito.verify(upsertStudyService, Mockito.times(0))
                 .upsert(folderId, recordId, request, userId);
@@ -859,7 +876,11 @@ public class RecordControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
                 )
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andDo(result -> {
+                    log.error("Error response: {}",
+                            result.getResponse().getContentAsString(StandardCharsets.UTF_8));
+                });
 
         Mockito.verify(upsertStudyService, Mockito.times(0))
                 .upsert(folderId, recordId, request, userId);

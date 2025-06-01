@@ -35,6 +35,7 @@ import org.y2k2.globa.constant.Constant;
 import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Slf4j
@@ -193,7 +194,11 @@ public class FolderControllerTest {
                         .content(objectMapper.writeValueAsString(request))
                         .accept(MediaType.APPLICATION_JSON)
         )
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andDo(result -> {
+                    log.error("Error response: {}",
+                            result.getResponse().getContentAsString(StandardCharsets.UTF_8));
+                });
 
         Mockito.verify(createFolderService, Mockito.times(0))
                 .create(ArgumentMatchers.anyString(), ArgumentMatchers.anyLong());
