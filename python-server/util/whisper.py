@@ -249,7 +249,7 @@ class WhisperManager:
 
             # 참조 텍스트 파일이 없으면 eng_master.txt 사용
             if not os.path.exists(reference_file):
-                reference_file = "gisa.txt"
+                reference_file = "eng_master.txt"
 
             # 파일이 존재하면 내용 읽기
             if os.path.exists(reference_file):
@@ -935,3 +935,287 @@ class WhisperManager:
             ))
 
         return segments
+
+    def enhance_accuracy_ensemble_stt(self, path: str, lan: str):
+        """정확도 중심 앙상블 STT 구현"""
+        self.logger.info("정확도 중심 앙상블 STT 시작")
+
+        # 참조 텍스트 로드
+        reference_text = self.load_reference_text(path)
+
+        # 리소스 모니터링 시작
+        self.resource_monitor.start_monitoring()
+
+        # 모니터링 스레드 설정
+        import threading
+        stop_monitoring = False
+
+        def monitor_resources():
+            while not stop_monitoring:
+                self.resource_monitor.sample_resource_usage()
+                time.sleep(0.5)
+
+        monitor_thread = threading.Thread(target=monitor_resources)
+        monitor_thread.daemon = True
+        monitor_thread.start()
+
+
+        # 기본 설정으로 우선 한 번 인식 (기준 결과)
+        base_segments, base_info = self.model.transcribe(
+            path,
+            language=lan,
+            beam_size=10,  # 큰 beam size로 정확도 우선
+            temperature=0.0,  # 확정적 결과
+            initial_prompt=self._get_language_prompt(lan),
+            condition_on_previous_text=True,
+            word_timestamps=True,
+            vad_filter=True,
+            vad_parameters={
+                "min_silence_duration_ms": 400,
+                "threshold": 0.45,
+                "speech_pad_ms": 200
+            }
+        )
+
+        # 기준 결과를 STTResults 객체로 변환
+        base_results = [STTResults(text=s.text, start=s.start, end=s.end) for s in base_segments]
+
+        # 기준 결과에 문제가 있는지 검사 (비정상적으로 긴 세그먼트 등)
+        has_issues = False
+        for result in base_results:
+            duration = result.end - result.start
+            if duration > 30.0:  # 30초 이상의 세그먼트는 문제 있다고 판단
+                has_issues = True
+                self.logger.warning(f"비정상적으로 긴 세그먼트 발견: {duration:.2f}초")
+                break
+
+        # 문제가 있는 경우에만 추가 앙상블 진행
+        if has_issues:
+            self.logger.info("기준 결과에 문제 발견, 세밀한 설정으로 재인식 시작")
+
+            # 더 세밀한 설정으로 재인식 (짧은 구간 감지에 집중)
+            refined_segments, _ = self.model.transcribe(
+                path,
+                language=lan,
+                beam_size=5,
+                temperature=0.0,
+                initial_prompt=self._get_language_prompt(lan),
+                condition_on_previous_text=True,
+                word_timestamps=True,
+                vad_filter=True,
+                vad_parameters={
+                    "min_silence_duration_ms": 300,
+                    "threshold": 0.4,
+                    "speech_pad_ms": 150
+                }
+            )
+
+            refined_results = [STTResults(text=s.text, start=s.start, end=s.end) for s in refined_segments]
+
+            # 대안적 접근: 오디오를 청크로 나누어 처리
+            chunked_results = self._process_audio_in_chunks(path, lan)
+
+            # 세 가지 결과를 조합하여 최상의 결과 생성
+            final_results = self._combine_best_segments(base_results, refined_results, chunked_results)
+        else:
+            # 문제가 없으면 기본 결과 사용
+            final_results = base_results
+
+
+        # 리소스 모니터링 종료
+        resource_metrics = self.resource_monitor.stop_monitoring()
+
+        # 성능 지표 계산
+        if reference_text:
+            performance_metrics = self.calculate_metrics(final_results, reference_text)
+            all_metrics = {**resource_metrics, **performance_metrics}
+        else:
+            all_metrics = resource_metrics
+
+        # 지표 기록
+        model_info = {**self.model_info, "ensemble_method": "bagging"}
+        self.resource_monitor.log_resources(all_metrics, model_info)
+
+        # 결과 저장
+        file_name = os.path.basename(path)
+        output_path = f"./bagging_{file_name}.json"
+        self.save_stt_results_to_json(final_results, output_path)
+        self.logger.info(f"배깅 앙상블 STT 결과가 {output_path}에 저장되었습니다.")
+
+        return final_results
+
+    def _process_audio_in_chunks(self, path, lan, chunk_size_seconds=60):
+        """오디오를 고정 크기 청크로 분할하여 처리"""
+        from pydub import AudioSegment
+        import tempfile
+
+        # 오디오 로드
+        audio = AudioSegment.from_file(path)
+        total_duration = len(audio) / 1000  # 초 단위
+
+        results = []
+
+        # 중첩되는 청크로 분할 (50% 중첩)
+        overlap = chunk_size_seconds * 0.5
+
+        for start_time in np.arange(0, total_duration, chunk_size_seconds - overlap):
+            end_time = min(start_time + chunk_size_seconds, total_duration)
+
+            # 마지막 청크가 너무 짧으면 건너뛰기
+            if end_time - start_time < 10:
+                continue
+
+            # 청크 추출 및 임시 파일로 저장
+            chunk = audio[int(start_time * 1000):int(end_time * 1000)]
+
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=True) as tmp_file:
+                chunk.export(tmp_file.name, format="wav")
+
+                # 청크 인식
+                segments, _ = self.model.transcribe(
+                    tmp_file.name,
+                    language=lan,
+                    beam_size=8,
+                    temperature=0.0,
+                    condition_on_previous_text=False,  # 각 청크는 독립적으로 처리
+                    initial_prompt=self._get_language_prompt(lan)
+                )
+
+                # 결과에 오프셋 추가하여 저장
+                for segment in segments:
+                    results.append(STTResults(
+                        text=segment.text,
+                        start=start_time + segment.start,
+                        end=start_time + segment.end
+                    ))
+
+        # 중복 구간 처리
+        return self._resolve_overlapping_segments(results)
+
+    def _combine_best_segments(self, base_results, refined_results, chunked_results):
+        """세 가지 결과 세트에서 최상의 세그먼트 조합 생성"""
+        # 모든 세그먼트를 시간순으로 정렬
+        all_segments = []
+        for result in base_results:
+            all_segments.append(("base", result))
+        for result in refined_results:
+            all_segments.append(("refined", result))
+        for result in chunked_results:
+            all_segments.append(("chunked", result))
+
+        # 시간순 정렬
+        all_segments.sort(key=lambda x: (x[1].start, x[1].end))
+
+        # 세그먼트 선택 알고리즘
+        final_results = []
+        last_end = -1
+
+        for source, segment in all_segments:
+            # 이미 다룬 시간 영역은 건너뛰기
+            if segment.end <= last_end:
+                continue
+
+            # 일부 겹치는 경우 처리
+            if segment.start < last_end:
+                overlap_ratio = (last_end - segment.start) / (segment.end - segment.start)
+
+                # 50% 이상 겹치면 건너뛰기
+                if overlap_ratio > 0.5:
+                    continue
+
+                # 일부만 겹치면 겹치지 않는 부분만 사용
+                segment = STTResults(
+                    text=segment.text,
+                    start=last_end,
+                    end=segment.end
+                )
+
+            # 품질 체크 (텍스트에 의미 있는 내용이 있는지)
+            if len(segment.text.strip()) < 2:
+                continue
+
+            # 선택된 세그먼트 추가
+            final_results.append(segment)
+            last_end = segment.end
+
+        return final_results
+
+    def _get_language_prompt(self, lan):
+        """언어별 적절한 프롬프트 반환"""
+        if lan == "ko":
+            return "이것은 한국어 대화입니다. 정확하게 받아적어주세요."
+        elif lan == "ja":
+            return "これは日本語の会話です。正確に書き起こしてください。"
+        else:
+            return "This is a conversation in English. Please transcribe accurately."
+
+    def _resolve_overlapping_segments(self, segments):
+        """중복되는 세그먼트 해결"""
+        if not segments:
+            return []
+
+        # 시간순 정렬
+        sorted_segments = sorted(segments, key=lambda x: (x.start, x.end))
+
+        resolved = [sorted_segments[0]]
+
+        for current in sorted_segments[1:]:
+            previous = resolved[-1]
+
+            # 완전히 포함되는 경우
+            if current.start >= previous.start and current.end <= previous.end:
+                # 더 짧은 세그먼트가 더 정확할 가능성이 높음
+                if len(current.text) < len(previous.text) * 0.7:
+                    resolved[-1] = current
+                continue
+
+            # 부분 겹침
+            if current.start < previous.end:
+                overlap_duration = previous.end - current.start
+                total_duration = current.end - current.start
+
+                # 겹침이 작으면 세그먼트 조정
+                if overlap_duration < total_duration * 0.3:
+                    current = STTResults(
+                        text=current.text,
+                        start=previous.end,
+                        end=current.end
+                    )
+                    resolved.append(current)
+                else:
+                    # 두 세그먼트 텍스트 품질 비교
+                    if self._text_quality_score(current.text) > self._text_quality_score(previous.text):
+                        resolved[-1] = current
+            else:
+                # 겹치지 않으면 그대로 추가
+                resolved.append(current)
+
+        return resolved
+
+    def _text_quality_score(self, text):
+        """텍스트 품질 점수 계산"""
+        if not text:
+            return 0
+
+        text = text.strip()
+
+        # 1. 길이 점수
+        length_score = min(len(text) / 50, 1.0) * 0.3
+
+        # 2. 문장 완성도 점수
+        sentence_score = 0
+        if text.endswith(('.', '!', '?', '。', '！', '？')):
+            sentence_score = 0.2
+
+        # 3. 단어 다양성 점수
+        words = text.split()
+        unique_ratio = len(set(words)) / max(len(words), 1)
+        diversity_score = unique_ratio * 0.3
+
+        # 4. 특수 문자 비율 점수
+        import re
+        special_chars = len(re.findall(r'[^\w\s]', text))
+        special_ratio = special_chars / max(len(text), 1)
+        special_score = (1 - min(special_ratio * 5, 1.0)) * 0.2
+
+        return length_score + sentence_score + diversity_score + special_score
