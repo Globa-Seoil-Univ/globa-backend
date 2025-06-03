@@ -26,7 +26,7 @@ public class CommentFixture implements Fixture<CommentEntity> {
     }
 
     public static class CommentBuilder {
-        private String content;
+        private String content = "Default comment content";
         private HighlightEntity highlight;
         private CommentEntity parent;
         private UserEntity user;

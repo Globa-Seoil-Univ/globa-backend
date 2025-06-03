@@ -12,6 +12,7 @@ public record RequestFirstCommentDto(
 
         @NotNull(message = "끝 인덱스는 필수입니다.")
         @Positive(message = "끝 인덱스는 1 이상이어야 합니다.")
+        @Max(value = 99999, message = "끝 인덱스는 99999 이하이어야 합니다.")
         Long endIdx,
 
         @NotBlank(message = "내용은 필수입니다.")

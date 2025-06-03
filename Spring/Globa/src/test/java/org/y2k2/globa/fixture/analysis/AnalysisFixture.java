@@ -24,7 +24,7 @@ public class AnalysisFixture implements Fixture<AnalysisEntity> {
     }
 
     public static class AnalysisBuilder {
-        private String content;
+        private String content = "Default analysis content";
         private SectionEntity section;
 
         private AnalysisBuilder() {}

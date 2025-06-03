@@ -82,11 +82,11 @@ public class GetCommentsServiceTest {
                 .isNotNull();
 
         Assertions
-                .assertThat(response.getTotal())
+                .assertThat(response.total())
                 .isEqualTo(parents.size());
 
         Assertions
-                .assertThat(response.getComments())
+                .assertThat(response.comments())
                 .allSatisfy(comment -> {
                     Assertions
                             .assertThat(comment.getCommentId())
