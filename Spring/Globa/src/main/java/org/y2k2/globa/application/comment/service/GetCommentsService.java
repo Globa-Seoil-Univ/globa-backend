@@ -16,6 +16,7 @@ import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.domain.comment.repository.CommentRepository;
 import org.y2k2.globa.domain.highlight.repository.HighlightRepository;
 import org.y2k2.globa.infrastructure.persistence.comment.entity.CommentEntity;
+import org.y2k2.globa.infrastructure.persistence.comment.projection.CommentWithHasReplyProjection;
 
 import java.util.List;
 
@@ -38,9 +39,9 @@ public class GetCommentsService {
         }
 
         Pageable pageable = PageRequest.of(page - 1, count);
-        Page<CommentEntity> comments = commentRepository.getParentComments(dto.highlightId(), pageable);
+        Page<CommentWithHasReplyProjection> comments = commentRepository.getParentComments(dto.highlightId(), pageable);
 
-        List<CommentEntity> parentComments = comments.getContent();
+        List<CommentWithHasReplyProjection> parentComments = comments.getContent();
         List<CommentDto> response = parentComments.stream()
                 .map(CommentMapper.INSTANCE::toResponseCommentDto)
                 .toList();

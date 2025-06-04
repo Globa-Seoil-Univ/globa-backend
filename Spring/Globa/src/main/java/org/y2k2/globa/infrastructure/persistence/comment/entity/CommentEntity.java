@@ -11,6 +11,8 @@ import org.y2k2.globa.infrastructure.persistence.highlight.entity.HighlightEntit
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -50,9 +52,6 @@ public class CommentEntity {
 
     @Column(name = "deleted_time")
     private LocalDateTime deletedTime;
-
-    @Formula(value = "(SELECT CASE WHEN EXISTS (SELECT 1 FROM comment c WHERE c.parent_id = ce1_0.comment_id) THEN true ELSE false END)")
-    private boolean hasReply;
 
     public void updateContent(String content) {
         if (content != null) {

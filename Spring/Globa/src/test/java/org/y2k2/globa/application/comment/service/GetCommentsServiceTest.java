@@ -23,9 +23,14 @@ import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.domain.comment.repository.CommentRepository;
 import org.y2k2.globa.domain.highlight.repository.HighlightRepository;
-import org.y2k2.globa.infrastructure.persistence.comment.entity.CommentEntity;
+import org.y2k2.globa.infrastructure.persistence.comment.projection.CommentWithHasReplyProjection;
+import org.y2k2.globa.infrastructure.persistence.comment.projection.CommentWithHasReplyProjectionImpl;
+import org.y2k2.globa.infrastructure.persistence.quizattemp.projection.QuizGradeProjection;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 public class GetCommentsServiceTest {
@@ -50,17 +55,15 @@ public class GetCommentsServiceTest {
 
         Pageable pageable = PageRequest.of(0, 10);
 
-        List<CommentEntity> parents = FixtureMonkey.builder()
-                .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)
+        List<CommentWithHasReplyProjectionImpl> parentImpls = FixtureMonkey.builder()
+                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
                 .defaultNotNull(true)
                 .build()
-                .giveMeBuilder(CommentEntity.class)
-                .set("highlight.highlightId", idsDto.highlightId())
-                .set("parent", null)
-                .set("hasReply", false)
+                .giveMeBuilder(CommentWithHasReplyProjectionImpl.class)
                 .sampleList(5);
 
-        Page<CommentEntity> page = new PageImpl<>(parents, pageable, parents.size());
+        List<CommentWithHasReplyProjection> parents = new ArrayList<>(parentImpls);
+        Page<CommentWithHasReplyProjection> page = new PageImpl<>(parents, pageable, parents.size());
 
         Mockito
                 .doNothing()
@@ -91,7 +94,7 @@ public class GetCommentsServiceTest {
                     Assertions
                             .assertThat(comment.getCommentId())
                             .isIn(parents.stream()
-                                    .map(CommentEntity::getCommentId)
+                                    .map(CommentWithHasReplyProjection::getCommentId)
                                     .toList());
                 });
 

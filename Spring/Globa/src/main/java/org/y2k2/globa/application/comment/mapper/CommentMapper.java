@@ -8,6 +8,7 @@ import org.y2k2.globa.application.common.mapper.CustomTimestampMapper;
 import org.y2k2.globa.application.common.mapper.CustomTimestampTranslator;
 import org.y2k2.globa.application.common.mapper.MapCreatedTime;
 import org.y2k2.globa.infrastructure.persistence.comment.entity.CommentEntity;
+import org.y2k2.globa.infrastructure.persistence.comment.projection.CommentWithHasReplyProjection;
 import org.y2k2.globa.infrastructure.persistence.highlight.entity.HighlightEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
@@ -17,12 +18,13 @@ public interface CommentMapper {
 
     @Mapping(source = "entity.commentId", target = "commentId")
     @Mapping(source = "entity.content", target = "content")
-    @Mapping(source = "entity.user.profilePath", target = "user.profile")
-    @Mapping(source = "entity.user.name", target = "user.name")
+    @Mapping(source = "entity.userId", target = "user.userId")
+    @Mapping(source = "entity.profilePath", target = "user.profile")
+    @Mapping(source = "entity.name", target = "user.name")
     @Mapping(source = "entity.hasReply", target = "hasReply")
     @Mapping(source = "entity.isDeleted", target = "deleted")
     @Mapping(source = "entity.createdTime", target = "createdTime", qualifiedBy = { CustomTimestampTranslator.class, MapCreatedTime.class })
-    CommentDto toResponseCommentDto(CommentEntity entity);
+    CommentDto toResponseCommentDto(CommentWithHasReplyProjection entity);
 
     @Mapping(source = "entity.commentId", target = "commentId")
     @Mapping(source = "entity.content", target = "content")
@@ -50,16 +52,16 @@ public interface CommentMapper {
     CommentEntity toChildCommentEntity(UserEntity user, HighlightEntity highlight, CommentEntity parent, String content);
 
     @AfterMapping
-    static void handleDeletedContent(@MappingTarget CommentDto dto, CommentEntity entity) {
-        if (entity.getDeletedTime() != null) {
-            dto.setContent("삭제된 댓글입니다");
+    static void handleDeletedContent(@MappingTarget CommentDto dto, CommentWithHasReplyProjection entity) {
+        if (entity.getIsDeleted()) {
+            dto.setContent("삭제된 댓글입니다.");
         }
     }
 
     @AfterMapping
     static void handleDeletedContent(@MappingTarget ReplyDto dto, CommentEntity entity) {
-        if (entity.getDeletedTime() != null) {
-            dto.setContent("삭제된 답글입니다");
+        if (entity.getIsDeleted()) {
+            dto.setContent("삭제된 답글입니다.");
         }
     }
 }

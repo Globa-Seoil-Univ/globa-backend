@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.y2k2.globa.domain.comment.repository.CommentRepository;
 import org.y2k2.globa.infrastructure.persistence.comment.entity.CommentEntity;
+import org.y2k2.globa.infrastructure.persistence.comment.projection.CommentWithHasReplyProjection;
 import org.y2k2.globa.infrastructure.persistence.highlight.entity.HighlightEntity;
 
 import java.util.List;
@@ -42,7 +43,7 @@ public class CommentRepositoryImpl implements CommentRepository {
     }
 
     @Override
-    public Page<CommentEntity> getParentComments(Long highlightId, Pageable pageable) {
+    public Page<CommentWithHasReplyProjection> getParentComments(Long highlightId, Pageable pageable) {
         return commentJpaRepository.findByHighlight_HighlightIdAndParentIsNullOrderByCommentIdDesc(highlightId, pageable);
     }
 

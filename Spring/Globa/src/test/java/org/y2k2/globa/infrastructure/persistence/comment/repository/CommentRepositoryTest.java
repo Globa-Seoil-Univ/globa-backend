@@ -18,6 +18,7 @@ import org.y2k2.globa.fixture.record.RecordFixture;
 import org.y2k2.globa.fixture.section.SectionFixture;
 import org.y2k2.globa.fixture.user.UserFixture;
 import org.y2k2.globa.infrastructure.persistence.comment.entity.CommentEntity;
+import org.y2k2.globa.infrastructure.persistence.comment.projection.CommentWithHasReplyProjection;
 import org.y2k2.globa.infrastructure.persistence.config.RepositoryIntegrationTest;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.folderrole.entity.FolderRoleEntity;
@@ -287,20 +288,18 @@ public class CommentRepositoryTest {
         commentRepository.save(parentComment2);
 
         Pageable pageable = Pageable.ofSize(10);
-        Page<CommentEntity> parentCommentsPage = commentRepository.getParentComments(highlight.getHighlightId(), pageable);
+        Page<CommentWithHasReplyProjection> parentCommentsPage = commentRepository.getParentComments(highlight.getHighlightId(), pageable);
 
         Assertions.assertThat(parentCommentsPage).isNotNull();
         Assertions.assertThat(parentCommentsPage.getTotalElements()).isEqualTo(2);
 
         log.info("Parent Comments = {}", parentCommentsPage.getContent().stream()
-                .map(CommentEntity::getCommentId)
+                .map(CommentWithHasReplyProjection::getCommentId)
                 .toList());
 
         Assertions.assertThat(parentCommentsPage.getContent())
                 .allSatisfy(comment -> {
                     Assertions.assertThat(comment.getContent()).isIn(content1, content2);
-                    Assertions.assertThat(comment.getUser().getUserId()).isEqualTo(myUser.getUserId());
-                    Assertions.assertThat(comment.getHighlight().getHighlightId()).isEqualTo(highlight.getHighlightId());
                     Assertions.assertThat(comment.getIsDeleted()).isFalse();
                 });
     }

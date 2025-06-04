@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.y2k2.globa.infrastructure.persistence.comment.entity.CommentEntity;
+import org.y2k2.globa.infrastructure.persistence.comment.projection.CommentWithHasReplyProjection;
 import org.y2k2.globa.infrastructure.persistence.highlight.entity.HighlightEntity;
 
 import java.util.List;
@@ -13,7 +14,18 @@ import java.util.Optional;
 public interface CommentJpaRepository extends JpaRepository<CommentEntity, Long> {
     Optional<CommentEntity> findByHighlight_HighlightIdAndCommentId(Long highlightId, Long commentId);
     Optional<CommentEntity> findByHighlight_HighlightIdAndCommentIdAndParentIsNull(Long highlightId, Long commentId);
-    Page<CommentEntity> findByHighlight_HighlightIdAndParentIsNullOrderByCommentIdDesc(Long highlightId, Pageable pageable);
+    @Query(
+            value = "SELECT c.commentId AS commentId, c.user.profilePath AS profilePath, c.user.name AS name, c.user.userId AS userId," +
+                        "c.content AS content, c.isDeleted AS isDeleted, c.createdTime AS createdTime, " +
+                        "CASE WHEN EXISTS (" +
+                            "SELECT 1 FROM CommentEntity child WHERE child.parent = c" +
+                        ") THEN TRUE ELSE FALSE END AS hasReply " +
+                    "FROM CommentEntity c " +
+                    "WHERE c.highlight.highlightId = :highlightId " +
+                        "AND c.parent IS NULL " +
+                    "ORDER BY c.commentId DESC "
+    )
+    Page<CommentWithHasReplyProjection> findByHighlight_HighlightIdAndParentIsNullOrderByCommentIdDesc(Long highlightId, Pageable pageable);
     Page<CommentEntity> findByParent_CommentIdOrderByCommentIdAsc(Long parentId, Pageable pageable);
 
     @Query(
