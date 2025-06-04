@@ -7,11 +7,14 @@ import com.navercorp.fixturemonkey.jakarta.validation.plugin.JakartaValidationPl
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -56,7 +59,7 @@ public class CommentIntegrationTest extends IntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private EntityManager entityManager;
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private UserFixture userFixture;
@@ -176,6 +179,11 @@ public class CommentIntegrationTest extends IntegrationTest {
         );
 
         setSecurityContext(myUser);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        jdbcTemplate.execute("DELETE FROM comment");
     }
 
     @Test
@@ -1283,42 +1291,6 @@ public class CommentIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("댓글 삭제 - 실패 (댓글 작성자 X)")
-    @WithAccount
-    void deleteComment_Fail_NoPermission() throws Exception {
-        Long folderId = myFolder.getFolderId(),
-                recordId = myRecord.getRecordId(),
-                sectionId = mySection.getSectionId(),
-                highlightId = myHighlight.getHighlightId(),
-                commentId = myComment.getCommentId();
-
-        folderShareFixture.save(
-                FolderShareFixture
-                        .builder()
-                        .owner(myUser)
-                        .target(otherUser)
-                        .folder(myFolder)
-                        .role(editor)
-                        .status(InvitationStatus.ACCEPT)
-                        .build()
-        );
-
-        setSecurityContext(otherUser);
-
-        mockMvc.perform(
-                        MockMvcRequestBuilders.delete(
-                                        Constant.COMMENT_PREFIX.getValue() + "/section/{sectionId}/highlight/{highlightId}/comment/{commentId}",
-                                        folderId, recordId, sectionId, highlightId, commentId
-                                )
-                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
-                                .accept(MediaType.APPLICATION_JSON)
-                )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isForbidden())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.errorCode").value(ErrorCode.MISMATCH_COMMENT_OWNER.getErrorCode()));
-    }
-
-    @Test
     @DisplayName("댓글 삭제 - 성공 (부모, 마지막, Owner)")
     @WithAccount
     void deleteParentComment_Success() throws Exception {
@@ -1358,7 +1330,8 @@ public class CommentIntegrationTest extends IntegrationTest {
     @DisplayName("댓글 삭제 - 성공 (부모, 대댓글 존재, Owner)")
     @WithAccount
     void deleteParentComment_Success_WithReplies() throws Exception {
-        CommentEntity replyComment = commentFixture.save(
+        // 대댓글 생성
+        commentFixture.save(
                 CommentFixture
                         .builder()
                         .user(myUser)
@@ -1418,6 +1391,346 @@ public class CommentIntegrationTest extends IntegrationTest {
                     Assertions.assertThat(comment.getContent()).isEqualTo("삭제된 댓글입니다.");
                     Assertions.assertThat(comment.getDeleted()).isTrue();
                     Assertions.assertThat(comment.getHasReply()).isTrue();
+                });
+    }
+
+    @Test
+    @DisplayName("댓글 삭제 - 성공 (부모, 마지막, Editor)")
+    @WithAccount
+    void deleteParentComment_Success_Editor() throws Exception {
+        CommentEntity otherCommentInMyFolder = commentFixture.save(
+                CommentFixture
+                        .builder()
+                        .user(otherUser)
+                        .highlight(myHighlight)
+                        .deleted(false)
+                        .build()
+        );
+
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(myUser)
+                        .target(otherUser)
+                        .folder(myFolder)
+                        .role(editor)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
+
+        Long folderId = myFolder.getFolderId(),
+                recordId = myRecord.getRecordId(),
+                sectionId = mySection.getSectionId(),
+                highlightId = myHighlight.getHighlightId();
+
+        // 부모댓글 삭제
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete(
+                                        Constant.COMMENT_PREFIX.getValue() + "/section/{sectionId}/highlight/{highlightId}/comment/{commentId}",
+                                        folderId, recordId, sectionId, highlightId, myComment.getCommentId()
+                                )
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        setSecurityContext(otherUser);
+
+        // 대댓글 삭제
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete(
+                                        Constant.COMMENT_PREFIX.getValue() + "/section/{sectionId}/highlight/{highlightId}/comment/{commentId}",
+                                        folderId, recordId, sectionId, highlightId, otherCommentInMyFolder.getCommentId()
+                                )
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        // 댓글이 삭제되었는지 확인
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get(
+                                        Constant.COMMENT_PREFIX.getValue() + "/section/{sectionId}/highlight/{highlightId}/comment",
+                                        folderId, recordId, sectionId, highlightId, otherCommentInMyFolder.getCommentId()
+                                )
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                // 삭제한 댓글이 마지막이기 때문에 Highlight가 존재하지 않음
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errorCode").value(ErrorCode.NOT_FOUND_HIGHLIGHT.getErrorCode()));
+    }
+
+    @Test
+    @DisplayName("댓글 삭제 - 성공 (대댓글, 대댓글 존재, Editor)")
+    @WithAccount
+    void deleteReply_Success_Editor() throws Exception {
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(myUser)
+                        .target(otherUser)
+                        .folder(myFolder)
+                        .role(editor)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
+
+        CommentEntity otherCommentInMyFolder = commentFixture.save(
+                CommentFixture
+                        .builder()
+                        .user(otherUser)
+                        .highlight(myHighlight)
+                        .deleted(false)
+                        .build()
+        );
+
+        CommentEntity replyComment = commentFixture.save(
+                CommentFixture
+                        .builder()
+                        .user(otherUser)
+                        .highlight(myHighlight)
+                        .parent(otherCommentInMyFolder)
+                        .deleted(false)
+                        .build()
+        );
+
+        Long folderId = myFolder.getFolderId(),
+                recordId = myRecord.getRecordId(),
+                sectionId = mySection.getSectionId(),
+                highlightId = myHighlight.getHighlightId(),
+                commentId = otherCommentInMyFolder.getCommentId();
+
+        setSecurityContext(otherUser);
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete(
+                                        Constant.COMMENT_PREFIX.getValue() + "/section/{sectionId}/highlight/{highlightId}/comment/{commentId}",
+                                        folderId, recordId, sectionId, highlightId, commentId
+                                )
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        // 댓글이 삭제되었는지 확인
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders.get(
+                                        Constant.COMMENT_PREFIX.getValue() + "/section/{sectionId}/highlight/{highlightId}/comment",
+                                        folderId, recordId, sectionId, highlightId
+                                )
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON_VALUE)                                .characterEncoding("UTF-8")
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        ResponseCommentDto response = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                ResponseCommentDto.class
+        );
+
+        log.info("response = {}", response);
+
+        Assertions
+                .assertThat(response.total())
+                .isEqualTo(2L);
+
+        // 대댓글이 존재하기 때문에 Soft Delete
+        Assertions
+                .assertThat(response.comments())
+                .hasSize(2)
+                .allSatisfy(comment -> {
+                    if (comment.getCommentId().equals(otherCommentInMyFolder.getCommentId())) {
+                        Assertions.assertThat(comment.getContent()).isEqualTo("삭제된 댓글입니다.");
+                        Assertions.assertThat(comment.getDeleted()).isTrue();
+                        Assertions.assertThat(comment.getHasReply()).isTrue();
+                    }
+                });
+    }
+
+    @Test
+    @DisplayName("댓글 삭제 - 실패 (Reader)")
+    @WithAccount
+    void deleteComment_Fail_Reader() throws Exception {
+        CommentEntity otherCommentInMyFolder = commentFixture.save(
+                CommentFixture
+                        .builder()
+                        .user(otherUser)
+                        .highlight(myHighlight)
+                        .deleted(false)
+                        .build()
+        );
+
+        Long folderId = myFolder.getFolderId(),
+                recordId = myRecord.getRecordId(),
+                sectionId = mySection.getSectionId(),
+                highlightId = myHighlight.getHighlightId(),
+                commentId = otherCommentInMyFolder.getCommentId();
+
+        // Reader 권한으로 변경되었음.
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(myUser)
+                        .target(otherUser)
+                        .folder(myFolder)
+                        .role(reader)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
+
+        setSecurityContext(otherUser);
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete(
+                                        Constant.COMMENT_PREFIX.getValue() + "/section/{sectionId}/highlight/{highlightId}/comment/{commentId}",
+                                        folderId, recordId, sectionId, highlightId, commentId
+                                )
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errorCode").value(ErrorCode.NOT_DESERVE_WRITEABLE.getErrorCode()));
+    }
+
+    @Test
+    @DisplayName("댓글 삭제 - 실패 (권한 X)")
+    @WithAccount
+    void deleteComment_Fail_NoPermission() throws Exception {
+        CommentEntity otherCommentInMyFolder = commentFixture.save(
+                CommentFixture
+                        .builder()
+                        .user(otherUser)
+                        .highlight(myHighlight)
+                        .deleted(false)
+                        .build()
+        );
+
+        Long folderId = myFolder.getFolderId(),
+                recordId = myRecord.getRecordId(),
+                sectionId = mySection.getSectionId(),
+                highlightId = myHighlight.getHighlightId(),
+                commentId = otherCommentInMyFolder.getCommentId();
+
+        setSecurityContext(otherUser);
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete(
+                                        Constant.COMMENT_PREFIX.getValue() + "/section/{sectionId}/highlight/{highlightId}/comment/{commentId}",
+                                        folderId, recordId, sectionId, highlightId, commentId
+                                )
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errorCode").value(ErrorCode.NOT_DESERVE_WRITEABLE.getErrorCode()));
+    }
+
+    @Test
+    @DisplayName("댓글 삭제 - 실패 (댓글 작성자 X)")
+    @WithAccount
+    void deleteComment_Fail_NoWriter() throws Exception {
+        Long folderId = myFolder.getFolderId(),
+                recordId = myRecord.getRecordId(),
+                sectionId = mySection.getSectionId(),
+                highlightId = myHighlight.getHighlightId(),
+                commentId = myComment.getCommentId();
+
+        folderShareFixture.save(
+                FolderShareFixture
+                        .builder()
+                        .owner(myUser)
+                        .target(otherUser)
+                        .folder(myFolder)
+                        .role(editor)
+                        .status(InvitationStatus.ACCEPT)
+                        .build()
+        );
+
+        setSecurityContext(otherUser);
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete(
+                                        Constant.COMMENT_PREFIX.getValue() + "/section/{sectionId}/highlight/{highlightId}/comment/{commentId}",
+                                        folderId, recordId, sectionId, highlightId, commentId
+                                )
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.errorCode").value(ErrorCode.MISMATCH_COMMENT_OWNER.getErrorCode()));
+    }
+
+    @Test
+    @DisplayName("댓글 삭제 - 성공 (대댓글)")
+    @WithAccount
+    void deleteReply_Success() throws Exception {
+        CommentEntity replyComment = commentFixture.save(
+                CommentFixture
+                        .builder()
+                        .user(myUser)
+                        .highlight(myHighlight)
+                        .parent(myComment)
+                        .deleted(false)
+                        .build()
+        );
+
+        Long folderId = myFolder.getFolderId(),
+                recordId = myRecord.getRecordId(),
+                sectionId = mySection.getSectionId(),
+                highlightId = myHighlight.getHighlightId();
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.delete(
+                                        Constant.COMMENT_PREFIX.getValue() + "/section/{sectionId}/highlight/{highlightId}/comment/{commentId}",
+                                        folderId, recordId, sectionId, highlightId, replyComment.getCommentId()
+                                )
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        // 댓글이 삭제되었는지 확인
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders.get(
+                                        Constant.COMMENT_PREFIX.getValue() + "/section/{sectionId}/highlight/{highlightId}/comment/{parentId}",
+                                        folderId, recordId, sectionId, highlightId, myComment.getCommentId()
+                                )
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        ResponseReplyDto response = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                ResponseReplyDto.class
+        );
+
+        log.info("response = {}", response);
+
+        Assertions
+                .assertThat(response.total())
+                .isEqualTo(1L);
+
+        // 대댓글이 삭제되었는지 확인
+        Assertions
+                .assertThat(response.comments())
+                .hasSize(1)
+                .allSatisfy(comment -> {
+                    Assertions.assertThat(comment.getContent()).isEqualTo("삭제된 답글입니다.");
+                    Assertions.assertThat(comment.getDeleted()).isTrue();
                 });
     }
 }
