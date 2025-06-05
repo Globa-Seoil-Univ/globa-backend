@@ -13,7 +13,6 @@ import java.util.Optional;
 public class AnswerRepositoryImpl implements AnswerRepository {
     private final AnswerJpaRepository answerJpaRepository;
 
-
     @Override
     public AnswerEntity save(AnswerEntity entity) {
         return answerJpaRepository.save(entity);

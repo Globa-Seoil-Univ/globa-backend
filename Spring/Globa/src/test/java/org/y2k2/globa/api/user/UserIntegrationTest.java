@@ -40,9 +40,7 @@ import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.common.util.jwt.JWT;
 import org.y2k2.globa.common.util.redis.RedisKey;
 import org.y2k2.globa.constant.Constant;
-import org.y2k2.globa.domain.role.type.UserRole;
 import org.y2k2.globa.fixture.folder.FolderFixture;
-import org.y2k2.globa.fixture.role.RoleFixture;
 import org.y2k2.globa.fixture.user.AnalysisFixtureBuilder;
 import org.y2k2.globa.fixture.user.UserFixture;
 import org.y2k2.globa.fixture.user.data.AnalysisData;
@@ -76,8 +74,6 @@ public class UserIntegrationTest extends IntegrationTest {
     private AnalysisFixtureBuilder analysisFixture;
     @Autowired
     private FolderFixture folderFixture;
-    @Autowired
-    private RoleFixture roleFixture;
 
     @MockBean
     private VerifyKakaoUseCase verifyKakaoUseCase;
@@ -327,13 +323,6 @@ public class UserIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("회원가입 - 성공 (카카오)")
     void signupKakao() throws Exception {
-        roleFixture.save(
-                RoleFixture
-                        .builder()
-                        .role(UserRole.USER)
-                        .build()
-        );
-
         RequestUserPostDTO request = new RequestUserPostDTO(
                 SnsKind.KAKAO.toString(),
                 "SNS_ID",
@@ -366,13 +355,6 @@ public class UserIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("회원가입 - 실패 (카카오)")
     void signupFailAuthKakao() throws Exception {
-        roleFixture.save(
-                RoleFixture
-                        .builder()
-                        .role(UserRole.USER)
-                        .build()
-        );
-
         Mockito.doThrow(new CustomException(ErrorCode.INVALID_SNS_TOKEN))
                 .when(verifyKakaoUseCase)
                 .execute(ArgumentMatchers.any(VerifySnsCommand.class));
@@ -401,13 +383,6 @@ public class UserIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("회원가입 - 성공 (구글)")
     void signupGoogle() throws Exception {
-        roleFixture.save(
-                RoleFixture
-                        .builder()
-                        .role(UserRole.USER)
-                        .build()
-        );
-
         Mockito.doNothing()
                 .when(verifyGoogleUseCase)
                 .execute(ArgumentMatchers.any(VerifySnsCommand.class));
@@ -440,13 +415,6 @@ public class UserIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("회원가입 - 실패 (구글)")
     void signupFailAuthGoogle() throws Exception {
-        roleFixture.save(
-                RoleFixture
-                        .builder()
-                        .role(UserRole.USER)
-                        .build()
-        );
-
         Mockito.doThrow(new CustomException(ErrorCode.INVALID_SNS_TOKEN))
                 .when(verifyGoogleUseCase)
                 .execute(ArgumentMatchers.any(VerifySnsCommand.class));
@@ -475,13 +443,6 @@ public class UserIntegrationTest extends IntegrationTest {
     @Test
     @DisplayName("회원가입 - 실패 (SNS 종류 없음)")
     void signupFailSnsKind() throws Exception {
-        roleFixture.save(
-                RoleFixture
-                        .builder()
-                        .role(UserRole.USER)
-                        .build()
-        );
-
         RequestUserPostDTO request = new RequestUserPostDTO(
                 "NOT_EXIST_SNS",
                 "SNS_ID",

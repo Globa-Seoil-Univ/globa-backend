@@ -19,24 +19,8 @@ public class RoleFixture implements Fixture<RoleEntity> {
         return roleRepository.save(entity);
     }
 
-    public static RoleBuilder builder() {
-        return new RoleBuilder();
-    }
-
-    public static class RoleBuilder {
-        private UserRole role;
-
-        private RoleBuilder() {}
-
-        public RoleBuilder role(UserRole role) {
-            this.role = role;
-            return this;
-        }
-
-        public RoleEntity build() {
-            RoleEntity roleEntity = new RoleEntity();
-            roleEntity.setName(role);
-            return roleEntity;
-        }
+    public RoleEntity getEntity(UserRole role) {
+        return roleRepository.getRole(role)
+                .orElseThrow(() -> new IllegalArgumentException("Role not found: " + role));
     }
 }
