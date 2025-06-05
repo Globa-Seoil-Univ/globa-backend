@@ -157,9 +157,9 @@ public class NotificationController {
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
-    @PostMapping("/{notification_id}")
+    @PostMapping("/{notificationId}")
     public ResponseEntity<Void> readNotification(
-            @PathVariable(value="notification_id") Long notificationId,
+            @PathVariable(value="notificationId") Long notificationId,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         readNotificationService.read(notificationId, details.getUserId());
@@ -197,9 +197,9 @@ public class NotificationController {
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
-    @DeleteMapping("/{notification_id}")
+    @DeleteMapping("/{notificationId}")
     public ResponseEntity<Void> deleteNotification(
-            @PathVariable(value="notification_id") Long notificationId,
+            @PathVariable(value="notificationId") Long notificationId,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         deleteNotificationService.delete(notificationId, details.getUserId());

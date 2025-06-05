@@ -2,7 +2,6 @@ package org.y2k2.globa.api.quizattempt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navercorp.fixturemonkey.FixtureMonkey;
-import com.navercorp.fixturemonkey.api.introspector.BeanArbitraryIntrospector;
 import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitraryIntrospector;
 import com.navercorp.fixturemonkey.jakarta.validation.plugin.JakartaValidationPlugin;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +20,6 @@ import org.y2k2.globa.annotation.WithAccount;
 import org.y2k2.globa.api.IntegrationTest;
 import org.y2k2.globa.application.analysis.dto.response.ResponseAnalysisDto;
 import org.y2k2.globa.application.quiz.dto.request.RequestQuizDto;
-import org.y2k2.globa.application.quiz.dto.response.ResponseQuizzesDto;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.util.jwt.JWT;
 import org.y2k2.globa.constant.Constant;

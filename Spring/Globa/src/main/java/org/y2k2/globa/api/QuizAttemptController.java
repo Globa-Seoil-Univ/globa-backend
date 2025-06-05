@@ -21,7 +21,7 @@ import java.net.URI;
 @RestController
 @ResponseBody
 @RequiredArgsConstructor
-@RequestMapping("/folder/{folder_id}/record/{record_id}/quiz")
+@RequestMapping("/folder/{folderId}/record/{recordId}/quiz")
 @Tag(name = "QuizAttempt", description = "퀴즈 시도 관련 API입니다.")
 public class QuizAttemptController {
     private final CreateQuizAttemptsService createQuizAttemptsService;
@@ -55,8 +55,8 @@ public class QuizAttemptController {
     )
     @PostMapping
     public ResponseEntity<?> createQuiz(
-            @PathVariable(value = "folder_id") Long folderId,
-            @PathVariable(value = "record_id") Long recordId,
+            @PathVariable(value = "folderId") Long folderId,
+            @PathVariable(value = "recordId") Long recordId,
             @Valid @RequestBody final RequestQuizDto quizzes,
             @AuthenticationPrincipal CustomUserDetails details
     ) {

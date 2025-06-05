@@ -140,9 +140,9 @@ public class FolderController {
                     @ApiResponse(responseCode = "500", ref="500")
             }
     )
-    @PatchMapping("/{folder_id}/name")
+    @PatchMapping("/{folderId}/name")
     public ResponseEntity<Void> updateFolderName(
-            @PathVariable(value = "folder_id") Long folderId,
+            @PathVariable(value = "folderId") Long folderId,
             @Valid @RequestBody RequestFolderNameDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
@@ -176,9 +176,9 @@ public class FolderController {
                     @ApiResponse(responseCode = "500", ref="500")
             }
     )
-    @DeleteMapping("/{folder_id}")
+    @DeleteMapping("/{folderId}")
     public ResponseEntity<Void> deleteFolder(
-            @PathVariable(value = "folder_id") Long folderId,
+            @PathVariable(value = "folderId") Long folderId,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         deleteFolderService.delete(folderId, details.getUserId());

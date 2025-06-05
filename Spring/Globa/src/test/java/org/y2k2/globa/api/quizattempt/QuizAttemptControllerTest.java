@@ -77,7 +77,7 @@ public class QuizAttemptControllerTest {
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .post("/folder/{folder_id}/record/{record_id}/quiz", folderId, recordId)
+                                .post("/folder/{folderId}/record/{recordId}/quiz", folderId, recordId)
                                 .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -119,7 +119,7 @@ public class QuizAttemptControllerTest {
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .post("/folder/{folder_id}/record/{record_id}/quiz", folderId, recordId)
+                                .post("/folder/{folderId}/record/{recordId}/quiz", folderId, recordId)
                                 .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -149,7 +149,7 @@ public class QuizAttemptControllerTest {
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .post("/folder/{folder_id}/record/{record_id}/quiz", folderId, recordId)
+                                .post("/folder/{folderId}/record/{recordId}/quiz", folderId, recordId)
                                 .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)

@@ -59,7 +59,7 @@ public class QuizControllerTest {
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .get("/folder/{folder_id}/record/{record_id}/quiz", folderId, recordId)
+                                .get("/folder/{folderId}/record/{recordId}/quiz", folderId, recordId)
                                 .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
                                 .accept(MediaType.APPLICATION_JSON)
                 )

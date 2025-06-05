@@ -29,11 +29,17 @@ public class UserFixture implements Fixture<UserEntity> {
     public static class UserBuilder {
         private String name = "Default User";
         private final SnsKind snsKind = SnsKind.GOOGLE;
+        private Boolean isDeleted = false;
 
         private UserBuilder() {}
 
         public UserBuilder name(String name) {
             this.name = name;
+            return this;
+        }
+
+        public UserBuilder isDeleted(Boolean isDeleted) {
+            this.isDeleted = isDeleted;
             return this;
         }
 
@@ -54,7 +60,7 @@ public class UserFixture implements Fixture<UserEntity> {
 
             user.setNotificationToken(fcmToken);
 
-            user.setIsDeleted(false);
+            user.setIsDeleted(isDeleted);
             user.setPrimaryNofi(false);
             user.setUploadNofi(false);
             user.setShareNofi(false);

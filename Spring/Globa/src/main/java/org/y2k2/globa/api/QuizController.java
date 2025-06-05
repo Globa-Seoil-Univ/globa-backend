@@ -21,7 +21,7 @@ import org.y2k2.globa.common.exception.SwaggerErrorCode;
 @RestController
 @ResponseBody
 @RequiredArgsConstructor
-@RequestMapping("/folder/{folder_id}/record/{record_id}/quiz")
+@RequestMapping("/folder/{folderId}/record/{recordId}/quiz")
 @Tag(name = "Quiz", description = "퀴즈 관련 API입니다.")
 public class QuizController {
     private final GetQuizzesService getQuizzesService;
@@ -53,8 +53,8 @@ public class QuizController {
     )
     @GetMapping
     public ResponseEntity<ResponseQuizzesDto> getQuizzes(
-            @PathVariable(value = "folder_id") Long folderId,
-            @PathVariable(value = "record_id") Long recordId,
+            @PathVariable(value = "folderId") Long folderId,
+            @PathVariable(value = "recordId") Long recordId,
             @AuthenticationPrincipal CustomUserDetails details
     ) { return ResponseEntity.ok(getQuizzesService.get(folderId, recordId, details.getUserId())); }
 }

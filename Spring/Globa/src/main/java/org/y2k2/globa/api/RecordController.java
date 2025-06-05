@@ -69,9 +69,9 @@ public class RecordController {
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
-    @GetMapping("/folder/{folder_id}/record")
+    @GetMapping("/folder/{folderId}/record")
     public ResponseEntity<ResponseRecordsByFolderDto> getRecordByFolderId(
-            @PathVariable(value = "folder_id") Long folderId,
+            @PathVariable(value = "folderId") Long folderId,
             @RequestParam(value = "page", defaultValue = "1", required = false) int page,
             @RequestParam(value = "count", defaultValue = "10", required = false) int count,
             @AuthenticationPrincipal CustomUserDetails details
@@ -139,10 +139,10 @@ public class RecordController {
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
-    @GetMapping("/folder/{folder_id}/record/{record_id}")
+    @GetMapping("/folder/{folderId}/record/{recordId}")
     public ResponseEntity<ResponseRecordDetailDto> getRecordDetail(
-            @PathVariable(value = "folder_id") Long folderId,
-            @PathVariable(value = "record_id") Long recordId,
+            @PathVariable(value = "folderId") Long folderId,
+            @PathVariable(value = "recordId") Long recordId,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         return ResponseEntity.ok(getRecordService.get(folderId, recordId, details.getUserId()));
@@ -173,10 +173,10 @@ public class RecordController {
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
-    @GetMapping("/folder/{folder_id}/record/{record_id}/analysis")
+    @GetMapping("/folder/{folderId}/record/{recordId}/analysis")
     public ResponseEntity<ResponseAnalysisDto> getAnalysis(
-                    @PathVariable(value = "folder_id") Long folderId,
-                    @PathVariable(value = "record_id") Long recordId,
+                    @PathVariable(value = "folderId") Long folderId,
+                    @PathVariable(value = "recordId") Long recordId,
                     @AuthenticationPrincipal CustomUserDetails details
     ) { return ResponseEntity.ok(getAnalysisService.get(folderId, recordId, details.getUserId())); }
 
@@ -311,9 +311,9 @@ public class RecordController {
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
-    @PostMapping("/folder/{folder_id}/record")
+    @PostMapping("/folder/{folderId}/record")
     public ResponseEntity<Void> createRecord(
-                            @PathVariable(value = "folder_id") Long folderId,
+                            @PathVariable(value = "folderId") Long folderId,
                             @Valid @RequestBody RequestPostRecordDto dto,
                             @AuthenticationPrincipal CustomUserDetails details
     ) {
@@ -353,10 +353,10 @@ public class RecordController {
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
-    @PostMapping("/folder/{folder_id}/record/{record_id}/link")
+    @PostMapping("/folder/{folderId}/record/{recordId}/link")
     public ResponseEntity<Void> addLinkShare(
-            @PathVariable(value = "folder_id", required = false) Long folderId,
-            @PathVariable(value = "record_id", required = false) Long recordId,
+            @PathVariable(value = "folderId", required = false) Long folderId,
+            @PathVariable(value = "recordId", required = false) Long recordId,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         updateShareLinkStatusService.update(folderId, recordId, true, details.getUserId());
@@ -391,10 +391,10 @@ public class RecordController {
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
-    @PatchMapping("/folder/{folder_id}/record/{record_id}/name")
+    @PatchMapping("/folder/{folderId}/record/{recordId}/name")
     public ResponseEntity<Void> modifyRecordName(
-            @PathVariable(value = "folder_id") Long folderId,
-            @PathVariable(value = "record_id") Long recordId,
+            @PathVariable(value = "folderId") Long folderId,
+            @PathVariable(value = "recordId") Long recordId,
             @Valid @RequestBody RequestRecordNameDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
@@ -434,10 +434,10 @@ public class RecordController {
                     }))
             }
     )
-    @PatchMapping("/folder/{folder_id}/record/{record_id}/move")
+    @PatchMapping("/folder/{folderId}/record/{recordId}/move")
     public ResponseEntity<Void> moveRecord(
-            @PathVariable(value = "folder_id") Long folderId,
-            @PathVariable(value = "record_id") Long recordId,
+            @PathVariable(value = "folderId") Long folderId,
+            @PathVariable(value = "recordId") Long recordId,
             @Valid @RequestBody RequestRecordMoveDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
@@ -471,10 +471,10 @@ public class RecordController {
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
-    @PatchMapping("/folder/{folder_id}/record/{record_id}/study")
+    @PatchMapping("/folder/{folderId}/record/{recordId}/study")
     public ResponseEntity<Void> upsertStudyTime(
-            @PathVariable(value = "folder_id") Long folderId,
-            @PathVariable(value = "record_id") Long recordId,
+            @PathVariable(value = "folderId") Long folderId,
+            @PathVariable(value = "recordId") Long recordId,
             @Valid @RequestBody RequestStudyDto dto,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
@@ -509,10 +509,10 @@ public class RecordController {
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
-    @DeleteMapping("/folder/{folder_id}/record/{record_id}")
+    @DeleteMapping("/folder/{folderId}/record/{recordId}")
     public ResponseEntity<Void> deleteRecord(
-            @PathVariable(value = "record_id") Long recordId,
-            @PathVariable(value = "folder_id") Long folderId,
+            @PathVariable(value = "recordId") Long recordId,
+            @PathVariable(value = "folderId") Long folderId,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         deleteRecordService.delete(folderId, recordId, details.getUserId());
@@ -547,10 +547,10 @@ public class RecordController {
                     @ApiResponse(responseCode = "500", ref = "500")
             }
     )
-    @DeleteMapping("/folder/{folder_id}/record/{record_id}/link")
+    @DeleteMapping("/folder/{folderId}/record/{recordId}/link")
     public ResponseEntity<Void> deleteLinkShare(
-            @PathVariable(value = "folder_id") Long folderId,
-            @PathVariable(value = "record_id") Long recordId,
+            @PathVariable(value = "folderId") Long folderId,
+            @PathVariable(value = "recordId") Long recordId,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         updateShareLinkStatusService.update(folderId, recordId, false, details.getUserId());
