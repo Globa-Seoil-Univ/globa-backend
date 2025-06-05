@@ -25,6 +25,8 @@ public class QuizFixture implements Fixture<QuizEntity> {
 
     public static class QuizBuilder {
         private RecordEntity record;
+        private String question = "Default Question";
+        private boolean answer = true;
 
         private QuizBuilder() {}
 
@@ -33,10 +35,20 @@ public class QuizFixture implements Fixture<QuizEntity> {
             return this;
         }
 
+        public QuizBuilder question(String question) {
+            this.question = question;
+            return this;
+        }
+
+        public QuizBuilder answer(boolean answer) {
+            this.answer = answer;
+            return this;
+        }
+
         public QuizEntity build() {
             QuizEntity quiz = new QuizEntity();
-            quiz.setQuestion("Is it the capital of France?");
-            quiz.setAnswer(true);
+            quiz.setQuestion(question);
+            quiz.setAnswer(answer);
             quiz.setRecord(record);
             return quiz;
         }

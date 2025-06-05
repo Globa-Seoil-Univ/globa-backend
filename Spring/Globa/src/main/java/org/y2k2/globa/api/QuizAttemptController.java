@@ -16,6 +16,8 @@ import org.y2k2.globa.application.quiz.dto.request.RequestQuizDto;
 import org.y2k2.globa.application.quizattemp.service.CreateQuizAttemptsService;
 import org.y2k2.globa.common.exception.SwaggerErrorCode;
 
+import java.net.URI;
+
 @RestController
 @ResponseBody
 @RequiredArgsConstructor
@@ -25,7 +27,7 @@ public class QuizAttemptController {
     private final CreateQuizAttemptsService createQuizAttemptsService;
 
     @Operation(
-            summary = "퀴즈 결과 추가",
+            summary = "퀴즈 결과 생성",
             description = "문서에 대해 시도한 퀴즈 결과를 추가합니다.",
             responses = {
                     @ApiResponse(
@@ -52,7 +54,7 @@ public class QuizAttemptController {
             }
     )
     @PostMapping
-    public ResponseEntity<?> postQuiz(
+    public ResponseEntity<?> createQuiz(
             @PathVariable(value = "folder_id") Long folderId,
             @PathVariable(value = "record_id") Long recordId,
             @Valid @RequestBody final RequestQuizDto quizzes,
@@ -64,6 +66,9 @@ public class QuizAttemptController {
                 quizzes,
                 details.getUserId()
         );
-        return ResponseEntity.noContent().build();
+
+        return ResponseEntity.created(
+                URI.create("/user/analysis")
+        ).build();
     }
 }

@@ -32,7 +32,7 @@ import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStat
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 @Slf4j
-public class FolderShareintegrationTest extends IntegrationTest {
+public class FolderShareIntegrationTest extends IntegrationTest {
     @Autowired
     private JWT jwt;
     @Autowired

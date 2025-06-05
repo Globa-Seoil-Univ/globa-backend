@@ -1,7 +1,6 @@
 package org.y2k2.globa.domain.analysis.repository;
 
 import org.y2k2.globa.infrastructure.persistence.analysis.entity.AnalysisEntity;
-import org.y2k2.globa.infrastructure.persistence.section.entity.SectionEntity;
 
 import java.util.List;
 
