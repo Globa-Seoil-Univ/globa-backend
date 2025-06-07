@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitraryIntrospector;
 import com.navercorp.fixturemonkey.jakarta.validation.plugin.JakartaValidationPlugin;
-import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -12,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
@@ -46,14 +44,11 @@ import org.y2k2.globa.infrastructure.persistence.highlight.entity.HighlightEntit
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 import org.y2k2.globa.infrastructure.persistence.section.entity.SectionEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
-import org.y2k2.globa.util.JWTTestProvider;
 
 @Slf4j
 public class CommentIntegrationTest extends IntegrationTest {
     @Autowired
     private JWT jwt;
-    @Autowired
-    private JWTTestProvider jwtTestProvider;
     @Autowired
     private MockMvc mockMvc;
     @Autowired

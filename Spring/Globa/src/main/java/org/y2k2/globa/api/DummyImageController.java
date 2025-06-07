@@ -21,7 +21,7 @@ import org.y2k2.globa.application.dummyimage.service.CreateDummyImageService;
 import org.y2k2.globa.common.exception.SwaggerErrorCode;
 
 @RestController
-@RequestMapping("/dummy")
+@RequestMapping("/dummy/image")
 @ResponseBody
 @RequiredArgsConstructor
 @Tag(name = "DummyImage", description = "임시 이미지 관련 API입니다.")
@@ -58,7 +58,7 @@ public class DummyImageController {
                     }))
             }
     )
-    @PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseDummyImageDto> addDummyImage(
             @Valid RequestDummyImageDto dto,
             @AuthenticationPrincipal CustomUserDetails details
