@@ -10,6 +10,8 @@ import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareEntity;
 import org.y2k2.globa.infrastructure.persistence.inquiry.entity.InquiryEntity;
 import org.y2k2.globa.infrastructure.persistence.notice.entity.NoticeEntity;
+import org.y2k2.globa.infrastructure.persistence.notification.converter.NotificationTypeConverter;
+import org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
@@ -25,8 +27,9 @@ public class NotificationEntity {
     @Column(name = "notification_id", columnDefinition = "INT UNSIGNED")
     private Long notificationId;
 
+    @Convert(converter = NotificationTypeConverter.class)
     @Column(name = "type_id", nullable = false)
-    private Character typeId;
+    private NotificationType typeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)

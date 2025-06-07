@@ -60,7 +60,7 @@ public class NoticeController {
             }
     )
     @GetMapping("/intro")
-    public ResponseEntity<List<ResponseNoticeIntroDto>> getIntroNotices() {
+    public ResponseEntity<ResponseNoticeIntroDto> getIntroNotices() {
         return ResponseEntity.ok().body(getIntroNoticesService.get());
     }
 
@@ -130,6 +130,6 @@ public class NoticeController {
             @AuthenticationPrincipal CustomUserDetails details
     ) {
         Long noticeId = createNoticeService.create(dto, details.getUserId());
-        return ResponseEntity.created(URI.create("/" + noticeId)).build();
+        return ResponseEntity.created(URI.create("/notice/" + noticeId)).build();
     }
 }

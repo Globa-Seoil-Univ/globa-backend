@@ -1,17 +1,8 @@
 package org.y2k2.globa.application.notice.dto.response;
 
-import lombok.Getter;
+import java.util.List;
 
-@Getter
-public class ResponseNoticeIntroDto {
-    private final Long noticeId;
-    private final String thumbnail;
-    private final String bgColor;
-
-    public ResponseNoticeIntroDto(Long noticeId, String thumbnail, String bgColor) {
-        this.noticeId = noticeId;
-        this.thumbnail = thumbnail;
-        this.bgColor = bgColor;
-    }
+public record ResponseNoticeIntroDto(
+        List<NoticeIntroDto> notices
+) {
 }
-

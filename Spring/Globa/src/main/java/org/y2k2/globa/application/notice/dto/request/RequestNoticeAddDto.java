@@ -9,16 +9,16 @@ import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
 
 public record RequestNoticeAddDto(
-        @NotBlank(message = "You must request title field")
+        @NotBlank(message = "제목은 필수 입력 사항입니다.")
         String title,
 
-        @NotBlank(message = "You must request content field")
+        @NotBlank(message = "내용은 필수 입력 사항입니다.")
         String content,
 
-        @NotNull(message = "You must request thumbnail field")
+        @NotNull(message = "썸네일은 필수 입력 사항입니다.")
         MultipartFile thumbnail,
 
-        @NotBlank(message = "You must request bgColor field")
+        @NotBlank(message = "배경색은 필수 입력 사항입니다.")
         String bgColor,
 
         Long[] imageIds

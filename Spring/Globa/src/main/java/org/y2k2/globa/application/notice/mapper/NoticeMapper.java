@@ -8,6 +8,7 @@ import org.y2k2.globa.application.common.dto.file.FileDto;
 import org.y2k2.globa.application.common.mapper.CustomTimestampTranslator;
 import org.y2k2.globa.application.common.mapper.MapCreatedTime;
 import org.y2k2.globa.application.notice.dto.request.RequestNoticeAddDto;
+import org.y2k2.globa.application.notice.dto.response.NoticeIntroDto;
 import org.y2k2.globa.application.notice.dto.response.ResponseNoticeDetailDto;
 import org.y2k2.globa.application.notice.dto.response.ResponseNoticeIntroDto;
 import org.y2k2.globa.infrastructure.persistence.notice.entity.NoticeEntity;
@@ -21,7 +22,7 @@ public interface NoticeMapper {
     @Mapping(source = "noticeId", target = "noticeId")
     @Mapping(source = "thumbnailPath", target = "thumbnail")
     @Mapping(source = "bgColor", target = "bgColor")
-    ResponseNoticeIntroDto toIntroResponseDto(NoticeEntity noticeEntity);
+    NoticeIntroDto toIntroNoticeDto(NoticeEntity noticeEntity);
 
     @Mapping(source = "title", target = "title")
     @Mapping(source = "content", target = "content")

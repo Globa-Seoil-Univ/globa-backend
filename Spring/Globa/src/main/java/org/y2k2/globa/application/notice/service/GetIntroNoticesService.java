@@ -15,11 +15,13 @@ import java.util.List;
 public class GetIntroNoticesService {
     private final NoticeRepository noticeRepository;
 
-    public List<ResponseNoticeIntroDto> get() {
+    public ResponseNoticeIntroDto get() {
         List<NoticeEntity> notices = noticeRepository.getNotices(Limit.of(3));
 
-        return notices.stream()
-                .map(NoticeMapper.INSTANCE::toIntroResponseDto)
-                .toList();
+        return new ResponseNoticeIntroDto(
+                notices.stream()
+                        .map(NoticeMapper.INSTANCE::toIntroNoticeDto)
+                        .toList()
+        );
     }
 }
