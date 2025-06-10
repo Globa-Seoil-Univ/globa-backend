@@ -1,16 +1,17 @@
 package org.y2k2.globa.application.notification.dto.common;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Setter
 @Getter
 public class NotificationParameters {
-    private Boolean notice;
-    private Boolean invite;
-    private Boolean share;
-    private Boolean record;
-    private Boolean inquiry;
+    private Boolean notice = false;
+    private Boolean invite = false;
+    private Boolean share = false;
+    private Boolean record = false;
+    private Boolean inquiry = false;
 
     public NotificationParameters() {
         this.notice = false;

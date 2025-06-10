@@ -21,7 +21,7 @@ public class NotificationReadEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "read_id", columnDefinition = "INT UNSIGNED")
-    private Long read_id;
+    private Long readId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)

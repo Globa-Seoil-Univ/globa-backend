@@ -32,35 +32,35 @@ public class CreateNotificationUseCase implements VoidUseCase<CreateNotification
         switch (sendMessage.getNotificationType()) {
             case NOTICE:
                 notification = NotificationMapper.INSTANCE.toNotificationWithNotice((RequestNotificationWithTopicDto) sendMessage);
-                notification.setTypeId(NotificationType.NOTICE);
+                notification.setType(NotificationType.NOTICE);
                 break;
             case SHARE_FOLDER_ADD_FILE:
                 notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareAddUser((RequestNotificationWithFolderShareAddUserDto) sendMessage);
-                notification.setTypeId(NotificationType.SHARE_FOLDER_ADD_FILE);
+                notification.setType(NotificationType.SHARE_FOLDER_ADD_FILE);
                 break;
             case SHARE_FOLDER_ADD_USER:
                 notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareAddUser((RequestNotificationWithFolderShareAddUserDto) sendMessage);
-                notification.setTypeId(NotificationType.SHARE_FOLDER_ADD_USER);
+                notification.setType(NotificationType.SHARE_FOLDER_ADD_USER);
                 break;
             case SHARE_FOLDER_ADD_COMMENT:
                 notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareComment((RequestNotificationWithFolderShareCommentDto) sendMessage);
-                notification.setTypeId(NotificationType.SHARE_FOLDER_ADD_COMMENT);
+                notification.setType(NotificationType.SHARE_FOLDER_ADD_COMMENT);
                 break;
             case UPLOAD_SUCCESS:
                 notification = NotificationMapper.INSTANCE.toNotificationWithNotice((RequestNotificationWithTopicDto) sendMessage);
-                notification.setTypeId(NotificationType.UPLOAD_SUCCESS);
+                notification.setType(NotificationType.UPLOAD_SUCCESS);
                 break;
             case UPLOAD_FAILED:
                 notification = NotificationMapper.INSTANCE.toNotificationWithNotice((RequestNotificationWithTopicDto) sendMessage);
-                notification.setTypeId(NotificationType.UPLOAD_FAILED);
+                notification.setType(NotificationType.UPLOAD_FAILED);
                 break;
             case INQUIRY:
                 notification = NotificationMapper.INSTANCE.toNotificationWithInquiry((RequestNotificationWithInquiryDto) sendMessage);
-                notification.setTypeId(NotificationType.INQUIRY);
+                notification.setType(NotificationType.INQUIRY);
                 break;
             case SHARE_FOLDER_INVITE:
                 notification = NotificationMapper.INSTANCE.toNotificationWithInvitation((RequestNotificationWithInvitationDto) sendMessage);
-                notification.setTypeId(NotificationType.SHARE_FOLDER_INVITE);
+                notification.setType(NotificationType.SHARE_FOLDER_INVITE);
                 break;
             default:
                 return null;

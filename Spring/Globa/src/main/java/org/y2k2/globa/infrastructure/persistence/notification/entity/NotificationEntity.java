@@ -29,7 +29,7 @@ public class NotificationEntity {
 
     @Convert(converter = NotificationTypeConverter.class)
     @Column(name = "type_id", nullable = false)
-    private NotificationType typeId;
+    private NotificationType type;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)

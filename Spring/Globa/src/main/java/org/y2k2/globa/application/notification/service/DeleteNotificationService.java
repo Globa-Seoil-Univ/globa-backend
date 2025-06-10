@@ -35,7 +35,7 @@ public class DeleteNotificationService {
 
         UserEntity user = findUserUseCase.execute(userId);
 
-        NotificationType type = notification.getTypeId();
+        NotificationType type = notification.getType();
         if (type == NotificationType.NOTICE || isShareNotification(notification)) {
             // 공지, 공유 관련 알림은 불특정 다수에게 전달되는 알림으로 특정 사용자만 삭제한 것으로 처리
             NotificationReadEntity readEntity = notificationReadRepository.getNotificationRead(notificationId)
@@ -48,8 +48,8 @@ public class DeleteNotificationService {
     }
 
     private boolean isShareNotification(NotificationEntity notification) {
-        return notification.getTypeId() == NotificationType.SHARE_FOLDER_ADD_COMMENT ||
-                notification.getTypeId() == NotificationType.SHARE_FOLDER_ADD_FILE ||
-                notification.getTypeId() == NotificationType.SHARE_FOLDER_ADD_USER;
+        return notification.getType() == NotificationType.SHARE_FOLDER_ADD_COMMENT ||
+                notification.getType() == NotificationType.SHARE_FOLDER_ADD_FILE ||
+                notification.getType() == NotificationType.SHARE_FOLDER_ADD_USER;
     }
 }

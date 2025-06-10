@@ -20,9 +20,9 @@ public class VerifyModifyNotificationUseCase implements VoidUseCase<VerifyModify
     }
 
     private boolean isShareNotification(NotificationEntity notification) {
-        return notification.getTypeId() == NotificationType.SHARE_FOLDER_ADD_COMMENT ||
-                notification.getTypeId() == NotificationType.SHARE_FOLDER_ADD_FILE ||
-                notification.getTypeId() == NotificationType.SHARE_FOLDER_ADD_USER;
+        return notification.getType() == NotificationType.SHARE_FOLDER_ADD_COMMENT ||
+                notification.getType() == NotificationType.SHARE_FOLDER_ADD_FILE ||
+                notification.getType() == NotificationType.SHARE_FOLDER_ADD_USER;
     }
 
     private boolean isAccessibleShareNotification(NotificationEntity notification, Long userId) {

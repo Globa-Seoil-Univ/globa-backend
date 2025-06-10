@@ -94,7 +94,7 @@ public class NotificationFixture implements Fixture<NotificationEntity> {
 
         public NotificationEntity build() {
             NotificationEntity entity = new NotificationEntity();
-            entity.setTypeId(type);
+            entity.setType(type);
             entity.setReceiver(receiver);
             entity.setSender(sender);
             entity.setFolderShare(folderShare);
