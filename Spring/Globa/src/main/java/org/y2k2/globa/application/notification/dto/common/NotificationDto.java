@@ -12,7 +12,7 @@ import lombok.Setter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class NotificationDto {
     private Long notificationId;
-    private String type;
+    private Character type;
     private Boolean isRead;
     private String createdTime;
 

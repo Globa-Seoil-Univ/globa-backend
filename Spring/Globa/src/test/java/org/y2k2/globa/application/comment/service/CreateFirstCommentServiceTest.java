@@ -113,7 +113,6 @@ public class CreateFirstCommentServiceTest {
                 .set("user.userId", idsDto.userId())
                 .set("highlight.highlightId", idsDto.highlightId())
                 .set("isDeleted", false)
-                .set("hasReply", false)
                 .set("deletedTime", null)
                 .set("content", request.content())
                 .sample();

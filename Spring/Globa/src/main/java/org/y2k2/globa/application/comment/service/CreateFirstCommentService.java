@@ -75,8 +75,7 @@ public class CreateFirstCommentService {
         sendCommentNotificationUseCase.execute(SendCommentNotificationCommand.of(
                 user,
                 section.getRecord().getFolder(),
-                section.getRecord(),
-                folderShare
+                section.getRecord()
         ));
 
         return savedHighlight.getHighlightId();

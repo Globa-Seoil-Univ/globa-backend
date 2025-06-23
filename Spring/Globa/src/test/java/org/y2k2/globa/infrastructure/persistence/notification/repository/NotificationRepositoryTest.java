@@ -78,7 +78,6 @@ public class NotificationRepositoryTest {
     private UserEntity user;
     private UserEntity otherUser;
     private FolderEntity folder;
-    private FolderShareEntity ownerShare;
     private FolderShareEntity editorShare;
     private RecordEntity record;
     private CommentEntity comment;
@@ -106,7 +105,7 @@ public class NotificationRepositoryTest {
         FolderRoleEntity owner = folderRoleFixture.getEntity(FolderRole.OWNER);
         FolderRoleEntity editor = folderRoleFixture.getEntity(FolderRole.EDITOR);
 
-        ownerShare = folderShareFixture.save(
+        folderShareFixture.save(
                 FolderShareFixture.builder()
                         .folder(folder)
                         .role(owner)
@@ -935,11 +934,26 @@ public class NotificationRepositoryTest {
     @Test
     @DisplayName("알림 목록 조회 - 성공 (폴더 공유 초대)")
     void getNotificationsShareInvite() {
+        UserEntity otherUser2 = userFixture.save(
+                UserFixture.builder()
+                        .name("otherUser2")
+                        .build()
+        );
+        FolderShareEntity readerShare = folderShareFixture.save(
+                FolderShareFixture.builder()
+                        .folder(folder)
+                        .role(folderRoleFixture.getEntity(FolderRole.READER))
+                        .owner(user)
+                        .target(otherUser2)
+                        .status(InvitationStatus.PENDING)
+                        .build()
+        );
+
         NotificationEntity notification = NotificationFixture.builder()
                 .sender(user)
-                .receiver(otherUser)
+                .receiver(otherUser2)
                 .folder(folder)
-                .folderShare(editorShare)
+                .folderShare(readerShare)
                 .type(NotificationType.SHARE_FOLDER_INVITE)
                 .build();
         Pageable pageable = PageRequest.of(0, 10);
@@ -952,7 +966,7 @@ public class NotificationRepositoryTest {
         parameters.setInvite(true);
 
         Page<NotificationProjection> notifications = notificationRepository.getNotifications(
-                otherUser.getUserId(),
+                otherUser2.getUserId(),
                 parameters,
                 pageable
         );
@@ -1279,7 +1293,7 @@ public class NotificationRepositoryTest {
                 .type(NotificationType.INQUIRY)
                 .build();
 
-        List<NotificationEntity> notifications = saveRepository.saveAll(List.of(
+        saveRepository.saveAll(List.of(
                 noticeNotification,
                 shareInviteNotification,
                 shareAddFileNotification,

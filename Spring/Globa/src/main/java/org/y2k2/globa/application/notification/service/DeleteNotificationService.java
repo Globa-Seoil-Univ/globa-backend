@@ -41,6 +41,7 @@ public class DeleteNotificationService {
             NotificationReadEntity readEntity = notificationReadRepository.getNotificationRead(notificationId)
                     .orElseGet(() -> NotificationReadMapper.INSTANCE.toEntity(notification, user, true));
 
+            readEntity.setIsDeleted(true);
             notificationReadRepository.save(readEntity);
         } else {
             notificationRepository.delete(notification);

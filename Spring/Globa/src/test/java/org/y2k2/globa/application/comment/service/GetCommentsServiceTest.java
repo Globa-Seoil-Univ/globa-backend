@@ -1,7 +1,6 @@
 package org.y2k2.globa.application.comment.service;
 
 import com.navercorp.fixturemonkey.FixtureMonkey;
-import com.navercorp.fixturemonkey.api.introspector.BeanArbitraryIntrospector;
 import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitraryIntrospector;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -25,12 +24,9 @@ import org.y2k2.globa.domain.comment.repository.CommentRepository;
 import org.y2k2.globa.domain.highlight.repository.HighlightRepository;
 import org.y2k2.globa.infrastructure.persistence.comment.projection.CommentWithHasReplyProjection;
 import org.y2k2.globa.infrastructure.persistence.comment.projection.CommentWithHasReplyProjectionImpl;
-import org.y2k2.globa.infrastructure.persistence.quizattemp.projection.QuizGradeProjection;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 public class GetCommentsServiceTest {

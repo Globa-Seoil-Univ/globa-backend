@@ -16,7 +16,7 @@ import org.y2k2.globa.application.common.dto.auth.CustomUserDetails;
 import org.y2k2.globa.application.foldershare.command.VerifyInvitationCommand;
 import org.y2k2.globa.application.foldershare.usecase.VerifyInvitationUseCase;
 import org.y2k2.globa.application.notification.command.CreateNotificationCommand;
-import org.y2k2.globa.application.notification.dto.common.RequestNotificationWithFolderShareAddUserDto;
+import org.y2k2.globa.application.notification.dto.common.RequestNotificationWithFolderShareDto;
 import org.y2k2.globa.application.notification.usecase.CreateNotificationUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
@@ -82,7 +82,7 @@ public class AcceptInvitationServiceTest {
                 .set("folderShare.shareId", shareId)
                 .set("sender.userId", receiverId)
                 .sample();
-        RequestNotificationWithFolderShareAddUserDto notification = RequestNotificationWithFolderShareAddUserDto.builder()
+        RequestNotificationWithFolderShareDto notification = RequestNotificationWithFolderShareDto.builder()
                 .sender(folderShare.getTargetUser())
                 .folder(folderShare.getFolder())
                 .folderShare(folderShare)

@@ -9,7 +9,7 @@ import org.y2k2.globa.application.common.dto.auth.CustomUserDetails;
 import org.y2k2.globa.application.foldershare.command.VerifyInvitationCommand;
 import org.y2k2.globa.application.foldershare.usecase.VerifyInvitationUseCase;
 import org.y2k2.globa.application.notification.command.CreateNotificationCommand;
-import org.y2k2.globa.application.notification.dto.common.RequestNotificationWithFolderShareAddUserDto;
+import org.y2k2.globa.application.notification.dto.common.RequestNotificationWithFolderShareDto;
 import org.y2k2.globa.application.notification.usecase.CreateNotificationUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
@@ -51,7 +51,7 @@ public class AcceptInvitationService {
                 receiver.getUserId()
         ).ifPresent(notificationRepository::delete);
 
-        RequestNotificationWithFolderShareAddUserDto notification = RequestNotificationWithFolderShareAddUserDto.builder()
+        RequestNotificationWithFolderShareDto notification = RequestNotificationWithFolderShareDto.builder()
                 .sender(folderShare.getTargetUser())
                 .folder(folderShare.getFolder())
                 .folderShare(folderShare)
@@ -73,8 +73,8 @@ public class AcceptInvitationService {
     @Async
     public void sendNotification(String username, String folderTitle, Long folderId, Long excludeId) {
         List<FolderShareEntity> targetFolderShares = folderShareRepository.getAllShareInvitationsWithoutMe(folderId, excludeId);
-        List<RequestNotificationWithFolderShareAddUserDto> notificationInfos = targetFolderShares.stream()
-                .map(targetFolderShare -> RequestNotificationWithFolderShareAddUserDto.builder()
+        List<RequestNotificationWithFolderShareDto> notificationInfos = targetFolderShares.stream()
+                .map(targetFolderShare -> RequestNotificationWithFolderShareDto.builder()
                         .receiver(targetFolderShare.getTargetUser())
                         .folder(targetFolderShare.getFolder())
                         .folderShare(targetFolderShare)

@@ -12,35 +12,52 @@ import org.y2k2.globa.application.notification.dto.common.*;
 import org.y2k2.globa.infrastructure.persistence.notification.entity.NotificationEntity;
 import org.y2k2.globa.infrastructure.persistence.notification.projection.NotificationProjection;
 
-@Mapper(uses = {CustomTimestampMapper.class})
+@Mapper(uses = CustomTimestampMapper.class)
 public interface NotificationMapper {
     NotificationMapper INSTANCE = Mappers.getMapper(NotificationMapper.class);
 
     @Mapping(source = "sender", target = "sender")
     @Mapping(source = "notice", target = "notice")
-    NotificationEntity toNotificationWithNotice(RequestNotificationWithTopicDto dto);
+    @Mapping(source = "notificationType", target = "type")
+    NotificationEntity toNotificationWithBasic(RequestNotificationWithTopicDto dto);
+
+    @Mapping(source = "sender", target = "sender")
+    @Mapping(source = "receiver", target = "receiver")
+    @Mapping(source = "folder", target = "folder")
+    @Mapping(source = "record", target = "record")
+    @Mapping(source = "notificationType", target = "type")
+    NotificationEntity toNotificationWithUploadSuccess(RequestNotificationWithUploadSuccessDto dto);
+
+    @Mapping(source = "sender", target = "sender")
+    @Mapping(source = "receiver", target = "receiver")
+    @Mapping(source = "notificationType", target = "type")
+    NotificationEntity toNotificationWithUploadFailed(SendMessage dto);
 
     @Mapping(source = "sender", target = "sender")
     @Mapping(source = "receiver", target = "receiver")
     @Mapping(source = "inquiry", target = "inquiry")
+    @Mapping(source = "notificationType", target = "type")
     NotificationEntity toNotificationWithInquiry(RequestNotificationWithInquiryDto dto);
 
     @Mapping(source = "sender", target = "sender")
     @Mapping(source = "receiver", target = "receiver")
     @Mapping(source = "folder", target = "folder")
     @Mapping(source = "folderShare", target = "folderShare")
+    @Mapping(source = "notificationType", target = "type")
     NotificationEntity toNotificationWithInvitation(RequestNotificationWithInvitationDto dto);
 
     @Mapping(source = "sender", target = "sender")
     @Mapping(source = "folder", target = "folder")
     @Mapping(source = "folderShare", target = "folderShare")
-    NotificationEntity toNotificationWithFolderShareAddUser(RequestNotificationWithFolderShareAddUserDto dto);
+    @Mapping(source = "notificationType", target = "type")
+    NotificationEntity toNotificationWithFolderShare(RequestNotificationWithFolderShareDto dto);
 
     @Mapping(source = "sender", target = "sender")
     @Mapping(source = "folder", target = "folder")
     @Mapping(source = "folderShare", target = "folderShare")
     @Mapping(source = "record", target = "record")
     @Mapping(source = "comment", target = "comment")
+    @Mapping(source = "notificationType", target = "type")
     NotificationEntity toNotificationWithFolderShareComment(RequestNotificationWithFolderShareCommentDto dto);
 
     @Mapping(source = "notificationId", target = "notificationId")

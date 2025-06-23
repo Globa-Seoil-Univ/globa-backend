@@ -7,7 +7,7 @@ import org.y2k2.globa.infrastructure.persistence.foldershare.entity.FolderShareE
 
 @Getter
 @SuperBuilder
-public class RequestNotificationWithFolderShareAddUserDto extends SendMessage {
+public class RequestNotificationWithFolderShareDto extends SendMessage {
     private FolderEntity folder;
     private FolderShareEntity folderShare;
 }

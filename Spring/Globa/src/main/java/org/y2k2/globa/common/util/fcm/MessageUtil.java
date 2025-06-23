@@ -40,9 +40,9 @@ public class MessageUtil {
     }
 
     private FcmData extractFcmData(SendMessage sendMessage) {
-        if (sendMessage instanceof RequestNotificationWithFolderShareAddUserDto) {
+        if (sendMessage instanceof RequestNotificationWithFolderShareDto) {
             return FcmData.builder()
-                    .folderId(((RequestNotificationWithFolderShareAddUserDto) sendMessage).getFolder().getFolderId())
+                    .folderId(((RequestNotificationWithFolderShareDto) sendMessage).getFolder().getFolderId())
                     .build();
         } else if (sendMessage instanceof RequestNotificationWithFolderShareCommentDto) {
             return FcmData.builder()

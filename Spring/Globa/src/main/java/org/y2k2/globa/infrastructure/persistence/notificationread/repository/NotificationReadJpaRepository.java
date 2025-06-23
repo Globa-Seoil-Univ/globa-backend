@@ -6,5 +6,5 @@ import org.y2k2.globa.infrastructure.persistence.notificationread.entity.Notific
 import java.util.Optional;
 
 public interface NotificationReadJpaRepository extends JpaRepository<NotificationReadEntity, Long> {
-    Optional<NotificationReadEntity> findByNotificationNotificationId(Long notification_id);
+    Optional<NotificationReadEntity> findByNotificationNotificationId(Long notificationId);
 }

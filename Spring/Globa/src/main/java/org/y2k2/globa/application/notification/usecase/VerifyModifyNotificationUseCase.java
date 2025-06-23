@@ -35,11 +35,18 @@ public class VerifyModifyNotificationUseCase implements VoidUseCase<VerifyModify
 
     @Override
     public void execute(VerifyModifyNotificationCommand command) {
-        if (!isAccessibleNotification(command.notification(), command.userId())) {
+        if (command.notification().getType() == NotificationType.NOTICE) {
+            // 공지사항 알림은 모든 사용자에게 전달되는 알림으로 권한 검증을 하지 않음
+            return;
+        }
+
+        boolean isShareNotification = isShareNotification(command.notification());
+
+        if (!isShareNotification && !isAccessibleNotification(command.notification(), command.userId())) {
             throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_NOTIFICATION);
         }
 
-        if (isShareNotification(command.notification()) && !isAccessibleShareNotification(command.notification(), command.userId())) {
+        if (isShareNotification && !isAccessibleShareNotification(command.notification(), command.userId())) {
             throw new CustomException(ErrorCode.NOT_DESERVE_ACCESS_NOTIFICATION);
         }
     }

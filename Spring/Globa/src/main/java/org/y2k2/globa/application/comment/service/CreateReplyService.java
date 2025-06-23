@@ -69,8 +69,7 @@ public class CreateReplyService {
         sendCommentNotificationUseCase.execute(SendCommentNotificationCommand.of(
                 user,
                 info.section().getRecord().getFolder(),
-                info.section().getRecord(),
-                info.folderShare()
+                info.section().getRecord()
         ));
     }
 

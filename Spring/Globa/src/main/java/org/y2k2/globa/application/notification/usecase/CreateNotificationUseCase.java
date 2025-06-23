@@ -9,10 +9,6 @@ import org.y2k2.globa.application.notification.mapper.NotificationMapper;
 import org.y2k2.globa.common.usecase.VoidUseCase;
 import org.y2k2.globa.domain.notification.repository.NotificationRepository;
 import org.y2k2.globa.infrastructure.persistence.notification.entity.NotificationEntity;
-import org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Component
@@ -31,36 +27,25 @@ public class CreateNotificationUseCase implements VoidUseCase<CreateNotification
 
         switch (sendMessage.getNotificationType()) {
             case NOTICE:
-                notification = NotificationMapper.INSTANCE.toNotificationWithNotice((RequestNotificationWithTopicDto) sendMessage);
-                notification.setType(NotificationType.NOTICE);
+                notification = NotificationMapper.INSTANCE.toNotificationWithBasic((RequestNotificationWithTopicDto) sendMessage);
                 break;
-            case SHARE_FOLDER_ADD_FILE:
-                notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareAddUser((RequestNotificationWithFolderShareAddUserDto) sendMessage);
-                notification.setType(NotificationType.SHARE_FOLDER_ADD_FILE);
+            case UPLOAD_SUCCESS:
+                notification = NotificationMapper.INSTANCE.toNotificationWithUploadSuccess((RequestNotificationWithUploadSuccessDto) sendMessage);
                 break;
-            case SHARE_FOLDER_ADD_USER:
-                notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareAddUser((RequestNotificationWithFolderShareAddUserDto) sendMessage);
-                notification.setType(NotificationType.SHARE_FOLDER_ADD_USER);
+            case UPLOAD_FAILED:
+                notification = NotificationMapper.INSTANCE.toNotificationWithUploadFailed(sendMessage);
+                break;
+            case SHARE_FOLDER_ADD_FILE, SHARE_FOLDER_ADD_USER:
+                notification = NotificationMapper.INSTANCE.toNotificationWithFolderShare((RequestNotificationWithFolderShareDto) sendMessage);
                 break;
             case SHARE_FOLDER_ADD_COMMENT:
                 notification = NotificationMapper.INSTANCE.toNotificationWithFolderShareComment((RequestNotificationWithFolderShareCommentDto) sendMessage);
-                notification.setType(NotificationType.SHARE_FOLDER_ADD_COMMENT);
-                break;
-            case UPLOAD_SUCCESS:
-                notification = NotificationMapper.INSTANCE.toNotificationWithNotice((RequestNotificationWithTopicDto) sendMessage);
-                notification.setType(NotificationType.UPLOAD_SUCCESS);
-                break;
-            case UPLOAD_FAILED:
-                notification = NotificationMapper.INSTANCE.toNotificationWithNotice((RequestNotificationWithTopicDto) sendMessage);
-                notification.setType(NotificationType.UPLOAD_FAILED);
                 break;
             case INQUIRY:
                 notification = NotificationMapper.INSTANCE.toNotificationWithInquiry((RequestNotificationWithInquiryDto) sendMessage);
-                notification.setType(NotificationType.INQUIRY);
                 break;
             case SHARE_FOLDER_INVITE:
                 notification = NotificationMapper.INSTANCE.toNotificationWithInvitation((RequestNotificationWithInvitationDto) sendMessage);
-                notification.setType(NotificationType.SHARE_FOLDER_INVITE);
                 break;
             default:
                 return null;
