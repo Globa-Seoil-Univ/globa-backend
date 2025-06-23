@@ -39,7 +39,7 @@ def load_reference_text(path):
 
         # 참조 텍스트 파일이 없으면 eng_master.txt 사용
         if not os.path.exists(reference_file):
-            reference_file = "gisa.txt"
+            reference_file = "eng_master.txt"
 
         # 파일이 존재하면 내용 읽기
         if os.path.exists(reference_file):
@@ -59,7 +59,7 @@ def stt2(path: str, lan: str) -> List[STTResults]:
     processed_url = preprocess_audio(url, path)
 
     # stt_results = whisper_manager.stt(path=url, lan=lan)
-    stt_results = whisper_manager.ensemble_stt(path=processed_url, lan=lan)
+    stt_results = whisper_manager.enhance_accuracy_ensemble_stt(path=processed_url, lan=lan)
     # 참조 텍스트 로드 (WhisperManager에서 사용한 것과 동일한 방식)
     reference_text = load_reference_text(path=url)
 
@@ -104,7 +104,7 @@ def preprocess_audio(audio_path: str, original_path: str) -> str:
         # 1. 오디오 로드
         try:
             # librosa를 사용한 로드 (리샘플링 지원)
-            y, sr = librosa.load(audio_path, sr=16000)  # 16kHz로 리샘플링, 8000도 가능
+                y, sr = librosa.load(audio_path, sr=16000)  # 16kHz로 리샘플링, 8000도 가능
         except Exception as e:
             print(f"librosa 로드 실패, pydub 시도: {e}")
             # librosa 실패 시 pydub로 시도

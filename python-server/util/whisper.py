@@ -716,7 +716,7 @@ class WhisperManager:
 
         # 결과 저장
         file_name = os.path.basename(path)
-        output_path = f"./bagging_{file_name}.json"
+        output_path = f"./output/bagging_{file_name}.json"
         self.save_stt_results_to_json(final_results, output_path)
         self.logger.info(f"배깅 앙상블 STT 결과가 {output_path}에 저장되었습니다.")
 
@@ -1038,7 +1038,7 @@ class WhisperManager:
 
         # 결과 저장
         file_name = os.path.basename(path)
-        output_path = f"./bagging_{file_name}.json"
+        output_path = f"./output/bagging_{file_name}.json"
         self.save_stt_results_to_json(final_results, output_path)
         self.logger.info(f"배깅 앙상블 STT 결과가 {output_path}에 저장되었습니다.")
 
@@ -1219,3 +1219,566 @@ class WhisperManager:
         special_score = (1 - min(special_ratio * 5, 1.0)) * 0.2
 
         return length_score + sentence_score + diversity_score + special_score
+
+    def enhanced_wer_ensemble_stt(self, path: str, lan: str):
+        """
+        ResourceMonitor 방식을 활용한 WER 최적화 앙상블 STT
+        """
+        self.logger.info(f"WER 최적화 앙상블 STT 시작: {os.path.basename(path)}")
+
+        # 리소스 모니터링 시작
+        self.resource_monitor.start_monitoring()
+
+        # 모니터링 스레드 설정
+        import threading
+        stop_monitoring = False
+
+        def monitor_resources():
+            while not stop_monitoring:
+                self.resource_monitor.sample_resource_usage()
+                time.sleep(0.5)  # 0.5초마다 샘플링
+
+        monitor_thread = threading.Thread(target=monitor_resources)
+        monitor_thread.daemon = True
+        monitor_thread.start()
+
+        try:
+            # 1단계: 다중 설정으로 병렬 인식 수행
+            configs = self._get_optimal_configs(lan)
+
+            all_segments = []
+
+            for config_name, config in configs.items():
+                self.logger.info(f"설정 '{config_name}'으로 인식 시작")
+
+                segments, info = self.model.transcribe(
+                    path,
+                    initial_prompt=self._get_enhanced_prompt(lan),
+                    **config
+                )
+
+                # 결과 저장
+                results = [STTResults(text=s.text, start=s.start, end=s.end) for s in segments]
+
+                # 세그먼트 품질 평가
+                for result in results:
+                    quality_score = self._calculate_segment_quality(result, lan)
+                    all_segments.append((config_name, result, quality_score))
+
+                self.logger.info(f"설정 '{config_name}' 완료: {len(results)}개 세그먼트")
+
+                # 메모리 즉시 확보
+                gc.collect()
+
+            # 2단계: 세그먼트 통합 및 최적화
+            self.logger.info("세그먼트 통합 및 최적화 시작")
+            optimized_segments = self._integrate_segments_by_quality(all_segments)
+
+            # 3단계: 오류 교정 및 후처리
+            self.logger.info("텍스트 오류 교정 및 후처리 시작")
+            corrected_segments = self._apply_error_corrections(optimized_segments, lan)
+
+            # 4단계: 최종 정리 및 일관성 확보
+            final_segments = self._ensure_consistency(corrected_segments)
+
+            self.logger.info(f"WER 최적화 앙상블 완료: {len(final_segments)}개 세그먼트")
+
+            # 결과 저장
+            file_name = os.path.basename(path)
+            output_path = f"./wer_optimized_{file_name}.json"
+            self.save_stt_results_to_json(final_segments, output_path)
+
+            return final_segments
+
+        except Exception as e:
+            self.logger.error(f"WER 최적화 앙상블 처리 중 오류: {str(e)}")
+            raise
+
+        finally:
+            # 모니터링 중지
+            stop_monitoring = True
+            monitor_thread.join(timeout=1.0)
+
+            # 리소스 모니터링 종료 및 결과 수집
+            resource_metrics = self.resource_monitor.stop_monitoring()
+
+            # 참조 텍스트가 있으면 WER 계산
+            reference_text = self.load_reference_text(path)
+            if reference_text:
+                performance_metrics = self.calculate_metrics(final_segments, reference_text)
+                all_metrics = {**resource_metrics, **performance_metrics}
+                self.logger.info(f"WER: {performance_metrics['wer']:.4f}, CER: {performance_metrics['cer']:.4f}")
+            else:
+                all_metrics = resource_metrics
+
+            # 지표 기록
+            model_info = {**self.model_info, "ensemble_method": "wer_optimized"}
+            self.resource_monitor.log_resources(all_metrics, model_info)
+
+    def _get_optimal_configs(self, lan):
+        """언어별 최적 설정 구성"""
+        base_config = {
+            "language": lan,
+            "beam_size": 8,
+            "temperature": 0.0,
+            "condition_on_previous_text": True,
+            "vad_filter": True,
+            "word_timestamps": True,
+            "repetition_penalty": 1.2,
+            "no_repeat_ngram_size": 3,
+            "suppress_blank": True,
+            "suppress_tokens": [-1],
+        }
+
+        # 한국어 특화 설정
+        if lan == "ko":
+            return {
+                "high_precision": {
+                    **base_config,
+                    "beam_size": 10,
+                    "best_of": 5,
+                    "vad_parameters": {
+                        "min_silence_duration_ms": 400,
+                        "threshold": 0.45,  # 중간 민감도
+                        "speech_pad_ms": 200
+                    }
+                },
+                "high_recall": {
+                    **base_config,
+                    "beam_size": 7,
+                    "best_of": 3,
+                    "vad_parameters": {
+                        "min_silence_duration_ms": 300,
+                        "threshold": 0.35,  # 높은 민감도
+                        "speech_pad_ms": 250
+                    }
+                },
+                "balanced": {
+                    **base_config,
+                    "beam_size": 5,
+                    "best_of": 2,
+                    "vad_parameters": {
+                        "min_silence_duration_ms": 350,
+                        "threshold": 0.4,
+                        "speech_pad_ms": 220
+                    }
+                }
+            }
+        # 영어 특화 설정
+        elif lan == "en":
+            return {
+                "high_precision": {
+                    **base_config,
+                    "beam_size": 8,
+                    "best_of": 4,
+                    "vad_parameters": {
+                        "min_silence_duration_ms": 450,
+                        "threshold": 0.5,
+                        "speech_pad_ms": 180
+                    }
+                },
+                "high_recall": {
+                    **base_config,
+                    "beam_size": 6,
+                    "best_of": 3,
+                    "vad_parameters": {
+                        "min_silence_duration_ms": 350,
+                        "threshold": 0.4,
+                        "speech_pad_ms": 220
+                    }
+                }
+            }
+        # 일본어 특화 설정
+        elif lan == "ja":
+            return {
+                "high_precision": {
+                    **base_config,
+                    "beam_size": 9,
+                    "best_of": 4,
+                    "vad_parameters": {
+                        "min_silence_duration_ms": 420,
+                        "threshold": 0.45,
+                        "speech_pad_ms": 210
+                    }
+                },
+                "adaptive": {
+                    **base_config,
+                    "beam_size": 6,
+                    "best_of": 3,
+                    "vad_parameters": {
+                        "min_silence_duration_ms": 380,
+                        "threshold": 0.42,
+                        "speech_pad_ms": 230
+                    }
+                }
+            }
+        # 기타 언어
+        else:
+            return {
+                "standard": {
+                    **base_config,
+                    "beam_size": 8,
+                    "best_of": 3,
+                    "vad_parameters": {
+                        "min_silence_duration_ms": 400,
+                        "threshold": 0.45,
+                        "speech_pad_ms": 200
+                    }
+                }
+            }
+
+    def _get_enhanced_prompt(self, lan):
+        """언어별 향상된 프롬프트"""
+        if lan == "ko":
+            return """이것은 한국어 대화입니다. 전문용어와 고유명사에 주의하면서 정확하게 받아적으세요.
+                     숫자 표현을 아라비아 숫자로 변환하고, 문장 부호를 적절히 사용하세요.
+                     '음', '어', '아' 같은 간투사는 필요한 경우가 아니면 생략하세요."""
+        elif lan == "ja":
+            return """これは日本語の会話です。専門用語と固有名詞に注意しながら、正確に書き起こしてください。
+                    数字の表現をアラビア数字に変換し、句読点を適切に使用してください。
+                    「あの」「えー」「うーん」などの間投詞は必要でない限り省略してください。"""
+        elif lan == "en":
+            return """This is an English conversation. Transcribe accurately, paying attention to technical terms and proper nouns.
+                     Convert number expressions to Arabic numerals and use punctuation appropriately.
+                     Omit fillers like 'um', 'uh', 'like' unless they are necessary."""
+        else:
+            return "Please transcribe this conversation accurately, with attention to specialized terminology."
+
+    def _calculate_segment_quality(self, segment, lan):
+        """세그먼트 품질 점수 계산"""
+        quality = 0.5  # 기본 점수
+        text = segment.text.strip()
+        duration = segment.end - segment.start
+
+        if not text:
+            return 0.1  # 빈 텍스트는 매우 낮은 점수
+
+        # 1. 텍스트 길이 대비 시간 비율
+        words = text.split()
+        words_per_second = len(words) / max(duration, 0.1)
+
+        if 0.5 <= words_per_second <= 3.0:  # 적정 발화 속도
+            quality += 0.15
+        elif words_per_second < 0.3 or words_per_second > 4.0:  # 비정상적 속도
+            quality -= 0.2
+
+        # 2. 문장 완성도
+        if any(text.endswith(c) for c in ['.', '!', '?', '。', '！', '？']):
+            quality += 0.1
+
+        # 3. 세그먼트 길이 적절성
+        if 1.0 <= duration <= 8.0:  # 적정 세그먼트 길이
+            quality += 0.15
+        elif duration > 15.0:  # 비정상적으로 긴 세그먼트
+            quality -= 0.3
+        elif duration < 0.5:  # 너무 짧은 세그먼트
+            quality -= 0.1
+
+        # 4. 언어별 특화 점수
+        if lan == "ko":
+            # 한국어 조사 포함 여부 (문법적 완성도)
+            korean_particles = ['은', '는', '이', '가', '을', '를', '에', '의']
+            if any(particle in text for particle in korean_particles):
+                quality += 0.1
+
+            # 반복되는 음절 패턴 감지
+            import re
+            if re.search(r'(\S{1,2})\1{2,}', text):  # 같은 1~2자 패턴이 3번 이상 반복
+                quality -= 0.2
+
+        elif lan == "en":
+            # 영어 대소문자 적절성
+            if text[0].isupper() and not text.isupper():
+                quality += 0.1
+
+            # 반복 단어 패턴 감지
+            import re
+            if re.search(r'\b(\w+)\s+\1\b', text):  # 같은 단어 연속 반복
+                quality -= 0.15
+
+        # 점수 범위 제한
+        return max(0.1, min(1.0, quality))
+
+    def _integrate_segments_by_quality(self, all_segments):
+        """품질 점수 기반 세그먼트 통합"""
+        # 시간 구간별로 정리
+        time_slots = {}
+
+        for config_name, segment, quality in all_segments:
+            # 시간을 0.5초 단위로 양자화
+            start_slot = round(segment.start * 2) / 2
+            end_slot = round(segment.end * 2) / 2
+            slot_key = (start_slot, end_slot)
+
+            if slot_key not in time_slots:
+                time_slots[slot_key] = []
+
+            time_slots[slot_key].append((config_name, segment, quality))
+
+        # 각 시간 슬롯에서 최고 품질의 세그먼트 선택
+        best_segments = []
+
+        for slot_key in sorted(time_slots.keys()):
+            candidates = time_slots[slot_key]
+
+            if len(candidates) == 1:
+                best_segments.append(candidates[0][1])  # 단일 후보면 그대로 사용
+            else:
+                # 품질 점수가 가장 높은 세그먼트 선택
+                best_candidate = max(candidates, key=lambda x: x[2])
+                best_segments.append(best_candidate[1])
+
+                # 로깅 (여러 후보 중에서 선택된 경우만)
+                self.logger.debug(
+                    f"시간 슬롯 {slot_key}: {len(candidates)}개 후보 중 '{best_candidate[0]}' 설정이 선택됨 (품질: {best_candidate[2]:.2f})")
+
+        # 인접 세그먼트 병합 (필요한 경우)
+        merged_segments = []
+
+        if best_segments:
+            current = best_segments[0]
+
+            for next_seg in best_segments[1:]:
+                # 시간 간격이 작고 두 세그먼트가 문법적으로 연결 가능한지 확인
+                if next_seg.start - current.end < 0.3 and self._can_merge(current.text, next_seg.text):
+                    # 세그먼트 병합
+                    current = STTResults(
+                        text=f"{current.text.rstrip()} {next_seg.text}",
+                        start=current.start,
+                        end=next_seg.end
+                    )
+                else:
+                    merged_segments.append(current)
+                    current = next_seg
+
+            # 마지막 세그먼트 추가
+            merged_segments.append(current)
+
+        return merged_segments
+
+    def _can_merge(self, text1, text2):
+        """두 텍스트가 문법적으로 병합 가능한지 확인"""
+        # 첫 번째 텍스트가 문장 종결자로 끝나면 병합하지 않음
+        if text1.rstrip().endswith(('.', '!', '?', '。', '！', '？')):
+            return False
+
+        # 두 번째 텍스트가 대문자나 문장 시작으로 보이면 병합하지 않음
+        if text2.strip() and text2.strip()[0].isupper():
+            return False
+
+        return True
+
+    def _apply_error_corrections(self, segments, lan):
+        """언어별 오류 교정 및 후처리"""
+        corrected = []
+
+        for segment in segments:
+            text = segment.text.strip()
+
+            # 1. 언어별 정규화 및 오류 수정
+            if lan == "ko":
+                # 한국어 특화 교정
+                text = self._correct_korean_text(text)
+            elif lan == "en":
+                # 영어 특화 교정
+                text = self._correct_english_text(text)
+            elif lan == "ja":
+                # 일본어 특화 교정
+                text = self._correct_japanese_text(text)
+            else:
+                # 기본 교정
+                text = self._correct_general_text(text)
+
+            # 2. 공통 교정
+            # 불필요한 공백 정리
+            text = re.sub(r'\s+', ' ', text).strip()
+
+            # 구두점 교정 (앞에 공백 있으면 제거)
+            text = re.sub(r'\s+([,.!?:;])', r'\1', text)
+
+            # 빈 세그먼트 제외
+            if not text:
+                continue
+
+            # 교정된 결과 저장
+            corrected.append(STTResults(
+                text=text,
+                start=segment.start,
+                end=segment.end
+            ))
+
+        return corrected
+
+    def _correct_korean_text(self, text):
+        """한국어 특화 텍스트 교정"""
+        if not text:
+            return text
+
+        # 1. 조사 오류 수정
+        corrections = {
+            "이은": "은", "가은": "는", "을를": "을", "을은": "은",
+            "을는": "는", "이를": "를", "가를": "를", "이는": "는",
+            "됬": "됐", "했서요": "했어요", "습니까": "습니까", "습니다": "습니다"
+        }
+
+        for error, correction in corrections.items():
+            text = text.replace(error, correction)
+
+        # 2. 숫자 표현 정규화
+        number_map = {
+            "일": "1", "이": "2", "삼": "3", "사": "4", "오": "5",
+            "육": "6", "칠": "7", "팔": "8", "구": "9", "십": "10"
+        }
+
+        # 두 자리 이상 숫자는 변환하지 않음 (예: "이십삼"은 "23"으로)
+        for k, v in number_map.items():
+            text = re.sub(rf'\b{k}\b', v, text)
+
+        # 3. 반복되는 간투사 제거
+        filler_words = ["어", "음", "그", "저", "아", "에"]
+        for filler in filler_words:
+            text = re.sub(rf'\b{filler}\b\s+\b{filler}\b', filler, text)
+
+        # 단일 간투사가 문장 시작이나 끝에 있으면 제거
+        for filler in filler_words:
+            text = re.sub(rf'^\b{filler}\b\s+', '', text)
+            text = re.sub(rf'\s+\b{filler}\b$', '', text)
+
+        # 4. 시간/날짜 표현 정규화
+        text = re.sub(r'(\d+)\s*시\s*(\d+)\s*분', r'\1시 \2분', text)
+        text = re.sub(r'(\d+)\s*월\s*(\d+)\s*일', r'\1월 \2일', text)
+
+        # 5. 맞춤법 오류 수정 (예시)
+        spelling_errors = {
+            "될까요": "될까요", "할께요": "할게요", "같애요": "같아요",
+            "이였": "였", "하겟": "하겠", "드릴께": "드릴게",
+            "될께": "될게", "했슴니다": "했습니다", "말할께": "말할게"
+        }
+
+        for error, correction in spelling_errors.items():
+            text = text.replace(error, correction)
+
+        return text
+
+    def _correct_english_text(self, text):
+        """영어 특화 텍스트 교정"""
+        if not text:
+            return text
+
+        # 1. 대소문자 교정
+        text = text[0].upper() + text[1:] if text else ""  # 첫 글자 대문자화
+
+        # 단어 'I'를 대문자로 교정
+        text = re.sub(r'\bi\b', 'I', text)
+
+        # 2. 축약형 교정
+        contractions = {
+            "dont": "don't", "cant": "can't", "wont": "won't",
+            "doesnt": "doesn't", "isnt": "isn't", "didnt": "didn't",
+            "im": "I'm", "youre": "you're", "hes": "he's", "shes": "she's",
+            "thats": "that's", "its": "it's", "theyre": "they're",
+            "wouldnt": "wouldn't", "shouldnt": "shouldn't", "couldnt": "couldn't"
+        }
+
+        for error, correction in contractions.items():
+            text = re.sub(rf'\b{error}\b', correction, text)
+
+        # 3. 번호 및 날짜 형식 교정
+        text = re.sub(r'(\d+)\s*dollars', r'$\1', text)
+        text = re.sub(r'(\d{1,2})\s*(\d{1,2})\s*(\d{4})', r'\1/\2/\3', text)  # 날짜 형식
+
+        # 4. 간투사 제거
+        filler_words = ["um", "uh", "like", "you know", "I mean", "so"]
+        for filler in filler_words:
+            text = re.sub(rf'\b{filler}\b\s*', '', text, flags=re.IGNORECASE)
+
+        # 5. 반복 단어 제거
+        text = re.sub(r'\b(\w+)(\s+\1\b)+', r'\1', text)
+
+        return text
+
+    def _correct_japanese_text(self, text):
+        """일본어 특화 텍스트 교정"""
+        if not text:
+            return text
+
+        # 1. 숫자 표현 정규화
+        number_map = {
+            "一": "1", "二": "2", "三": "3", "四": "4", "五": "5",
+            "六": "6", "七": "7", "八": "8", "九": "9", "十": "10"
+        }
+
+        for k, v in number_map.items():
+            text = text.replace(k, v)
+
+        # 2. 간투사 제거
+        fillers = ["あの", "えーと", "えー", "うーん", "あー", "まー"]
+        for filler in fillers:
+            text = text.replace(filler, "")
+
+        # 3. 시간 표현 정규화
+        text = re.sub(r'(\d+)\s*時\s*(\d+)\s*分', r'\1時\2分', text)
+
+        # 4. 문장 부호 교정
+        text = re.sub(r'\s+([、。？！])', r'\1', text)  # 일본어 구두점 앞 공백 제거
+
+        return text
+
+    def _correct_general_text(self, text):
+        """기본 텍스트 교정"""
+        if not text:
+            return text
+
+        # 1. 불필요한 공백 정리
+        text = re.sub(r'\s+', ' ', text).strip()
+
+        # 2. 반복 단어 제거
+        text = re.sub(r'\b(\w+)(\s+\1\b)+', r'\1', text)
+
+        # 3. 숫자 표현 통일
+        text = re.sub(r'(\d)\s+(\d)', r'\1\2', text)  # 숫자 사이 공백 제거
+
+        return text
+
+    def _ensure_consistency(self, segments):
+        """세그먼트 간 일관성 확보 및 최종 품질 체크"""
+        if not segments:
+            return []
+
+        # 1. 시간 연속성 확보 (겹치는 세그먼트 조정)
+        sorted_segments = sorted(segments, key=lambda x: (x.start, x.end))
+        consistent_segments = []
+
+        prev_segment = sorted_segments[0]
+        consistent_segments.append(prev_segment)
+
+        for segment in sorted_segments[1:]:
+            # 겹치는 부분이 있으면 조정
+            if segment.start < prev_segment.end:
+                if segment.end <= prev_segment.end:
+                    # 완전히 포함되는 경우, 더 나은 텍스트 선택
+                    if len(segment.text.split()) > len(prev_segment.text.split()) * 1.2:
+                        consistent_segments[-1] = segment
+                    continue
+                else:
+                    # 부분 겹침, 시작 시간 조정
+                    segment = STTResults(
+                        text=segment.text,
+                        start=prev_segment.end,
+                        end=segment.end
+                    )
+
+            consistent_segments.append(segment)
+            prev_segment = segment
+
+        # 2. 최종 필터링 (너무 짧거나 내용 없는 세그먼트 제거)
+        final_segments = []
+
+        for segment in consistent_segments:
+            # 빈 텍스트이거나 너무 짧은 세그먼트 제외
+            if not segment.text.strip() or (segment.end - segment.start < 0.3 and len(segment.text.strip()) < 2):
+                continue
+
+            final_segments.append(segment)
+
+        return final_segments
