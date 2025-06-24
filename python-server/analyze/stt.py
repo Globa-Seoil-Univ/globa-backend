@@ -21,6 +21,7 @@ whisper_manager = WhisperManager()
 def stt(path: str) -> List[STTResults]:
     url = storage_manager.getDownloadUrl(path=path)
     # stt_results = whisper_manager.stt(path=url)
+    # lan또한 받아서 인자로 넘겨줌. 수정부분.
     stt_results = whisper_manager.stt(path=url, lan="kr")
     return stt_results
 
@@ -51,11 +52,12 @@ def load_reference_text(path):
         return None
 
 def stt2(path: str, lan: str) -> List[STTResults]:
-    # url = storage_manager.getDownloadUrl(path=path)
+    # 밑에 임시 로컬 혹은 이것을 사용해야함. 이것이 FB에 올라가있는 실제 오디오 파일의 경로이다.
+    url = storage_manager.getDownloadUrl(path=path)
+    # url = "./"+path+".wav" # 임시 로컬
     open_ai = OpenAIUtil()
-    url = "./"+path+".wav" # 임시 로컬
 
-
+    # 위에 파베에서 받아온 오디오를 가지고, 전처리 수행 후 로컬에 임시 저장.
     processed_url = preprocess_audio(url, path)
 
     # stt_results = whisper_manager.stt(path=url, lan=lan)

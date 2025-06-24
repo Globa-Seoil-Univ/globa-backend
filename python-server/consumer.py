@@ -136,6 +136,8 @@ class Consumer:
 
             record_id = message.value["recordId"]
             user_id = message.value["userId"]
+            # 새로 추가, 유저로부터 language를 받아야함
+            lan = message.value["language"]
         except Exception as e:
             self.logger.error("Exception: {0}".format(e))
             self.producer.send_message(key=failed_key, message={'recordId': 0, 'userId': 0, 'message': e.__str__()})
@@ -149,26 +151,28 @@ class Consumer:
             while attempt < max_retries:
                 with SessionMaker() as session:
                     try:
-                        # 지우면 안됨 임시 주석
-                        # user = session.query(AppUser).filter(AppUser.user_id == user_id).first()
-                        # if user is None:
-                        #     self.logger.info(f"Not found user")
-                        #     raise NotFoundException("No such user")
-                        # record = session.query(Record).filter(Record.record_id == record_id).first()
-                        # if record is None:
-                        #     raise NotFoundException("No such record")
-                        # if record.path is None:
-                        #     raise NotFoundException("No such path")
-                        # folder_share = (session.query(FolderShare).filter(FolderShare.folder_id == record.folder_id
-                        #                                                   and FolderShare.owner_id == user.user_id)
-                        #                 .first())
-                        # if folder_share is None:
-                        #     raise NotFoundException("No such folder share")
+                        # 지우면 안됨 임시 주석, 유저 유효성 검증
+                        user = session.query(AppUser).filter(AppUser.user_id == user_id).first()
+                        if user is None:
+                            self.logger.info(f"Not found user")
+                            raise NotFoundException("No such user")
+                        record = session.query(Record).filter(Record.record_id == record_id).first()
+                        if record is None:
+                            raise NotFoundException("No such record")
+                        if record.path is None:
+                            raise NotFoundException("No such path")
+                        folder_share = (session.query(FolderShare).filter(FolderShare.folder_id == record.folder_id
+                                                                          and FolderShare.owner_id == user.user_id)
+                                        .first())
+                        if folder_share is None:
+                            raise NotFoundException("No such folder share")
 
                         self.logger.info(f"Starting analyze audio: {record_id}")
-                        # 지우면 안됨 임시 주석
-                        # stt_results = stt(record.path, lan)
-                        stt_results = stt2(str(record_id),"ko")
+                        # 지우면 안됨 임시 주석, 기존에는 stt를 호출했지만, 이젠 stt2를 호출해야함. 추후 메소드명 정리 필요
+                        stt_results = stt2(record.path, lan)
+                        # 테스트를 위한 stt_results 설정
+                        # stt_results = stt2(str(record_id),"ko")
+
                         self.logger.info(f"result: {stt_results}")
                         add_section(record_id=record_id, text=stt_results, session=session)
                         assign_text(record_id=record_id, text=stt_results, session=session)
@@ -178,8 +182,8 @@ class Consumer:
                         add_qa(record_id=record_id, text=text, session=session)
                         add_keywords(record_id=record_id, text=text, session=session, lan="ko") # ja en ko
 
-                        # 지우면 안됨 임시 주석
-                        # session.commit()
+                        # 지우면 안됨 임시 주석, 커밋하는 부분. DB의 무결성 보증을 위해 잠시 주석했었음.
+                        session.commit()
                         self.logger.info(f"Success analyzed audio : {record_id}")
                         self.producer.send_message(key=success_key, message={'recordId': record_id, 'userId': user_id})
                         return
