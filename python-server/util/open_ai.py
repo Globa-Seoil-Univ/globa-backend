@@ -484,7 +484,7 @@ class OpenAIUtil:
             Maintain the characteristics of spoken language, but correct only clear typos and spelling errors."""
 
         # 배치 크기 설정 (한 번에 처리할 STTResults 항목 수)
-        BATCH_SIZE = 20  # 필요에 따라 조정
+        BATCH_SIZE = 40  # 필요에 따라 조정
 
         corrected_results = []
 

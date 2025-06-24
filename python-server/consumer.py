@@ -88,10 +88,6 @@ class Consumer:
     def run(self):
         self.logger.info("Starting consumer")
 
-        # for문 작동 대신에 poll메소드를 쓰기위해 주석처리
-        # try:
-        #     for message in self.consumer:
-        #         self.executor.submit(self.process_message, message)
         try:
             while True:
                 # notion에 기록된 poll 메소드 이용 ( 1초 주기 )
@@ -201,10 +197,7 @@ class Consumer:
                         self.logger.error(f"[{attempt}/{max_retries}] Analyze Error : {e}")        
                         if attempt < max_retries:
                             time.sleep(1)
-                        # 재시도 3회 로직때문에 임시 주석
-                        # self.producer.send_message(key=failed_key,
-                        #                            message={'recordId': record_id, 'userId': user_id,
-                        #                                     'message': str(e)})
+
             # 재시도 모두 실패 시 failed 토픽 전송
             self.producer.send_message(key=failed_key,
                                        message={'recordId': record_id, 'userId': user_id,
