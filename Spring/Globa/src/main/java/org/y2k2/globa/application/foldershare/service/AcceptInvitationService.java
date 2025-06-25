@@ -75,7 +75,7 @@ public class AcceptInvitationService {
         List<FolderShareEntity> targetFolderShares = folderShareRepository.getAllShareInvitationsWithoutMe(folderId, excludeId);
         List<RequestNotificationWithFolderShareDto> notificationInfos = targetFolderShares.stream()
                 .map(targetFolderShare -> RequestNotificationWithFolderShareDto.builder()
-                        .receiver(targetFolderShare.getTargetUser())
+                        .sender(targetFolderShare.getTargetUser())
                         .folder(targetFolderShare.getFolder())
                         .folderShare(targetFolderShare)
                         .notificationType(NotificationType.SHARE_FOLDER_ADD_USER)
