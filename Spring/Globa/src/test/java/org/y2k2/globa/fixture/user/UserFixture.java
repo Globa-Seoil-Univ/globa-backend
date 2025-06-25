@@ -3,12 +3,14 @@ package org.y2k2.globa.fixture.user;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
+import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.domain.user.repository.UserRepository;
 import org.y2k2.globa.fixture.Fixture;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.infrastructure.persistence.user.repository.UserRepositoryImpl;
 import org.y2k2.globa.infrastructure.persistence.user.type.SnsKind;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Import(UserRepositoryImpl.class)

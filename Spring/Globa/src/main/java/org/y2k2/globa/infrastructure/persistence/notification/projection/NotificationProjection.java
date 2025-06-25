@@ -4,22 +4,22 @@ import java.time.LocalDateTime;
 
 public interface NotificationProjection {
     Long getNotificationId();
-    Character getType();
-    Long getShareId();
+    String getType();
+    Boolean getIsRead();
     Long getFolderId();
+    String getFolderTitle();
     Long getRecordId();
+    String getRecordTitle();
+    Long getShareId();
     Long getCommentId();
+    String getCommentContent();
     Long getNoticeId();
-    Long getInquiryId();
-    Integer getIsRead();
-    LocalDateTime getCreatedTime();
     String getNoticeThumbnail();
     String getNoticeTitle();
     String getNoticeContent();
+    LocalDateTime getCreatedTime();
     String getUserProfile();
     String getUserName();
-    String getFolderTitle();
-    String getRecordTitle();
-    String getCommentContent();
+    Long getInquiryId();
     String getInquiryTitle();
 }

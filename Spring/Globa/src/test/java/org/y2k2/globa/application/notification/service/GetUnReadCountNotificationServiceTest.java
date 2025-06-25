@@ -45,23 +45,23 @@ public class GetUnReadCountNotificationServiceTest {
         ResponseUnReadCountDto response = getUnReadCountNotificationService.get(userId);
 
         Assertions
-                .assertThat(response.getAll())
+                .assertThat(response.all())
                 .isEqualTo(noticeCount + inviteCount + shareCount + recordCount + inquiryCount);
 
         Assertions
-                .assertThat(response.getNotice())
+                .assertThat(response.notice())
                 .isEqualTo(noticeCount);
 
         Assertions
-                .assertThat(response.getShare())
+                .assertThat(response.share())
                 .isEqualTo(inviteCount + shareCount);
 
         Assertions
-                .assertThat(response.getDocument())
+                .assertThat(response.document())
                 .isEqualTo(recordCount);
 
         Assertions
-                .assertThat(response.getInquiry())
+                .assertThat(response.inquiry())
                 .isEqualTo(inquiryCount);
 
         Mockito
@@ -85,23 +85,23 @@ public class GetUnReadCountNotificationServiceTest {
         ResponseUnReadCountDto response = getUnReadCountNotificationService.get(userId);
 
         Assertions
-                .assertThat(response.getAll())
+                .assertThat(response.all())
                 .isEqualTo(0L);
 
         Assertions
-                .assertThat(response.getNotice())
+                .assertThat(response.notice())
                 .isEqualTo(0L);
 
         Assertions
-                .assertThat(response.getShare())
+                .assertThat(response.share())
                 .isEqualTo(0L);
 
         Assertions
-                .assertThat(response.getDocument())
+                .assertThat(response.document())
                 .isEqualTo(0L);
 
         Assertions
-                .assertThat(response.getInquiry())
+                .assertThat(response.inquiry())
                 .isEqualTo(0L);
 
         Mockito

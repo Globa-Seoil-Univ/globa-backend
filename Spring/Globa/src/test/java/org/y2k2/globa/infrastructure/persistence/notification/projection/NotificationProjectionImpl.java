@@ -4,14 +4,14 @@ import java.time.LocalDateTime;
 
 public class NotificationProjectionImpl implements NotificationProjection {
     Long notificationId;
-    Character type;
+    String type;
     Long shareId;
     Long folderId;
     Long recordId;
     Long commentId;
     Long noticeId;
     Long inquiryId;
-    Integer isRead;
+    Boolean isRead;
     LocalDateTime createdTime;
     String noticeThumbnail;
     String noticeTitle;
@@ -23,9 +23,9 @@ public class NotificationProjectionImpl implements NotificationProjection {
     String commentContent;
     String inquiryTitle;
 
-    public NotificationProjectionImpl(Long notificationId, Character type, Long shareId, Long folderId,
+    public NotificationProjectionImpl(Long notificationId, String type, Long shareId, Long folderId,
                                       Long recordId, Long commentId, Long noticeId, Long inquiryId,
-                                      Integer isRead, LocalDateTime createdTime, String noticeThumbnail,
+                                      Boolean isRead, LocalDateTime createdTime, String noticeThumbnail,
                                       String noticeTitle, String noticeContent, String userProfile,
                                       String userName, String folderTitle, String recordTitle,
                                       String commentContent, String inquiryTitle) {
@@ -57,7 +57,7 @@ public class NotificationProjectionImpl implements NotificationProjection {
     }
 
     @Override
-    public Character getType() {
+    public String getType() {
         return type;
     }
 
@@ -92,7 +92,7 @@ public class NotificationProjectionImpl implements NotificationProjection {
     }
 
     @Override
-    public Integer getIsRead() {
+    public Boolean getIsRead() {
         return isRead;
     }
 

@@ -31,7 +31,7 @@ public class HasUnReadNotificationServiceTest {
         ResponseUnReadNotificationDto response = hasUnReadNotificationService.get(userId);
 
         Assertions
-                .assertThat(response.getHasUnRead())
+                .assertThat(response.hasUnRead())
                 .isTrue();
     }
 
@@ -47,7 +47,7 @@ public class HasUnReadNotificationServiceTest {
         ResponseUnReadNotificationDto response = hasUnReadNotificationService.get(userId);
 
         Assertions
-                .assertThat(response.getHasUnRead())
+                .assertThat(response.hasUnRead())
                 .isFalse();
     }
 }

@@ -81,32 +81,52 @@ public interface NotificationMapper {
     @Mapping(source = "createdTime", target = "createdTime", qualifiedBy = { CustomTimestampTranslator.class, MapCreatedTime.class })
     NotificationDto toResponseNotificationDto(NotificationProjection entity);
 
-    default Boolean mapIsRead(Integer isRead) {
-        return isRead != null && isRead == 1;
-    }
-
     @AfterMapping
     default NotificationDto deleteEmpty(@MappingTarget NotificationDto entity) {
         // 빈 객체를 null로 설정
-        if (entity.getNotice().getNoticeId() == null && entity.getNotice().getTitle() == null) {
+        if (
+                entity.getNotice() == null
+                        || entity.getNotice().getNoticeId() == null
+                        || entity.getNotice().getTitle() == null
+        ) {
             entity.setNotice(null);
         }
-        if (entity.getUser().getProfile() == null && entity.getUser().getName() == null) {
+        if (
+                entity.getUser() == null
+                        || entity.getUser().getProfile() == null
+                        || entity.getUser().getName() == null
+        ) {
             entity.setUser(null);
         }
-        if (entity.getShare().getShareId() == null) {
+        if (entity.getShare() == null || entity.getShare().getShareId() == null) {
             entity.setShare(null);
         }
-        if (entity.getFolder().getFolderId() == null && entity.getFolder().getTitle() == null) {
+        if (
+                entity.getFolder() == null
+                        || entity.getFolder().getFolderId() == null
+                        || entity.getFolder().getTitle() == null
+        ) {
             entity.setFolder(null);
         }
-        if (entity.getRecord().getRecordId() == null && entity.getRecord().getTitle() == null) {
+        if (
+                entity.getRecord() == null
+                        || entity.getRecord().getRecordId() == null
+                        || entity.getRecord().getTitle() == null
+        ) {
             entity.setRecord(null);
         }
-        if (entity.getComment().getCommentId() == null && entity.getComment().getContent() == null) {
+        if (
+                entity.getComment() == null
+                        || entity.getComment().getCommentId() == null
+                        || entity.getComment().getContent() == null
+        ) {
             entity.setComment(null);
         }
-        if (entity.getInquiry().getInquiryId() == null && entity.getInquiry().getTitle() == null) {
+        if (
+                entity.getInquiry() == null
+                        || entity.getInquiry().getInquiryId() == null
+                        || entity.getInquiry().getTitle() == null
+        ) {
             entity.setInquiry(null);
         }
 

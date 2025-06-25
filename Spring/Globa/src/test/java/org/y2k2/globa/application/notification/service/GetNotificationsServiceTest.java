@@ -75,7 +75,7 @@ public class GetNotificationsServiceTest {
         log.info("Response = {}", response);
 
         Assertions
-                .assertThat(response.getNotifications())
+                .assertThat(response.notifications())
                 .hasSize(8)
                 .allSatisfy(notification -> {
                     Assertions.assertThat(notification.getType()).isEqualTo(NotificationType.NOTICE.getTypeId());
@@ -161,7 +161,7 @@ public class GetNotificationsServiceTest {
         log.info("Response = {}", response);
 
         Assertions
-                .assertThat(response.getNotifications())
+                .assertThat(response.notifications())
                 .hasSize(9)
                 .allSatisfy(notification -> {
                     Assertions.assertThat(notification.getType()).isIn(
@@ -229,7 +229,7 @@ public class GetNotificationsServiceTest {
         log.info("Response = {}", response);
 
         Assertions
-                .assertThat(response.getNotifications())
+                .assertThat(response.notifications())
                 .hasSize(6)
                 .allSatisfy(notification -> {
                     Assertions.assertThat(notification.getType()).isIn(
@@ -278,7 +278,7 @@ public class GetNotificationsServiceTest {
         log.info("Response = {}", response);
 
         Assertions
-                .assertThat(response.getNotifications())
+                .assertThat(response.notifications())
                 .hasSize(3)
                 .allSatisfy(notification -> {
                     Assertions.assertThat(notification.getType()).isEqualTo(NotificationType.INQUIRY.getTypeId());
@@ -342,7 +342,7 @@ public class GetNotificationsServiceTest {
         log.info("Response = {}", response);
 
         Assertions
-                .assertThat(response.getNotifications())
+                .assertThat(response.notifications())
                 .hasSize(7);
 
         Mockito
