@@ -10,8 +10,6 @@ import org.y2k2.globa.infrastructure.persistence.keyword.projection.KeywordProje
 import java.util.List;
 
 public interface KeywordJpaRepository extends JpaRepository<KeywordEntity, Long> {
-    Boolean existsByRecord(RecordEntity record);
-
     @Query(
             value = "SELECT k.record.recordId AS recordId, k.word AS word, k.importance AS importance " +
                     "FROM KeywordEntity k " +
@@ -26,7 +24,7 @@ public interface KeywordJpaRepository extends JpaRepository<KeywordEntity, Long>
             "GROUP BY word " +
             "ORDER BY COUNT(word) DESC, AVG(importance) DESC " +
             "LIMIT 10;", nativeQuery = true)
-    List<KeywordProjection> findKeywordByRecordIds(@Param("recordIds") List<Long> recordIds);
+    List<KeywordProjection> findTop10ByKeywordByRecordIds(@Param("recordIds") List<Long> recordIds);
 
     @Query(
             value = "SELECT k.record.recordId AS recordId, k.word AS word, k.importance AS importance " +
@@ -35,5 +33,7 @@ public interface KeywordJpaRepository extends JpaRepository<KeywordEntity, Long>
                     "ORDER BY k.importance DESC " +
                     "LIMIT 10"
     )
-    List<KeywordProjection> findAllByRecordId(@Param("recordId") Long recordId);
+    List<KeywordProjection> findTop10ByRecordId(@Param("recordId") Long recordId);
+
+    List<KeywordEntity> findAllByRecord_RecordId(Long recordId);
 }

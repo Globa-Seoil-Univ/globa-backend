@@ -9,9 +9,9 @@ import java.util.List;
 public interface KeywordRepository {
     void deleteAll(List<KeywordEntity> entities);
 
-    Boolean hasKeyword(RecordEntity record);
-
     List<KeywordProjection> getAllByRecordInKeywords(List<RecordEntity> records);
     List<KeywordProjection> getTop10ByAllKeywords(List<Long> recordIds);
     List<KeywordProjection> getTop10ByRecordKeywords(Long recordId);
+
+    List<KeywordEntity> getAllKeywords(Long recordId);
 }

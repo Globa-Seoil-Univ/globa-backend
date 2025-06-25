@@ -20,22 +20,22 @@ public class KeywordRepositoryImpl implements KeywordRepository {
     }
 
     @Override
-    public Boolean hasKeyword(RecordEntity record) {
-        return keywordJpaRepository.existsByRecord(record);
-    }
-
-    @Override
     public List<KeywordProjection> getAllByRecordInKeywords(List<RecordEntity> records) {
         return keywordJpaRepository.findAllByRecordInOrderByImportanceDesc(records);
     }
 
     @Override
     public List<KeywordProjection> getTop10ByAllKeywords(List<Long> recordIds) {
-        return keywordJpaRepository.findKeywordByRecordIds(recordIds);
+        return keywordJpaRepository.findTop10ByKeywordByRecordIds(recordIds);
     }
 
     @Override
     public List<KeywordProjection> getTop10ByRecordKeywords(Long recordId) {
-        return keywordJpaRepository.findAllByRecordId(recordId);
+        return keywordJpaRepository.findTop10ByRecordId(recordId);
+    }
+
+    @Override
+    public List<KeywordEntity> getAllKeywords(Long recordId) {
+        return keywordJpaRepository.findAllByRecord_RecordId(recordId);
     }
 }

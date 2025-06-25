@@ -5,5 +5,4 @@ public record ResponseKafkaDto(
         Long userId,
         String message
 ) {
-
 }
