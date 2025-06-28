@@ -35,6 +35,7 @@ class Producer:
                     value=message,
                 )
                 # 좀 더 추가적인 무언가가 작성이 가능해졌습니다.
+                self.logger.info(f"Message sent to broker : {key}")
                 self.producer.flush()
                 return True  # 성공 시 종료
             except Exception as e:

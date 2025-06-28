@@ -100,8 +100,15 @@ def preprocess_audio(audio_path: str, original_path: str) -> str:
         # 로깅
         print(f"오디오 전처리 시작: {audio_path}")
 
-        # 전처리된 파일 저장 경로
-        output_path = f"./{original_path}_processed.wav"
+        # # 전처리된 파일 저장 경로 기존 코드
+        # output_path = f"./{original_path}_processed.wav"
+
+        # 파일명만 추출
+        filename = os.path.basename(original_path)
+        base_name = os.path.splitext(filename)[0]
+
+        output_path = f"downloads/{base_name}_processed.wav"
+        os.makedirs("downloads", exist_ok=True)
 
         # 1. 오디오 로드
         try:

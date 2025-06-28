@@ -176,7 +176,7 @@ class Consumer:
 
                         text = ''.join(result.text for result in stt_results)
                         add_qa(record_id=record_id, text=text, session=session)
-                        add_keywords(record_id=record_id, text=text, session=session, lan="ko") # ja en ko
+                        add_keywords(record_id=record_id, text=text, session=session, lan=lan) # ja en ko
 
                         # 지우면 안됨 임시 주석, 커밋하는 부분. DB의 무결성 보증을 위해 잠시 주석했었음.
                         session.commit()

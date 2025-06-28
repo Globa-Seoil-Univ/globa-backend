@@ -28,7 +28,7 @@ class AppUser(Base):
     notification_token: Mapped[Optional[str]] = mapped_column(VARCHAR(300), unique=True)
     notification_token_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP)
     created_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, default=func.now())
-    deleted: Mapped[Optional[bool]] = mapped_column(BOOLEAN, default=False)
+    is_deleted: Mapped[Optional[bool]] = mapped_column(BOOLEAN, default=False)
     deleted_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP)
 
     folders: Mapped[List["Folder"]] = relationship(back_populates="user", cascade="all, delete-orphan")
@@ -62,7 +62,7 @@ class AppUser(Base):
             'notification_token': self.notification_token,
             'notification_token_time': self.notification_token_time,
             'created_time': self.created_time,
-            'deleted': self.deleted,
+            'is_deleted': self.is_deleted,
             'deleted_time': self.deleted_time
         }
 
@@ -123,7 +123,7 @@ class FolderShare(Base):
     target_id: Mapped[int] = mapped_column(INTEGER(unsigned=True), ForeignKey("app_user.user_id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
     role_id: Mapped[Optional[int]] = mapped_column(VARCHAR(1), ForeignKey("folder_role.role_id", ondelete="SET NULL", onupdate="CASCADE"))
     invitation_status: Mapped[Optional[str]] = mapped_column(VARCHAR(7), default="PENDING")
-    invitation_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, default=func.now())
+    # invitation_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, default=func.now())
     created_time: Mapped[Optional[str]] = mapped_column(TIMESTAMP, default=func.now())
 
     owner: Mapped["AppUser"] = relationship(
@@ -150,17 +150,18 @@ class FolderShare(Base):
             'target_id': self.target_id,
             'role_id': self.role_id,
             'invitation_status': self.invitation_status,
-            'invitation_time': self.invitation_time,
+            # 'invitation_time': self.invitation_time,
             'created_time': self.created_time
         }
 
 
 @event.listens_for(FolderShare, "before_insert")
 def before_insert(mapper, connection):
-    if mapper.invitation_status == "ACCEPT":
-        mapper.invitation_time = func.now()
-    else:
-        mapper.invitation_time = None
+    # if mapper.invitation_status == "ACCEPT":
+    #     mapper.invitation_time = func.now()
+    # else:
+    #     mapper.invitation_time = None
+    print("임시 주석")
 
 
 class Highlight(Base):

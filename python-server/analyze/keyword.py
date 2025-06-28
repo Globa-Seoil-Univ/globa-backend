@@ -33,4 +33,4 @@ def add_keywords(record_id: int, text: str, session: Session, lan: str):
         keywords.append(Keyword(record_id=record_id, word=keyword[0], importance=keyword[1]))
 
     # 지우면 안됨 임시 주석
-    # session.add_all(keywords)
+    session.add_all(keywords)
