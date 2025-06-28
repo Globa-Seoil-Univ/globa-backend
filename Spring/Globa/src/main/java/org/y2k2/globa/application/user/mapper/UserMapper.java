@@ -29,6 +29,7 @@ public interface UserMapper {
     @Mapping(source = "cmd.notification", target = "uploadNofi")
     @Mapping(source = "cmd.notification", target = "shareNofi")
     @Mapping(source = "cmd.eventNotification", target = "eventNofi")
+    @Mapping(target = "isDeleted", constant = "false")
     UserEntity toEntity(CreateUserCommand cmd);
 
     @Mapping(source = "user.userId", target = "userId")

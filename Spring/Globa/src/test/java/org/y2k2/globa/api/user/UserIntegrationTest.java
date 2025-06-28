@@ -26,6 +26,8 @@ import org.y2k2.globa.annotation.WithAccount;
 import org.y2k2.globa.api.IntegrationTest;
 import org.y2k2.globa.application.analysis.dto.response.ResponseAnalysisDto;
 import org.y2k2.globa.application.fcm.dto.request.RequestNotificationTokenDto;
+import org.y2k2.globa.application.folder.dto.response.ResponseFolderDto;
+import org.y2k2.globa.application.foldershare.dto.response.ResponseFolderShareUserDto;
 import org.y2k2.globa.application.survey.dto.request.RequestSurveyDto;
 import org.y2k2.globa.application.user.command.VerifySnsCommand;
 import org.y2k2.globa.application.user.dto.request.*;
@@ -44,6 +46,7 @@ import org.y2k2.globa.fixture.folder.FolderFixture;
 import org.y2k2.globa.fixture.user.AnalysisFixtureBuilder;
 import org.y2k2.globa.fixture.user.UserFixture;
 import org.y2k2.globa.fixture.user.data.AnalysisData;
+import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStatus;
 import org.y2k2.globa.infrastructure.persistence.survey.type.SurveyType;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.infrastructure.persistence.user.type.SnsKind;
@@ -350,6 +353,46 @@ public class UserIntegrationTest extends IntegrationTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.refreshTokenExpireTime").exists())
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn();
+
+        // 기본 폴더 가져오기
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders.get("/folder")
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+
+        ResponseFolderDto responseFolder = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                ResponseFolderDto.class
+        );
+
+        Assertions.assertThat(responseFolder.getFolders().get(0).getFolderId()).isNotNull();
+
+        Long publicFolderId = responseFolder.getFolders().get(0).getFolderId();
+
+        // 기본 폴더 초대 상태 확인
+        MvcResult inviteResult = mockMvc.perform(
+                        MockMvcRequestBuilders.get("/folder/{folderId}/share/user", publicFolderId)
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+
+        ResponseFolderShareUserDto inviteResponse = objectMapper.readValue(
+                inviteResult.getResponse().getContentAsString(),
+                ResponseFolderShareUserDto.class
+        );
+
+        log.info("Public Folder ID: {}, Invite Status: {}", publicFolderId, inviteResponse.users().get(0).invitationStatus());
+
+        // 초대 상태가 ACCEPT인지 확인
+        Assertions.assertThat(inviteResponse.users().get(0).roleId()).isEqualTo(1L);
+        Assertions.assertThat(inviteResponse.users().get(0).invitationStatus()).isEqualTo(InvitationStatus.ACCEPT);
     }
 
     @Test
@@ -410,6 +453,46 @@ public class UserIntegrationTest extends IntegrationTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.refreshTokenExpireTime").exists())
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn();
+
+        // 기본 폴더 가져오기
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders.get("/folder")
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+
+        ResponseFolderDto responseFolder = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                ResponseFolderDto.class
+        );
+
+        Assertions.assertThat(responseFolder.getFolders().get(0).getFolderId()).isNotNull();
+
+        Long publicFolderId = responseFolder.getFolders().get(0).getFolderId();
+
+        // 기본 폴더 초대 상태 확인
+        MvcResult inviteResult = mockMvc.perform(
+                        MockMvcRequestBuilders.get("/folder/{folderId}/share/user", publicFolderId)
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+
+        ResponseFolderShareUserDto inviteResponse = objectMapper.readValue(
+                inviteResult.getResponse().getContentAsString(),
+                ResponseFolderShareUserDto.class
+        );
+
+        log.info("Public Folder ID: {}, Invite Status: {}", publicFolderId, inviteResponse.users().get(0).invitationStatus());
+
+        // 초대 상태가 ACCEPT인지 확인
+        Assertions.assertThat(inviteResponse.users().get(0).roleId()).isEqualTo(1L);
+        Assertions.assertThat(inviteResponse.users().get(0).invitationStatus()).isEqualTo(InvitationStatus.ACCEPT);
     }
 
     @Test
