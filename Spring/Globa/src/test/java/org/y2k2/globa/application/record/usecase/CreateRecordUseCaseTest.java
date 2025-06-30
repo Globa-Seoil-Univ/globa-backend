@@ -18,6 +18,7 @@ import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.util.file.FileStore;
 import org.y2k2.globa.domain.record.repository.RecordRepository;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
+import org.y2k2.globa.infrastructure.persistence.record.type.Language;
 
 import java.util.Optional;
 
@@ -44,7 +45,9 @@ public class CreateRecordUseCaseTest {
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
                 .defaultNotNull(true)
                 .build()
-                .giveMeOne(CreateRecordCommand.class);
+                .giveMeBuilder(CreateRecordCommand.class)
+                .set("dto.lang", Language.KO.name())
+                .sample();
 
         RecordEntity record = FixtureMonkey.builder()
                 .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)

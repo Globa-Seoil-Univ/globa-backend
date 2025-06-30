@@ -313,9 +313,9 @@ public class RecordController {
     )
     @PostMapping("/folder/{folderId}/record")
     public ResponseEntity<Void> createRecord(
-                            @PathVariable(value = "folderId") Long folderId,
-                            @Valid @RequestBody RequestPostRecordDto dto,
-                            @AuthenticationPrincipal CustomUserDetails details
+        @PathVariable(value = "folderId") Long folderId,
+        @Valid @RequestBody RequestPostRecordDto dto,
+        @AuthenticationPrincipal CustomUserDetails details
     ) {
         createRecordService.create(folderId, dto, details.getUserId());
         return ResponseEntity.ok().build();

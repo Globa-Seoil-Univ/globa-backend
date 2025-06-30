@@ -59,6 +59,7 @@ import org.y2k2.globa.infrastructure.persistence.highlight.entity.HighlightEntit
 import org.y2k2.globa.infrastructure.persistence.quiz.entity.QuizEntity;
 import org.y2k2.globa.infrastructure.persistence.quizattemp.entity.QuizAttemptEntity;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
+import org.y2k2.globa.infrastructure.persistence.record.type.Language;
 import org.y2k2.globa.infrastructure.persistence.section.entity.SectionEntity;
 import org.y2k2.globa.infrastructure.persistence.study.entity.StudyEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
@@ -1131,7 +1132,7 @@ public class RecordIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("문서 추가 - 성공")
+    @DisplayName("문서 생성 - 성공")
     @WithAccount
     void createRecord() throws Exception {
         RequestPostRecordDto request = FixtureMonkey
@@ -1139,7 +1140,9 @@ public class RecordIntegrationTest extends IntegrationTest {
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
                 .plugin(new JakartaValidationPlugin())
                 .build()
-                .giveMeOne(RequestPostRecordDto.class);
+                .giveMeBuilder(RequestPostRecordDto.class)
+                .set("lang", Language.KO.name())
+                .sample();
 
         FileDto fileDto = FixtureMonkey
                 .builder()
@@ -1171,7 +1174,7 @@ public class RecordIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("문서 추가 - 실패 (폴더 X)")
+    @DisplayName("문서 생성 - 실패 (폴더 X)")
     @WithAccount
     void createRecordNotFoundFolder() throws Exception {
         RequestPostRecordDto request = FixtureMonkey
@@ -1179,7 +1182,9 @@ public class RecordIntegrationTest extends IntegrationTest {
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
                 .plugin(new JakartaValidationPlugin())
                 .build()
-                .giveMeOne(RequestPostRecordDto.class);
+                .giveMeBuilder(RequestPostRecordDto.class)
+                .set("lang", Language.KO.name())
+                .sample();
 
         log.info("request = {}", request);
 
@@ -1194,7 +1199,7 @@ public class RecordIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("문서 추가 - 실패 (권한 X)")
+    @DisplayName("문서 생성 - 실패 (권한 X)")
     @WithAccount
     void createRecordWithoutPermission() throws Exception {
         RequestPostRecordDto request = FixtureMonkey
@@ -1202,7 +1207,9 @@ public class RecordIntegrationTest extends IntegrationTest {
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
                 .plugin(new JakartaValidationPlugin())
                 .build()
-                .giveMeOne(RequestPostRecordDto.class);
+                .giveMeBuilder(RequestPostRecordDto.class)
+                .set("lang", Language.KO.name())
+                .sample();
 
         log.info("request = {}", request);
 
@@ -1217,7 +1224,7 @@ public class RecordIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @DisplayName("문서 추가 - 실패 (Firebase Storage 파일 X)")
+    @DisplayName("문서 생성 - 실패 (Firebase Storage 파일 X)")
     @WithAccount
     void createRecordNotFoundFile() throws Exception {
         RequestPostRecordDto request = FixtureMonkey
@@ -1225,7 +1232,9 @@ public class RecordIntegrationTest extends IntegrationTest {
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
                 .plugin(new JakartaValidationPlugin())
                 .build()
-                .giveMeOne(RequestPostRecordDto.class);
+                .giveMeBuilder(RequestPostRecordDto.class)
+                .set("lang", Language.KO.name())
+                .sample();
 
         log.info("request = {}", request);
 

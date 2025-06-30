@@ -14,8 +14,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.y2k2.globa.application.analysis.dto.response.ResponseAnalysisDto;
 import org.y2k2.globa.application.foldershare.command.VerifyFolderCommand;
 import org.y2k2.globa.application.foldershare.usecase.VerifyFolderAccessibleUseCase;
+import org.y2k2.globa.common.exception.CustomException;
+import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.domain.keyword.repository.KeywordRepository;
 import org.y2k2.globa.domain.quizattemp.repository.QuizAttemptRepository;
+import org.y2k2.globa.domain.record.repository.RecordRepository;
 import org.y2k2.globa.domain.study.repository.StudyRepository;
 import org.y2k2.globa.infrastructure.persistence.keyword.projection.KeywordProjection;
 import org.y2k2.globa.infrastructure.persistence.keyword.projection.KeywordProjectionImpl;
@@ -35,6 +38,8 @@ public class GetAnalysisServiceTest {
 
     @Mock
     VerifyFolderAccessibleUseCase verifyFolderAccessibleUseCase;
+    @Mock
+    RecordRepository recordRepository;
     @Mock
     StudyRepository studyRepository;
     @Mock
@@ -73,6 +78,9 @@ public class GetAnalysisServiceTest {
         Mockito.doNothing()
                 .when(verifyFolderAccessibleUseCase)
                 .execute(Mockito.any(VerifyFolderCommand.class));
+
+        Mockito.when(recordRepository.existsById(recordId))
+                .thenReturn(true);
 
         Mockito.when(studyRepository.getAllStudies(userId, recordId))
                 .thenReturn(studies);
@@ -116,6 +124,9 @@ public class GetAnalysisServiceTest {
                 .when(verifyFolderAccessibleUseCase)
                 .execute(Mockito.any(VerifyFolderCommand.class));
 
+        Mockito.when(recordRepository.existsById(recordId))
+                .thenReturn(true);
+
         Mockito.when(studyRepository.getAllStudies(userId, recordId))
                 .thenReturn(studies);
 
@@ -140,5 +151,24 @@ public class GetAnalysisServiceTest {
                     Assertions.assertThat(r.keywords()).isNotNull();
                     Assertions.assertThat(r.keywords()).isEmpty();
                 });
+    }
+
+    @Test
+    @DisplayName("문서에 대한 분석 정보 가져오기 - 실패 (문서 없음)")
+    void getAnalysisWithoutRecordFail() {
+        Long recordId = 1L;
+        Long folderId = 1L;
+        Long userId = 1L;
+
+        Mockito.doNothing()
+                .when(verifyFolderAccessibleUseCase)
+                .execute(Mockito.any(VerifyFolderCommand.class));
+
+        Mockito.when(recordRepository.existsById(recordId))
+                .thenReturn(false);
+
+        Assertions.assertThatThrownBy(() -> getAnalysisService.get(recordId, folderId, userId))
+                .isInstanceOf(CustomException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND_RECORD);
     }
 }

@@ -63,6 +63,7 @@ public interface RecordMapper {
 
     @Mapping(source = "dto.title", target = "title")
     @Mapping(source = "dto.path", target = "path")
+    @Mapping(source = "dto.lang", target = "lang")
     @Mapping(source = "user", target = "user")
     @Mapping(source = "folder", target = "folder")
     @Mapping(source = "size", target = "size")

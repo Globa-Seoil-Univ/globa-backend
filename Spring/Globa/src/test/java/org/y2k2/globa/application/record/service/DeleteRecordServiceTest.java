@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.y2k2.globa.application.foldershare.command.VerifyFolderCommand;
 import org.y2k2.globa.application.foldershare.usecase.VerifyFolderOwnerUseCase;
+import org.y2k2.globa.application.foldershare.usecase.VerifyFolderWritableUseCase;
 import org.y2k2.globa.application.record.usecase.FindOwnRecordUseCase;
 import org.y2k2.globa.common.util.file.FileStore;
 import org.y2k2.globa.domain.record.repository.RecordRepository;
@@ -22,7 +23,7 @@ public class DeleteRecordServiceTest {
     private DeleteRecordService deleteRecordService;
 
     @Mock
-    VerifyFolderOwnerUseCase verifyFolderOwnerUseCase;
+    VerifyFolderWritableUseCase verifyFolderWritableUseCase;
     @Mock
     FindOwnRecordUseCase findOwnRecordUseCase;
     @Mock
@@ -43,7 +44,7 @@ public class DeleteRecordServiceTest {
                 .thenReturn(record);
 
         Mockito.doNothing()
-                .when(verifyFolderOwnerUseCase)
+                .when(verifyFolderWritableUseCase)
                 .execute(Mockito.any(VerifyFolderCommand.class));
 
         Mockito.doNothing()
@@ -59,7 +60,7 @@ public class DeleteRecordServiceTest {
         Mockito.verify(findOwnRecordUseCase, Mockito.times(1))
                 .execute(Mockito.any());
 
-        Mockito.verify(verifyFolderOwnerUseCase, Mockito.times(1))
+        Mockito.verify(verifyFolderWritableUseCase, Mockito.times(1))
                 .execute(Mockito.any(VerifyFolderCommand.class));
 
         Mockito.verify(recordRepository, Mockito.times(1))

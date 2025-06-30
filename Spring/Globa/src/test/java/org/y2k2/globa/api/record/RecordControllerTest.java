@@ -33,6 +33,7 @@ import org.y2k2.globa.application.record.service.*;
 import org.y2k2.globa.application.study.dto.request.RequestStudyDto;
 import org.y2k2.globa.common.util.jwt.JWT;
 import org.y2k2.globa.constant.Constant;
+import org.y2k2.globa.infrastructure.persistence.record.type.Language;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -556,7 +557,9 @@ public class RecordControllerTest {
                 .defaultNotNull(true)
                 .plugin(new JakartaValidationPlugin())
                 .build()
-                .giveMeOne(RequestPostRecordDto.class);
+                .giveMeBuilder(RequestPostRecordDto.class)
+                .set("lang", Language.KO.name())
+                .sample();
 
         log.info("request = {}", request);
 
@@ -579,7 +582,7 @@ public class RecordControllerTest {
     }
 
     @Test
-    @DisplayName("문서 생성 - 실패 (제목, 경로 중 하나 없음)")
+    @DisplayName("문서 생성 - 실패 (잘못된 요청)")
     @WithAccount
     void createRecordFail() throws Exception {
         Long folderId = 1L;

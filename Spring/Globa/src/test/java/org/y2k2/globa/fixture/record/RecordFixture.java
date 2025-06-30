@@ -8,6 +8,7 @@ import org.y2k2.globa.fixture.Fixture;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 import org.y2k2.globa.infrastructure.persistence.record.repository.RecordRepositoryImpl;
+import org.y2k2.globa.infrastructure.persistence.record.type.Language;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 @Import(RecordRepositoryImpl.class)
@@ -67,6 +68,7 @@ public class RecordFixture implements Fixture<RecordEntity> {
             entity.setPath(path);
             entity.setSize("1000");
             entity.setIsShare(isShare);
+            entity.setLang(Language.KO);
             return entity;
         }
     }

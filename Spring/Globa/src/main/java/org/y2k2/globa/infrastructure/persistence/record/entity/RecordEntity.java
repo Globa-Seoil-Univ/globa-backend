@@ -8,6 +8,7 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
+import org.y2k2.globa.infrastructure.persistence.record.type.Language;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 import java.time.LocalDateTime;
@@ -32,6 +33,10 @@ public class RecordEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "folder_id", nullable = false, columnDefinition = "INT UNSIGNED")
     private FolderEntity folder;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "lang", nullable = false)
+    private Language lang;
 
     @Column(name = "title", nullable = false, length = 32)
     private String title;

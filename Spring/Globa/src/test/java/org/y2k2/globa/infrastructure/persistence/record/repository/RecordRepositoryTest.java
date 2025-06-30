@@ -22,6 +22,7 @@ import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.infrastructure.persistence.foldershare.type.InvitationStatus;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 import org.y2k2.globa.infrastructure.persistence.record.projection.RecordSearchProjection;
+import org.y2k2.globa.infrastructure.persistence.record.type.Language;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 import java.util.List;
@@ -143,6 +144,7 @@ public class RecordRepositoryTest {
         newRecord.setUser(user);
         newRecord.setPath(path);
         newRecord.setSize(size);
+        newRecord.setLang(Language.KO);
 
         RecordEntity savedRecord = recordRepository.save(newRecord);
 

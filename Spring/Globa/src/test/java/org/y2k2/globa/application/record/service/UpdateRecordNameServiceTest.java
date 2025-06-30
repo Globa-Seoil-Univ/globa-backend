@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.y2k2.globa.application.foldershare.command.VerifyFolderCommand;
 import org.y2k2.globa.application.foldershare.usecase.VerifyFolderOwnerUseCase;
+import org.y2k2.globa.application.foldershare.usecase.VerifyFolderWritableUseCase;
 import org.y2k2.globa.application.record.command.FindOwnRecordCommand;
 import org.y2k2.globa.application.record.usecase.FindOwnRecordUseCase;
 import org.y2k2.globa.domain.record.repository.RecordRepository;
@@ -24,7 +25,7 @@ public class UpdateRecordNameServiceTest {
     @Mock
     private FindOwnRecordUseCase findOwnRecordUseCase;
     @Mock
-    private VerifyFolderOwnerUseCase verifyFolderOwnerUseCase;
+    private VerifyFolderWritableUseCase verifyFolderWritableUseCase;
     @Mock
     private RecordRepository recordRepository;
 
@@ -46,7 +47,7 @@ public class UpdateRecordNameServiceTest {
                 .thenReturn(record);
 
         Mockito.doNothing()
-                .when(verifyFolderOwnerUseCase)
+                .when(verifyFolderWritableUseCase)
                 .execute(Mockito.any(VerifyFolderCommand.class));
 
         updateRecordNameService.update(folderId, recordId, title, userId);

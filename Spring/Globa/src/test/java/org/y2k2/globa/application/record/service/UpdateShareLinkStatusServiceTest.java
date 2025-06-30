@@ -10,6 +10,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.y2k2.globa.application.foldershare.command.VerifyFolderCommand;
+import org.y2k2.globa.application.foldershare.usecase.VerifyFolderOwnerUseCase;
+import org.y2k2.globa.application.foldershare.usecase.VerifyFolderWritableUseCase;
 import org.y2k2.globa.application.record.command.FindOwnRecordCommand;
 import org.y2k2.globa.application.record.usecase.FindOwnRecordUseCase;
 import org.y2k2.globa.common.exception.CustomException;
@@ -28,6 +31,8 @@ public class UpdateShareLinkStatusServiceTest {
 
     @Mock
     private FindOwnRecordUseCase findOwnRecordUseCase;
+    @Mock
+    private VerifyFolderWritableUseCase verifyFolderWritableUseCase;
     @Mock
     private FolderRepository folderRepository;
     @Mock
@@ -68,6 +73,10 @@ public class UpdateShareLinkStatusServiceTest {
         Mockito.when(findOwnRecordUseCase.execute(Mockito.any(FindOwnRecordCommand.class)))
                 .thenReturn(record);
 
+        Mockito.doNothing()
+                .when(verifyFolderWritableUseCase)
+                .execute(Mockito.any(VerifyFolderCommand.class));
+
         Mockito.when(recordRepository.save(Mockito.any(RecordEntity.class)))
                 .thenReturn(record);
 
@@ -78,6 +87,9 @@ public class UpdateShareLinkStatusServiceTest {
 
         Mockito.verify(findOwnRecordUseCase, Mockito.times(1))
                 .execute(Mockito.any(FindOwnRecordCommand.class));
+
+        Mockito.verify(verifyFolderWritableUseCase, Mockito.times(1))
+                .execute(Mockito.any(VerifyFolderCommand.class));
 
         Mockito.verify(recordRepository, Mockito.times(1))
                 .save(Mockito.any(RecordEntity.class));
@@ -103,56 +115,6 @@ public class UpdateShareLinkStatusServiceTest {
                 .getFolder(folderId);
 
         Mockito.verify(findOwnRecordUseCase, Mockito.times(0))
-                .execute(Mockito.any(FindOwnRecordCommand.class));
-
-        Mockito.verify(recordRepository, Mockito.times(0))
-                .save(Mockito.any(RecordEntity.class));
-    }
-
-    @Test
-    @DisplayName("문서 공유 상태 수정 - 실패 (소유자 불일치)")
-    void updateShareLinkStatusMismatchFolderOwner() {
-        // given
-        Long folderId = 1L;
-        Long recordId = 1L;
-        boolean isShared = true;
-        Long userId = 1L;
-
-        FolderEntity folder = FixtureMonkey.builder()
-                .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)
-                .defaultNotNull(true)
-                .build()
-                .giveMeBuilder(FolderEntity.class)
-                .set("folderId", folderId)
-                // 다른 사용자
-                .set("user.userId", 2L)
-                .sample();
-
-        RecordEntity record = FixtureMonkey.builder()
-                .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)
-                .defaultNotNull(true)
-                .build()
-                .giveMeBuilder(RecordEntity.class)
-                .set("recordId", recordId)
-                .set("user.userId", userId)
-                .set("folder.folderId", folderId)
-                .set("isShare", false)
-                .sample();
-
-        Mockito.when(folderRepository.getFolder(folderId))
-                .thenReturn(Optional.of(folder));
-
-        Mockito.when(findOwnRecordUseCase.execute(Mockito.any(FindOwnRecordCommand.class)))
-                .thenReturn(record);
-
-        Assertions.assertThatThrownBy(() -> updateShareLinkStatusService.update(folderId, recordId, isShared, userId))
-                .isInstanceOf(CustomException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.MISMATCH_FOLDER_OWNER);
-
-        Mockito.verify(folderRepository, Mockito.times(1))
-                .getFolder(folderId);
-
-        Mockito.verify(findOwnRecordUseCase, Mockito.times(1))
                 .execute(Mockito.any(FindOwnRecordCommand.class));
 
         Mockito.verify(recordRepository, Mockito.times(0))

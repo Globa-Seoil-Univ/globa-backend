@@ -48,6 +48,6 @@ public class CreateRecordService {
                 )
         );
 
-        kafkaProducer.send(topic, topicKey, new RequestKafkaDto(createdRecordId, user.getUserId()));
+        kafkaProducer.send(topic, topicKey, new RequestKafkaDto(createdRecordId, user.getUserId(), dto.lang()));
     }
 }
