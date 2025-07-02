@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.y2k2.globa.application.notice.dto.response.ResponseNoticeDetailDto;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
+import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.domain.notice.repository.NoticeRepository;
 import org.y2k2.globa.infrastructure.persistence.notice.entity.NoticeEntity;
 
@@ -35,6 +36,7 @@ public class GetNoticeDetailServiceTest {
                 .build()
                 .giveMeBuilder(NoticeEntity.class)
                 .set("noticeId", noticeId)
+                .set("createdTime", new CustomTimestamp().getTimestamp())
                 .sample();
 
         Mockito

@@ -66,7 +66,6 @@ public class DummyImageControllerTest {
                 MockMvcRequestBuilders.multipart("/dummy/image")
                         .file(file)
                         .header("Authorization", jwt.getGrantType() + jwt.getAccessToken())
-                        .accept(MediaType.MULTIPART_FORM_DATA)
         )
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }

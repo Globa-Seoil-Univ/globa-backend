@@ -13,6 +13,7 @@ import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
+import org.y2k2.globa.domain.foldershare.repository.FolderShareRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
@@ -27,6 +28,8 @@ public class DeleteFolderServiceTest {
     private FindUserUseCase findUserUseCase;
     @Mock
     private DeleteFilesUseCase deleteFilesUseCase;
+    @Mock
+    FolderShareRepository folderShareRepository;
     @Mock
     FolderRepository folderRepository;
 
@@ -46,6 +49,8 @@ public class DeleteFolderServiceTest {
                 .set("folderId", 1L)
                 .sample();
 
+        Mockito.when(folderShareRepository.isOwner(user.getUserId(), folder.getFolderId()))
+                .thenReturn(true);
         Mockito.when(findUserUseCase.execute(user.getUserId()))
                 .thenReturn(user);
         Mockito.when(folderRepository.getFolderWithoutDefaultFolder(folder.getFolderId(), user))
@@ -59,12 +64,50 @@ public class DeleteFolderServiceTest {
 
         deleteFolderService.delete(folder.getFolderId(), user.getUserId());
 
-        Mockito.verify(findUserUseCase, Mockito.times(1)).execute(user.getUserId());
+        Mockito.verify(folderShareRepository, Mockito.times(1))
+                .isOwner(user.getUserId(), folder.getFolderId());
+        Mockito.verify(findUserUseCase, Mockito.times(1))
+                .execute(user.getUserId());
         Mockito.verify(folderRepository, Mockito.times(1))
                 .getFolderWithoutDefaultFolder(folder.getFolderId(), user);
         Mockito.verify(folderRepository, Mockito.times(1))
                 .delete(ArgumentMatchers.any(FolderEntity.class));
         Mockito.verify(deleteFilesUseCase, Mockito.times(1))
+                .execute(ArgumentMatchers.any(FolderEntity.class));
+    }
+
+    @Test
+    @DisplayName("폴더 삭제 - 실패 (폴더 소유자 불일치)")
+    void folderDeleteMismatchOwnerTest() {
+        UserEntity user = FixtureMonkey.builder()
+                .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)
+                .build()
+                .giveMeBuilder(UserEntity.class)
+                .set("userId", 1L)
+                .sample();
+        FolderEntity folder = FixtureMonkey.builder()
+                .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)
+                .build()
+                .giveMeBuilder(FolderEntity.class)
+                .set("folderId", 1L)
+                .sample();
+
+        Mockito.when(folderShareRepository.isOwner(user.getUserId(), folder.getFolderId()))
+                .thenReturn(false);
+
+        Assertions.assertThatThrownBy(() -> deleteFolderService.delete(folder.getFolderId(), user.getUserId()))
+                .isInstanceOf(CustomException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.MISMATCH_FOLDER_OWNER);
+
+        Mockito.verify(folderShareRepository, Mockito.times(1))
+                .isOwner(user.getUserId(), folder.getFolderId());
+        Mockito.verify(findUserUseCase, Mockito.never())
+                .execute(user.getUserId());
+        Mockito.verify(folderRepository, Mockito.never())
+                .getFolderWithoutDefaultFolder(folder.getFolderId(), user);
+        Mockito.verify(folderRepository, Mockito.never())
+                .delete(ArgumentMatchers.any(FolderEntity.class));
+        Mockito.verify(deleteFilesUseCase, Mockito.never())
                 .execute(ArgumentMatchers.any(FolderEntity.class));
     }
 
@@ -84,6 +127,8 @@ public class DeleteFolderServiceTest {
                 .set("folderId", 1L)
                 .sample();
 
+        Mockito.when(folderShareRepository.isOwner(user.getUserId(), folder.getFolderId()))
+                .thenReturn(true);
         Mockito.when(findUserUseCase.execute(user.getUserId()))
                 .thenReturn(user);
         Mockito.when(folderRepository.getFolderWithoutDefaultFolder(folder.getFolderId(), user))
@@ -93,8 +138,15 @@ public class DeleteFolderServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND_FOLDER);
 
-        Mockito.verify(findUserUseCase, Mockito.times(1)).execute(user.getUserId());
+        Mockito.verify(folderShareRepository, Mockito.times(1))
+                .isOwner(user.getUserId(), folder.getFolderId());
+        Mockito.verify(findUserUseCase, Mockito.times(1))
+                .execute(user.getUserId());
         Mockito.verify(folderRepository, Mockito.times(1))
                 .getFolderWithoutDefaultFolder(folder.getFolderId(), user);
+        Mockito.verify(folderRepository, Mockito.never())
+                .delete(ArgumentMatchers.any(FolderEntity.class));
+        Mockito.verify(deleteFilesUseCase, Mockito.never())
+                .execute(ArgumentMatchers.any(FolderEntity.class));
     }
 }

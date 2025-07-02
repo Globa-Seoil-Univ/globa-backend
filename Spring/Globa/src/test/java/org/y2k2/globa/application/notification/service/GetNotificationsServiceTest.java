@@ -52,7 +52,7 @@ public class GetNotificationsServiceTest {
                 .defaultNotNull(false)
                 .build()
                 .giveMeBuilder(NotificationProjectionImpl.class)
-                .set("type", NotificationType.NOTICE.getTypeId())
+                .set("type", String.valueOf(NotificationType.NOTICE.getTypeId()))
                 .set("notificationId", Arbitraries.longs().greaterOrEqual(1))
                 .set("noticeId", Arbitraries.longs().greaterOrEqual(1))
                 .set("noticeTitle", Arbitraries.strings().alpha().ofMinLength(1).ofMaxLength(60))
@@ -78,7 +78,9 @@ public class GetNotificationsServiceTest {
                 .assertThat(response.notifications())
                 .hasSize(8)
                 .allSatisfy(notification -> {
-                    Assertions.assertThat(notification.getType()).isEqualTo(NotificationType.NOTICE.getTypeId());
+                    Assertions
+                            .assertThat(notification.getType())
+                            .isEqualTo(String.valueOf(NotificationType.NOTICE.getTypeId()));
                 });
 
         Mockito
@@ -100,7 +102,7 @@ public class GetNotificationsServiceTest {
                 .defaultNotNull(false)
                 .build()
                 .giveMeBuilder(NotificationProjectionImpl.class)
-                .set("type", NotificationType.SHARE_FOLDER_ADD_FILE.getTypeId())
+                .set("type", String.valueOf(NotificationType.SHARE_FOLDER_ADD_FILE.getTypeId()))
                 .set("notificationId", Arbitraries.longs().greaterOrEqual(1))
                 .set("folderId", Arbitraries.longs().greaterOrEqual(1))
                 .set("folderTitle", Arbitraries.strings().alpha().ofMinLength(1).ofMaxLength(60))
@@ -116,7 +118,7 @@ public class GetNotificationsServiceTest {
                 .defaultNotNull(false)
                 .build()
                 .giveMeBuilder(NotificationProjectionImpl.class)
-                .set("type", NotificationType.SHARE_FOLDER_ADD_USER.getTypeId())
+                .set("type", String.valueOf(NotificationType.SHARE_FOLDER_ADD_USER.getTypeId()))
                 .set("notificationId", Arbitraries.longs().greaterOrEqual(1))
                 .set("folderId", Arbitraries.longs().greaterOrEqual(1))
                 .set("folderTitle", Arbitraries.strings().alpha().ofMinLength(1).ofMaxLength(60))
@@ -130,7 +132,7 @@ public class GetNotificationsServiceTest {
                 .defaultNotNull(false)
                 .build()
                 .giveMeBuilder(NotificationProjectionImpl.class)
-                .set("type", NotificationType.SHARE_FOLDER_ADD_COMMENT.getTypeId())
+                .set("type", String.valueOf(NotificationType.SHARE_FOLDER_ADD_COMMENT.getTypeId()))
                 .set("notificationId", Arbitraries.longs().greaterOrEqual(1))
                 .set("folderId", Arbitraries.longs().greaterOrEqual(1))
                 .set("folderTitle", Arbitraries.strings().alpha().ofMinLength(1).ofMaxLength(60))
@@ -165,9 +167,9 @@ public class GetNotificationsServiceTest {
                 .hasSize(9)
                 .allSatisfy(notification -> {
                     Assertions.assertThat(notification.getType()).isIn(
-                            NotificationType.SHARE_FOLDER_ADD_FILE.getTypeId(),
-                            NotificationType.SHARE_FOLDER_ADD_USER.getTypeId(),
-                            NotificationType.SHARE_FOLDER_ADD_COMMENT.getTypeId()
+                            String.valueOf(NotificationType.SHARE_FOLDER_ADD_FILE.getTypeId()),
+                            String.valueOf(NotificationType.SHARE_FOLDER_ADD_USER.getTypeId()),
+                            String.valueOf(NotificationType.SHARE_FOLDER_ADD_COMMENT.getTypeId())
                     );
                 });
 
@@ -190,7 +192,7 @@ public class GetNotificationsServiceTest {
                 .defaultNotNull(false)
                 .build()
                 .giveMeBuilder(NotificationProjectionImpl.class)
-                .set("type", NotificationType.UPLOAD_SUCCESS.getTypeId())
+                .set("type", String.valueOf(NotificationType.UPLOAD_SUCCESS.getTypeId()))
                 .set("notificationId", Arbitraries.longs().greaterOrEqual(1))
                 .set("folderId", Arbitraries.longs().greaterOrEqual(1))
                 .set("folderTitle", Arbitraries.strings().alpha().ofMinLength(1).ofMaxLength(60))
@@ -204,7 +206,7 @@ public class GetNotificationsServiceTest {
                 .defaultNotNull(false)
                 .build()
                 .giveMeBuilder(NotificationProjectionImpl.class)
-                .set("type", NotificationType.UPLOAD_FAILED.getTypeId())
+                .set("type", String.valueOf(NotificationType.UPLOAD_FAILED.getTypeId()))
                 .set("notificationId", Arbitraries.longs().greaterOrEqual(1))
                 .set("folderId", Arbitraries.longs().greaterOrEqual(1))
                 .set("folderTitle", Arbitraries.strings().alpha().ofMinLength(1).ofMaxLength(60))
@@ -233,8 +235,8 @@ public class GetNotificationsServiceTest {
                 .hasSize(6)
                 .allSatisfy(notification -> {
                     Assertions.assertThat(notification.getType()).isIn(
-                            NotificationType.UPLOAD_SUCCESS.getTypeId(),
-                            NotificationType.UPLOAD_FAILED.getTypeId()
+                            String.valueOf(NotificationType.UPLOAD_SUCCESS.getTypeId()),
+                            String.valueOf(NotificationType.UPLOAD_FAILED.getTypeId())
                     );
                 });
 
@@ -257,7 +259,7 @@ public class GetNotificationsServiceTest {
                 .defaultNotNull(false)
                 .build()
                 .giveMeBuilder(NotificationProjectionImpl.class)
-                .set("type", NotificationType.INQUIRY.getTypeId())
+                .set("type", String.valueOf(NotificationType.INQUIRY.getTypeId()))
                 .set("notificationId", Arbitraries.longs().greaterOrEqual(1))
                 .set("inquiryId", Arbitraries.longs().greaterOrEqual(1))
                 .set("inquiryTitle", Arbitraries.strings().alpha().ofMinLength(1).ofMaxLength(60))
@@ -281,7 +283,9 @@ public class GetNotificationsServiceTest {
                 .assertThat(response.notifications())
                 .hasSize(3)
                 .allSatisfy(notification -> {
-                    Assertions.assertThat(notification.getType()).isEqualTo(NotificationType.INQUIRY.getTypeId());
+                    Assertions
+                            .assertThat(notification.getType())
+                            .isEqualTo(String.valueOf(NotificationType.INQUIRY.getTypeId()));
                 });
 
         Mockito
@@ -320,7 +324,7 @@ public class GetNotificationsServiceTest {
             NotificationProjectionImpl notification = fixtureMonkey
                     .giveMeBuilder(NotificationProjectionImpl.class)
                     .set("notificationId", Arbitraries.longs().greaterOrEqual(1))
-                    .set("type", type.getTypeId())
+                    .set("type", String.valueOf(type.getTypeId()))
                     .set("createdTime", new CustomTimestamp().getTimestamp())
                     // 각 알림 타입에 맞는 필드를 설정은 생략
                     .sample();

@@ -56,7 +56,6 @@ public class GetRepliesServiceTest {
                 .set("commentId", idsDto.parentId())
                 .set("highlight.highlightId", idsDto.highlightId())
                 .set("parent", null)
-                .set("hasReply", true)
                 .sample();
 
         Pageable pageable = PageRequest.of(0, 10);
@@ -67,7 +66,6 @@ public class GetRepliesServiceTest {
                 .giveMeBuilder(CommentEntity.class)
                 .set("highlight.highlightId", idsDto.highlightId())
                 .set("parent", parentComment)
-                .set("hasReply", false)
                 .sampleList(5);
         Page<CommentEntity> page = new PageImpl<>(replies, pageable, replies.size());
 

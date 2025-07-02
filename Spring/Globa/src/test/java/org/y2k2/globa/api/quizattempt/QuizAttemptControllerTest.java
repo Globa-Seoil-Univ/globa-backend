@@ -84,7 +84,7 @@ public class QuizAttemptControllerTest {
                                 .content(objectMapper.writeValueAsString(requestQuizDto))
                 )
                 .andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.header().string("Location", "/folder/" + folderId + "/record/" + recordId + "/quiz"));
+                .andExpect(MockMvcResultMatchers.header().string("Location", "/user/analysis"));
 
         Mockito
                 .verify(createQuizAttemptsService, Mockito.times(1))
@@ -126,7 +126,7 @@ public class QuizAttemptControllerTest {
                                 .content(objectMapper.writeValueAsString(requestQuizDto))
                 )
                 .andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.header().string("Location", "/folder/" + folderId + "/record/" + recordId + "/quiz"));
+                .andExpect(MockMvcResultMatchers.header().string("Location", "/user/analysis"));
 
         Mockito
                 .verify(createQuizAttemptsService, Mockito.times(1))
