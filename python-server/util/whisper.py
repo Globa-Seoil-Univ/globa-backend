@@ -249,7 +249,7 @@ class WhisperManager:
 
             # 참조 텍스트 파일이 없으면 eng_master.txt 사용
             if not os.path.exists(reference_file):
-                reference_file = "gisa.txt"
+                reference_file = "cake.txt"
 
             # 파일이 존재하면 내용 읽기
             if os.path.exists(reference_file):

@@ -40,7 +40,7 @@ def load_reference_text(path):
 
         # 참조 텍스트 파일이 없으면 eng_master.txt 사용
         if not os.path.exists(reference_file):
-            reference_file = "eng_master.txt"
+            reference_file = "cake.txt"
 
         # 파일이 존재하면 내용 읽기
         if os.path.exists(reference_file):
@@ -61,9 +61,10 @@ def stt2(path: str, lan: str) -> List[STTResults]:
     processed_url = preprocess_audio(url, path)
 
     # stt_results = whisper_manager.stt(path=url, lan=lan)
-    stt_results = whisper_manager.enhance_accuracy_ensemble_stt(path=processed_url, lan=lan)
+    stt_results = whisper_manager.enhance_accuracy_ensemble_stt(path=url, lan=lan)
     # 참조 텍스트 로드 (WhisperManager에서 사용한 것과 동일한 방식)
     reference_text = load_reference_text(path=url)
+
 
     # 테스트 맞춤법 검사
     stt_results_enhance = open_ai.correct_spelling(stt_results=stt_results, language=lan, reference_text=reference_text)

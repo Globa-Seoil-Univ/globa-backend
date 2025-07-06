@@ -144,8 +144,21 @@ class Consumer:
 
             attempt = 0
             max_retries = 3
+            last_error = None
+            last_failed_step = None
+
             while attempt < max_retries:
                 with SessionMaker() as session:
+                    processing_status = {
+                        "stt": "NOT_STARTED",  # STT 상태 추가
+                        "add_section": "NOT_STARTED",
+                        "assign_text": "NOT_STARTED",
+                        "add_summary": "NOT_STARTED",
+                        "add_qa": "NOT_STARTED",
+                        "add_keywords": "NOT_STARTED"
+                    }
+                    current_failed_step = None
+                    current_error = None
                     try:
                         # 지우면 안됨 임시 주석, 유저 유효성 검증
                         user = session.query(AppUser).filter(AppUser.user_id == user_id).first()
@@ -164,21 +177,81 @@ class Consumer:
                             raise NotFoundException("No such folder share")
 
                         self.logger.info(f"Starting analyze audio: {record_id}")
+
                         # 지우면 안됨 임시 주석, 기존에는 stt를 호출했지만, 이젠 stt2를 호출해야함. 추후 메소드명 정리 필요
-                        stt_results = stt2(record.path, lan)
+                        # stt_results = stt2(record.path, lan)
                         # 테스트를 위한 stt_results 설정
                         # stt_results = stt2(str(record_id),"ko")
+                        # self.logger.info(f"result: {stt_results}")
 
-                        self.logger.info(f"result: {stt_results}")
-                        add_section(record_id=record_id, text=stt_results, session=session)
-                        assign_text(record_id=record_id, text=stt_results, session=session)
-                        add_summary(record_id=record_id, session=session)
+                        try:
+                            processing_status["stt"] = "IN_PROGRESS"
+                            stt_results = stt2(record.path, lan)
+                            processing_status["stt"] = "SUCCESS"
+                            self.logger.info(f"STT result: {stt_results}")
+                        except Exception as e:
+                            processing_status["stt"] = "FAILED"
+                            current_failed_step = "stt"
+                            current_error = e
+                            raise
 
-                        text = ''.join(result.text for result in stt_results)
-                        add_qa(record_id=record_id, text=text, session=session)
-                        add_keywords(record_id=record_id, text=text, session=session, lan=lan) # ja en ko
+                        # 각 단계별 처리 (에러 추적을 위해 수정)
+                        try:
+                            processing_status["add_section"] = "IN_PROGRESS"
+                            add_section(record_id=record_id, text=stt_results, session=session, lan=lan)
+                            processing_status["add_section"] = "SUCCESS"
+                        except Exception as e:
+                            processing_status["add_section"] = "FAILED"
+                            current_failed_step = "add_section"
+                            current_error = e
+                            raise
 
-                        # 지우면 안됨 임시 주석, 커밋하는 부분. DB의 무결성 보증을 위해 잠시 주석했었음.
+                        try:
+                            processing_status["assign_text"] = "IN_PROGRESS"
+                            import json
+
+                            invalid_json = '{"recordId": 128, "userId": 1, "language": "ko",}'
+                            json.loads(invalid_json)  # JSONDecodeError 발생
+
+                            assign_text(record_id=record_id, text=stt_results, session=session)
+                            processing_status["assign_text"] = "SUCCESS"
+                        except Exception as e:
+                            processing_status["assign_text"] = "FAILED"
+                            current_failed_step = "assign_text"
+                            current_error = e
+                            raise
+
+                        try:
+                            processing_status["add_summary"] = "IN_PROGRESS"
+                            add_summary(record_id=record_id, session=session, lan=lan)
+                            processing_status["add_summary"] = "SUCCESS"
+                        except Exception as e:
+                            processing_status["add_summary"] = "FAILED"
+                            current_failed_step = "add_summary"
+                            current_error = e
+                            raise
+
+                        try:
+                            processing_status["add_qa"] = "IN_PROGRESS"
+                            text = ''.join(result.text for result in stt_results)
+                            add_qa(record_id=record_id, text=text, session=session, lan=lan)
+                            processing_status["add_qa"] = "SUCCESS"
+                        except Exception as e:
+                            processing_status["add_qa"] = "FAILED"
+                            current_failed_step = "add_qa"
+                            current_error = e
+                            raise
+
+                        try:
+                            processing_status["add_keywords"] = "IN_PROGRESS"
+                            add_keywords(record_id=record_id, text=text, session=session, lan=lan)
+                            processing_status["add_keywords"] = "SUCCESS"
+                        except Exception as e:
+                            processing_status["add_keywords"] = "FAILED"
+                            current_failed_step = "add_keywords"
+                            current_error = e
+                            raise
+
                         session.commit()
                         self.logger.info(f"Success analyzed audio : {record_id}")
                         self.producer.send_message(key=success_key, message={'recordId': record_id, 'userId': user_id})
@@ -194,6 +267,8 @@ class Consumer:
                     except Exception as e:
                         session.rollback()
                         attempt += 1
+                        last_failed_step = current_failed_step
+                        last_error = current_error
                         self.logger.error(f"[{attempt}/{max_retries}] Analyze Error : {e}")        
                         if attempt < max_retries:
                             time.sleep(1)
@@ -202,6 +277,16 @@ class Consumer:
             self.producer.send_message(key=failed_key,
                                        message={'recordId': record_id, 'userId': user_id,
                                                 'message': f"Analyze failed after {max_retries}retries"})
+            self.producer.send_to_dlq(
+                record_id=record_id,
+                user_id=user_id,
+                failed_step=last_failed_step or "unknown",
+                error_type=self.producer.classify_error(last_error),
+                error_message=str(last_error),
+                processing_status=processing_status,
+                retry_count=max_retries
+            )
+
         else:
             self.producer.send_message(key=failed_key,
                                        message={'recordId': record_id, 'userId': user_id,
