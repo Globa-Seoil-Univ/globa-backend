@@ -1,4 +1,4 @@
-package org.y2k2.globa.common.util;
+package org.y2k2.globa.common.util.kafka;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

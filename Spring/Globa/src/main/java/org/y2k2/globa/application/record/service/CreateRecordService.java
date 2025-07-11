@@ -12,7 +12,7 @@ import org.y2k2.globa.application.record.usecase.CreateRecordUseCase;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
-import org.y2k2.globa.common.util.KafkaProducer;
+import org.y2k2.globa.common.util.kafka.KafkaProducer;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
