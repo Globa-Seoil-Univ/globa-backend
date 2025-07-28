@@ -52,19 +52,11 @@ def load_reference_text(path):
         return None
 
 def stt2(path: str, lan: str) -> List[STTResults]:
-    # 밑에 임시 로컬 혹은 이것을 사용해야함. 이것이 FB에 올라가있는 실제 오디오 파일의 경로이다.
     url = storage_manager.getDownloadUrl(path=path)
-    # url = "./"+path+".wav" # 임시 로컬
     open_ai = OpenAIUtil()
 
-    # 위에 파베에서 받아온 오디오를 가지고, 전처리 수행 후 로컬에 임시 저장.
-    processed_url = preprocess_audio(url, path)
-
-    # stt_results = whisper_manager.stt(path=url, lan=lan)
     stt_results = whisper_manager.enhance_accuracy_ensemble_stt(path=url, lan=lan)
-    # 참조 텍스트 로드 (WhisperManager에서 사용한 것과 동일한 방식)
     reference_text = load_reference_text(path=url)
-
 
     # 테스트 맞춤법 검사
     stt_results_enhance = open_ai.correct_spelling(stt_results=stt_results, language=lan, reference_text=reference_text)
@@ -98,13 +90,6 @@ def preprocess_audio(audio_path: str, original_path: str) -> str:
         전처리된 오디오 파일 경로
     """
     try:
-        # 로깅
-        print(f"오디오 전처리 시작: {audio_path}")
-
-        # # 전처리된 파일 저장 경로 기존 코드
-        # output_path = f"./{original_path}_processed.wav"
-
-        # 파일명만 추출
         filename = os.path.basename(original_path)
         base_name = os.path.splitext(filename)[0]
 
@@ -113,10 +98,8 @@ def preprocess_audio(audio_path: str, original_path: str) -> str:
 
         # 1. 오디오 로드
         try:
-            # librosa를 사용한 로드 (리샘플링 지원)
-                y, sr = librosa.load(audio_path, sr=16000)  # 16kHz로 리샘플링, 8000도 가능
+            y, sr = librosa.load(audio_path, sr=16000)  # 16kHz로 리샘플링, 8000도 가능
         except Exception as e:
-            print(f"librosa 로드 실패, pydub 시도: {e}")
             # librosa 실패 시 pydub로 시도
             audio = AudioSegment.from_file(audio_path)
             audio = audio.set_channels(1)  # 모노로 변환
@@ -182,10 +165,8 @@ def preprocess_audio(audio_path: str, original_path: str) -> str:
         # 7. 결과 저장
         sf.write(output_path, y_processed, sr)
 
-        print(f"오디오 전처리 완료: {output_path}")
         return output_path
 
     except Exception as e:
-        print(f"오디오 전처리 중 오류 발생: {e}")
         # 오류 발생 시 원본 파일 반환
         return audio_path

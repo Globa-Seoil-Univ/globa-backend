@@ -94,28 +94,3 @@ class KeywordUtilJP:
         except Exception as e:
             self.logger.error(f"키워드 추출 중 오류 발생: {e}")
             return []
-
-
-# if __name__ == "__main__":
-#     print("가보장")
-#     keyword_util = KeywordUtilJP()
-#
-#     # 일본어 샘플 텍스트
-#     sample_text = """日本の首都は東京です。東京は日本の経済、政治、文化の中心地です。
-#     世界中から観光客が訪れる人気の都市です。美味しい食べ物や歴史的な建物も多くあります。"""
-#
-#     # 명사 추출 결과 확인
-#     nouns = keyword_util._KeywordUtilJP__noun_extractor(sample_text)
-#     print("추출된 명사:", nouns)
-#
-#     # 전처리된 텍스트 확인
-#     preprocessed = keyword_util._KeywordUtilJP__preprocess(sample_text)
-#     print("전처리된 텍스트:", preprocessed)
-#
-#     # 키워드 추출
-#     keywords = keyword_util.get_keywords(sample_text)
-#
-#     print("\n입력 텍스트:")
-#     print(sample_text)
-#     print("\n추출된 키워드:")
-#     print(keywords)

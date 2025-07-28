@@ -67,14 +67,14 @@ class Producer:
         dlq_message = {
             "record_id": record_id,
             "user_id": user_id,
-            "error_info": {
+            "info": {
                 "failed_step": failed_step,
                 "error_type": error_type,
                 "error_message": str(error_message),
                 "timestamp": datetime.utcnow().isoformat() + "Z",
                 "retry_count": retry_count
             },
-            "processing_status": processing_status
+            "status": processing_status
         }
 
         # DLQ는 재시도 없이 바로 전송 (DLQ 자체가 실패하면 안 되므로)

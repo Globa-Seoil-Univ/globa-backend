@@ -178,11 +178,6 @@ class Consumer:
 
                         self.logger.info(f"Starting analyze audio: {record_id}")
 
-                        # 지우면 안됨 임시 주석, 기존에는 stt를 호출했지만, 이젠 stt2를 호출해야함. 추후 메소드명 정리 필요
-                        # stt_results = stt2(record.path, lan)
-                        # 테스트를 위한 stt_results 설정
-                        # stt_results = stt2(str(record_id),"ko")
-                        # self.logger.info(f"result: {stt_results}")
 
                         try:
                             processing_status["stt"] = "IN_PROGRESS"
@@ -208,11 +203,6 @@ class Consumer:
 
                         try:
                             processing_status["assign_text"] = "IN_PROGRESS"
-                            import json
-
-                            invalid_json = '{"recordId": 128, "userId": 1, "language": "ko",}'
-                            json.loads(invalid_json)  # JSONDecodeError 발생
-
                             assign_text(record_id=record_id, text=stt_results, session=session)
                             processing_status["assign_text"] = "SUCCESS"
                         except Exception as e:

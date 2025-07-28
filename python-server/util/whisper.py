@@ -39,7 +39,7 @@ class ResourceMonitor:
         self.cpu_util_samples = []
         self.ram_util_samples = []
         self.gpu_memory_samples = []
-        self.memory_samples = []  # 메모리 사용량 샘플 잠깐 추가
+        self.memory_samples = []
 
     def start_monitoring(self):
         """
@@ -51,7 +51,7 @@ class ResourceMonitor:
         self.cpu_util_samples = []
         self.ram_util_samples = []
         self.gpu_memory_samples = []
-        self.memory_samples = []  # 메모리 샘플 초기화ㅏ
+        self.memory_samples = []
 
     def sample_resource_usage(self):
         """
@@ -86,11 +86,10 @@ class ResourceMonitor:
             모니터링 종료 및 결과 저장
         :return:
         """
-        # 가비지 컬렉션 강제 실행
         gc.collect()
         processing_time = time.time() - self.start_time
 
-        # 메모리 사용량 계산 (평균, 최대값)
+        # 메모리 사용량 계산
         if self.memory_samples:
             avg_memory = np.mean(self.memory_samples)
             max_memory = np.max(self.memory_samples)
@@ -186,7 +185,6 @@ class WhisperManager:
             results: STTResults 객체 리스트
             output_file_path: 저장할 JSON 파일 경로
         """
-        # STTResults 객체를 딕셔너리로 직접 변환
         results_dict = []
         for result in results:
             results_dict.append({
@@ -194,10 +192,7 @@ class WhisperManager:
                 "start": result.start,
                 "end": result.end
             })
-        # json_data = {
-        #     "result": results_dict
-        # }
-        # JSON 파일로 저장
+
         with open(output_file_path, 'w', encoding='utf-8') as f:
             json.dump(results_dict, f, ensure_ascii=False, indent=2)
 
@@ -362,9 +357,8 @@ class WhisperManager:
         self.save_stt_results_to_json(results, output_path)
         self.logger.info(f"STT 결과가 {output_path}에 저장되었습니다.")
 
-        # 파일 제거하는건데 자꾸 귀찮으므로 잠깐 주석
-        # if os.path.isfile(path):
-        #     os.remove(path)
+        if os.path.isfile(path):
+            os.remove(path)
 
         return results
     ## 앙상블 시도1
@@ -1012,13 +1006,10 @@ class WhisperManager:
 
             refined_results = [STTResults(text=s.text, start=s.start, end=s.end) for s in refined_segments]
 
-            # 대안적 접근: 오디오를 청크로 나누어 처리
             chunked_results = self._process_audio_in_chunks(path, lan)
 
-            # 세 가지 결과를 조합하여 최상의 결과 생성
             final_results = self._combine_best_segments(base_results, refined_results, chunked_results)
         else:
-            # 문제가 없으면 기본 결과 사용
             final_results = base_results
 
 

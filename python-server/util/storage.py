@@ -50,6 +50,4 @@ class FirebaseStorageManager:
             token=token  # 푸시 알림을 받을 FCM 토큰
         )
 
-        # 🔥 메시지 전송
-        response = messaging.send(message)
-        print(f"✅ FCM 메시지 전송 성공: {response}")
+        messaging.send(message)
