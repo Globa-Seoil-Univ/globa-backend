@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.y2k2.globa.application.user.usecase.FindActiveUserIdUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
+import org.y2k2.globa.common.util.hash.HashUtil;
 import org.y2k2.globa.domain.user.repository.UserRepository;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
@@ -27,6 +28,8 @@ public class FindActiveUserIdUseCaseTest {
 
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private HashUtil hashUtil;
 
     @Test
     @DisplayName("사용자 고유 ID 조회 - 성공")
@@ -41,6 +44,8 @@ public class FindActiveUserIdUseCaseTest {
 
         Mockito.when(userRepository.getUserBySnsId(user.getSnsId()))
                 .thenReturn(Optional.of(user));
+        Mockito.when(hashUtil.hash(user.getSnsId()))
+                .thenReturn(user.getSnsId());
 
         Optional<Long> userId = findActiveUserIdUseCase.execute(user.getSnsId());
 
@@ -65,6 +70,8 @@ public class FindActiveUserIdUseCaseTest {
 
         Mockito.when(userRepository.getUserBySnsId(user.getSnsId()))
                 .thenReturn(Optional.empty());
+        Mockito.when(hashUtil.hash(user.getSnsId()))
+                .thenReturn(user.getSnsId());
 
         Optional<Long> userId = findActiveUserIdUseCase.execute(user.getSnsId());
 
@@ -87,6 +94,8 @@ public class FindActiveUserIdUseCaseTest {
 
         Mockito.when(userRepository.getUserBySnsId(user.getSnsId()))
                 .thenReturn(Optional.of(user));
+        Mockito.when(hashUtil.hash(user.getSnsId()))
+                .thenReturn(user.getSnsId());
 
         Assertions.assertThatThrownBy(() -> findActiveUserIdUseCase.execute(user.getSnsId()))
                 .as("삭제된 사용자의 경우 CustomException이 발생해야 합니다.")

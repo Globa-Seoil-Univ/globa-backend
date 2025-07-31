@@ -23,6 +23,7 @@ import org.y2k2.globa.application.user.dto.request.RequestUserPostDTO;
 import org.y2k2.globa.application.user.usecase.*;
 import org.y2k2.globa.application.userrole.command.CreateUserRoleCommand;
 import org.y2k2.globa.application.userrole.usecase.CreateUserRoleUseCase;
+import org.y2k2.globa.common.util.hash.HashUtil;
 import org.y2k2.globa.infrastructure.persistence.folderrole.type.FolderRole;
 import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.common.util.jwt.JWT;
@@ -57,6 +58,8 @@ public class CreateUserServiceTest {
     private CreateDefaultFolderUseCase createDefaultFolderUseCase;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private HashUtil hashUtil;
 
     private final JWT jwt = JWT.builder()
             .grantType("Bearer")

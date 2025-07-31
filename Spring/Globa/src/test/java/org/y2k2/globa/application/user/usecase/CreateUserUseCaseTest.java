@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.y2k2.globa.application.user.command.CreateUserCommand;
 import org.y2k2.globa.application.user.mapper.UserMapper;
 import org.y2k2.globa.application.user.usecase.CreateUserUseCase;
+import org.y2k2.globa.common.util.hash.HashUtil;
 import org.y2k2.globa.domain.user.repository.UserRepository;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
@@ -25,17 +26,23 @@ public class CreateUserUseCaseTest {
 
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private HashUtil hashUtil;
 
     @Test
     @DisplayName("유저 생성 - 성공")
     void createUserTest() {
         CreateUserCommand command = FixtureMonkey.builder()
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
+                .defaultNotNull(true)
                 .build()
                 .giveMeOne(CreateUserCommand.class);
 
-        UserEntity user = UserMapper.INSTANCE.toEntity(command);
+        String hashedSnsId = "hashedSnsId";
+        UserEntity user = UserMapper.INSTANCE.toEntity(command, hashedSnsId);
 
+        Mockito.when(hashUtil.hash(Mockito.anyString()))
+                .thenReturn(hashedSnsId);
         Mockito.when(userRepository.save(Mockito.any(UserEntity.class)))
                 .thenReturn(user);
 
@@ -53,7 +60,7 @@ public class CreateUserUseCaseTest {
                     Assertions.assertThat(u.getSnsKind())
                             .isEqualTo(command.snsKind());
                     Assertions.assertThat(u.getSnsId())
-                            .isEqualTo(command.snsId());
+                            .isEqualTo(hashedSnsId);
                     Assertions.assertThat(u.getProfilePath())
                             .isEqualTo(command.profile());
                     Assertions.assertThat(u.getPrimaryNofi())

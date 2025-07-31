@@ -18,7 +18,7 @@ public class KafkaConsumer {
     private final KafkaService kafkaService;
     private final DLQService dlqService;
 
-    @KafkaListener(topics = "response", groupId = "globa_audio_group")
+    @KafkaListener(topics = "response", groupId = "globa_audio_group_record", containerFactory = "recordKafkaListenerContainerFactory")
     public void listen(ConsumerRecord<String, ResponseKafkaDto> record, Acknowledgment acknowledgment) {
         try {
             String key = record.key();
@@ -41,7 +41,7 @@ public class KafkaConsumer {
         }
     }
 
-    @KafkaListener(topics = "response_dlq", groupId = "globa_audio_group")
+    @KafkaListener(topics = "response_dlq", groupId = "globa_audio_group_dlq", containerFactory = "dlqKafkaListenerContainerFactory")
     public void listenDLQ(ConsumerRecord<String, ResponseDLQDto> record, Acknowledgment acknowledgment) {
         try {
             ResponseDLQDto payload = record.value();

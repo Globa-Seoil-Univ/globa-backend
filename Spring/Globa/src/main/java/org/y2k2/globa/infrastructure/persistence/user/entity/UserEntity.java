@@ -26,7 +26,7 @@ public class UserEntity {
     @Column(name = "sns_kind", nullable = false, length = 4)
     private SnsKind snsKind;
 
-    @Column(name = "sns_id", nullable = false, unique = true, length = 50)
+    @Column(name = "sns_id", nullable = false, unique = true, length = 250)
     private String snsId;
 
     @Column(name = "code", nullable = false, unique = true, length = 6)

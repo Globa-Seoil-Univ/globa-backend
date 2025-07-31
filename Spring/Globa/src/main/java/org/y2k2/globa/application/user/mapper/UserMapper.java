@@ -22,7 +22,7 @@ public interface UserMapper {
 
     @Mapping(source = "cmd.code", target = "code")
     @Mapping(source = "cmd.snsKind", target = "snsKind")
-    @Mapping(source = "cmd.snsId", target = "snsId")
+    @Mapping(source = "hashedSnsId", target = "snsId")
     @Mapping(source = "cmd.name", target = "name")
     @Mapping(source = "cmd.profile", target = "profilePath")
     @Mapping(source = "cmd.notification", target = "primaryNofi")
@@ -30,7 +30,7 @@ public interface UserMapper {
     @Mapping(source = "cmd.notification", target = "shareNofi")
     @Mapping(source = "cmd.eventNotification", target = "eventNofi")
     @Mapping(target = "isDeleted", constant = "false")
-    UserEntity toEntity(CreateUserCommand cmd);
+    UserEntity toEntity(CreateUserCommand cmd, String hashedSnsId);
 
     @Mapping(source = "user.userId", target = "userId")
     @Mapping(source = "user.profilePath", target = "profile")

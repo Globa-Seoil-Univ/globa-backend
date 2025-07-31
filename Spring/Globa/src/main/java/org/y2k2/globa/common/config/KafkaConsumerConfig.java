@@ -18,6 +18,7 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.util.backoff.BackOff;
 import org.springframework.util.backoff.FixedBackOff;
+import org.y2k2.globa.application.kafka.dto.response.ResponseDLQDto;
 import org.y2k2.globa.application.kafka.dto.response.ResponseKafkaDto;
 
 import java.net.SocketTimeoutException;
@@ -43,38 +44,87 @@ public class KafkaConsumerConfig {
     private Long maxAttempts;
 
     @Bean
-    public ConsumerFactory<String, ResponseKafkaDto> consumerFactory() {
+    public ConsumerFactory<String, ResponseKafkaDto> recordConsumerFactory() {
+        return createConsumerFactory(ResponseKafkaDto.class, groupId + "_record");
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, ResponseKafkaDto> recordKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, ResponseKafkaDto> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(recordConsumerFactory());
+        factory.setCommonErrorHandler(recordErrorHandler());
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        factory.setConcurrency(1);
+
+        return factory;
+    }
+
+    @Bean
+    public ConsumerFactory<String, ResponseDLQDto> dlqConsumerFactory() {
+        return createConsumerFactory(ResponseDLQDto.class, groupId + "_dlq");
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, ResponseDLQDto> dlqKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, ResponseDLQDto> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(dlqConsumerFactory());
+        factory.setCommonErrorHandler(dlqErrorHandler());
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        factory.setConcurrency(1);
+
+        return factory;
+    }
+
+    private <T> ConsumerFactory<String, T> createConsumerFactory(Class<T> targetType, String groupId) {
         Map<String, Object> consumerProperties = new HashMap<>();
         consumerProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        consumerProperties.put(ConsumerConfig.GROUP_INSTANCE_ID_CONFIG, ("SchedulerCoordinator" + UUID.randomUUID()));
+        consumerProperties.put(ConsumerConfig.CLIENT_ID_CONFIG,
+                "globa-audio-client-" + targetType.getSimpleName().toLowerCase() + "-" + UUID.randomUUID());
         consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
         consumerProperties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, enableAutoCommit);
         consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
 
-        JsonDeserializer<ResponseKafkaDto> deserializer = new JsonDeserializer<>(ResponseKafkaDto.class, false);
-        ErrorHandlingDeserializer<ResponseKafkaDto> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(deserializer);
+        // Trusted packages 설정
+        consumerProperties.put(JsonDeserializer.TRUSTED_PACKAGES, "org.y2k2.globa.application.kafka.dto.response.*");
 
-        return new DefaultKafkaConsumerFactory<>(consumerProperties, new StringDeserializer(), errorHandlingDeserializer);
+        consumerProperties.put(JsonDeserializer.VALUE_DEFAULT_TYPE, targetType.getName());
+        consumerProperties.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
+
+        JsonDeserializer<T> deserializer = new JsonDeserializer<>(targetType, false);
+        ErrorHandlingDeserializer<T> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(deserializer);
+
+        return new DefaultKafkaConsumerFactory<>(
+                consumerProperties,
+                new StringDeserializer(), errorHandlingDeserializer
+        );
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ResponseKafkaDto> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, ResponseKafkaDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
-        factory.setConsumerFactory(consumerFactory());
-        factory.setConcurrency(1);
-        factory.setCommonErrorHandler(errorHandler());
-        return factory;
-    }
-
-    @Bean
-    public DefaultErrorHandler errorHandler() {
+    public DefaultErrorHandler recordErrorHandler() {
         BackOff fixedBackOff = new FixedBackOff(interval, maxAttempts);
 
         DefaultErrorHandler errorHandler = new DefaultErrorHandler((consumerRecord, e) -> {
             log.error("Failed to process message: " + consumerRecord.value() + " with error: " + e.getMessage());
+        }, fixedBackOff);
+
+        errorHandler.addRetryableExceptions(SocketTimeoutException.class);
+        errorHandler.addNotRetryableExceptions(NullPointerException.class);
+        errorHandler.addNotRetryableExceptions(JsonParseException.class);
+        errorHandler.addNotRetryableExceptions(SerializationException.class);
+
+        return errorHandler;
+    }
+
+    @Bean
+    public DefaultErrorHandler dlqErrorHandler() {
+        BackOff fixedBackOff = new FixedBackOff(0L, 0L); // 재시도 없이 바로 처리
+
+        DefaultErrorHandler errorHandler = new DefaultErrorHandler((consumerRecord, e) -> {
+            log.error("Failed to process DLQ message: " + consumerRecord.value() + " with error: " + e.getMessage());
         }, fixedBackOff);
 
         errorHandler.addRetryableExceptions(SocketTimeoutException.class);
