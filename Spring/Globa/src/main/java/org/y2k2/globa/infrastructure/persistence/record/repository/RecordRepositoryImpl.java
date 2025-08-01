@@ -40,8 +40,13 @@ public class RecordRepositoryImpl implements RecordRepository {
     }
 
     @Override
-    public List<String> getAllPath(Long folderId) {
-        return recordJpaRepository.findAllPaths(folderId);
+    public List<String> getAllPathWithFolderId(Long folderId) {
+        return recordJpaRepository.findAllPathsWithFolderId(folderId);
+    }
+
+    @Override
+    public List<String> getAllPathWIthUserIds(List<Long> userIds) {
+        return recordJpaRepository.findAllPathsByUserIds(userIds);
     }
 
     @Override

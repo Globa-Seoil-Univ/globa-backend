@@ -20,7 +20,7 @@ public class DeleteFilesUseCase implements VoidUseCase<FolderEntity> {
     @Async
     @Override
     public void execute(FolderEntity folder) {
-        List<String> paths = recordRepository.getAllPath(folder.getFolderId());
+        List<String> paths = recordRepository.getAllPathWithFolderId(folder.getFolderId());
         fileStore.deleteFiles(paths);
     }
 }

@@ -25,7 +25,13 @@ public interface RecordJpaRepository extends JpaRepository<RecordEntity, Long> {
             value = "SELECT r.path FROM RecordEntity r " +
                     "WHERE r.folder.folderId = :folderId"
     )
-    List<String> findAllPaths(Long folderId);
+    List<String> findAllPathsWithFolderId(Long folderId);
+
+    @Query(
+            value = "SELECT r.path FROM RecordEntity r " +
+                    "WHERE r.user.userId IN (:userIds)"
+    )
+    List<String> findAllPathsByUserIds(List<Long> userIds);
 
     Page<RecordEntity> findAllByFolderFolderId(Long folderId, Pageable pageable);
 

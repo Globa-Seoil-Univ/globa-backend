@@ -21,15 +21,15 @@ public class UserRoleRepositoryImpl implements UserRoleRepository {
     }
 
     @Override
+    public void deletes(List<Long> userIds) {
+        userRoleJpaRepository.deleteAllByUser_UserIdIn(userIds);
+    }
+
+    @Override
     public Boolean isWritable(Long userId) {
         return userRoleJpaRepository.existsByUser_UserIdAndRole_NameIn(
                 userId,
                 List.of(UserRole.ADMIN, UserRole.EDITOR)
         );
-    }
-
-    @Override
-    public Optional<UserRoleEntity> getUserRole(Long userId) {
-        return userRoleJpaRepository.findByUser_UserId(userId);
     }
 }

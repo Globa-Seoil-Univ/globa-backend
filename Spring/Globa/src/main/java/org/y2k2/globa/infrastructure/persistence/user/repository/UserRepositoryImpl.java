@@ -2,9 +2,11 @@ package org.y2k2.globa.infrastructure.persistence.user.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 import org.y2k2.globa.domain.user.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +21,11 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public void deletes(List<UserEntity> users) {
+        userJpaRepository.deleteAllInBatch(users);
+    }
+
+    @Override
     public Boolean isCodeExists(String code) {
         return userJpaRepository.existsByCode(code);
     }
@@ -26,6 +33,12 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public List<UserEntity> getAllUsersByCodes(List<String> codes) {
         return userJpaRepository.findAllByCodeIn(codes);
+    }
+
+    @Override
+    public List<UserEntity> getInActiveUsers() {
+        LocalDateTime intervalDay = new CustomTimestamp().getTimestamp().minusDays(30);
+        return userJpaRepository.findAllByIsDeletedTrue(intervalDay);
     }
 
     @Override

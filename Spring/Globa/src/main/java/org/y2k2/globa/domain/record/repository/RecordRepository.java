@@ -17,7 +17,8 @@ public interface RecordRepository {
     Boolean existsById(Long recordId);
 
     List<Long> getAllRecordId(Long userId);
-    List<String> getAllPath(Long folderId);
+    List<String> getAllPathWithFolderId(Long folderId);
+    List<String> getAllPathWIthUserIds(List<Long> userId);
 
     Page<RecordEntity> getRecordsByFolderId(Long folderId, Pageable pageable);
     Page<RecordEntity> getAccessibleRecord(Long userId, Pageable pageable);

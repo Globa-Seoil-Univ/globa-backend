@@ -21,7 +21,7 @@ public class InquiryEntity {
     private Long inquiryId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "user_id", columnDefinition = "INT UNSIGNED")
     private UserEntity user;
 

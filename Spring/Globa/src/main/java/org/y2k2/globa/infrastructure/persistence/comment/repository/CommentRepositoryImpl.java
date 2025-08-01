@@ -23,6 +23,11 @@ public class CommentRepositoryImpl implements CommentRepository {
     }
 
     @Override
+    public List<CommentEntity> saveAll(List<CommentEntity> entities) {
+        return commentJpaRepository.saveAll(entities);
+    }
+
+    @Override
     public void delete(CommentEntity entity) {
         commentJpaRepository.delete(entity);
     }
@@ -55,6 +60,11 @@ public class CommentRepositoryImpl implements CommentRepository {
     @Override
     public List<CommentEntity> getAllDeletedComment(Long commentId) {
         return commentJpaRepository.findAllSelfOrChildDeletedByCommentId(commentId);
+    }
+
+    @Override
+    public List<CommentEntity> getAllCleanupComment() {
+        return commentJpaRepository.findAllByUserIsNull();
     }
 
     @Override

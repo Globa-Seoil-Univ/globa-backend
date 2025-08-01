@@ -61,4 +61,6 @@ public interface CommentJpaRepository extends JpaRepository<CommentEntity, Long>
                                 ")" +
                             "OR comment_id = :commentId", nativeQuery = true)
     List<CommentEntity> findAllSelfOrChildDeletedByCommentId(Long commentId);
+
+    List<CommentEntity> findAllByUserIsNull();
 }

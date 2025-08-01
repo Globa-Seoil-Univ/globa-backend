@@ -208,7 +208,7 @@ public class RecordRepositoryTest {
         );
         RecordEntity otherUserRecord = createRecordAndShare(folder, otherUser, user, editor, InvitationStatus.ACCEPT);
 
-        List<String> paths = recordRepository.getAllPath(folder.getFolderId());
+        List<String> paths = recordRepository.getAllPathWithFolderId(folder.getFolderId());
 
         log.info("Original Record Path = {}", record.getPath());
         log.info("Saved My Own Record Path = {}", myOwnRecord.getPath());
