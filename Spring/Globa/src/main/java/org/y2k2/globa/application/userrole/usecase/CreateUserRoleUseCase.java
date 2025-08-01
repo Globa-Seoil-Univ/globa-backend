@@ -9,7 +9,6 @@ import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.usecase.VoidUseCase;
 import org.y2k2.globa.domain.role.repository.RoleRepository;
 import org.y2k2.globa.domain.userrole.repository.UserRoleRepository;
-import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.role.entity.RoleEntity;
 import org.y2k2.globa.infrastructure.persistence.userrole.entity.UserRoleEntity;
 
