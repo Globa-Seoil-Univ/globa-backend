@@ -14,7 +14,10 @@ public enum ErrorCode {
     INVITE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "자기 자신을 초대할 수 없습니다.", "40020"),
     INVITE_ACCEPT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "이미 수락된 초대입니다.", "40021"),
     INVALID_SNS_KIND(HttpStatus.BAD_REQUEST, "유효하지 않은 Sns Kind 입니다.", "40050"),
+    INVALID_SNS_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 Sns ID 입니다.", "40051"),
     MISMATCH_SHARE_ID(HttpStatus.BAD_REQUEST, "요청한 공유 ID가 일치하지 않습니다.", "40060"),
+    INVALID_AES_ENCRYPTION_VALUE(HttpStatus.BAD_REQUEST, "AES 암호화에 사용할 값이 유효하지 않습니다.", "40070"),
+    INVALID_AES_DECRYPTION_VALUE(HttpStatus.BAD_REQUEST, "AES 복호화에 사용할 값이 유효하지 않습니다.", "40071"),
 
     /* 401 UNAUTHORIZED : 허락되지 않은 사용자 */
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 Access 토큰입니다.", "40110"),
@@ -70,6 +73,10 @@ public enum ErrorCode {
     NOT_FOUND_KEYWORD_EXCEL(HttpStatus.INTERNAL_SERVER_ERROR, "키워드 엑셀 파일을 찾을 수 없습니다.","50050"),
     NOT_FOUND_FOLDER_ROLE(HttpStatus.INTERNAL_SERVER_ERROR, "폴더 권한을 찾을 수 없습니다.", "50051"),
     NOT_FOUND_USER_ROLE(HttpStatus.INTERNAL_SERVER_ERROR, "유저 권한을 찾을 수 없습니다.", "50052"),
+    NOT_FOUND_HASH_SALT(HttpStatus.INTERNAL_SERVER_ERROR, "해시 salt를 찾을 수 없습니다.", "50053"),
+    FAILED_HASH(HttpStatus.INTERNAL_SERVER_ERROR, "해시 생성에 실패하였습니다.", "50054"),
+    FAILED_AES_ENCRYPTION(HttpStatus.INTERNAL_SERVER_ERROR, "AES 암호화에 실패하였습니다.", "50055"),
+    FAILED_AES_DECRYPTION(HttpStatus.INTERNAL_SERVER_ERROR, "AES 복호화에 실패하였습니다.", "50056")
     ;
 
     private final HttpStatus httpStatus;

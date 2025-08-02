@@ -13,6 +13,7 @@ import org.y2k2.globa.application.kafka.dto.common.ConsumerValidateDto;
 import org.y2k2.globa.application.kafka.dto.response.ResponseKafkaDto;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
+import org.y2k2.globa.common.util.crypto.AESUtil;
 import org.y2k2.globa.domain.analysis.repository.AnalysisRepository;
 import org.y2k2.globa.domain.foldershare.repository.FolderShareRepository;
 import org.y2k2.globa.domain.keyword.repository.KeywordRepository;
@@ -41,6 +42,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class KafkaService {
+    private final AESUtil aesUtil;
     private final FirebaseMessaging firebaseMessaging;
 
     private final UserRepository userRepository;
@@ -58,12 +60,13 @@ public class KafkaService {
 
     @Transactional
     public void success(ResponseKafkaDto dto) {
-        Long userId = dto.userId();
+        String encryptedUserId = dto.userId();
+        Long decryptedUserId = aesUtil.decrypt(encryptedUserId);
         Long recordId = dto.recordId();
-        ConsumerValidateDto validateDto = validateRecord(userId, recordId);
+        ConsumerValidateDto validateDto = validateRecord(decryptedUserId, recordId);
 
         if (!validateDto.isValidated()) {
-            if (validateDto.user() != null || validateDto.record() != null) {
+            if (validateDto.user() != null) {
                 sendNotification("업로드 실패", "업로드 실패하였습니다.\n나중에 다시 시도해주세요.", validateDto.user());
             }
 
@@ -73,9 +76,9 @@ public class KafkaService {
         UserEntity user = validateDto.user();
         RecordEntity record = validateDto.record();
 
-        addNotification(user, record, NotificationType.UPLOAD_SUCCESS);
+        addNotification(user, record);
 
-        sendNotificationShare(record.getTitle() + "이(가) 업로드 되었습니다.", userId, record.getFolder().getFolderId());
+        sendNotificationShare(record.getTitle() + "이(가) 업로드 되었습니다.", decryptedUserId, record.getFolder().getFolderId());
         sendNotification("업로드 성공", record.getTitle() + "의 업로드 성공하였습니다.", user);
     }
 
@@ -83,13 +86,14 @@ public class KafkaService {
     public void failed(ResponseKafkaDto dto) {
         log.error("Failed to upload and userId = {}, recordId = {}, dto = {}", dto.userId(), dto.recordId(), dto.message());
 
-        Long userId = dto.userId();
+        String encryptedUserId = dto.userId();
+        Long decryptedUserId = aesUtil.decrypt(encryptedUserId);
         Long recordId = dto.recordId();
-        ConsumerValidateDto validateDto = validateRecord(userId, recordId);
+        ConsumerValidateDto validateDto = validateRecord(decryptedUserId, recordId);
 
         // 오디오 분석에 실패하였고, 기본 정보도 확인할 수 없다면 로그 남기기
         if (validateDto.user() == null || validateDto.record() == null) {
-            log.warn("User not found and userId = {}, recordId = {}", userId, recordId);
+            log.warn("User not found and userId = {}, recordId = {}", decryptedUserId, recordId);
             return;
         }
 
@@ -181,9 +185,9 @@ public class KafkaService {
         return new ConsumerValidateDto(false, user, null);
     }
 
-    private void addNotification(UserEntity user, RecordEntity record, NotificationType type) {
+    private void addNotification(UserEntity user, RecordEntity record) {
         NotificationEntity entity = new NotificationEntity();
-        entity.setType(type);
+        entity.setType(NotificationType.UPLOAD_SUCCESS);
         entity.setReceiver(user);
         entity.setSender(user);
         entity.setFolder(record.getFolder());
@@ -234,7 +238,7 @@ public class KafkaService {
 
             firebaseMessaging.sendEach(messages, false);
         }  catch (Exception e) {
-            log.debug("Failed to send share upload notification : " + e.getMessage());
+            log.debug("Failed to send share upload notification : {}", e.getMessage());
         }
     }
 }

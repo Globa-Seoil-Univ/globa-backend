@@ -23,6 +23,7 @@ import org.y2k2.globa.application.record.usecase.CreateRecordUseCase;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
+import org.y2k2.globa.common.util.crypto.AESUtil;
 import org.y2k2.globa.common.util.kafka.KafkaProducer;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
@@ -42,6 +43,8 @@ public class CreateRecordServiceTest {
     private CreateRecordUseCase createRecordUseCase;
     @Mock
     private FolderRepository folderRepository;
+    @Mock
+    private AESUtil aesUtil;
     @Mock
     private KafkaProducer kafkaProducer;
 
@@ -85,6 +88,9 @@ public class CreateRecordServiceTest {
         Mockito.when(createRecordUseCase.execute(Mockito.any(CreateRecordCommand.class)))
                 .thenReturn(1L);
 
+        Mockito.when(aesUtil.encrypt(Mockito.anyLong()))
+                .thenReturn("encryptedUserId");
+
         Mockito.doNothing()
                 .when(kafkaProducer)
                 .send(Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestKafkaDto.class));
@@ -125,6 +131,9 @@ public class CreateRecordServiceTest {
 
         Mockito.verify(createRecordUseCase, Mockito.times(0))
                 .execute(Mockito.any(CreateRecordCommand.class));
+
+        Mockito.verify(aesUtil, Mockito.times(0))
+                .encrypt(Mockito.anyLong());
 
         Mockito.verify(kafkaProducer, Mockito.times(0))
                 .send(Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestKafkaDto.class));

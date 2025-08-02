@@ -81,8 +81,12 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'com.h2database:h2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    testImplementation 'com.navercorp.fixturemonkey:fixture-monkey-starter:1.1.10'
-    testImplementation 'com.navercorp.fixturemonkey:fixture-monkey-jakarta-validation:1.1.10'
+
+    // fixture-monkey
+    testImplementation 'com.navercorp.fixturemonkey:fixture-monkey-starter:1.1.14'
+    testImplementation 'com.navercorp.fixturemonkey:fixture-monkey-jakarta-validation:1.1.14'
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:{version}")
+
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
 }

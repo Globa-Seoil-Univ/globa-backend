@@ -1,7 +1,7 @@
 package org.y2k2.globa.application.kafka.dto.request;
 
 public record RequestKafkaDto(
-        long recordId,
-        long userId,
+        Long recordId,
+        String userId,
         String lang
 ) {}

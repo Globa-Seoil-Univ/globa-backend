@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.usecase.UseCase;
-import org.y2k2.globa.common.util.hash.HashUtil;
+import org.y2k2.globa.common.util.crypto.HashUtil;
 import org.y2k2.globa.domain.user.repository.UserRepository;
 
 import java.util.Optional;

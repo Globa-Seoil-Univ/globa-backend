@@ -11,10 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.y2k2.globa.application.user.usecase.FindActiveUserIdUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
-import org.y2k2.globa.common.util.hash.HashUtil;
+import org.y2k2.globa.common.util.crypto.HashUtil;
 import org.y2k2.globa.domain.user.repository.UserRepository;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 

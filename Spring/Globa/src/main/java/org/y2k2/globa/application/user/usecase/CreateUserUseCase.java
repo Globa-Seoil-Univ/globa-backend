@@ -5,11 +5,9 @@ import org.springframework.stereotype.Component;
 import org.y2k2.globa.application.user.command.CreateUserCommand;
 import org.y2k2.globa.application.user.mapper.UserMapper;
 import org.y2k2.globa.common.usecase.UseCase;
-import org.y2k2.globa.common.util.hash.HashUtil;
+import org.y2k2.globa.common.util.crypto.HashUtil;
 import org.y2k2.globa.domain.user.repository.UserRepository;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
-
-import java.security.MessageDigest;
 
 @RequiredArgsConstructor
 @Component

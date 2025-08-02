@@ -177,6 +177,7 @@ public class UserController {
                     ),
                     @ApiResponse(responseCode = "400", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.INVALID_SNS_KIND, ref = SwaggerErrorCode.INVALID_SNS_KIND_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.INVALID_SNS_ID, ref = SwaggerErrorCode.INVALID_SNS_ID_VALUE),
                     })),
                     @ApiResponse(responseCode = "401", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.INVALID_SNS_TOKEN, ref = SwaggerErrorCode.INVALID_SNS_TOKEN_VALUE),
@@ -189,6 +190,8 @@ public class UserController {
                     })),
                     @ApiResponse(responseCode = "500", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
                             @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_FOLDER_ROLE, ref = SwaggerErrorCode.NOT_FOUND_FOLDER_ROLE_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.FAILED_HASH, ref = SwaggerErrorCode.FAILED_HASH_VALUE),
+                            @ExampleObject(name = SwaggerErrorCode.NOT_FOUND_HASH_SALT, ref = SwaggerErrorCode.NOT_FOUND_HASH_SALT_VALUE),
                     })),
             }
     )

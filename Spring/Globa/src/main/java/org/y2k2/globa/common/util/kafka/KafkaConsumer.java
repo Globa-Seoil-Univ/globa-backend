@@ -24,12 +24,12 @@ public class KafkaConsumer {
             String key = record.key();
             ResponseKafkaDto payload = record.value();
 
-            long recordId = payload.recordId();
-            long userId = payload.userId();
+            Long recordId = payload.recordId();
+            String encryptedUserId = payload.userId();
 
             if (key.equalsIgnoreCase("success")
                     && recordId > 0
-                    && userId > 0) {
+                    && !encryptedUserId.isEmpty()) {
                 kafkaService.success(payload);
             } else {
                 kafkaService.failed(payload);
@@ -37,7 +37,7 @@ public class KafkaConsumer {
 
             acknowledgment.acknowledge();
         } catch (Exception e) {
-            log.error("Failed to kafka process message = " + e.getMessage());
+            log.error("Failed to kafka process message = {}", e.getMessage());
         }
     }
 
@@ -49,7 +49,7 @@ public class KafkaConsumer {
 
             acknowledgment.acknowledge();
         } catch (Exception e) {
-            log.error("Failed to kafka process DLQ message = " + e.getMessage());
+            log.error("Failed to kafka process DLQ message = {}", e.getMessage());
         }
     }
 }

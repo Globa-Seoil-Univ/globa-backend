@@ -19,8 +19,14 @@ public class SwaggerErrorCode {
     public static final String INVITE_ACCEPT_BAD_REQUEST_VALUE = "40021";
     public static final String INVALID_SNS_KIND = "INVALID_SNS_KIND";
     public static final String INVALID_SNS_KIND_VALUE = "40050";
+    public static final String INVALID_SNS_ID = "INVALID_SNS_ID";
+    public static final String INVALID_SNS_ID_VALUE = "40051";
     public static final String MISMATCH_SHARE_ID = "MISMATCH_SHARE_ID";
     public static final String MISMATCH_SHARE_ID_VALUE = "40060";
+    public static final String INVALID_AES_ENCRYPTION_VALUE = "INVALID_AES_ENCRYPTION_VALUE";
+    public static final String INVALID_AES_ENCRYPTION_VALUE_VALUE = "40070";
+    public static final String INVALID_AES_DECRYPTION_VALUE = "INVALID_AES_DECRYPTION_VALUE";
+    public static final String INVALID_AES_DECRYPTION_VALUE_VALUE = "40071";
 
     /* 401 UNAUTHORIZED : 허락되지 않은 사용자 */
     public static final String INVALID_TOKEN = "INVALID_TOKEN";
@@ -124,4 +130,12 @@ public class SwaggerErrorCode {
     public static final String NOT_FOUND_FOLDER_ROLE_VALUE = "50050";
     public static final String NOT_FOUND_USER_ROLE = "NOT_FOUND_USER_ROLE";
     public static final String NOT_FOUND_USER_ROLE_VALUE = "50051";
+    public static final String NOT_FOUND_HASH_SALT = "NOT_FOUND_HASH_SALT";
+    public static final String NOT_FOUND_HASH_SALT_VALUE = "50052";
+    public static final String FAILED_HASH = "FAILED_HASH";
+    public static final String FAILED_HASH_VALUE = "50053";
+    public static final String FAILED_AES_ENCRYPTION = "FAILED_AES_ENCRYPTION";
+    public static final String FAILED_AES_ENCRYPTION_VALUE = "50054";
+    public static final String FAILED_AES_DECRYPTION = "FAILED_AES_DECRYPTION";
+    public static final String FAILED_AES_DECRYPTION_VALUE = "50055";
 }

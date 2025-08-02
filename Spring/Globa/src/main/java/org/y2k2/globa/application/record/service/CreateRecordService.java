@@ -12,6 +12,7 @@ import org.y2k2.globa.application.record.usecase.CreateRecordUseCase;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
+import org.y2k2.globa.common.util.crypto.AESUtil;
 import org.y2k2.globa.common.util.kafka.KafkaProducer;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
@@ -31,6 +32,7 @@ public class CreateRecordService {
 
     private final FolderRepository folderRepository;
 
+    private final AESUtil aesUtil;
     private final KafkaProducer kafkaProducer;
 
     public void create(Long folderId, RequestPostRecordDto dto, Long userId) {
@@ -48,6 +50,8 @@ public class CreateRecordService {
                 )
         );
 
-        kafkaProducer.send(topic, topicKey, new RequestKafkaDto(createdRecordId, user.getUserId(), dto.lang()));
+        String encryptedUserId = aesUtil.encrypt(user.getUserId());
+        RequestKafkaDto request = new RequestKafkaDto(createdRecordId, encryptedUserId, dto.lang());
+        kafkaProducer.send(topic, topicKey, request);
     }
 }

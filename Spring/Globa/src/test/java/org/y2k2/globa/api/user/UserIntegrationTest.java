@@ -39,7 +39,6 @@ import org.y2k2.globa.application.user.usecase.VerifyKakaoUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.util.CustomTimestamp;
-import org.y2k2.globa.common.util.hash.HashUtil;
 import org.y2k2.globa.common.util.jwt.JWT;
 import org.y2k2.globa.common.util.redis.RedisKey;
 import org.y2k2.globa.constant.Constant;

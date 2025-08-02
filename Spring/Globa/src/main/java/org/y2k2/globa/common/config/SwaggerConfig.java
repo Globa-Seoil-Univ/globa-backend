@@ -59,7 +59,10 @@ public class SwaggerConfig {
         components.addExamples(ErrorCode.INVITE_BAD_REQUEST.getErrorCode(), createExample(ErrorCode.INVITE_BAD_REQUEST.getErrorCode(), "자신을 초대할 수 없습니다."));
         components.addExamples(ErrorCode.INVITE_ACCEPT_BAD_REQUEST.getErrorCode(), createExample(ErrorCode.INVITE_ACCEPT_BAD_REQUEST.getErrorCode(), "이미 초대된 사용자입니다."));
         components.addExamples(ErrorCode.INVALID_SNS_KIND.getErrorCode(), createExample(ErrorCode.INVALID_SNS_KIND.getErrorCode(), "유효하지 않은 Sns Kind입니다."));
+        components.addExamples(ErrorCode.INVALID_SNS_ID.getErrorCode(), createExample(ErrorCode.INVALID_SNS_ID.getErrorCode(), "유효하지 않은 Sns ID입니다."));
         components.addExamples(ErrorCode.MISMATCH_SHARE_ID.getErrorCode(), createExample(ErrorCode.MISMATCH_SHARE_ID.getErrorCode(), "요청한 Share Id와 DB의 정보가 일치하지 않습니다."));
+        components.addExamples(ErrorCode.INVALID_AES_ENCRYPTION_VALUE.getErrorCode(), createExample(ErrorCode.INVALID_AES_ENCRYPTION_VALUE.getErrorCode(), "AES 암호화에 사용할 값이 유효하지 않습니다."));
+        components.addExamples(ErrorCode.INVALID_AES_DECRYPTION_VALUE.getErrorCode(), createExample(ErrorCode.INVALID_AES_DECRYPTION_VALUE.getErrorCode(), "AES 복호화에 사용할 값이 유효하지 않습니다."));
 
         // 401 Errors
         components.addExamples(ErrorCode.INVALID_TOKEN.getErrorCode(), createExample(ErrorCode.INVALID_TOKEN.getErrorCode(), "유효하지 않은 토큰입니다."));
@@ -115,6 +118,10 @@ public class SwaggerConfig {
         components.addExamples(ErrorCode.NOT_FOUND_KEYWORD_EXCEL.getErrorCode(), createExample(ErrorCode.NOT_FOUND_KEYWORD_EXCEL.getErrorCode(), "키워드 엑셀 파일을 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_FOLDER_ROLE.getErrorCode(), createExample(ErrorCode.NOT_FOUND_FOLDER_ROLE.getErrorCode(), "폴더 권한을 찾을 수 없습니다."));
         components.addExamples(ErrorCode.NOT_FOUND_USER_ROLE.getErrorCode(), createExample(ErrorCode.NOT_FOUND_USER_ROLE.getErrorCode(), "유저 권한을 찾을 수 없습니다."));
+        components.addExamples(ErrorCode.NOT_FOUND_HASH_SALT.getErrorCode(), createExample(ErrorCode.NOT_FOUND_HASH_SALT.getErrorCode(), "해시 salt를 찾을 수 없습니다."));
+        components.addExamples(ErrorCode.FAILED_HASH.getErrorCode(), createExample(ErrorCode.FAILED_HASH.getErrorCode(), "해시 생성에 실패하였습니다."));
+        components.addExamples(ErrorCode.FAILED_AES_ENCRYPTION.getErrorCode(), createExample(ErrorCode.FAILED_AES_ENCRYPTION.getErrorCode(), "AES 암호화에 실패하였습니다."));
+        components.addExamples(ErrorCode.FAILED_AES_DECRYPTION.getErrorCode(), createExample(ErrorCode.FAILED_AES_DECRYPTION.getErrorCode(), "AES 복호화에 실패하였습니다."));
     }
 
     private ApiResponse createApiResponse(Schema schema, String description, Example example) {

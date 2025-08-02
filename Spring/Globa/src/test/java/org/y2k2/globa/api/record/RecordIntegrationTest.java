@@ -35,9 +35,9 @@ import org.y2k2.globa.application.record.dto.response.ResponseRecordsByFolderDto
 import org.y2k2.globa.application.record.dto.response.ResponseRecordsDto;
 import org.y2k2.globa.application.study.dto.request.RequestStudyDto;
 import org.y2k2.globa.common.util.CustomTimestamp;
-import org.y2k2.globa.common.util.kafka.KafkaProducer;
 import org.y2k2.globa.common.util.file.FileStore;
 import org.y2k2.globa.common.util.jwt.JWT;
+import org.y2k2.globa.common.util.kafka.KafkaProducer;
 import org.y2k2.globa.constant.Constant;
 import org.y2k2.globa.fixture.analysis.AnalysisFixture;
 import org.y2k2.globa.fixture.folder.FolderFixture;

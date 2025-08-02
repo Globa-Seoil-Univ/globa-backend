@@ -13,8 +13,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.y2k2.globa.application.user.command.CreateUserCommand;
 import org.y2k2.globa.application.user.mapper.UserMapper;
-import org.y2k2.globa.application.user.usecase.CreateUserUseCase;
-import org.y2k2.globa.common.util.hash.HashUtil;
+import org.y2k2.globa.common.util.crypto.HashUtil;
 import org.y2k2.globa.domain.user.repository.UserRepository;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
