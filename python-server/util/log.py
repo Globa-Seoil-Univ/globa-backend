@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 
 
 class Logger:
@@ -15,10 +16,11 @@ class Logger:
 
             # Stream handler
             stream_handler = logging.StreamHandler()
+            stream_handler.stream = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
             stream_handler.setFormatter(formatter)
             self.logger.addHandler(stream_handler)
 
             # File handler
-            file_handler = logging.FileHandler(f'{self.directory}/{name}.log')
+            file_handler = logging.FileHandler(f'{self.directory}/{name}.log', encoding='utf-8')
             file_handler.setFormatter(formatter)
             self.logger.addHandler(file_handler)
