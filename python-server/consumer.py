@@ -16,6 +16,7 @@ from analyze.stt import stt2
 from exception.NotFoundException import NotFoundException
 from model.orm import AppUser, Record, FolderShare
 from producer import Producer
+from util.AESUtil import AESUtil
 from util.database import SessionMaker
 from util.log import Logger
 from util.gpt import *
@@ -131,7 +132,8 @@ class Consumer:
             is_analyze = message.topic == self.topic and key == "analyze"
 
             record_id = message.value["recordId"]
-            user_id = message.value["userId"]
+            from util.AESUtil import AESUtil
+            user_id = AESUtil.decrypt(message.value["userId"])
             # 새로 추가, 유저로부터 language를 받아야함
             lan = message.value["language"]
         except Exception as e:
@@ -151,11 +153,11 @@ class Consumer:
                 with SessionMaker() as session:
                     processing_status = {
                         "stt": "NOT_STARTED",  # STT 상태 추가
-                        "add_section": "NOT_STARTED",
-                        "assign_text": "NOT_STARTED",
-                        "add_summary": "NOT_STARTED",
-                        "add_qa": "NOT_STARTED",
-                        "add_keywords": "NOT_STARTED"
+                        "ADD_SECTION": "NOT_STARTED",
+                        "ASSIGN_TEXT": "NOT_STARTED",
+                        "ADD_SUMMARY": "NOT_STARTED",
+                        "ADD_QA": "NOT_STARTED",
+                        "ADD_KEYWORDS": "NOT_STARTED"
                     }
                     current_failed_step = None
                     current_error = None
@@ -192,53 +194,53 @@ class Consumer:
 
                         # 각 단계별 처리 (에러 추적을 위해 수정)
                         try:
-                            processing_status["add_section"] = "IN_PROGRESS"
+                            processing_status["ADD_SECTION"] = "IN_PROGRESS"
                             add_section(record_id=record_id, text=stt_results, session=session, lan=lan)
-                            processing_status["add_section"] = "SUCCESS"
+                            processing_status["ADD_SECTION"] = "SUCCESS"
                         except Exception as e:
-                            processing_status["add_section"] = "FAILED"
-                            current_failed_step = "add_section"
+                            processing_status["ADD_SECTION"] = "FAILED"
+                            current_failed_step = "ADD_SECTION"
                             current_error = e
                             raise
 
                         try:
-                            processing_status["assign_text"] = "IN_PROGRESS"
+                            processing_status["ASSIGN_TEXT"] = "IN_PROGRESS"
                             assign_text(record_id=record_id, text=stt_results, session=session)
-                            processing_status["assign_text"] = "SUCCESS"
+                            processing_status["ASSIGN_TEXT"] = "SUCCESS"
                         except Exception as e:
-                            processing_status["assign_text"] = "FAILED"
-                            current_failed_step = "assign_text"
+                            processing_status["ASSIGN_TEXT"] = "FAILED"
+                            current_failed_step = "ASSIGN_TEXT"
                             current_error = e
                             raise
 
                         try:
-                            processing_status["add_summary"] = "IN_PROGRESS"
+                            processing_status["ADD_SUMMARY"] = "IN_PROGRESS"
                             add_summary(record_id=record_id, session=session, lan=lan)
-                            processing_status["add_summary"] = "SUCCESS"
+                            processing_status["ADD_SUMMARY"] = "SUCCESS"
                         except Exception as e:
-                            processing_status["add_summary"] = "FAILED"
-                            current_failed_step = "add_summary"
+                            processing_status["ADD_SUMMARY"] = "FAILED"
+                            current_failed_step = "ADD_SUMMARY"
                             current_error = e
                             raise
 
                         try:
-                            processing_status["add_qa"] = "IN_PROGRESS"
+                            processing_status["ADD_QA"] = "IN_PROGRESS"
                             text = ''.join(result.text for result in stt_results)
                             add_qa(record_id=record_id, text=text, session=session, lan=lan)
-                            processing_status["add_qa"] = "SUCCESS"
+                            processing_status["ADD_QA"] = "SUCCESS"
                         except Exception as e:
-                            processing_status["add_qa"] = "FAILED"
-                            current_failed_step = "add_qa"
+                            processing_status["ADD_QA"] = "FAILED"
+                            current_failed_step = "ADD_QA"
                             current_error = e
                             raise
 
                         try:
-                            processing_status["add_keywords"] = "IN_PROGRESS"
+                            processing_status["ADD_KEYWORDS"] = "IN_PROGRESS"
                             add_keywords(record_id=record_id, text=text, session=session, lan=lan)
-                            processing_status["add_keywords"] = "SUCCESS"
+                            processing_status["ADD_KEYWORDS"] = "SUCCESS"
                         except Exception as e:
-                            processing_status["add_keywords"] = "FAILED"
-                            current_failed_step = "add_keywords"
+                            processing_status["ADD_KEYWORDS"] = "FAILED"
+                            current_failed_step = "ADD_KEYWORDS"
                             current_error = e
                             raise
 

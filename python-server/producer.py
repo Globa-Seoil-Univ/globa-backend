@@ -65,12 +65,11 @@ class Producer:
         from datetime import datetime
 
         dlq_message = {
-            "record_id": record_id,
-            "user_id": user_id,
+            "recordId": record_id,
             "info": {
-                "failed_step": failed_step,
-                "error_type": error_type,
-                "error_message": str(error_message),
+                "step": failed_step,
+                "type": error_type,
+                "message": str(error_message),
                 "timestamp": datetime.utcnow().isoformat() + "Z",
                 "retry_count": retry_count
             },
