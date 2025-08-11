@@ -18,14 +18,6 @@ storage_manager = FirebaseStorageManager()
 whisper_manager = WhisperManager()
 
 
-def stt(path: str) -> List[STTResults]:
-    url = storage_manager.getDownloadUrl(path=path)
-    # stt_results = whisper_manager.stt(path=url)
-    # lan또한 받아서 인자로 넘겨줌. 수정부분.
-    stt_results = whisper_manager.stt(path=url, lan="kr")
-    return stt_results
-
-
 def load_reference_text(path):
     """
     참조 텍스트 파일을 로드합니다.

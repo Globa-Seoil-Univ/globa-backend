@@ -11,7 +11,6 @@ from analyze.quiz import add_qa
 from analyze.section import add_section
 from analyze.summary import add_summary
 from analyze.assign_text import assign_text
-from analyze.stt import stt
 from analyze.stt import stt2
 from exception.NotFoundException import NotFoundException
 from model.orm import AppUser, Record, FolderShare
@@ -21,6 +20,7 @@ from util.database import SessionMaker
 from util.log import Logger
 from util.gpt import *
 
+from util.AESUtil import AESUtil
 load_dotenv()
 
 response_topic = os.environ.get('response-topic')
@@ -132,7 +132,6 @@ class Consumer:
             is_analyze = message.topic == self.topic and key == "analyze"
 
             record_id = message.value["recordId"]
-            from util.AESUtil import AESUtil
             user_id = AESUtil.decrypt(message.value["userId"])
             # 새로 추가, 유저로부터 language를 받아야함
             lan = message.value["language"]
