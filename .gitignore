@@ -195,6 +195,7 @@ firebase.json
 
 ### properties ###
 /Spring/Globa/src/main/resources/application.properties
+/Spring/Globa/src/test/resources/application.properties
 
 HELP.md
 .gradle/
@@ -236,3 +237,8 @@ out/
 
 ### word ###
 /Spring/Globa/word/*
+/python-server/output
+/Spring/Globa/src/test/resources/word/*
+
+### test sql ###
+/Spring/Globa/src/test/resources/data.sql

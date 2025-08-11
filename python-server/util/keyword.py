@@ -5,9 +5,12 @@ from transformers import BertModel
 from keybert import KeyBERT
 from kiwipiepy import Kiwi
 
+from util.log import Logger
+
 
 class KeywordUtil:
     def __init__(self):
+        self.logger = Logger(name="keyword_kr").logger
         self.model = BertModel.from_pretrained("skt/kobert-base-v1")
         self.kw_model = KeyBERT(self.model)
         self.kiwi = Kiwi()
@@ -50,4 +53,6 @@ class KeywordUtil:
         keywords = self.kw_model.extract_keywords(pre_sentences[0], keyphrase_ngram_range=(1, 1), stop_words=None,
                                                   use_maxsum=True, use_mmr=True, diversity=0.3, top_n=10)
 
+        for keyword in keywords:
+            self.logger.info("keyword result " + keyword[0]+ " :: " + f"{keyword[1]}")
         return keywords
