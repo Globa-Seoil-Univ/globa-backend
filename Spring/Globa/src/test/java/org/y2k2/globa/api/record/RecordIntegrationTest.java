@@ -2024,7 +2024,7 @@ public class RecordIntegrationTest extends IntegrationTest {
     @WithAccount
     void createStudyTime() throws Exception {
         // 60분
-        RequestStudyDto request = new RequestStudyDto(60L);
+        RequestStudyDto request = new RequestStudyDto(60);
         log.info("request = {}", request);
 
         mockMvc.perform(
@@ -2074,7 +2074,7 @@ public class RecordIntegrationTest extends IntegrationTest {
     @WithAccount
     void updateStudyTime() throws Exception {
         // 60분
-        RequestStudyDto request = new RequestStudyDto(60L);
+        RequestStudyDto request = new RequestStudyDto(60);
         log.info("request = {}", request);
 
         mockMvc.perform(
@@ -2091,7 +2091,7 @@ public class RecordIntegrationTest extends IntegrationTest {
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         // 10분 추가
-        RequestStudyDto updateRequest = new RequestStudyDto(10L);
+        RequestStudyDto updateRequest = new RequestStudyDto(10);
         log.info("updateRequest = {}", updateRequest);
 
         mockMvc.perform(
@@ -2141,7 +2141,7 @@ public class RecordIntegrationTest extends IntegrationTest {
     @WithAccount
     void createStudyTimeNotFound() throws Exception {
         // 60분
-        RequestStudyDto request = new RequestStudyDto(60L);
+        RequestStudyDto request = new RequestStudyDto(60);
         log.info("request = {}", request);
 
         mockMvc.perform(
@@ -2163,7 +2163,7 @@ public class RecordIntegrationTest extends IntegrationTest {
     @WithAccount
     void createStudyTimeNotMyFolder() throws Exception {
         // 60분
-        RequestStudyDto request = new RequestStudyDto(60L);
+        RequestStudyDto request = new RequestStudyDto(60);
         log.info("request = {}", request);
 
         mockMvc.perform(
@@ -2185,7 +2185,7 @@ public class RecordIntegrationTest extends IntegrationTest {
     @WithAccount
     void createStudyTimeWithoutPermission() throws Exception {
         // 60분
-        RequestStudyDto request = new RequestStudyDto(60L);
+        RequestStudyDto request = new RequestStudyDto(60);
         log.info("request = {}", request);
 
         mockMvc.perform(

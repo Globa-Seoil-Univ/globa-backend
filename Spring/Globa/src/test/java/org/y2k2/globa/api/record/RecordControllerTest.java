@@ -864,7 +864,7 @@ public class RecordControllerTest {
                 .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
                 .build()
                 .giveMeBuilder(RequestStudyDto.class)
-                .set("studyTime", -1L)
+                .set("studyTime", -1)
                 .sample();
 
         Mockito.doNothing()
