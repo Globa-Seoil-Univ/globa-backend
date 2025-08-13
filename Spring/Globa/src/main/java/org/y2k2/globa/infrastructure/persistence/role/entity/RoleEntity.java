@@ -16,6 +16,6 @@ public class RoleEntity {
     private Integer roleId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "name", nullable = false, length = 10)
+    @Column(name = "name", nullable = false, columnDefinition = "ENUM('ADMIN', 'EDITOR', 'VIEWER', 'USER')")
     private UserRole name;
 }

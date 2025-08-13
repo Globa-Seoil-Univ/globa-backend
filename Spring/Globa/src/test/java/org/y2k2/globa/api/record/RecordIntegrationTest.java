@@ -2065,7 +2065,7 @@ public class RecordIntegrationTest extends IntegrationTest {
                 .hasSize(1)
                 .allSatisfy(studyTime -> {
                     Assertions.assertThat(studyTime.studyTime())
-                            .isEqualTo(60L);
+                            .isEqualTo(60);
                 });
     }
 
@@ -2132,7 +2132,7 @@ public class RecordIntegrationTest extends IntegrationTest {
                 .hasSize(1)
                 .allSatisfy(studyTime -> {
                     Assertions.assertThat(studyTime.studyTime())
-                            .isEqualTo(70L);
+                            .isEqualTo(70);
                 });
     }
 

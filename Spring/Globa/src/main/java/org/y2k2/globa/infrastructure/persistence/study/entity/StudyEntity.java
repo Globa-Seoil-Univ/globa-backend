@@ -34,7 +34,7 @@ public class StudyEntity {
     private RecordEntity record;
 
     @Column(name = "study_time", columnDefinition = "INT UNSIGNED DEFAULT 0")
-    private Long studyTime;
+    private Integer studyTime;
 
     @CreationTimestamp
     @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

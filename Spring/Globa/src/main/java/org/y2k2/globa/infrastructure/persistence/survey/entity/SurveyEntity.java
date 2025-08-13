@@ -23,7 +23,7 @@ public class SurveyEntity {
     private SurveyType surveyType;
 
     @Lob
-    @Column(name = "content")
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
     @CreationTimestamp
