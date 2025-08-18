@@ -148,7 +148,7 @@ public class AnalysisFixtureBuilder {
                         .builder()
                         .user(user)
                         .record(record)
-                        .studyTime(10L)
+                        .studyTime(10)
                         .createdTime(new CustomTimestamp().getTimestamp())
                         .build()
         );

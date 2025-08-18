@@ -46,7 +46,7 @@ public class FolderShareEntity {
     private FolderRoleEntity role;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "invitation_status", length = 7, columnDefinition = "ENUM('PENDING', 'ACCEPT') DEFAULT 'PENDING'")
+    @Column(name = "invitation_status", columnDefinition = "ENUM('PENDING', 'ACCEPT') DEFAULT 'PENDING'")
     private InvitationStatus invitationStatus;
 
     @CreationTimestamp

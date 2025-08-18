@@ -6,9 +6,9 @@ import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 public record UpsertStudyCommand(
         UserEntity user,
         RecordEntity record,
-        Long studyTime
+        Integer studyTime
 ) {
-    public static UpsertStudyCommand of(UserEntity user, RecordEntity record, Long studyTime) {
+    public static UpsertStudyCommand of(UserEntity user, RecordEntity record, Integer studyTime) {
         return new UpsertStudyCommand(user, record, studyTime);
     }
 }

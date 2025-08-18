@@ -29,7 +29,7 @@ public class UserEntity {
     @Column(name = "sns_id", nullable = false, unique = true, length = 250)
     private String snsId;
 
-    @Column(name = "code", nullable = false, unique = true, length = 6)
+    @Column(name = "code", nullable = false, unique = true, columnDefinition = "CHAR(6)")
     private String code;
 
     @Column(name = "name", nullable = false, length = 50)

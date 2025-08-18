@@ -133,8 +133,8 @@ public class GetUserAnalysisServiceTest {
         return List.of(
                 new StudyTimeProjection() {
                     @Override
-                    public Long getTotalStudyTime() {
-                        return 120L;
+                    public Integer getTotalStudyTime() {
+                        return 120;
                     }
 
                     @Override
@@ -144,8 +144,8 @@ public class GetUserAnalysisServiceTest {
                 },
                 new StudyTimeProjection() {
                     @Override
-                    public Long getTotalStudyTime() {
-                        return 60L;
+                    public Integer getTotalStudyTime() {
+                        return 60;
                     }
 
                     @Override

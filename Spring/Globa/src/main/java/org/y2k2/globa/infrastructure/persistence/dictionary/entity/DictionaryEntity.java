@@ -27,7 +27,7 @@ public class DictionaryEntity {
     private String engWord;
 
     @Lob
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "category", length = 20)

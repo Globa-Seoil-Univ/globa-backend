@@ -30,7 +30,7 @@ public class StudyFixture implements Fixture<StudyEntity> {
     public static class StudyBuilder {
         private UserEntity user;
         private RecordEntity record;
-        private Long studyTime = 10L;
+        private Integer studyTime = 10;
         private LocalDateTime createdTime;
 
         private StudyBuilder() {}
@@ -45,7 +45,7 @@ public class StudyFixture implements Fixture<StudyEntity> {
             return this;
         }
 
-        public StudyBuilder studyTime(Long studyTime) {
+        public StudyBuilder studyTime(Integer studyTime) {
             this.studyTime = studyTime;
             return this;
         }

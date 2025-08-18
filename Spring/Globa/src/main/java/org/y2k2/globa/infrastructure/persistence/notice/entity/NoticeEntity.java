@@ -31,7 +31,7 @@ public class NoticeEntity {
     private String title;
 
     @Lob
-    @Column(name = "content", nullable = false)
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "thumbnail_path", nullable = false, length = 200)
@@ -43,7 +43,7 @@ public class NoticeEntity {
     @Column(name = "thumbnail_type", nullable = false, length = 20)
     private String thumbnailType;
 
-    @Column(name = "bg_color", nullable = false, length = 9)
+    @Column(name = "bg_color", nullable = false, columnDefinition = "CHAR(9)")
     private String bgColor;
 
     @CreationTimestamp

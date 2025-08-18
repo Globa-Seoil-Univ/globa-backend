@@ -26,7 +26,7 @@ public class AnalysisEntity {
     private SectionEntity section;
 
     @Lob
-    @Column(name = "content")
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
     @CreationTimestamp

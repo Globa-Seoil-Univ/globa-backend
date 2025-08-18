@@ -26,7 +26,7 @@ public class QuizEntity {
     private RecordEntity record;
 
     @Lob
-    @Column(name = "question", nullable = false)
+    @Column(name = "question", nullable = false, columnDefinition = "TEXT")
     private String question;
 
     @Column(name = "answer", nullable = false)
