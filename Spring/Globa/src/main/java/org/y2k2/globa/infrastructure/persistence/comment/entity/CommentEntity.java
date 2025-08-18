@@ -40,7 +40,7 @@ public class CommentEntity {
     private HighlightEntity highlight;
 
     @Lob
-    @Column(name = "content", nullable = false)
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "is_deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT 0")

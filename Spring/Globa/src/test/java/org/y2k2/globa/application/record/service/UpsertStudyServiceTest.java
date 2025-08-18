@@ -45,7 +45,7 @@ public class UpsertStudyServiceTest {
         Long folderId = 1L;
         Long recordId = 1L;
         Long userId = 1L;
-        RequestStudyDto dto = new RequestStudyDto(60L);
+        RequestStudyDto dto = new RequestStudyDto(60);
 
         UserEntity user = FixtureMonkey.builder()
                 .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)
@@ -101,7 +101,7 @@ public class UpsertStudyServiceTest {
         Long folderId = 1L;
         Long recordId = 1L;
         Long userId = 1L;
-        RequestStudyDto dto = new RequestStudyDto(60L);
+        RequestStudyDto dto = new RequestStudyDto(60);
 
         UserEntity user = FixtureMonkey.builder()
                 .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)
@@ -141,7 +141,7 @@ public class UpsertStudyServiceTest {
         Long folderId = 1L;
         Long recordId = 1L;
         Long userId = 1L;
-        RequestStudyDto dto = new RequestStudyDto(60L);
+        RequestStudyDto dto = new RequestStudyDto(60);
 
         UserEntity user = FixtureMonkey.builder()
                 .objectIntrospector(BeanArbitraryIntrospector.INSTANCE)
