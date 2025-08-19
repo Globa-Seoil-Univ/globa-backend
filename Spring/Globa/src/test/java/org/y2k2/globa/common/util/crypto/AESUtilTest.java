@@ -27,7 +27,7 @@ class AESUtilTest {
     @Test
     @DisplayName("암호화/복호화 - 성공")
     void encryptAndDecrypt_Success() {
-        Long originalValue = 12345L;
+        Long originalValue = 1L;
 
         String encryptedValue = aesUtil.encrypt(originalValue);
         log.info("Encrypted Value = {}", encryptedValue);

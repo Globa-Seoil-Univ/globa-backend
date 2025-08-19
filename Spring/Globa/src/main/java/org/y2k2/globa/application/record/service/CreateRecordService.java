@@ -1,19 +1,18 @@
 package org.y2k2.globa.application.record.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.y2k2.globa.application.foldershare.command.VerifyFolderCommand;
 import org.y2k2.globa.application.foldershare.usecase.VerifyFolderAccessibleUseCase;
-import org.y2k2.globa.application.kafka.dto.request.RequestKafkaDto;
 import org.y2k2.globa.application.record.command.CreateRecordCommand;
 import org.y2k2.globa.application.record.dto.request.RequestPostRecordDto;
 import org.y2k2.globa.application.record.usecase.CreateRecordUseCase;
+import org.y2k2.globa.application.sqs.dto.request.RequestSQSDto;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.util.crypto.AESUtil;
-import org.y2k2.globa.common.util.kafka.KafkaProducer;
+import org.y2k2.globa.common.util.sqs.SQSSender;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
@@ -21,11 +20,6 @@ import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 @Service
 @RequiredArgsConstructor
 public class CreateRecordService {
-    @Value("${kafka.topic.audio}")
-    private String topic;
-    @Value("${kafka.topic.audio.key}")
-    private String topicKey;
-
     private final FindUserUseCase findUserUseCase;
     private final VerifyFolderAccessibleUseCase verifyFolderAccessibleUseCase;
     private final CreateRecordUseCase createRecordUseCase;
@@ -33,7 +27,7 @@ public class CreateRecordService {
     private final FolderRepository folderRepository;
 
     private final AESUtil aesUtil;
-    private final KafkaProducer kafkaProducer;
+    private final SQSSender sqsSender;
 
     public void create(Long folderId, RequestPostRecordDto dto, Long userId) {
         UserEntity user = findUserUseCase.execute(userId);
@@ -51,7 +45,7 @@ public class CreateRecordService {
         );
 
         String encryptedUserId = aesUtil.encrypt(user.getUserId());
-        RequestKafkaDto request = new RequestKafkaDto(createdRecordId, encryptedUserId, dto.lang());
-        kafkaProducer.send(topic, topicKey, request);
+        RequestSQSDto request = new RequestSQSDto(createdRecordId, encryptedUserId, dto.lang());
+        sqsSender.sendMessage(request);
     }
 }

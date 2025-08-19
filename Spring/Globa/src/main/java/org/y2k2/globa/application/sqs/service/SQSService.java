@@ -1,4 +1,4 @@
-package org.y2k2.globa.application.kafka.service;
+package org.y2k2.globa.application.sqs.service;
 
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -9,8 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.y2k2.globa.application.kafka.dto.common.ConsumerValidateDto;
-import org.y2k2.globa.application.kafka.dto.response.ResponseKafkaDto;
+import org.y2k2.globa.application.sqs.dto.common.ConsumerValidateDto;
+import org.y2k2.globa.application.sqs.dto.response.ResponseSQSDto;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.util.crypto.AESUtil;
@@ -41,7 +41,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class KafkaService {
+public class SQSService {
     private final AESUtil aesUtil;
     private final FirebaseMessaging firebaseMessaging;
 
@@ -59,7 +59,7 @@ public class KafkaService {
     private final Bucket bucket;
 
     @Transactional
-    public void success(ResponseKafkaDto dto) {
+    public void success(ResponseSQSDto dto) {
         String encryptedUserId = dto.userId();
         Long decryptedUserId = aesUtil.decrypt(encryptedUserId);
         Long recordId = dto.recordId();
@@ -83,7 +83,7 @@ public class KafkaService {
     }
 
     @Transactional
-    public void failed(ResponseKafkaDto dto) {
+    public void failed(ResponseSQSDto dto) {
         log.error("Failed to upload and userId = {}, recordId = {}, dto = {}", dto.userId(), dto.recordId(), dto.message());
 
         String encryptedUserId = dto.userId();

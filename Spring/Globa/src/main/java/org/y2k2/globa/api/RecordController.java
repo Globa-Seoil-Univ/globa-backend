@@ -285,7 +285,7 @@ public class RecordController {
             description = """
                    폴더에 녹음 파일을 추가합니다. <br />
                    해당 녹음 파일은 클라이언트에서 Firebase Storage 업로드 후 요청되어야 합니다. <br />
-                   또한, Kafka를 통해 Python 서버에서 STT, 퀴즈 생성, 키워드 추출, 섹션 분리, 섹션 요약이 실행되는 작업입니다. <br />
+                   또한, SQS를 통해 Python 서버에서 STT, 퀴즈 생성, 키워드 추출, 섹션 분리, 섹션 요약이 실행되는 작업입니다. <br />
                    모든 분석이 끝나기까지 녹음 파일의 길이에 따라 5 ~ 30분 정도 소요됩니다.
                     """,
             responses = {
