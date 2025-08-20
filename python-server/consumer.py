@@ -26,6 +26,7 @@ load_dotenv()
 response_topic = os.environ.get('response-topic')
 success_key = os.environ.get("success-key")
 failed_key = os.environ.get('failed-key')
+secret_key = os.environ.get('secret-key')
 
 
 class Consumer:
@@ -85,7 +86,7 @@ class Consumer:
             # 활동 시간 갱신
             self.last_activity_time = current_time
             return self.executor
-        
+
     def run(self):
         self.logger.info("Starting consumer")
 
@@ -108,8 +109,8 @@ class Consumer:
                     with self.executor_lock:
                         # 마지막 활동 이후 일정 시간이 지나면 쓰레드 풀 정리
                         if (self.executor and
-                            current_time - self.last_activity_time > self.thread_timeout and
-                            len([f for f in self.executor._threads if f.is_alive()]) == 0):
+                                current_time - self.last_activity_time > self.thread_timeout and
+                                len([f for f in self.executor._threads if f.is_alive()]) == 0):
                             self.logger.info("장시간 작업 없음 :: 쓰레드 풀 정리")
                             self.executor.shutdown(wait=False)
                             self.executor = None
@@ -132,7 +133,9 @@ class Consumer:
             is_analyze = message.topic == self.topic and key == "analyze"
 
             record_id = message.value["recordId"]
-            user_id = AESUtil.decrypt(message.value["userId"])
+            aes_util = AESUtil(secret_key)
+
+            user_id = aes_util.decrypt(str(message.value["userId"]))
             # 새로 추가, 유저로부터 language를 받아야함
             lan = message.value["language"]
         except Exception as e:
@@ -178,7 +181,6 @@ class Consumer:
                             raise NotFoundException("No such folder share")
 
                         self.logger.info(f"Starting analyze audio: {record_id}")
-
 
                         try:
                             processing_status["stt"] = "IN_PROGRESS"
@@ -244,6 +246,7 @@ class Consumer:
                             raise
 
                         session.commit()
+
                         self.logger.info(f"Success analyzed audio : {record_id}")
                         self.producer.send_message(key=success_key, message={'recordId': record_id, 'userId': user_id})
                         return
@@ -260,7 +263,7 @@ class Consumer:
                         attempt += 1
                         last_failed_step = current_failed_step
                         last_error = current_error
-                        self.logger.error(f"[{attempt}/{max_retries}] Analyze Error : {e}")        
+                        self.logger.error(f"[{attempt}/{max_retries}] Analyze Error : {e}")
                         if attempt < max_retries:
                             time.sleep(1)
 
