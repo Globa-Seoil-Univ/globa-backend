@@ -3,7 +3,6 @@ package org.y2k2.globa.common.util.sqs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.sqs.annotation.SqsListener;
-import io.awspring.cloud.sqs.operations.SqsTemplate;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -105,7 +104,6 @@ public class SQSReceiver {
 
         try {
             log.info("Received SQS message with ID = {}, receiveCount = {}", messageId, receiveCount);
-            Thread.sleep(50000); // 50초 동안 대기 (테스트용)
 
             // 재시도 횟수에 따라 백오프 지연 적용
             if (receiveCount > 1) {
