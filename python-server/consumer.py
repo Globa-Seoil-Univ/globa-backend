@@ -3,6 +3,7 @@ import time
 import concurrent.futures
 from threading import Lock
 
+import boto3
 from kafka import KafkaConsumer
 from dotenv import load_dotenv
 
@@ -28,6 +29,9 @@ success_key = os.environ.get("success-key")
 failed_key = os.environ.get('failed-key')
 secret_key = os.environ.get('secret-key')
 
+region = os.environ.get('AWS_REGION')
+response_queue_url = os.environ.get('RESPONSE_SQS_QUEUE_URL')
+queue_url = os.environ.get('SQS_QUEUE_URL')
 
 class Consumer:
     broker = ""
@@ -43,6 +47,10 @@ class Consumer:
     thread_timeout = 60  # idle 쓰레드를 처리할 시간.
 
     def __init__(self, broker, topic, group_id):
+        ## SQS 컨버전 작업
+        self.sqs = boto3.client('sqs', region_name=region)
+
+
         self.logger = Logger(name="consumer").logger
         self.broker = broker
         self.topic = topic
@@ -95,14 +103,31 @@ class Consumer:
                 # notion에 기록된 poll 메소드 이용 ( 1초 주기 )
                 messages = self.consumer.poll(timeout_ms=1000)
 
+                # SQS 작업 - 2
+                response = self.sqs.receive_message(
+                    QueueUrl=queue_url,
+                    MaxNumberOfMessages=10, # 한 번에 받는 최대 수
+                    MessageAttributeNames=['All'], # 속성명 종류
+                    WaitTimeSeconds=20, # Long Polling 타임임
+                    AttributeNames=['All'],
+                    #VisibilityTimeout=60,
+
+                )
+
+                messages = response.get('Messages', [])
+
                 # 메시지가 있을 때만 executor 사용
                 if messages:
                     executor = self.get_executor()
 
-                    # 가져온 메시지 처리하는 부분,
-                    for tp, msgs in messages.items():
-                        for message in msgs:
-                            executor.submit(self.process_message, message)
+                    # 가져온 메시지 처리하는 부분, - kafka
+                    # for tp, msgs in messages.items():
+                    #     for message in msgs:
+                    #         executor.submit(self.process_message, message)
+
+                    # sqs 식으로 변경 -3
+                    for message in messages:
+                        executor.submit(self.process_sqs_message, message)
                 else:
                     # 메시지가 없을 때 쓰레드 풀 상태 확인
                     current_time = time.time()
@@ -289,3 +314,74 @@ class Consumer:
                                                            f"is_analyze: {is_analyze}"})
             self.logger.info(
                 f"Not valid message is_json: {is_json}, is_enough_data: {is_enough_data}, is_analyze: {is_analyze}")
+
+    def process_sqs_message(self, message):
+        receipt_handle = message['ReceiptHandle']
+
+        try:
+            body = json.loads(message['Body'])
+
+            message_attributes = message.get('MessageAttributes', {})
+            key = None
+            if 'key' in message_attributes:
+                key = message_attributes['key']['StringValue']
+
+            kafka_like_message = type('Message', (), {
+                'key': key.encode('utf-8') if key else b'analyze',
+                'value': body,
+                'topic': 'analyze'  # 고정값 또는 메시지 속성에서 가져오기
+            })()
+
+            self.process_message(kafka_like_message)
+
+            self.sqs.delete_message(
+                QueueUrl=queue_url,
+                ReceiptHandle=receipt_handle
+            )
+
+        except Exception as e:
+            self.logger.error(f"메시지 처리 실패: {e}")
+            # KAFKA DLQ를 여기서 호출해야할듯?
+
+    def send_sqs_success_message(self, record_id, user_id):
+        try:
+            message_body = {
+                'recordId': record_id,
+                'userId': user_id,
+                'status': 'success'
+            }
+
+            self.sqs.send_message(
+                QueueUrl=response_queue_url,
+                MessageBody=json.dumps(message_body),
+                MessageAttributes={
+                    'key': {
+                        'StringValue': success_key,
+                        'DataType': 'String'
+                    }
+                }
+            )
+        except Exception as e:
+            self.logger.error(f"SQS 성공 : {e}")
+
+    def send_sqs_failure_message(self, record_id, user_id, message):
+        try:
+            message_body = {
+                'recordId': record_id,
+                'userId': user_id,
+                'message': message,
+                'status': 'failed'
+            }
+
+            self.sqs.send_message(
+                QueueUrl=response_queue_url,
+                MessageBody=json.dumps(message_body),
+                MessageAttributes={
+                    'key': {
+                        'StringValue': failed_key,
+                        'DataType': 'String'
+                    }
+                }
+            )
+        except Exception as e:
+            self.logger.error(f"sQs 실패 : {e}")
