@@ -22,16 +22,19 @@ from util.log import Logger
 from util.gpt import *
 
 from util.AESUtil import AESUtil
+from util.visibility_manager import VisibilityTimeoutManager
+
 load_dotenv()
 
 response_topic = os.environ.get('response-topic')
 success_key = os.environ.get("success-key")
 failed_key = os.environ.get('failed-key')
 secret_key = os.environ.get('secret-key')
+salt = os.environ.get('SALT')
 
 region = os.environ.get('AWS_REGION')
-response_queue_url = os.environ.get('RESPONSE_SQS_QUEUE_URL')
 queue_url = os.environ.get('SQS_QUEUE_URL')
+
 
 class Consumer:
     broker = ""
@@ -47,11 +50,20 @@ class Consumer:
     thread_timeout = 60  # idle 쓰레드를 처리할 시간.
 
     def __init__(self, broker, topic, group_id):
-        ## SQS 컨버전 작업
-        self.sqs = boto3.client('sqs', region_name=region)
-
-
         self.logger = Logger(name="consumer").logger
+
+        ## SQS 컨버전 작업
+        self.sqs = boto3.client('sqs', region_name=region, aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'), aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'))
+        # VisibilityTimeout 관리자 초기화
+        self.visibility_manager = VisibilityTimeoutManager(
+            sqs_client=self.sqs,
+            queue_url=queue_url,
+            logger=self.logger,
+            visibility_timeout_seconds=int(os.environ.get("VISIBILITY_TIMEOUT_SECONDS", 1200)),
+            extension_threshold_seconds=int(os.environ.get("EXTENSION_THRESHOLD_SECONDS", 300)),
+            monitor_interval=int(os.environ.get("MONITOR_INTERVAL_SECONDS", 60))
+        )
+
         self.broker = broker
         self.topic = topic
         self.group_id = group_id
@@ -98,10 +110,13 @@ class Consumer:
     def run(self):
         self.logger.info("Starting consumer")
 
+        # VisibilityTimeout 모니터링 시작 부분 -1
+        self.visibility_manager.start_monitoring()
+
         try:
             while True:
-                # notion에 기록된 poll 메소드 이용 ( 1초 주기 )
-                messages = self.consumer.poll(timeout_ms=1000)
+                # notion에 기록된 poll 메소드 이용 ( 1초 주기 ) - kafka
+                # messages = self.consumer.poll(timeout_ms=1000)
 
                 # SQS 작업 - 2
                 response = self.sqs.receive_message(
@@ -127,6 +142,10 @@ class Consumer:
 
                     # sqs 식으로 변경 -3
                     for message in messages:
+                        # 메시지 처리 시작할 떄, VisibilityTimeout 모니터링 등록하기.
+                        receipt_handle = message['ReceiptHandle']
+                        self.visibility_manager.register_message(receipt_handle
+                                                                 )
                         executor.submit(self.process_sqs_message, message)
                 else:
                     # 메시지가 없을 때 쓰레드 풀 상태 확인
@@ -144,8 +163,12 @@ class Consumer:
                     time.sleep(0.1)
         except Exception as e:
             self.logger.error("Failed to JSON : {0}".format(e))
-            self.producer.send_message(key=failed_key, message={'recordId': 0, 'userId': 0, 'message': e.__str__()})
+            # self.producer.send_message(key=failed_key, message={'recordId': 0, 'userId': 0, 'message': e.__str__()}) # 기존 kafka
+            self.send_sqs_failure_message(record_id=0,user_id=0,message=str(e))
         finally:
+            # 모니터링 하는거 정리
+            self.visibility_manager.stop_monitoring()
+
             # 종료 시 쓰레드 풀이 있으면 정리
             if self.executor:
                 self.executor.shutdown(wait=True)
@@ -168,7 +191,7 @@ class Consumer:
             self.producer.send_message(key=failed_key, message={'recordId': 0, 'userId': 0, 'message': e.__str__()})
             return
 
-        if is_json and is_enough_data and is_analyze:
+        if is_json and is_enough_data:
             self.logger.info(f"In stt method recordId: {record_id} user_id: {user_id}")
 
             attempt = 0
@@ -352,7 +375,7 @@ class Consumer:
             }
 
             self.sqs.send_message(
-                QueueUrl=response_queue_url,
+                QueueUrl=queue_url,
                 MessageBody=json.dumps(message_body),
                 MessageAttributes={
                     'key': {
@@ -374,7 +397,7 @@ class Consumer:
             }
 
             self.sqs.send_message(
-                QueueUrl=response_queue_url,
+                QueueUrl=queue_url,
                 MessageBody=json.dumps(message_body),
                 MessageAttributes={
                     'key': {
