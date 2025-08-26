@@ -42,8 +42,6 @@ class Consumer:
     broker = ""
     topic = ""
     group_id = ""
-    consumer = None
-    producer = None
     logger = None
     executor = None
     # 동적인 쓰레드풀 생성을 위한 파라미터들
@@ -69,18 +67,7 @@ class Consumer:
         self.broker = broker
         self.topic = topic
         self.group_id = group_id
-        self.consumer = KafkaConsumer(
-            bootstrap_servers=self.broker,
-            group_id=self.group_id,
-            auto_offset_reset="latest",
-            enable_auto_commit=True,
-            value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-        )
-        self.producer = Producer(
-            broker=self.broker,
-            topic=response_topic
-        )
-        self.consumer.subscribe(self.topic)
+
         # 기존에는 5개의 쓰레드풀을 강제로 설정 했었음. 낭비되므로 일단 주석
         # self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)  # 최대 5개의 스레드
         self.executor = None
