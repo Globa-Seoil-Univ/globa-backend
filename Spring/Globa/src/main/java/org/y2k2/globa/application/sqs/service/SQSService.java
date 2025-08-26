@@ -93,7 +93,6 @@ public class SQSService {
 
         // 오디오 분석에 실패하였고, 기본 정보도 확인할 수 없다면 로그 남기기
         if (validateDto.user() == null || validateDto.record() == null) {
-            log.warn("User not found and userId = {}, recordId = {}", decryptedUserId, recordId);
             return;
         }
 
@@ -112,11 +111,11 @@ public class SQSService {
     private ConsumerValidateDto validateRecord(Long userId, Long recordId) {
         boolean isValid = true;
 
-        UserEntity user = userRepository.getUserByUserId(userId)
-                .orElseThrow(() -> {
-                    log.warn("User not found and userId = {}, recordId = {}", userId, recordId);
-                    return new CustomException(ErrorCode.NOT_FOUND_USER);
-                });
+        Optional<UserEntity> optionalUser = userRepository.getUserByUserId(userId);
+        if (optionalUser.isEmpty()) {
+            log.warn("User not found and userId = {}, recordId = {}", userId, recordId);
+            return new ConsumerValidateDto(false, null, null);
+        }
 
         Optional<RecordEntity> optionalRecord = recordRepository.getRecord(recordId);
         if (optionalRecord.isEmpty()) {
@@ -173,16 +172,17 @@ public class SQSService {
                 deleteRecordWithFirebase(record.getPath());
                 recordRepository.delete(record);
 
-                sendNotification("업로드 실패", "업로드 실패하였습니다.\n나중에 다시 시도해주세요.", user);
-                return new ConsumerValidateDto(false, user, record);
+                sendNotification("업로드 실패", "업로드 실패하였습니다.\n나중에 다시 시도해주세요.", optionalUser.get());
+                return new ConsumerValidateDto(false, optionalUser.get(), record);
+
             }
 
-            return new ConsumerValidateDto(true, user, record);
+            return new ConsumerValidateDto(true, optionalUser.get(), record);
         }
 
         // Record가 없으면 유효하지 않음
-        sendNotification("업로드 실패", "업로드 실패하였습니다.\n나중에 다시 시도해주세요.", user);
-        return new ConsumerValidateDto(false, user, null);
+        sendNotification("업로드 실패", "업로드 실패하였습니다.\n나중에 다시 시도해주세요.", optionalUser.get());
+        return new ConsumerValidateDto(false, optionalUser.get(), null);
     }
 
     private void addNotification(UserEntity user, RecordEntity record) {

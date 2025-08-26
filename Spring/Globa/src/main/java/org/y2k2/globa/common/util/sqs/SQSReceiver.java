@@ -9,7 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.y2k2.globa.application.sqs.dto.response.MessageTrackingInfo;
+import org.y2k2.globa.application.sqs.dto.response.ResponseDLQDto;
 import org.y2k2.globa.application.sqs.dto.response.ResponseSQSDto;
+import org.y2k2.globa.application.sqs.service.DLQService;
 import org.y2k2.globa.application.sqs.service.SQSService;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.*;
@@ -25,12 +27,18 @@ import java.util.concurrent.*;
 public class SQSReceiver {
     @Value("${spring.cloud.aws.sqs.receive-queue-name}")
     private String receiveQueueName;
-    private String queueUrl;
+    @Value("${spring.cloud.aws.sqs.dlq-queue-name}")
+    private String dlqQueueName;
+
+    private String receiveQueueUrl;
+    private String dlqQueueUrl;
     private int visibilityTimeout;
 
     private final SqsClient sqsClient;
     private final ObjectMapper objectMapper;
+
     private final SQSService sqsService;
+    private final DLQService dlqService;
 
     // 스레드 개수
     private final ScheduledExecutorService sharedScheduler = Executors.newScheduledThreadPool(5);
@@ -58,15 +66,20 @@ public class SQSReceiver {
     @PostConstruct
     public void init() {
         // SQS 큐 URL 가져오기
-        GetQueueUrlResponse queueUrlResponse = sqsClient.getQueueUrl(
+        this.receiveQueueUrl = sqsClient.getQueueUrl(
                 GetQueueUrlRequest.builder()
                         .queueName(receiveQueueName)
                         .build()
-        );
-        this.queueUrl = queueUrlResponse.queueUrl();
+        ).queueUrl();
+
+        this.dlqQueueUrl = sqsClient.getQueueUrl(
+                GetQueueUrlRequest.builder()
+                        .queueName(dlqQueueName)
+                        .build()
+        ).queueUrl();
 
         GetQueueAttributesRequest getAttributesRequest = GetQueueAttributesRequest.builder()
-                .queueUrl(queueUrl)
+                .queueUrl(receiveQueueUrl)
                 .attributeNames(QueueAttributeName.VISIBILITY_TIMEOUT)
                 .build();
 
@@ -75,7 +88,7 @@ public class SQSReceiver {
                 ? Integer.parseInt(attributesResponse.attributes().get(QueueAttributeName.VISIBILITY_TIMEOUT))
                 : DEFAULT_VISIBILITY_TIMEOUT;
 
-        log.info("SQS queue URL initialized: {}", queueUrl);
+        log.info("SQS queue URL initialized = {}, {}", receiveQueueUrl, dlqQueueUrl);
     }
 
     @SqsListener("${spring.cloud.aws.sqs.receive-queue-name}")
@@ -136,19 +149,39 @@ public class SQSReceiver {
             }
 
             // 완료 처리
-            deleteMessage(receiptHandle);
+            deleteMessage(receiveQueueUrl, receiptHandle);
         } catch (JsonProcessingException e) {
             log.error("Failed to process SQS message = {}", e.getMessage());
-            deleteMessage(receiptHandle);
+            deleteMessage(receiveQueueUrl, receiptHandle);
         } catch (Exception e) {
             log.error("Unexpected error while processing messageId = {}, error = {}", messageId, e.getMessage());
-            deleteMessage(receiptHandle);
+            deleteMessage(receiveQueueUrl, receiptHandle);
         } finally {
             cleanup(messageId);
         }
     }
 
-    private void deleteMessage(String receiptHandle) {
+    @SqsListener("${spring.cloud.aws.sqs.dlq-queue-name}")
+    public void handleDLQ(
+            Message message
+    ) {
+        String messageId = message.messageId();
+        String receiptHandle = message.receiptHandle();
+        String body = message.body();
+
+        try {
+            log.info("Received DLQ message with ID = {}", messageId);
+
+            ResponseDLQDto response = objectMapper.readValue(body, ResponseDLQDto.class);
+            dlqService.process(response);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to process DLQ message = {}", e.getMessage());
+        } finally {
+            deleteMessage(dlqQueueUrl, receiptHandle);
+        }
+    }
+
+    private void deleteMessage(String queueUrl, String receiptHandle) {
         sqsClient.deleteMessage(
                 DeleteMessageRequest.builder()
                         .queueUrl(queueUrl)
@@ -235,7 +268,7 @@ public class SQSReceiver {
         log.info("Extending visibility timeout for messageId = {}", messageId);
         
         ChangeMessageVisibilityRequest request = ChangeMessageVisibilityRequest.builder()
-                .queueUrl(queueUrl)
+                .queueUrl(receiveQueueUrl)
                 .receiptHandle(trackingInfo.receiptHandle())
                 .visibilityTimeout(VISIBILITY_EXTENSION)
                 .build();
