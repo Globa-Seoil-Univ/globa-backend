@@ -1,4 +1,4 @@
-package org.y2k2.globa.application.kafka.dto.common;
+package org.y2k2.globa.application.sqs.dto.common;
 
 import lombok.Builder;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
