@@ -25,7 +25,6 @@ import org.y2k2.globa.annotation.WithAccount;
 import org.y2k2.globa.api.IntegrationTest;
 import org.y2k2.globa.application.analysis.dto.response.ResponseAnalysisDto;
 import org.y2k2.globa.application.common.dto.file.FileDto;
-import org.y2k2.globa.application.kafka.dto.request.RequestKafkaDto;
 import org.y2k2.globa.application.record.dto.request.RequestPostRecordDto;
 import org.y2k2.globa.application.record.dto.request.RequestRecordMoveDto;
 import org.y2k2.globa.application.record.dto.request.RequestRecordNameDto;
@@ -33,11 +32,12 @@ import org.y2k2.globa.application.record.dto.response.ResponseRecordDetailDto;
 import org.y2k2.globa.application.record.dto.response.ResponseRecordSearchDto;
 import org.y2k2.globa.application.record.dto.response.ResponseRecordsByFolderDto;
 import org.y2k2.globa.application.record.dto.response.ResponseRecordsDto;
+import org.y2k2.globa.application.sqs.dto.request.RequestSQSDto;
 import org.y2k2.globa.application.study.dto.request.RequestStudyDto;
 import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.common.util.file.FileStore;
 import org.y2k2.globa.common.util.jwt.JWT;
-import org.y2k2.globa.common.util.kafka.KafkaProducer;
+import org.y2k2.globa.common.util.sqs.SQSSender;
 import org.y2k2.globa.constant.Constant;
 import org.y2k2.globa.fixture.analysis.AnalysisFixture;
 import org.y2k2.globa.fixture.folder.FolderFixture;
@@ -105,7 +105,7 @@ public class RecordIntegrationTest extends IntegrationTest {
     private KeywordFixture keywordFixture;
 
     @MockBean
-    private KafkaProducer kafkaProducer;
+    private SQSSender sqsSender;
     @MockBean
     private FileStore fileStore;
 
@@ -1160,8 +1160,8 @@ public class RecordIntegrationTest extends IntegrationTest {
                 .thenReturn(Optional.of(fileDto));
 
         Mockito.doNothing()
-                .when(kafkaProducer)
-                .send(Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestKafkaDto.class));
+                .when(sqsSender)
+                .sendMessage(Mockito.any(RequestSQSDto.class));
 
         mockMvc.perform(
                         MockMvcRequestBuilders.post(Constant.RECORD_PREFIX.getValue(), myFolder.getFolderId())

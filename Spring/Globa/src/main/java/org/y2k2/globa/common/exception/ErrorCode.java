@@ -76,7 +76,8 @@ public enum ErrorCode {
     NOT_FOUND_HASH_SALT(HttpStatus.INTERNAL_SERVER_ERROR, "해시 salt를 찾을 수 없습니다.", "50053"),
     FAILED_HASH(HttpStatus.INTERNAL_SERVER_ERROR, "해시 생성에 실패하였습니다.", "50054"),
     FAILED_AES_ENCRYPTION(HttpStatus.INTERNAL_SERVER_ERROR, "AES 암호화에 실패하였습니다.", "50055"),
-    FAILED_AES_DECRYPTION(HttpStatus.INTERNAL_SERVER_ERROR, "AES 복호화에 실패하였습니다.", "50056")
+    FAILED_AES_DECRYPTION(HttpStatus.INTERNAL_SERVER_ERROR, "AES 복호화에 실패하였습니다.", "50056"),
+    MAX_VISIBILITY_EXTENSION_REACHED(HttpStatus.INTERNAL_SERVER_ERROR, "SQS 메시지의 최대 가시성 확장 횟수에 도달했습니다.", "50060")
     ;
 
     private final HttpStatus httpStatus;

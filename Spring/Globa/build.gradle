@@ -41,9 +41,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
-    // Spring Session & Kafka
+    // Spring Session
     implementation 'org.springframework.session:spring-session-data-redis'
-    implementation 'org.springframework.kafka:spring-kafka'
 
     // Hibernate Commons Annotations
     implementation 'org.hibernate.common:hibernate-commons-annotations:6.0.6.Final'
@@ -79,6 +78,10 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
+
+    // AWS SQS
+    implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.4.0")
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs'
 
     // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

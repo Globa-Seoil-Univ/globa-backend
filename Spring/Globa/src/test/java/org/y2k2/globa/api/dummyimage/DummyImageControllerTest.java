@@ -1,6 +1,5 @@
 package org.y2k2.globa.api.dummyimage;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitraryIntrospector;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +18,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.y2k2.globa.annotation.WithAccount;
-import org.y2k2.globa.api.CommentController;
 import org.y2k2.globa.api.ControllerConfig;
 import org.y2k2.globa.api.DummyImageController;
 import org.y2k2.globa.application.dummyimage.dto.request.RequestDummyImageDto;

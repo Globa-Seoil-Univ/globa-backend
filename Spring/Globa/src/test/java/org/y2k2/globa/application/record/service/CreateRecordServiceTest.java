@@ -16,15 +16,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.y2k2.globa.application.foldershare.command.VerifyFolderCommand;
 import org.y2k2.globa.application.foldershare.usecase.VerifyFolderAccessibleUseCase;
-import org.y2k2.globa.application.kafka.dto.request.RequestKafkaDto;
 import org.y2k2.globa.application.record.command.CreateRecordCommand;
 import org.y2k2.globa.application.record.dto.request.RequestPostRecordDto;
 import org.y2k2.globa.application.record.usecase.CreateRecordUseCase;
+import org.y2k2.globa.application.sqs.dto.request.RequestSQSDto;
 import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.util.crypto.AESUtil;
-import org.y2k2.globa.common.util.kafka.KafkaProducer;
+import org.y2k2.globa.common.util.sqs.SQSSender;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
@@ -46,7 +46,7 @@ public class CreateRecordServiceTest {
     @Mock
     private AESUtil aesUtil;
     @Mock
-    private KafkaProducer kafkaProducer;
+    private SQSSender sqsSender;
 
     @BeforeEach
     void setup() {
@@ -92,13 +92,13 @@ public class CreateRecordServiceTest {
                 .thenReturn("encryptedUserId");
 
         Mockito.doNothing()
-                .when(kafkaProducer)
-                .send(Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestKafkaDto.class));
+                .when(sqsSender)
+                .sendMessage(Mockito.any(RequestSQSDto.class));
 
         createRecordService.create(1L, dto, 1L);
 
-        Mockito.verify(kafkaProducer, Mockito.times(1))
-                .send(Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestKafkaDto.class));
+        Mockito.verify(sqsSender, Mockito.times(1))
+                .sendMessage(Mockito.any(RequestSQSDto.class));
     }
 
     @Test
@@ -135,7 +135,7 @@ public class CreateRecordServiceTest {
         Mockito.verify(aesUtil, Mockito.times(0))
                 .encrypt(Mockito.anyLong());
 
-        Mockito.verify(kafkaProducer, Mockito.times(0))
-                .send(Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestKafkaDto.class));
+        Mockito.verify(sqsSender, Mockito.times(0))
+                .sendMessage(Mockito.any(RequestSQSDto.class));
     }
 }

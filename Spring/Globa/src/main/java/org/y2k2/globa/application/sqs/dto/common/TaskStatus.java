@@ -1,4 +1,4 @@
-package org.y2k2.globa.application.kafka.dto.common;
+package org.y2k2.globa.application.sqs.dto.common;
 
 public enum TaskStatus {
     SUCCESS,
