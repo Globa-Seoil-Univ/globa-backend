@@ -200,7 +200,7 @@ class WhisperManager:
 
     def calculate_metrics(self, results: List[STTResults], reference_text: Optional[str] = None) -> dict:
         """
-        STT 결과의 성능 지표를 계산합니다.
+        STT 결과의 성능 지표를 계산합니다. ( 디버깅용 )
 
         Args:
             results: STTResults 객체 리스트
@@ -259,6 +259,8 @@ class WhisperManager:
 
     def stt(self, path: str, lan: str):# parameter language [ ko, ja, en ]
         """
+        개선 이전 코드. Deprecated !!
+
         음성을 텍스트로 변환하고 성능 지표와 리소스 사용량을 측정합니다.
 
         Args:
@@ -361,152 +363,6 @@ class WhisperManager:
             os.remove(path)
 
         return results
-    ## 앙상블 시도1
-    def init_ensemble_models(self):
-        """앙상블에 사용할 여러 모델 초기화"""
-        self.logger.info("앙상블 모델 초기화 중...")
-
-        # 기본 모델은 이미 self.model에 초기화되어 있음
-        # 추가 모델 초기화
-        self.ensemble_models = {
-            "medium": self.model,  # 기존에 초기화된 모델 재사용
-        }
-
-        # 다른 모델 크기 추가 (필요에 따라 조정)
-        try:
-            self.logger.info("large-v3 모델 로딩 중...")
-            self.ensemble_models["large-v3"] = WhisperModel(
-                "large-v3",
-                device="cuda",
-                compute_type="float16",  # large 모델은 메모리 절약을 위해 float16 사용
-                cpu_threads=16,
-                num_workers=8
-            )
-            self.logger.info("large-v3 모델 로딩 완료")
-        except Exception as e:
-            self.logger.error(f"large-v3 모델 로딩 실패: {e}")
-
-        # 필요에 따라 더 많은 모델 추가 가능
-        # self.ensemble_models["small"] = WhisperModel("small", device="cuda", compute_type="float32")
-
-        return self.ensemble_models
-
-    def ensemble_stt(self, path: str, lan: str):
-        """여러 모델의 결과를 앙상블하여 최종 결과 생성"""
-        self.logger.info("앙상블 STT 시작")
-
-        # 앙상블 모델 초기화 (아직 초기화되지 않았다면)
-        if not hasattr(self, 'ensemble_models'):
-            self.init_ensemble_models()
-
-        # 리소스 모니터링 시작
-        self.resource_monitor.start_monitoring()
-
-        # 각 모델별 결과 저장
-        all_results = {}
-
-        # 모니터링 스레드 설정
-        import threading
-        stop_monitoring = False
-
-        def monitor_resources():
-            while not stop_monitoring:
-                self.resource_monitor.sample_resource_usage()
-                time.sleep(0.5)
-
-        monitor_thread = threading.Thread(target=monitor_resources)
-        monitor_thread.daemon = True
-        monitor_thread.start()
-
-        # 각 모델로 STT 수행
-        for model_name, model in self.ensemble_models.items():
-            self.logger.info(f"{model_name} 모델로 STT 수행 중...")
-
-            if lan == "ko":
-                prompt = "너는 이제부터 한국어로 대화하는 회의, 강의, 모임 등 사람들과의 대화를 한국어 텍스트로 변환해야하는 역할이야."
-            elif lan == "ja":
-                prompt = "あなたは、会議、講義、会議など、人々との会話をテキストに変換する役割です。"
-            else:
-                prompt = "Now your role is to convert conversations from conferences, lectures, meetings, etc. into text."
-
-            segments, info = model.transcribe(
-                path,
-                initial_prompt=prompt,
-                beam_size=10,
-                language=lan,
-                temperature=0,
-                condition_on_previous_text=True,
-                max_new_tokens=128,
-                vad_filter=True,
-                repetition_penalty=1.2,
-                no_repeat_ngram_size=3,
-                vad_parameters=dict(
-                    min_silence_duration_ms=500,
-                    threshold=0.5,
-                    speech_pad_ms=200
-                ),
-                best_of=9,
-                suppress_blank=True,
-                suppress_tokens=[-1],
-            )
-
-            # 결과 저장
-            model_results = []
-            for segment in segments:
-                result = STTResults(
-                    text=segment.text,
-                    start=segment.start,
-                    end=segment.end
-                )
-                model_results.append(result)
-
-            all_results[model_name] = model_results
-            self.logger.info(f"{model_name} 모델 처리 완료: {len(model_results)}개 세그먼트 생성")
-
-        # 모니터링 중지
-        stop_monitoring = True
-        monitor_thread.join(timeout=1.0)
-
-        # 앙상블 결과 생성
-        final_results = self._combine_results(all_results)
-
-        # 리소스 모니터링 종료 및 결과 수집
-        resource_metrics = self.resource_monitor.stop_monitoring()
-
-        # 참조 텍스트 로드 및 성능 지표 계산
-        reference_text = self.load_reference_text(path)
-        if reference_text:
-            # 앙상블 결과 성능 계산
-            performance_metrics = self.calculate_metrics(final_results, reference_text)
-            all_metrics = {**resource_metrics, **performance_metrics}
-
-            # 각 개별 모델의 성능도 계산
-            for model_name, model_results in all_results.items():
-                model_metrics = self.calculate_metrics(model_results, reference_text)
-                all_metrics[f"{model_name}_wer"] = model_metrics["wer"]
-                all_metrics[f"{model_name}_cer"] = model_metrics["cer"]
-
-                # 로그에 각 모델 성능 출력
-                self.logger.info(
-                    f"{model_name} 모델 성능 - WER: {model_metrics['wer']:.4f}, CER: {model_metrics['cer']:.4f}")
-        else:
-            all_metrics = resource_metrics
-
-        # 지표 기록
-        model_info = {
-            "ensemble_models": ", ".join(self.ensemble_models.keys()),
-            "device": "cuda",
-            "ensemble_method": "confidence_voting"  # 사용한 앙상블 방법
-        }
-        self.resource_monitor.log_resources(all_metrics, model_info)
-
-        # 결과 저장
-        file_name = os.path.basename(path)
-        output_path = f"./ensemble_{file_name}.json"
-        self.save_stt_results_to_json(final_results, output_path)
-        self.logger.info(f"앙상블 STT 결과가 {output_path}에 저장되었습니다.")
-
-        return final_results
 
     def _combine_results(self, all_results):
         """여러 모델의 결과를 조합하는 메서드"""
@@ -563,157 +419,6 @@ class WhisperManager:
             final_results.append(current[1])
 
         self.logger.info(f"앙상블 결과 조합 완료: {len(final_results)}개 세그먼트 생성")
-        return final_results
-
-    def ensemble_stt_bagging(self, path: str, lan: str):
-        """배깅(Bagging) 방식으로 앙상블 STT 수행"""
-        self.logger.info("배깅 방식 앙상블 STT 시작")
-
-        # 참조 텍스트 로드
-        reference_text = self.load_reference_text(path)
-
-        # 리소스 모니터링 시작
-        self.resource_monitor.start_monitoring()
-
-        # 언어별 프롬프트
-        if lan == "ko":
-            prompt = "너는 이제부터 한국어로 대화하는 회의, 강의, 모임 등 사람들과의 대화를 한국어 텍스트로 변환해야하는 역할이야."
-        elif lan == "ja":
-            prompt = "あなたは、会議、講義、会議など、人々との会話をテキストに変換する役割です。"
-        else:
-            prompt = "Now your role is to convert conversations from conferences, lectures, meetings, etc. into text."
-
-        # 모니터링 스레드 설정
-        import threading
-        stop_monitoring = False
-
-        def monitor_resources():
-            while not stop_monitoring:
-                self.resource_monitor.sample_resource_usage()
-                time.sleep(0.5)
-
-        monitor_thread = threading.Thread(target=monitor_resources)
-        monitor_thread.daemon = True
-        monitor_thread.start()
-
-        try:
-            # 배깅을 위한 다양한 설정 정의
-            bagging_configs = [
-                {
-                    "name": "config1",
-                    "beam_size": 10,
-                    "temperature": 0.0,
-                    "vad_filter": True,
-                    "vad_parameters": {
-                        "min_silence_duration_ms": 500,
-                        "threshold": 0.5,
-                        "speech_pad_ms": 200
-                    },
-                    "best_of": 5
-                },
-                {
-                    "name": "config2",
-                    "beam_size": 5,
-                    "temperature": 0.1,
-                    "vad_filter": True,
-                    "vad_parameters": {
-                        "min_silence_duration_ms": 400,
-                        "threshold": 0.4,
-                        "speech_pad_ms": 300
-                    },
-                    "best_of": 3
-                },
-                {
-                    "name": "config3",
-                    "beam_size": 7,
-                    "temperature": 0.0,
-                    "vad_filter": True,
-                    "vad_parameters": {
-                        "min_silence_duration_ms": 600,
-                        "threshold": 0.6,
-                        "speech_pad_ms": 250
-                    },
-                    "best_of": 7
-                }
-            ]
-
-            # 각 설정으로 독립적인 추론 수행
-            all_segments = []
-
-            for config in bagging_configs:
-                self.logger.info(f"{config['name']} 설정으로 처리 중...")
-
-                segments, info = self.model.transcribe(
-                    path,
-                    initial_prompt=prompt,
-                    beam_size=config["beam_size"],
-                    language=lan,
-                    temperature=config["temperature"],
-                    condition_on_previous_text=True,
-                    max_new_tokens=128,
-                    vad_filter=True,  # VAD 필터 반드시 활성화
-                    vad_parameters={
-                        "min_silence_duration_ms": 300,  # 더 짧은 침묵도 감지 (기존 500ms)
-                        "threshold": 0.3,  # 더 민감하게 설정 (기존 0.5)
-                        "speech_pad_ms": 150  # 패딩 축소 (기존 200ms)
-                    },
-                    word_timestamps=True,  # 단어별 타임스탬프 활성화
-                    repetition_penalty=1.2,
-                    no_repeat_ngram_size=3,
-                    best_of=config["best_of"],
-                    suppress_blank=True,
-                    suppress_tokens=[-1],
-                )
-
-                # 결과 수집
-                config_segments = []
-                for segment in segments:
-                    result = STTResults(
-                        text=segment.text,
-                        start=segment.start,
-                        end=segment.end
-                    )
-                    config_segments.append((config["name"], result))
-
-                all_segments.extend(config_segments)
-                self.logger.info(f"{config['name']} 설정: {len(config_segments)}개 세그먼트 생성")
-
-            # 배깅 결합 알고리즘을 사용하여 최종 결과 생성
-            combined_results  = self._bagging_combine_results(all_segments)
-
-            # 추가: 긴 세그먼트 분할 처리
-            final_results = self.segment_long_transcriptions(combined_results)
-
-            self.logger.info(f"배깅 앙상블 최종 결과: {len(final_results)}개 세그먼트")
-
-        except Exception as e:
-            self.logger.error(f"배깅 앙상블 처리 중 오류 발생: {e}")
-            raise
-        finally:
-            # 모니터링 중지
-            stop_monitoring = True
-            monitor_thread.join(timeout=1.0)
-
-        # 리소스 모니터링 종료
-        resource_metrics = self.resource_monitor.stop_monitoring()
-
-        # 성능 지표 계산
-        if reference_text:
-            performance_metrics = self.calculate_metrics(final_results, reference_text)
-            all_metrics = {**resource_metrics, **performance_metrics}
-        else:
-            all_metrics = resource_metrics
-
-        # 지표 기록
-        model_info = {**self.model_info, "ensemble_method": "bagging"}
-        self.resource_monitor.log_resources(all_metrics, model_info)
-
-        # 결과 저장
-        file_name = os.path.basename(path)
-        output_path = f"./output/bagging_{file_name}.json"
-        self.save_stt_results_to_json(final_results, output_path)
-        self.logger.info(f"배깅 앙상블 STT 결과가 {output_path}에 저장되었습니다.")
-
         return final_results
 
     def _bagging_combine_results(self, all_segments):
@@ -831,7 +536,11 @@ class WhisperManager:
         return merged
 
     def segment_long_transcriptions(self, results):
-        """긴 음성 인식 결과를 적절한 크기로 분할하는 함수"""
+        """
+            성능은 향상되나, 각 섹션별로 세부 텍스트가 할당되기 위한 타임라인이 어긋나는 문제로 인하여 Deprecated !
+
+            긴 음성 인식 결과를 적절한 크기로 분할하는 함수
+        """
         self.logger.info("긴 세그먼트 분할 처리 시작")
 
         segmented_results = []
@@ -1211,101 +920,6 @@ class WhisperManager:
 
         return length_score + sentence_score + diversity_score + special_score
 
-    def enhanced_wer_ensemble_stt(self, path: str, lan: str):
-        """
-        ResourceMonitor 방식을 활용한 WER 최적화 앙상블 STT
-        """
-        self.logger.info(f"WER 최적화 앙상블 STT 시작: {os.path.basename(path)}")
-
-        # 리소스 모니터링 시작
-        self.resource_monitor.start_monitoring()
-
-        # 모니터링 스레드 설정
-        import threading
-        stop_monitoring = False
-
-        def monitor_resources():
-            while not stop_monitoring:
-                self.resource_monitor.sample_resource_usage()
-                time.sleep(0.5)  # 0.5초마다 샘플링
-
-        monitor_thread = threading.Thread(target=monitor_resources)
-        monitor_thread.daemon = True
-        monitor_thread.start()
-
-        try:
-            # 1단계: 다중 설정으로 병렬 인식 수행
-            configs = self._get_optimal_configs(lan)
-
-            all_segments = []
-
-            for config_name, config in configs.items():
-                self.logger.info(f"설정 '{config_name}'으로 인식 시작")
-
-                segments, info = self.model.transcribe(
-                    path,
-                    initial_prompt=self._get_enhanced_prompt(lan),
-                    **config
-                )
-
-                # 결과 저장
-                results = [STTResults(text=s.text, start=s.start, end=s.end) for s in segments]
-
-                # 세그먼트 품질 평가
-                for result in results:
-                    quality_score = self._calculate_segment_quality(result, lan)
-                    all_segments.append((config_name, result, quality_score))
-
-                self.logger.info(f"설정 '{config_name}' 완료: {len(results)}개 세그먼트")
-
-                # 메모리 즉시 확보
-                gc.collect()
-
-            # 2단계: 세그먼트 통합 및 최적화
-            self.logger.info("세그먼트 통합 및 최적화 시작")
-            optimized_segments = self._integrate_segments_by_quality(all_segments)
-
-            # 3단계: 오류 교정 및 후처리
-            self.logger.info("텍스트 오류 교정 및 후처리 시작")
-            corrected_segments = self._apply_error_corrections(optimized_segments, lan)
-
-            # 4단계: 최종 정리 및 일관성 확보
-            final_segments = self._ensure_consistency(corrected_segments)
-
-            self.logger.info(f"WER 최적화 앙상블 완료: {len(final_segments)}개 세그먼트")
-
-            # 결과 저장
-            file_name = os.path.basename(path)
-            output_path = f"./wer_optimized_{file_name}.json"
-            self.save_stt_results_to_json(final_segments, output_path)
-
-            return final_segments
-
-        except Exception as e:
-            self.logger.error(f"WER 최적화 앙상블 처리 중 오류: {str(e)}")
-            raise
-
-        finally:
-            # 모니터링 중지
-            stop_monitoring = True
-            monitor_thread.join(timeout=1.0)
-
-            # 리소스 모니터링 종료 및 결과 수집
-            resource_metrics = self.resource_monitor.stop_monitoring()
-
-            # 참조 텍스트가 있으면 WER 계산
-            reference_text = self.load_reference_text(path)
-            if reference_text:
-                performance_metrics = self.calculate_metrics(final_segments, reference_text)
-                all_metrics = {**resource_metrics, **performance_metrics}
-                self.logger.info(f"WER: {performance_metrics['wer']:.4f}, CER: {performance_metrics['cer']:.4f}")
-            else:
-                all_metrics = resource_metrics
-
-            # 지표 기록
-            model_info = {**self.model_info, "ensemble_method": "wer_optimized"}
-            self.resource_monitor.log_resources(all_metrics, model_info)
-
     def _get_optimal_configs(self, lan):
         """언어별 최적 설정 구성"""
         base_config = {
@@ -1560,27 +1174,21 @@ class WhisperManager:
         return True
 
     def _apply_error_corrections(self, segments, lan):
-        """언어별 오류 교정 및 후처리"""
+        """언어별 오류 교정 및 후처리 Deprecated"""
         corrected = []
 
         for segment in segments:
             text = segment.text.strip()
 
-            # 1. 언어별 정규화 및 오류 수정
             if lan == "ko":
-                # 한국어 특화 교정
                 text = self._correct_korean_text(text)
             elif lan == "en":
-                # 영어 특화 교정
                 text = self._correct_english_text(text)
             elif lan == "ja":
-                # 일본어 특화 교정
                 text = self._correct_japanese_text(text)
             else:
-                # 기본 교정
                 text = self._correct_general_text(text)
 
-            # 2. 공통 교정
             # 불필요한 공백 정리
             text = re.sub(r'\s+', ' ', text).strip()
 
@@ -1591,7 +1199,6 @@ class WhisperManager:
             if not text:
                 continue
 
-            # 교정된 결과 저장
             corrected.append(STTResults(
                 text=text,
                 start=segment.start,
@@ -1605,7 +1212,6 @@ class WhisperManager:
         if not text:
             return text
 
-        # 1. 조사 오류 수정
         corrections = {
             "이은": "은", "가은": "는", "을를": "을", "을은": "은",
             "을는": "는", "이를": "를", "가를": "를", "이는": "는",
@@ -1615,13 +1221,11 @@ class WhisperManager:
         for error, correction in corrections.items():
             text = text.replace(error, correction)
 
-        # 2. 숫자 표현 정규화
         number_map = {
             "일": "1", "이": "2", "삼": "3", "사": "4", "오": "5",
             "육": "6", "칠": "7", "팔": "8", "구": "9", "십": "10"
         }
 
-        # 두 자리 이상 숫자는 변환하지 않음 (예: "이십삼"은 "23"으로)
         for k, v in number_map.items():
             text = re.sub(rf'\b{k}\b', v, text)
 

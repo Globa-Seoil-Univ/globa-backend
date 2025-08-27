@@ -2,7 +2,9 @@ import os
 import time
 import concurrent.futures
 from threading import Lock
+from datetime import datetime
 
+import boto3
 from kafka import KafkaConsumer
 from dotenv import load_dotenv
 
@@ -11,7 +13,7 @@ from analyze.quiz import add_qa
 from analyze.section import add_section
 from analyze.summary import add_summary
 from analyze.assign_text import assign_text
-from analyze.stt import stt2
+from analyze.stt import stt
 from exception.NotFoundException import NotFoundException
 from model.orm import AppUser, Record, FolderShare
 from producer import Producer
@@ -21,19 +23,25 @@ from util.log import Logger
 from util.gpt import *
 
 from util.AESUtil import AESUtil
+from util.visibility_manager import VisibilityTimeoutManager
+
 load_dotenv()
 
 response_topic = os.environ.get('response-topic')
 success_key = os.environ.get("success-key")
 failed_key = os.environ.get('failed-key')
+secret_key = os.environ.get('secret-key')
+salt = os.environ.get('SALT')
+
+region = os.environ.get('AWS_REGION')
+queue_url = os.environ.get('SQS_QUEUE_URL')
+spring_queue_url = os.environ.get('SQS_SPRING_QUEUE_URL')
 
 
 class Consumer:
     broker = ""
     topic = ""
     group_id = ""
-    consumer = None
-    producer = None
     logger = None
     executor = None
     # 동적인 쓰레드풀 생성을 위한 파라미터들
@@ -43,21 +51,23 @@ class Consumer:
 
     def __init__(self, broker, topic, group_id):
         self.logger = Logger(name="consumer").logger
+
+        ## SQS 컨버전 작업
+        self.sqs = boto3.client('sqs', region_name=region, aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'), aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'))
+        # VisibilityTimeout 관리자 초기화
+        self.visibility_manager = VisibilityTimeoutManager(
+            sqs_client=self.sqs,
+            queue_url=queue_url,
+            logger=self.logger,
+            visibility_timeout_seconds=int(os.environ.get("VISIBILITY_TIMEOUT_SECONDS", 1200)),
+            extension_threshold_seconds=int(os.environ.get("EXTENSION_THRESHOLD_SECONDS", 300)),
+            monitor_interval=int(os.environ.get("MONITOR_INTERVAL_SECONDS", 60))
+        )
+
         self.broker = broker
         self.topic = topic
         self.group_id = group_id
-        self.consumer = KafkaConsumer(
-            bootstrap_servers=self.broker,
-            group_id=self.group_id,
-            auto_offset_reset="latest",
-            enable_auto_commit=True,
-            value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-        )
-        self.producer = Producer(
-            broker=self.broker,
-            topic=response_topic
-        )
-        self.consumer.subscribe(self.topic)
+
         # 기존에는 5개의 쓰레드풀을 강제로 설정 했었음. 낭비되므로 일단 주석
         # self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)  # 최대 5개의 스레드
         self.executor = None
@@ -85,31 +95,41 @@ class Consumer:
             # 활동 시간 갱신
             self.last_activity_time = current_time
             return self.executor
-        
+
     def run(self):
         self.logger.info("Starting consumer")
 
+        self.visibility_manager.start_monitoring()
+
         try:
             while True:
-                # notion에 기록된 poll 메소드 이용 ( 1초 주기 )
-                messages = self.consumer.poll(timeout_ms=1000)
+                response = self.sqs.receive_message(
+                    QueueUrl=queue_url,
+                    MaxNumberOfMessages=10, # 한 번에 받는 최대 수
+                    MessageAttributeNames=['All'], # 속성명 종류
+                    WaitTimeSeconds=20, # Long Polling 타임임
+                    AttributeNames=['All'],
+
+                )
+
+                messages = response.get('Messages', [])
 
                 # 메시지가 있을 때만 executor 사용
                 if messages:
                     executor = self.get_executor()
 
-                    # 가져온 메시지 처리하는 부분,
-                    for tp, msgs in messages.items():
-                        for message in msgs:
-                            executor.submit(self.process_message, message)
+                    for message in messages:
+                        # 메시지 처리 시작할 떄, VisibilityTimeout 모니터링 등록하기.
+                        receipt_handle = message['ReceiptHandle']
+                        self.visibility_manager.register_message(receipt_handle
+                                                                 )
+                        executor.submit(self.process_sqs_message, message)
                 else:
-                    # 메시지가 없을 때 쓰레드 풀 상태 확인
                     current_time = time.time()
                     with self.executor_lock:
-                        # 마지막 활동 이후 일정 시간이 지나면 쓰레드 풀 정리
                         if (self.executor and
-                            current_time - self.last_activity_time > self.thread_timeout and
-                            len([f for f in self.executor._threads if f.is_alive()]) == 0):
+                                current_time - self.last_activity_time > self.thread_timeout and
+                                len([f for f in self.executor._threads if f.is_alive()]) == 0):
                             self.logger.info("장시간 작업 없음 :: 쓰레드 풀 정리")
                             self.executor.shutdown(wait=False)
                             self.executor = None
@@ -118,171 +138,379 @@ class Consumer:
                     time.sleep(0.1)
         except Exception as e:
             self.logger.error("Failed to JSON : {0}".format(e))
-            self.producer.send_message(key=failed_key, message={'recordId': 0, 'userId': 0, 'message': e.__str__()})
+            self.send_sqs_failure_message(record_id=0,user_id=0,message=str(e))
         finally:
+            # 모니터링 하는거 정리
+            self.visibility_manager.stop_monitoring()
+
             # 종료 시 쓰레드 풀이 있으면 정리
             if self.executor:
                 self.executor.shutdown(wait=True)
 
-    def process_message(self, message):
+    def process_sqs_message(self, message):
+        receipt_handle = message['ReceiptHandle']
+        message_id = message.get('MessageId', 'unknown')
+        group_id = message.get('Attributes', {}).get('MessageGroupId'),
+
         try:
-            key = str(message.key, 'utf-8')
+            body = json.loads(message['Body'])
+
+            message_attributes = message.get('MessageAttributes', {})
+            key = None
+            if 'key' in message_attributes:
+                key = message_attributes['key']['StringValue']
+
+            kafka_like_message = type('Message', (), {
+                'key': key.encode('utf-8') if key else b'analyze',
+                'value': body,
+                'topic': 'analyze'  # 고정값 또는 메시지 속성에서 가져오기
+            })()
+            self.logger.info(f"SQS 메시지 처리 시작 - ID: {message_id}")
+
+            # 메시지 처리 (기존 process_message 로직 사용)
+            success = self.process_message_with_result(kafka_like_message, receipt_handle)
+
+            if success:
+                self.delete_sqs_message(receipt_handle, message_id)
+                self.logger.info(f"메시지 처리 성공 및 삭제 완료 - ID: {message_id}")
+            else:
+                self.send_sqs_failure_message(message.value["recordId"], str(message.value["userId"]), f"메시지 처리 실패 - ID :{message_id}")
+
+            self.sqs.delete_message(
+                QueueUrl=queue_url,
+                ReceiptHandle=receipt_handle
+            )
+            self.visibility_manager.unregister_message(receipt_handle)
+        except Exception as e:
+            self.logger.error(f"메시지 처리 실패: {e}")
+            # KAFKA DLQ를 여기서 호출해야할듯?
+
+    def process_message_with_result(self, message, receipt_handle):
+        """
+        기존 process_message를 수정하여 성공/실패 결과를 반환하도록 함
+        """
+        try:
             is_json = isinstance(message.value, dict)
             is_enough_data = "recordId" in message.value and "userId" in message.value
-            is_analyze = message.topic == self.topic and key == "analyze"
+
+            if not (is_json and is_enough_data):
+                self.logger.error(f"유효하지 않은 메시지 형식")
+                self.visibility_manager.unregister_message(receipt_handle)
+                return False
+
 
             record_id = message.value["recordId"]
-            user_id = AESUtil.decrypt(message.value["userId"])
-            # 새로 추가, 유저로부터 language를 받아야함
+            aes_util = AESUtil(secret_key)
+            user_id = aes_util.decrypt(str(message.value["userId"]))
             lan = message.value["language"]
+
         except Exception as e:
-            self.logger.error("Exception: {0}".format(e))
-            self.producer.send_message(key=failed_key, message={'recordId': 0, 'userId': 0, 'message': e.__str__()})
-            return
+            self.logger.error(f"❌ 메시지 파싱 실패: {e}")
+            self.send_sqs_failure_message(record_id, str(message.value["userId"]), e.message)
+            return False
 
-        if is_json and is_enough_data and is_analyze:
-            self.logger.info(f"In stt method recordId: {record_id} user_id: {user_id}")
+        # 재시도 로직
+        attempt = 0
+        max_retries = 3
+        last_error = None
+        last_failed_step = None
 
-            attempt = 0
-            max_retries = 3
-            last_error = None
-            last_failed_step = None
+        while attempt < max_retries:
+            with SessionMaker() as session:
+                processing_status = {
+                    "stt": "NOT_STARTED",
+                    "addSection": "NOT_STARTED",
+                    "assignText": "NOT_STARTED",
+                    "addSummary": "NOT_STARTED",
+                    "addQa": "NOT_STARTED",
+                    "addKeywords": "NOT_STARTED"
+                }
 
-            while attempt < max_retries:
-                with SessionMaker() as session:
-                    processing_status = {
-                        "stt": "NOT_STARTED",  # STT 상태 추가
-                        "ADD_SECTION": "NOT_STARTED",
-                        "ASSIGN_TEXT": "NOT_STARTED",
-                        "ADD_SUMMARY": "NOT_STARTED",
-                        "ADD_QA": "NOT_STARTED",
-                        "ADD_KEYWORDS": "NOT_STARTED"
+                try:
+                    # 기존 처리 로직 (STT부터 키워드까지)
+                    user = session.query(AppUser).filter(AppUser.user_id == user_id).first()
+                    if user is None:
+                        self.logger.info(f"Not found user")
+                        raise NotFoundException("No such user")
+
+                    record = session.query(Record).filter(Record.record_id == record_id).first()
+
+                    if record is None:
+                        raise NotFoundException("No such record")
+
+                    if record.path is None:
+                        raise NotFoundException("No such path")
+                    folder_share = (session.query(FolderShare).filter(FolderShare.folder_id == record.folder_id
+                                                                      and FolderShare.owner_id == user.user_id)
+                                    .first())
+                    if folder_share is None:
+                        raise NotFoundException("No such folder share")
+
+                    self.logger.info(f"🎯 오디오 분석 시작: {record_id}")
+
+                    # STT 처리
+                    processing_status["stt"] = "IN_PROGRESS"
+                    stt_results = stt(record.path, lan)
+
+                    processing_status["stt"] = "SUCCESS"
+
+                    # 각 단계별 처리
+                    processing_status["addSection"] = "IN_PROGRESS"
+                    add_section(record_id=record_id, text=stt_results, session=session, lan=lan)
+                    processing_status["addSection"] = "SUCCESS"
+
+                    processing_status["assignText"] = "IN_PROGRESS"
+                    assign_text(record_id=record_id, text=stt_results, session=session)
+                    processing_status["assignText"] = "SUCCESS"
+
+                    processing_status["addSummary"] = "IN_PROGRESS"
+                    add_summary(record_id=record_id, session=session, lan=lan)
+                    processing_status["addSummary"] = "SUCCESS"
+
+                    processing_status["addQa"] = "IN_PROGRESS"
+                    text = ''.join(result.text for result in stt_results)
+                    add_qa(record_id=record_id, text=text, session=session, lan=lan)
+                    processing_status["addQa"] = "SUCCESS"
+
+                    processing_status["addKeywords"] = "IN_PROGRESS"
+                    add_keywords(record_id=record_id, text=text, session=session, lan=lan)
+                    processing_status["addKeywords"] = "SUCCESS"
+
+                    session.commit()
+
+                    self.send_sqs_success_message(record_id, str(message.value["userId"]))
+                    self.logger.info(f"오디오 분석 완료: {record_id}")
+                    return True
+
+                except NotFoundException as e:
+                    session.rollback()
+                    self.logger.error(f"리소스 없음 - recordId: {record_id}, userId: {user_id}, 원인: {e.message}")
+                    self.send_sqs_failure_message(record_id, str(message.value["userId"]), e.message)
+                    return False
+
+                except Exception as e:
+                    session.rollback()
+                    attempt += 1
+                    last_error = e
+
+                    # 실패한 단계 찾기
+                    for step, status in processing_status.items():
+                        if status == "IN_PROGRESS":
+                            last_failed_step = step
+                            processing_status[step] = "FAILED"
+                            break
+
+                    self.logger.error(f"❌ [{attempt}/{max_retries}] 분석 오류: {e}")
+
+                    if attempt < max_retries:
+                        time.sleep(1)  # 재시도 전 대기
+                    else:
+                        # 최종 실패 처리
+                        self.send_sqs_failure_message(record_id, str(message.value["userId"]), f"분석 실패 (재시도 {max_retries}회)")
+
+                        # DLQ로 전송
+                        self.send_to_dlq(
+                            record_id=record_id,
+                            user_id=str(message.value["userId"]),
+                            failed_step=last_failed_step or "unknown",
+                            error_type=self.classify_error(last_error),
+                            error_message=str(last_error),
+                            processing_status=processing_status,
+                            retry_count=max_retries
+                        )
+                        return False
+
+        return False
+
+    def send_sqs_success_message(self, record_id, user_id):
+        try:
+            message_body = {
+                'recordId': record_id,
+                'userId': user_id,
+                'status': 'success',
+            }
+
+            message_group_id = f"response-{record_id}-{user_id}"
+            deduplication_id = f"success-{record_id}-{int(time.time())}"
+
+            send_params = {
+                'QueueUrl': spring_queue_url,
+                'MessageBody': json.dumps(message_body),
+                'MessageAttributes': {
+                    'key': {
+                        'StringValue': success_key,
+                        'DataType': 'String'
+                    },
+                    'status': {
+                        'StringValue': 'success',
+                        'DataType': 'String'
+                    },
+                    'message_type': {
+                        'StringValue': 'response',
+                        'DataType': 'String'
                     }
-                    current_failed_step = None
-                    current_error = None
-                    try:
-                        # 지우면 안됨 임시 주석, 유저 유효성 검증
-                        user = session.query(AppUser).filter(AppUser.user_id == user_id).first()
-                        if user is None:
-                            self.logger.info(f"Not found user")
-                            raise NotFoundException("No such user")
-                        record = session.query(Record).filter(Record.record_id == record_id).first()
-                        if record is None:
-                            raise NotFoundException("No such record")
-                        if record.path is None:
-                            raise NotFoundException("No such path")
-                        folder_share = (session.query(FolderShare).filter(FolderShare.folder_id == record.folder_id
-                                                                          and FolderShare.owner_id == user.user_id)
-                                        .first())
-                        if folder_share is None:
-                            raise NotFoundException("No such folder share")
+                }
+            }
 
-                        self.logger.info(f"Starting analyze audio: {record_id}")
+            # FIFO 큐인지 확인
+            if queue_url.endswith('.fifo'):
+                send_params['MessageGroupId'] = message_group_id
+                send_params['MessageDeduplicationId'] = deduplication_id
 
+            self.sqs.send_message(**send_params)
+            self.logger.info(f"성공 메시지 전송 완료 - recordId: {record_id}")
+        except Exception as e:
+            self.logger.error(f"SQS 성공 : {e}")
 
-                        try:
-                            processing_status["stt"] = "IN_PROGRESS"
-                            stt_results = stt2(record.path, lan)
-                            processing_status["stt"] = "SUCCESS"
-                            self.logger.info(f"STT result: {stt_results}")
-                        except Exception as e:
-                            processing_status["stt"] = "FAILED"
-                            current_failed_step = "stt"
-                            current_error = e
-                            raise
+    def send_sqs_failure_message(self, record_id, user_id, message):
+        try:
+            message_body = {
+                'recordId': record_id,
+                'userId': user_id,
+                'status': 'failed',
+            }
 
-                        # 각 단계별 처리 (에러 추적을 위해 수정)
-                        try:
-                            processing_status["ADD_SECTION"] = "IN_PROGRESS"
-                            add_section(record_id=record_id, text=stt_results, session=session, lan=lan)
-                            processing_status["ADD_SECTION"] = "SUCCESS"
-                        except Exception as e:
-                            processing_status["ADD_SECTION"] = "FAILED"
-                            current_failed_step = "ADD_SECTION"
-                            current_error = e
-                            raise
+            # FIFO 큐용 파라미터
+            message_group_id = f"response-{record_id}-{user_id}"
+            deduplication_id = f"failed-{record_id}-{int(time.time())}"
 
-                        try:
-                            processing_status["ASSIGN_TEXT"] = "IN_PROGRESS"
-                            assign_text(record_id=record_id, text=stt_results, session=session)
-                            processing_status["ASSIGN_TEXT"] = "SUCCESS"
-                        except Exception as e:
-                            processing_status["ASSIGN_TEXT"] = "FAILED"
-                            current_failed_step = "ASSIGN_TEXT"
-                            current_error = e
-                            raise
+            send_params = {
+                'QueueUrl': spring_queue_url,
+                'MessageBody': json.dumps(message_body),
+                'MessageAttributes': {
+                    'key': {
+                        'StringValue': failed_key,
+                        'DataType': 'String'
+                    },
+                    'status': {
+                        'StringValue': 'failed',
+                        'DataType': 'String'
+                    },
+                    'message_type': {
+                        'StringValue': 'response',
+                        'DataType': 'String'
+                    }
+                }
+            }
 
-                        try:
-                            processing_status["ADD_SUMMARY"] = "IN_PROGRESS"
-                            add_summary(record_id=record_id, session=session, lan=lan)
-                            processing_status["ADD_SUMMARY"] = "SUCCESS"
-                        except Exception as e:
-                            processing_status["ADD_SUMMARY"] = "FAILED"
-                            current_failed_step = "ADD_SUMMARY"
-                            current_error = e
-                            raise
+            # FIFO 큐인지 확인
+            if queue_url.endswith('.fifo'):
+                send_params['MessageGroupId'] = message_group_id
+                send_params['MessageDeduplicationId'] = deduplication_id
 
-                        try:
-                            processing_status["ADD_QA"] = "IN_PROGRESS"
-                            text = ''.join(result.text for result in stt_results)
-                            add_qa(record_id=record_id, text=text, session=session, lan=lan)
-                            processing_status["ADD_QA"] = "SUCCESS"
-                        except Exception as e:
-                            processing_status["ADD_QA"] = "FAILED"
-                            current_failed_step = "ADD_QA"
-                            current_error = e
-                            raise
+            self.sqs.send_message(**send_params)
+            self.logger.info(f"실패 메시지 전송 완료 - recordId: {record_id}")
+        except Exception as e:
+            self.logger.error(f"sQs 실패 : {e}")
 
-                        try:
-                            processing_status["ADD_KEYWORDS"] = "IN_PROGRESS"
-                            add_keywords(record_id=record_id, text=text, session=session, lan=lan)
-                            processing_status["ADD_KEYWORDS"] = "SUCCESS"
-                        except Exception as e:
-                            processing_status["ADD_KEYWORDS"] = "FAILED"
-                            current_failed_step = "ADD_KEYWORDS"
-                            current_error = e
-                            raise
-
-                        session.commit()
-                        self.logger.info(f"Success analyzed audio : {record_id}")
-                        self.producer.send_message(key=success_key, message={'recordId': record_id, 'userId': user_id})
-                        return
-                    except NotFoundException as e:
-                        session.rollback()
-                        self.logger.error(
-                            f"Not found exception with recordId : {record_id}, userId : {user_id} cause message : {e.message}")
-                        self.producer.send_message(key=failed_key,
-                                                   message={'recordId': record_id, 'userId': user_id,
-                                                            'message': e.message})
-                        return
-                    except Exception as e:
-                        session.rollback()
-                        attempt += 1
-                        last_failed_step = current_failed_step
-                        last_error = current_error
-                        self.logger.error(f"[{attempt}/{max_retries}] Analyze Error : {e}")        
-                        if attempt < max_retries:
-                            time.sleep(1)
-
-            # 재시도 모두 실패 시 failed 토픽 전송
-            self.producer.send_message(key=failed_key,
-                                       message={'recordId': record_id, 'userId': user_id,
-                                                'message': f"Analyze failed after {max_retries}retries"})
-            self.producer.send_to_dlq(
-                record_id=record_id,
-                user_id=user_id,
-                failed_step=last_failed_step or "unknown",
-                error_type=self.producer.classify_error(last_error),
-                error_message=str(last_error),
-                processing_status=processing_status,
-                retry_count=max_retries
+    def delete_sqs_message(self, receipt_handle, message_id):
+        """SQS 메시지 삭제"""
+        try:
+            self.sqs.delete_message(
+                QueueUrl=queue_url,
+                ReceiptHandle=receipt_handle
             )
 
+            self.visibility_manager.unregister_message(receipt_handle)
+            self.logger.info(f"🗑️ SQS 메시지 삭제 완료 - ID: {message_id}")
+
+        except Exception as e:
+            self.logger.error(f"❌ SQS 메시지 삭제 실패 - ID: {message_id}, Error: {e}")
+            # 삭제 실패해도 처리는 계속 진행 (중복 처리 방지를 위해 visibility timeout 활용)
+
+    def send_to_dlq(self, record_id, user_id, failed_step, error_type, error_message, processing_status, retry_count,
+                    original_message=None):
+        """DLQ(Dead Letter Queue)로 실패 메시지 전송"""
+        try:
+            dlq_message = {
+                "recordId": record_id,
+                "userId": user_id,
+                "errorInfo": {
+                    "step": failed_step,
+                    "type": error_type,
+                    "message": str(error_message),
+                    "timestamp": datetime.utcnow().isoformat() + "Z",
+                },
+                "errorStatus": processing_status
+            }
+
+            # DLQ URL이 설정되어 있다면 DLQ로 전송
+            dlq_url = os.environ.get('SQS_DLQ_URL')
+            if dlq_url:
+                message_group_id = f"dlq-{record_id}-{user_id}"
+                deduplication_id = f"dlq-{record_id}-{int(time.time())}-{retry_count}"
+                send_params = {
+                    'QueueUrl': dlq_url,
+                    'MessageBody': json.dumps(dlq_message),
+                    'MessageAttributes': {
+                        'failed_step': {
+                            'StringValue': failed_step,
+                            'DataType': 'String'
+                        },
+                        'retry_count': {
+                            'StringValue': str(retry_count),
+                            'DataType': 'Number'
+                        }
+                    }
+                }
+
+                # FIFO 큐인지 확인 (.fifo로 끝나는지)
+                if dlq_url.endswith('.fifo'):
+                    send_params['MessageGroupId'] = message_group_id
+                    send_params['MessageDeduplicationId'] = deduplication_id
+
+                self.sqs.send_message(**send_params)
+                self.logger.info(f"📤 DLQ 전송 완료 - recordId: {record_id}")
+            else:
+                # DLQ가 없으면 로그만 남김
+                self.logger.error(f"DLQ URL 미설정 - 실패 메시지: {dlq_message}")
+
+        except Exception as e:
+            self.logger.error(f"DLQ 전송 실패: {e}")
+
+    def classify_error(self, error):
+        """에러 타입 분류 - Exception 타입 기반"""
+        import openai
+        from sqlalchemy.exc import SQLAlchemyError
+        from requests.exceptions import RequestException, Timeout, ConnectionError
+        from json import JSONDecodeError
+
+        if isinstance(error, openai.OpenAIError):
+            return "OPENAI_API_ERROR"
+        elif isinstance(error, (openai.RateLimitError, openai.APITimeoutError)):
+            return "OPENAI_RATE_LIMIT_ERROR"
+        elif isinstance(error, SQLAlchemyError):
+            return "DATABASE_ERROR"
+        elif isinstance(error, JSONDecodeError):
+            return "JSON_PARSING_ERROR"
+        elif isinstance(error, Timeout):
+            return "TIMEOUT_ERROR"
+        elif isinstance(error, ConnectionError):
+            return "CONNECTION_ERROR"
+        elif isinstance(error, RequestException):
+            return "HTTP_REQUEST_ERROR"
+        elif isinstance(error, ValueError):
+            return "VALIDATION_ERROR"
+        elif isinstance(error, KeyError):
+            return "MISSING_KEY_ERROR"
+        elif isinstance(error, FileNotFoundError):
+            return "FILE_NOT_FOUND_ERROR"
+        elif isinstance(error, PermissionError):
+            return "PERMISSION_ERROR"
         else:
-            self.producer.send_message(key=failed_key,
-                                       message={'recordId': record_id, 'userId': user_id,
-                                                'message': f"Not valid message is_json: {is_json}, "
-                                                           f"is_enough_data: {is_enough_data}, "
-                                                           f"is_analyze: {is_analyze}"})
-            self.logger.info(
-                f"Not valid message is_json: {is_json}, is_enough_data: {is_enough_data}, is_analyze: {is_analyze}")
+            error_str = str(error).lower()
+
+            if any(keyword in error_str for keyword in ["openai", "api key", "quota", "billing"]):
+                return "OPENAI_API_ERROR"
+            elif any(keyword in error_str for keyword in ["database", "sql", "connection pool"]):
+                return "DATABASE_ERROR"
+            elif any(keyword in error_str for keyword in ["json", "parse", "decode"]):
+                return "JSON_PARSING_ERROR"
+            elif any(keyword in error_str for keyword in ["timeout", "timed out"]):
+                return "TIMEOUT_ERROR"
+            elif any(keyword in error_str for keyword in ["connection", "network", "unreachable"]):
+                return "CONNECTION_ERROR"
+            elif any(keyword in error_str for keyword in ["validation", "invalid", "required"]):
+                return "VALIDATION_ERROR"
+            else:
+                return f"UNKNOWN_ERROR_{type(error).__name__}"

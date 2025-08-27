@@ -43,7 +43,7 @@ def load_reference_text(path):
     except Exception as e:
         return None
 
-def stt2(path: str, lan: str) -> List[STTResults]:
+def stt(path: str, lan: str) -> List[STTResults]:
     url = storage_manager.getDownloadUrl(path=path)
     open_ai = OpenAIUtil()
 
@@ -72,6 +72,7 @@ def remove_noise_text(stt_results: List[STTResults]):
 
 def preprocess_audio(audio_path: str, original_path: str) -> str:
     """
+    Deprecated !!
     오디오 파일을 전처리하여 STT 성능 향상을 목적으로 작성!
 
     Args:
