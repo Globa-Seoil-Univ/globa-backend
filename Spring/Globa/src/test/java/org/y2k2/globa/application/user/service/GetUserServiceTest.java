@@ -81,8 +81,8 @@ public class GetUserServiceTest {
         ResponseUserDto response = getUserService.getUser(userId);
 
         Assertions.assertThat(response).isNotNull();
-        Assertions.assertThat(response.userId()).isEqualTo(userId);
-        Assertions.assertThat(response.publicFolderId()).isNotNull();
+        Assertions.assertThat(response.getUserId()).isEqualTo(userId);
+        Assertions.assertThat(response.getPublicFolderId()).isNotNull();
     }
 
     @Test
@@ -126,8 +126,8 @@ public class GetUserServiceTest {
         ResponseUserDto response = getUserService.getUser(userId);
 
         Assertions.assertThat(response).isNotNull();
-        Assertions.assertThat(response.userId()).isEqualTo(userId);
-        Assertions.assertThat(response.publicFolderId()).isNotNull();
+        Assertions.assertThat(response.getUserId()).isEqualTo(userId);
+        Assertions.assertThat(response.getPublicFolderId()).isNotNull();
     }
 
     @Test

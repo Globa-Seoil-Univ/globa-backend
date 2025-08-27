@@ -129,20 +129,20 @@ public class UserIntegrationTest extends IntegrationTest {
             ResponseUserDto.class
         );
 
-        Assertions.assertThat(response.userId()).isNotNull();
-        Assertions.assertThat(response.name()).isEqualTo(user.getName());
-        Assertions.assertThat(response.code()).isEqualTo(user.getCode());
-        Assertions.assertThat(response.publicFolderId()).isNotNull();
+        Assertions.assertThat(response.getUserId()).isNotNull();
+        Assertions.assertThat(response.getName()).isEqualTo(user.getName());
+        Assertions.assertThat(response.getCode()).isEqualTo(user.getCode());
+        Assertions.assertThat(response.getPublicFolderId()).isNotNull();
 
         // Cache 확인
         ResponseUserDto cachedUser = Objects.requireNonNull(cacheManager.getCache("user"))
-                .get(response.userId(), ResponseUserDto.class);
+                .get(response.getUserId(), ResponseUserDto.class);
 
         Assertions.assertThat(cachedUser).isNotNull();
-        Assertions.assertThat(cachedUser.userId()).isNotNull();
-        Assertions.assertThat(cachedUser.name()).isEqualTo(user.getName());
-        Assertions.assertThat(cachedUser.code()).isEqualTo(user.getCode());
-        Assertions.assertThat(cachedUser.publicFolderId()).isNotNull();
+        Assertions.assertThat(cachedUser.getUserId()).isNotNull();
+        Assertions.assertThat(cachedUser.getName()).isEqualTo(user.getName());
+        Assertions.assertThat(cachedUser.getCode()).isEqualTo(user.getCode());
+        Assertions.assertThat(cachedUser.getPublicFolderId()).isNotNull();
     }
 
     @Test
@@ -163,10 +163,10 @@ public class UserIntegrationTest extends IntegrationTest {
             ResponseUserDto.class
         );
 
-        Assertions.assertThat(response.userId()).isNotNull();
-        Assertions.assertThat(response.name()).isEqualTo(user.getName());
-        Assertions.assertThat(response.code()).isEqualTo(user.getCode());
-        Assertions.assertThat(response.publicFolderId()).isNotNull();
+        Assertions.assertThat(response.getUserId()).isNotNull();
+        Assertions.assertThat(response.getName()).isEqualTo(user.getName());
+        Assertions.assertThat(response.getCode()).isEqualTo(user.getCode());
+        Assertions.assertThat(response.getPublicFolderId()).isNotNull();
     }
 
     @Test

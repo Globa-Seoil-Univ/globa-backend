@@ -20,7 +20,9 @@ public class VerifyGoogleUseCase implements VoidUseCase<VerifySnsCommand> {
     @Override
     public void execute(VerifySnsCommand command) {
         try {
-            FirebaseToken token = firebaseAuth.verifyIdToken(command.token());
+            String tokenValue = command.token().replace("Bearer ", "");
+
+            FirebaseToken token = firebaseAuth.verifyIdToken(tokenValue);
 
             if(!command.snsId().equalsIgnoreCase(token.getUid())){
                 throw new CustomException(ErrorCode.INVALID_SNS_TOKEN);

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.y2k2.globa.application.common.dto.file.FileDto;
 import org.y2k2.globa.common.util.CustomTimestamp;
 import org.y2k2.globa.infrastructure.persistence.user.converter.SnsKindConverter;
@@ -68,6 +69,7 @@ public class UserEntity {
     @Column(name = "deleted_time")
     private LocalDateTime deletedTime;
 
+    @CreationTimestamp
     @Column(name = "created_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdTime;
 

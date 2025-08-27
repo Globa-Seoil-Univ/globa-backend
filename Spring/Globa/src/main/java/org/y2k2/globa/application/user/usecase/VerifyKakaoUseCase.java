@@ -27,7 +27,7 @@ public class VerifyKakaoUseCase implements VoidUseCase<VerifySnsCommand> {
         try {
             // HTTP 요청 헤더에 Authorization 추가
             HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + command.token());
+            headers.set("Authorization", command.token());
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
             ResponseEntity<String> response = restTemplate.exchange(
