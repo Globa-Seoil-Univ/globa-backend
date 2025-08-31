@@ -5,7 +5,6 @@ from threading import Lock
 from datetime import datetime
 
 import boto3
-from kafka import KafkaConsumer
 from dotenv import load_dotenv
 
 from analyze.keyword import add_keywords
@@ -16,8 +15,6 @@ from analyze.assign_text import assign_text
 from analyze.stt import stt
 from exception.NotFoundException import NotFoundException
 from model.orm import AppUser, Record, FolderShare
-from producer import Producer
-from util.AESUtil import AESUtil
 from util.database import SessionMaker
 from util.log import Logger
 from util.gpt import *
@@ -168,13 +165,13 @@ class Consumer:
             self.logger.info(f"SQS 메시지 처리 시작 - ID: {message_id}")
 
             # 메시지 처리 (기존 process_message 로직 사용)
-            success = self.process_message_with_result(kafka_like_message, receipt_handle)
+            success = self.process_message_with_result(kafka_like_message, receipt_handle, message_id)
 
             if success:
                 self.delete_sqs_message(receipt_handle, message_id)
                 self.logger.info(f"메시지 처리 성공 및 삭제 완료 - ID: {message_id}")
             else:
-                self.send_sqs_failure_message(message.value["recordId"], str(message.value["userId"]), f"메시지 처리 실패 - ID :{message_id}")
+                self.send_sqs_failure_message(message.value["recordId"], str(message.value["userId"]), f"메시지 처리 실패 - ID :{message_id}", receipt_handle=receipt_handle, message_id=message_id)
 
             self.sqs.delete_message(
                 QueueUrl=queue_url,
@@ -185,7 +182,7 @@ class Consumer:
             self.logger.error(f"메시지 처리 실패: {e}")
             # KAFKA DLQ를 여기서 호출해야할듯?
 
-    def process_message_with_result(self, message, receipt_handle):
+    def process_message_with_result(self, message, receipt_handle, message_id):
         """
         기존 process_message를 수정하여 성공/실패 결과를 반환하도록 함
         """
@@ -206,7 +203,7 @@ class Consumer:
 
         except Exception as e:
             self.logger.error(f"❌ 메시지 파싱 실패: {e}")
-            self.send_sqs_failure_message(record_id, str(message.value["userId"]), e.message)
+            self.send_sqs_failure_message(record_id, str(message.value["userId"]), e.message, receipt_handle=receipt_handle, message_id=message_id)
             return False
 
         # 재시도 로직
@@ -285,7 +282,7 @@ class Consumer:
                 except NotFoundException as e:
                     session.rollback()
                     self.logger.error(f"리소스 없음 - recordId: {record_id}, userId: {user_id}, 원인: {e.message}")
-                    self.send_sqs_failure_message(record_id, str(message.value["userId"]), e.message)
+                    self.send_sqs_failure_message(record_id, str(message.value["userId"]), e.message, receipt_handle=receipt_handle, message_id=message_id)
                     return False
 
                 except Exception as e:
@@ -306,7 +303,7 @@ class Consumer:
                         time.sleep(1)  # 재시도 전 대기
                     else:
                         # 최종 실패 처리
-                        self.send_sqs_failure_message(record_id, str(message.value["userId"]), f"분석 실패 (재시도 {max_retries}회)")
+                        self.send_sqs_failure_message(record_id, str(message.value["userId"]), f"분석 실패 (재시도 {max_retries}회)", receipt_handle=receipt_handle, message_id=message_id)
 
                         # DLQ로 전송
                         self.send_to_dlq(
@@ -362,7 +359,7 @@ class Consumer:
         except Exception as e:
             self.logger.error(f"SQS 성공 : {e}")
 
-    def send_sqs_failure_message(self, record_id, user_id, message):
+    def send_sqs_failure_message(self, record_id, user_id, message, receipt_handle = None, message_id = None):
         try:
             message_body = {
                 'recordId': record_id,
@@ -399,6 +396,9 @@ class Consumer:
                 send_params['MessageDeduplicationId'] = deduplication_id
 
             self.sqs.send_message(**send_params)
+            if receipt_handle is not None and message_id is not None:
+                self.delete_sqs_message(receipt_handle, message_id)
+            print(send_params)
             self.logger.info(f"실패 메시지 전송 완료 - recordId: {record_id}")
         except Exception as e:
             self.logger.error(f"sQs 실패 : {e}")
