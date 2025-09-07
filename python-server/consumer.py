@@ -213,109 +213,121 @@ class Consumer:
         last_failed_step = None
 
         while attempt < max_retries:
-            with SessionMaker() as session:
-                processing_status = {
-                    "stt": "NOT_STARTED",
-                    "addSection": "NOT_STARTED",
-                    "assignText": "NOT_STARTED",
-                    "addSummary": "NOT_STARTED",
-                    "addQa": "NOT_STARTED",
-                    "addKeywords": "NOT_STARTED"
-                }
+            processing_status = {
+                "stt": "NOT_STARTED",
+                "addSection": "NOT_STARTED",
+                "assignText": "NOT_STARTED",
+                "addSummary": "NOT_STARTED",
+                "addQa": "NOT_STARTED",
+                "addKeywords": "NOT_STARTED"
+            }
 
-                try:
-                    # 기존 처리 로직 (STT부터 키워드까지)
-                    user = session.query(AppUser).filter(AppUser.user_id == user_id).first()
+            try:
+                with SessionMaker() as pre_session:
+                    user = pre_session.query(AppUser).filter(AppUser.user_id == user_id).first()
                     if user is None:
                         self.logger.info(f"Not found user")
                         raise NotFoundException("No such user")
 
-                    record = session.query(Record).filter(Record.record_id == record_id).first()
+                    record = pre_session.query(Record).filter(Record.record_id == record_id).first()
 
                     if record is None:
                         raise NotFoundException("No such record")
 
                     if record.path is None:
                         raise NotFoundException("No such path")
-                    folder_share = (session.query(FolderShare).filter(FolderShare.folder_id == record.folder_id
+                    folder_share = (pre_session.query(FolderShare).filter(FolderShare.folder_id == record.folder_id
                                                                       and FolderShare.owner_id == user.user_id)
                                     .first())
                     if folder_share is None:
                         raise NotFoundException("No such folder share")
 
-                    self.logger.info(f"🎯 오디오 분석 시작: {record_id}")
+                self.logger.info(f"🎯 오디오 분석 시작: {record_id}")
 
-                    # STT 처리
-                    processing_status["stt"] = "IN_PROGRESS"
-                    stt_results = stt(record.path, lan)
+                # STT 처리
+                processing_status["stt"] = "IN_PROGRESS"
+                stt_results = stt(record.path, lan)
 
-                    processing_status["stt"] = "SUCCESS"
+                processing_status["stt"] = "SUCCESS"
 
-                    # 각 단계별 처리
-                    processing_status["addSection"] = "IN_PROGRESS"
-                    add_section(record_id=record_id, text=stt_results, session=session, lan=lan)
-                    processing_status["addSection"] = "SUCCESS"
+                # 각 단계별 처리
+                processing_status["addSection"] = "IN_PROGRESS"
+                section_list = add_section(record_id=record_id, text=stt_results, lan=lan)
+                processing_status["addSection"] = "SUCCESS"
 
-                    processing_status["assignText"] = "IN_PROGRESS"
-                    assign_text(record_id=record_id, text=stt_results, session=session)
-                    processing_status["assignText"] = "SUCCESS"
+                processing_status["assignText"] = "IN_PROGRESS"
+                assign_text_list, assign_results = assign_text(record_id=record_id, text=stt_results, section_list=section_list)
+                processing_status["assignText"] = "SUCCESS"
 
-                    processing_status["addSummary"] = "IN_PROGRESS"
-                    add_summary(record_id=record_id, session=session, lan=lan)
-                    processing_status["addSummary"] = "SUCCESS"
+                processing_status["addSummary"] = "IN_PROGRESS"
+                summaries, section_list = add_summary(record_id=record_id, assign_texts=assign_results,section_list=section_list, lan=lan)
+                processing_status["addSummary"] = "SUCCESS"
 
-                    processing_status["addQa"] = "IN_PROGRESS"
-                    text = ''.join(result.text for result in stt_results)
-                    add_qa(record_id=record_id, text=text, session=session, lan=lan)
-                    processing_status["addQa"] = "SUCCESS"
+                processing_status["addQa"] = "IN_PROGRESS"
+                text = ''.join(result.text for result in stt_results)
+                quiz = add_qa(record_id=record_id, text=text,lan=lan)
+                processing_status["addQa"] = "SUCCESS"
 
-                    processing_status["addKeywords"] = "IN_PROGRESS"
-                    add_keywords(record_id=record_id, text=text, session=session, lan=lan)
-                    processing_status["addKeywords"] = "SUCCESS"
+                processing_status["addKeywords"] = "IN_PROGRESS"
+                keywords = add_keywords(record_id=record_id, text=text, lan=lan)
+                processing_status["addKeywords"] = "SUCCESS"
 
-                    session.commit()
+                with SessionMaker() as session:
+                    try :
+                        session.add_all(section_list)
+                        session.flush()
+                        if len(section_list) != len(assign_text_list) != len(summaries):
+                            raise ValueError("section_list 길이와 assign_text_list, summaries 길이가 다릅니다.")
+                        for section_obj, analysis_obj in zip(section_list, assign_text_list, ):
+                            analysis_obj.section = section_obj  # section_id 할당
 
-                    self.send_sqs_success_message(record_id, str(message.value["userId"]))
-                    self.logger.info(f"오디오 분석 완료: {record_id}")
-                    return True
+                        session.add_all(assign_text_list)
+                        session.add_all(summaries)
+                        session.add_all(quiz)
+                        session.add_all(keywords)
+                        session.commit()
+                    except Exception as e:
+                        session.rollback()
 
-                except NotFoundException as e:
-                    session.rollback()
-                    self.logger.error(f"리소스 없음 - recordId: {record_id}, userId: {user_id}, 원인: {e.message}")
-                    self.send_sqs_failure_message(record_id, str(message.value["userId"]), e.message, receipt_handle=receipt_handle, message_id=message_id)
+                self.send_sqs_success_message(record_id, str(message.value["userId"]))
+                self.logger.info(f"오디오 분석 완료: {record_id}")
+                return True
+
+            except NotFoundException as e:
+                self.logger.error(f"리소스 없음 - recordId: {record_id}, userId: {user_id}, 원인: {e.message}")
+                self.send_sqs_failure_message(record_id, str(message.value["userId"]), e.message, receipt_handle=receipt_handle, message_id=message_id)
+                return False
+
+            except Exception as e:
+                attempt += 1
+                last_error = e
+
+                # 실패한 단계 찾기
+                for step, status in processing_status.items():
+                    if status == "IN_PROGRESS":
+                        last_failed_step = step
+                        processing_status[step] = "FAILED"
+                        break
+
+                self.logger.error(f"❌ [{attempt}/{max_retries}] 분석 오류: {e}")
+
+                if attempt < max_retries:
+                    time.sleep(1)  # 재시도 전 대기
+                else:
+                    # 최종 실패 처리
+                    self.send_sqs_failure_message(record_id, str(message.value["userId"]), f"분석 실패 (재시도 {max_retries}회)", receipt_handle=receipt_handle, message_id=message_id)
+
+                    # DLQ로 전송
+                    self.send_to_dlq(
+                        record_id=record_id,
+                        user_id=str(message.value["userId"]),
+                        failed_step=last_failed_step or "unknown",
+                        error_type=self.classify_error(last_error),
+                        error_message=str(last_error),
+                        processing_status=processing_status,
+                        retry_count=max_retries
+                    )
                     return False
-
-                except Exception as e:
-                    session.rollback()
-                    attempt += 1
-                    last_error = e
-
-                    # 실패한 단계 찾기
-                    for step, status in processing_status.items():
-                        if status == "IN_PROGRESS":
-                            last_failed_step = step
-                            processing_status[step] = "FAILED"
-                            break
-
-                    self.logger.error(f"❌ [{attempt}/{max_retries}] 분석 오류: {e}")
-
-                    if attempt < max_retries:
-                        time.sleep(1)  # 재시도 전 대기
-                    else:
-                        # 최종 실패 처리
-                        self.send_sqs_failure_message(record_id, str(message.value["userId"]), f"분석 실패 (재시도 {max_retries}회)", receipt_handle=receipt_handle, message_id=message_id)
-
-                        # DLQ로 전송
-                        self.send_to_dlq(
-                            record_id=record_id,
-                            user_id=str(message.value["userId"]),
-                            failed_step=last_failed_step or "unknown",
-                            error_type=self.classify_error(last_error),
-                            error_message=str(last_error),
-                            processing_status=processing_status,
-                            retry_count=max_retries
-                        )
-                        return False
 
         return False
 
@@ -398,7 +410,6 @@ class Consumer:
             self.sqs.send_message(**send_params)
             if receipt_handle is not None and message_id is not None:
                 self.delete_sqs_message(receipt_handle, message_id)
-            print(send_params)
             self.logger.info(f"실패 메시지 전송 완료 - recordId: {record_id}")
         except Exception as e:
             self.logger.error(f"sQs 실패 : {e}")
