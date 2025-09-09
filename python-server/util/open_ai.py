@@ -462,7 +462,7 @@ class OpenAIUtil:
 
         return section_list
 
-    # 위에서 분리된 섹션에 텍스트 전문을 할당해서 script 테이블에 insert
+    # 위에서 분리된 섹션에 텍스트 전문을 할당해서 Analysis 테이블에 insert
     def assign_text(self, stt_origin: List[STTResults], sections: List[Section]):
         assign_text_list = []
         assign_results = []  # 결과를 저장할 리스트
@@ -482,7 +482,6 @@ class OpenAIUtil:
                     "end_time": section.end_time,
                     "content": ""
                 }
-
                 for i in range(start_index, len(stt_origin)):
                     if stt_origin[i].start <= section.end_time:
                         current_str += stt_origin[i].text  # 시간 범위 내의 텍스트 추가
@@ -515,10 +514,10 @@ class OpenAIUtil:
         with open("assign_result.json", "w", encoding="utf-8") as f:
             json.dump(assign_results, f, ensure_ascii=False, indent=2)
 
-        return assign_text_list
+        return assign_text_list, assign_results
 
     # section과 script를 불러와서 매칭시켜서, 요약하고, summary insert
-    def get_summary(self, datas: List[Section], language: str = 'ko'):
+    def get_summary(self, datas,section_list, language: str = 'ko'):
         self.logger.info("summary 진입 ============")
         summary_list = []
 
@@ -559,14 +558,14 @@ class OpenAIUtil:
     本文: {content}"""
         }
 
-        for data in datas:
-            if data:
-                if data.content:
+        for data, section in zip(datas, section_list):
+            if data and (len(datas) == len(section_list)):
+                if data.get('content'):
                     try:
                         # 언어에 맞는 프롬프트 생성
                         user_content = user_prompts[language].format(
-                            title=data.title,
-                            content=data.content
+                            title=data.get('title',''),
+                            content=data.get('content','')
                         )
 
                         completion = self.client.chat.completions.create(
@@ -614,14 +613,18 @@ class OpenAIUtil:
                                 continue
 
                         if completion_json and 'summaries' in completion_json:
+                            tmp_summaries: List[Summary] = []
                             for summary in completion_json['summaries']:
                                 if summary.get('text'):
                                     summary_entity = Summary(
-                                        section_id=data.section_id,
+                                        section=section,
                                         content=summary['text']
                                     )
                                     summary_list.append(summary_entity)
+                                    tmp_summaries.append(summary_entity)
                                     self.logger.info(f"✅ 요약 생성 성공: '{summary['text'][:50]}...'")
+                            section.summaries.clear()
+                            section.summaries.extend(tmp_summaries)
                         else:
                             self.logger.warning(f"❌ 요약 JSON 파싱 실패 또는 'summaries' 키 없음")
 
@@ -633,7 +636,7 @@ class OpenAIUtil:
                         continue
 
         self.logger.info(f"🎉 총 {len(summary_list)}개 요약 생성 완료")
-        return summary_list
+        return summary_list, section_list
 
     def stt(self, path: str, lan: str):  # parameter language [ ko, ja, en ]
         self.logger.info("Starting STT2222")
