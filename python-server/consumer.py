@@ -188,7 +188,7 @@ class Consumer:
         """
         try:
             is_json = isinstance(message.value, dict)
-            is_enough_data = "recordId" in message.value and "userId" in message.value
+            is_enough_data = "recordId" in message.value and "userId" in message.value and "lang" in message.value
 
             if not (is_json and is_enough_data):
                 self.logger.error(f"유효하지 않은 메시지 형식")
@@ -199,7 +199,7 @@ class Consumer:
             record_id = message.value["recordId"]
             aes_util = AESUtil(secret_key)
             user_id = aes_util.decrypt(str(message.value["userId"]))
-            lan = message.value["language"]
+            lan = message.value["lang"]
 
         except Exception as e:
             self.logger.error(f"❌ 메시지 파싱 실패: {e}")
