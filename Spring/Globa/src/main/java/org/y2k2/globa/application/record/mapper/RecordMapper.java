@@ -18,6 +18,7 @@ import org.y2k2.globa.application.user.dto.common.UserIntroDto;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
 import org.y2k2.globa.infrastructure.persistence.record.projection.RecordSearchProjection;
+import org.y2k2.globa.infrastructure.persistence.record.type.Language;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 import java.util.List;
@@ -63,10 +64,10 @@ public interface RecordMapper {
 
     @Mapping(source = "dto.title", target = "title")
     @Mapping(source = "dto.path", target = "path")
-    @Mapping(source = "dto.lang", target = "lang")
+    @Mapping(source = "lang", target = "lang")
     @Mapping(source = "user", target = "user")
     @Mapping(source = "folder", target = "folder")
     @Mapping(source = "size", target = "size")
     @Mapping(target = "createdTime", ignore = true)
-    RecordEntity toEntity(RequestPostRecordDto dto, FolderEntity folder, UserEntity user, Long size);
+    RecordEntity toEntity(RequestPostRecordDto dto, Language lang, FolderEntity folder, UserEntity user, Long size);
 }

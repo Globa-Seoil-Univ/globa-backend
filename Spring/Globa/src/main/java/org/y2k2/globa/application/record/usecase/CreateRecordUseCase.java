@@ -12,6 +12,7 @@ import org.y2k2.globa.common.usecase.VoidUseCase;
 import org.y2k2.globa.common.util.file.FileStore;
 import org.y2k2.globa.domain.record.repository.RecordRepository;
 import org.y2k2.globa.infrastructure.persistence.record.entity.RecordEntity;
+import org.y2k2.globa.infrastructure.persistence.record.type.Language;
 
 @Component
 @RequiredArgsConstructor
@@ -25,7 +26,7 @@ public class CreateRecordUseCase implements UseCase<CreateRecordCommand, Long> {
         FileDto file = fileStore.getFile(command.dto().path())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_RECORD_FIREBASE));
 
-        RecordEntity record = RecordMapper.INSTANCE.toEntity(command.dto(), command.folder(), command.user(), file.size());
+        RecordEntity record = RecordMapper.INSTANCE.toEntity(command.dto(), Language.valueOf(command.dto().lang().toUpperCase()), command.folder(), command.user(), file.size());
         return recordRepository.save(record).getRecordId();
     }
 }
