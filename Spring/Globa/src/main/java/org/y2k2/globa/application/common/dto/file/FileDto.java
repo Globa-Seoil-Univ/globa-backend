@@ -16,10 +16,10 @@ public record FileDto(
         String storeFileName,
         String storePath,
         String extension,
-        long size
+        Long size
 ) {
     @Builder
-    public FileDto(String originalFileName, String storeFileName, String storePath, String extension, long size) {
+    public FileDto(String originalFileName, String storeFileName, String storePath, String extension, Long size) {
         this.originalFileName = originalFileName;
         this.storeFileName = storeFileName;
         this.storePath = storePath;

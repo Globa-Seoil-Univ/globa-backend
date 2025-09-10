@@ -37,6 +37,10 @@ public class UpdateUserProfileImgService {
             updateUserUseCase.execute(
                     UpdateUserCommand.builder()
                             .user(user)
+                            .name(user.getName())
+                            .uploadNofi(user.getUploadNofi())
+                            .shareNofi(user.getShareNofi())
+                            .eventNofi(user.getEventNofi())
                             .profileImage(file)
                             .build()
             );

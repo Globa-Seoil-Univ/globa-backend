@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.y2k2.globa.application.common.dto.file.FileDto;
 import org.y2k2.globa.application.folder.command.CreateDefaultFolderCommand;
 import org.y2k2.globa.application.folder.command.UpdateFolderNameCommand;
 import org.y2k2.globa.application.folder.usecase.CreateDefaultFolderUseCase;
@@ -49,6 +50,16 @@ public class UpdateUserNameService {
                 UpdateUserCommand.builder()
                         .user(user)
                         .name(dto.name())
+                        .uploadNofi(user.getUploadNofi())
+                        .shareNofi(user.getShareNofi())
+                        .eventNofi(user.getEventNofi())
+                        .profileImage(
+                                FileDto.builder()
+                                        .storePath(user.getProfilePath())
+                                        .size(user.getProfileSize())
+                                        .extension(user.getProfileType())
+                                        .build()
+                        )
                         .build()
         );
 
