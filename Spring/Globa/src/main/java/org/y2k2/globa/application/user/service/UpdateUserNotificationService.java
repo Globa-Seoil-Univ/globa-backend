@@ -20,6 +20,7 @@ public class UpdateUserNotificationService {
         updateUserUseCase.execute(
                 UpdateUserCommand.builder()
                         .user(user)
+                        .primaryNofi(dto.primaryNofi())
                         .uploadNofi(dto.uploadNofi())
                         .shareNofi(dto.shareNofi())
                         .eventNofi(dto.eventNofi())

@@ -65,7 +65,7 @@ public class UserEntityTest {
     @Test
     @DisplayName("알림 설정 수정 - 성공")
     void updateNotification() {
-        user.updateNotification(true, true, true);
+        user.updateNotification(true, true, true, true);
 
         Assertions.assertThat(user.getUploadNofi()).isTrue();
         Assertions.assertThat(user.getShareNofi()).isTrue();
@@ -75,8 +75,8 @@ public class UserEntityTest {
     @Test
     @DisplayName("알림 설정 수정 - 성공 (null 제외)")
     void updateNotificationExcludeNull() {
-        user.updateNotification(true, true, true);
-        user.updateNotification(null, false, null);
+        user.updateNotification(true, true, true, true);
+        user.updateNotification(true,null, false, null);
 
         Assertions.assertThat(user.getUploadNofi()).isTrue();
         Assertions.assertThat(user.getShareNofi()).isFalse();
@@ -86,8 +86,8 @@ public class UserEntityTest {
     @Test
     @DisplayName("알림 설정 수정 - 실패 (null)")
     void updateNotificationFail() {
-        user.updateNotification(true ,true, true);
-        user.updateNotification(null, null, null);
+        user.updateNotification(true, true ,true, true);
+        user.updateNotification(null, null, null, null);
 
         Assertions.assertThat(user.getUploadNofi()).isNotNull();
         Assertions.assertThat(user.getShareNofi()).isNotNull();

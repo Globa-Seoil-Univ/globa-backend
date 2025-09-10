@@ -91,7 +91,11 @@ public class UserEntity {
         }
     }
 
-    public void updateNotification(Boolean uploadNofi, Boolean shareNofi, Boolean eventNofi) {
+    public void updateNotification(Boolean primaryNofi, Boolean uploadNofi, Boolean shareNofi, Boolean eventNofi) {
+        if (primaryNofi != null) {
+            this.primaryNofi = primaryNofi;
+        }
+
         if (uploadNofi != null) {
             this.uploadNofi = uploadNofi;
         }

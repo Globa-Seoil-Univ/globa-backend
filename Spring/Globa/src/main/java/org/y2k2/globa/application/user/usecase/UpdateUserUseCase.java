@@ -24,8 +24,9 @@ public class UpdateUserUseCase implements VoidUseCase<UpdateUserCommand> {
             user.updateProfile(command.profileImage());
         }
 
-        if (command.uploadNofi() != null && command.shareNofi() != null && command.eventNofi() != null) {
+        if (command.primaryNofi() != null && command.uploadNofi() != null && command.shareNofi() != null && command.eventNofi() != null) {
             user.updateNotification(
+                    command.primaryNofi(),
                     command.uploadNofi(),
                     command.shareNofi(),
                     command.eventNofi()
