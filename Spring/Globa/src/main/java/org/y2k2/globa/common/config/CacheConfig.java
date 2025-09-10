@@ -41,7 +41,8 @@ public class CacheConfig {
                         RedisSerializationContext.SerializationPair.fromSerializer(
                                 genericJackson2JsonRedisSerializer
                         )
-                );
+                )
+                .computePrefixWith(cacheName -> cacheName + ":");
 
         return RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(redisCacheConfiguration)
