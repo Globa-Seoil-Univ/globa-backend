@@ -27,7 +27,7 @@ public class DLQService {
 
         DLQEntity entity = new DLQEntity();
 
-        entity.setType(dto.errorInfo().type().name());
+        entity.setType(dto.errorInfo().type());
         entity.setStep(dto.errorInfo().step().name());
         entity.setMessage(dto.errorInfo().message());
         entity.setOccurrenceTime(dto.errorInfo().timestamp());
