@@ -14,7 +14,6 @@ import org.y2k2.globa.application.user.usecase.FindUserUseCase;
 import org.y2k2.globa.common.exception.CustomException;
 import org.y2k2.globa.common.exception.ErrorCode;
 import org.y2k2.globa.common.util.crypto.AESUtil;
-import org.y2k2.globa.common.util.file.FileStore;
 import org.y2k2.globa.common.util.sqs.SQSSender;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
@@ -32,7 +31,6 @@ public class CreateRecordService {
 
     private final AESUtil aesUtil;
     private final SQSSender sqsSender;
-    private final FileStore fileStore;
 
     private final ApplicationEventPublisher eventPublisher;
 
