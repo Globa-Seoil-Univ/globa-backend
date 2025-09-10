@@ -5,7 +5,6 @@ import com.navercorp.fixturemonkey.api.introspector.BeanArbitraryIntrospector;
 import com.navercorp.fixturemonkey.api.introspector.ConstructorPropertiesArbitraryIntrospector;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,9 +12,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.context.ApplicationEventPublisher;
 import org.y2k2.globa.application.foldershare.command.VerifyFolderCommand;
 import org.y2k2.globa.application.foldershare.usecase.VerifyFolderAccessibleUseCase;
+import org.y2k2.globa.application.notification.dto.common.SendMessage;
 import org.y2k2.globa.application.record.command.CreateRecordCommand;
 import org.y2k2.globa.application.record.dto.request.RequestPostRecordDto;
 import org.y2k2.globa.application.record.usecase.CreateRecordUseCase;
@@ -47,12 +47,8 @@ public class CreateRecordServiceTest {
     private AESUtil aesUtil;
     @Mock
     private SQSSender sqsSender;
-
-    @BeforeEach
-    void setup() {
-        ReflectionTestUtils.setField(createRecordService, "topic", "test-topic");
-        ReflectionTestUtils.setField(createRecordService, "topicKey", "test-key");
-    }
+    @Mock
+    private ApplicationEventPublisher publisher;
 
     @Test
     @DisplayName("문서 생성 - 성공")
@@ -99,6 +95,9 @@ public class CreateRecordServiceTest {
 
         Mockito.verify(sqsSender, Mockito.times(1))
                 .sendMessage(Mockito.any(RequestSQSDto.class));
+
+        Mockito.verify(publisher, Mockito.never())
+                .publishEvent(Mockito.any(SendMessage.class));
     }
 
     @Test
@@ -122,6 +121,10 @@ public class CreateRecordServiceTest {
         Mockito.when(folderRepository.getFolder(Mockito.anyLong()))
                 .thenReturn(java.util.Optional.empty());
 
+        Mockito.doNothing()
+                .when(publisher)
+                .publishEvent(Mockito.any(SendMessage.class));
+
         Assertions.assertThatThrownBy(() -> createRecordService.create(1L, dto, 1L))
                 .isInstanceOf(CustomException.class)
                         .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND_FOLDER);
@@ -137,5 +140,8 @@ public class CreateRecordServiceTest {
 
         Mockito.verify(sqsSender, Mockito.times(0))
                 .sendMessage(Mockito.any(RequestSQSDto.class));
+
+        Mockito.verify(publisher, Mockito.times(1))
+                .publishEvent(Mockito.any(SendMessage.class));
     }
 }

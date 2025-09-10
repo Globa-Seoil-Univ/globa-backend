@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.y2k2.globa.application.user.command.CreateJWTCommand;
-import org.y2k2.globa.application.user.usecase.CreateJWTUseCase;
 import org.y2k2.globa.common.util.jwt.JWT;
 import org.y2k2.globa.common.util.jwt.JWTProvider;
 import org.y2k2.globa.common.util.redis.RedisKey;

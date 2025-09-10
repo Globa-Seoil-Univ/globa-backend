@@ -228,6 +228,7 @@ public class UserIntegrationTest extends IntegrationTest {
             ResponseNotificationSettingDto.class
         );
 
+        Assertions.assertThat(response.primaryNofi()).isNotNull();
         Assertions.assertThat(response.eventNofi()).isNotNull();
         Assertions.assertThat(response.uploadNofi()).isNotNull();
         Assertions.assertThat(response.shareNofi()).isNotNull();
@@ -756,6 +757,7 @@ public class UserIntegrationTest extends IntegrationTest {
         RequestNotificationSettingDto request = new RequestNotificationSettingDto(
                 false,
                 false,
+                false,
                 false
         );
 
@@ -767,6 +769,60 @@ public class UserIntegrationTest extends IntegrationTest {
                 )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        // 알림 정보 가져오기
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue() + "/notification")
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+
+        ResponseNotificationSettingDto response = objectMapper.readValue(
+            result.getResponse().getContentAsString(),
+            ResponseNotificationSettingDto.class
+        );
+
+        Assertions
+                .assertThat(response.eventNofi())
+                .isFalse();
+
+        Assertions
+                .assertThat(response.uploadNofi())
+                .isFalse();
+
+        Assertions
+                .assertThat(response.shareNofi())
+                .isFalse();
+
+        Assertions
+                .assertThat(response.primaryNofi())
+                .isFalse();
+
+        // 이미지, 이름은 변경되지 말아야함.
+        MvcResult userResult = mockMvc.perform(
+                        MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue())
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+
+        ResponseUserDto userResponse = objectMapper.readValue(
+            userResult.getResponse().getContentAsString(),
+            ResponseUserDto.class
+        );
+
+        Assertions
+                .assertThat(userResponse.getName())
+                .isEqualTo(user.getName());
+
+        Assertions
+                .assertThat(userResponse.getProfile())
+                .isEqualTo(user.getProfilePath());
     }
 
     @Test
@@ -784,22 +840,19 @@ public class UserIntegrationTest extends IntegrationTest {
                 "NEW_NAME"
         );
 
-        mockMvc.perform(
-                        MockMvcRequestBuilders.patch(Constant.USER_PREFIX.getValue() + "/name")
+        // 알림 정보 가져오기
+        MvcResult notiResult = mockMvc.perform(
+                        MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue() + "/notification")
                                 .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request))
+                                .accept(MediaType.APPLICATION_JSON)
                 )
+                .andExpect(MockMvcResultMatchers.status().isOk())
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
-    }
+                .andReturn();
 
-    @Test
-    @DisplayName("이름 수정 - 성공 (기본 폴더가 없는 경우)")
-    @WithAccount
-    void modifyNameWithoutDefaultFolder() throws Exception {
-        RequestNameDto request = new RequestNameDto(
-                "NEW_NAME"
+        ResponseNotificationSettingDto notiResponseBefore = objectMapper.readValue(
+                notiResult.getResponse().getContentAsString(),
+                ResponseNotificationSettingDto.class
         );
 
         mockMvc.perform(
@@ -810,12 +863,132 @@ public class UserIntegrationTest extends IntegrationTest {
                 )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        // 이름 변경 확인
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue())
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+
+        ResponseUserDto response = objectMapper.readValue(
+            result.getResponse().getContentAsString(),
+            ResponseUserDto.class
+        );
+
+        Assertions
+                .assertThat(response.getName())
+                .isEqualTo("NEW_NAME");
+
+        Assertions
+                .assertThat(response.getProfile())
+                .isEqualTo(user.getProfilePath());
+
+        // 알림은 변경되지 말아야함.
+        MvcResult notiResultAfter = mockMvc.perform(
+                        MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue() + "/notification")
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+
+        ResponseNotificationSettingDto notiResponseAfter = objectMapper.readValue(
+                notiResultAfter.getResponse().getContentAsString(),
+                ResponseNotificationSettingDto.class
+        );
+
+        Assertions.assertThat(notiResponseBefore.primaryNofi()).isEqualTo(notiResponseAfter.primaryNofi());
+        Assertions.assertThat(notiResponseBefore.eventNofi()).isEqualTo(notiResponseAfter.eventNofi());
+        Assertions.assertThat(notiResponseBefore.uploadNofi()).isEqualTo(notiResponseAfter.uploadNofi());
+        Assertions.assertThat(notiResponseBefore.shareNofi()).isEqualTo(notiResponseAfter.shareNofi());
+    }
+
+    @Test
+    @DisplayName("이름 수정 - 성공 (기본 폴더가 없는 경우)")
+    @WithAccount
+    void modifyNameWithoutDefaultFolder() throws Exception {
+        RequestNameDto request = new RequestNameDto(
+                "NEW_NAME"
+        );
+
+        // 알림 정보 가져오기
+        MvcResult notiResult = mockMvc.perform(
+                        MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue() + "/notification")
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+
+        ResponseNotificationSettingDto notiResponseBefore = objectMapper.readValue(
+                notiResult.getResponse().getContentAsString(),
+                ResponseNotificationSettingDto.class
+        );
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.patch(Constant.USER_PREFIX.getValue() + "/name")
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        // 이름 변경 확인
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue())
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+
+        ResponseUserDto response = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                ResponseUserDto.class
+        );
+
+        Assertions
+                .assertThat(response.getName())
+                .isEqualTo("NEW_NAME");
+
+        Assertions
+                .assertThat(response.getProfile())
+                .isEqualTo(user.getProfilePath());
+
+        // 알림은 변경되지 말아야함.
+        MvcResult notiResultAfter = mockMvc.perform(
+                        MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue() + "/notification")
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+
+        ResponseNotificationSettingDto notiResponseAfter = objectMapper.readValue(
+                notiResultAfter.getResponse().getContentAsString(),
+                ResponseNotificationSettingDto.class
+        );
+
+        Assertions.assertThat(notiResponseBefore.primaryNofi()).isEqualTo(notiResponseAfter.primaryNofi());
+        Assertions.assertThat(notiResponseBefore.eventNofi()).isEqualTo(notiResponseAfter.eventNofi());
+        Assertions.assertThat(notiResponseBefore.uploadNofi()).isEqualTo(notiResponseAfter.uploadNofi());
+        Assertions.assertThat(notiResponseBefore.shareNofi()).isEqualTo(notiResponseAfter.shareNofi());
     }
 
     @Test
     @DisplayName("프로필 수정 - 성공")
     @WithAccount
     void modifyProfile() throws Exception {
+        String oldProfilePath = user.getProfilePath();
         RequestProfileImageDto request = new RequestProfileImageDto(
                 new MockMultipartFile(
                         "profile",
@@ -823,6 +996,21 @@ public class UserIntegrationTest extends IntegrationTest {
                         "image/jpeg",
                         "testdata".getBytes()
                 )
+        );
+
+        // 알림 정보 가져오기
+        MvcResult notiResult = mockMvc.perform(
+                        MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue() + "/notification")
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+
+        ResponseNotificationSettingDto notiResponseBefore = objectMapper.readValue(
+                notiResult.getResponse().getContentAsString(),
+                ResponseNotificationSettingDto.class
         );
 
         mockMvc.perform(
@@ -837,6 +1025,49 @@ public class UserIntegrationTest extends IntegrationTest {
                                 })
                 )
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        // 프로필 변경 확인
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue())
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+
+        ResponseUserDto response = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                ResponseUserDto.class
+        );
+
+        Assertions
+                .assertThat(response.getName())
+                .isEqualTo(user.getName());
+
+        Assertions
+                .assertThat(response.getProfile())
+                .isNotEqualTo(oldProfilePath);
+
+        // 알림은 변경되지 말아야함.
+        MvcResult notiResultAfter = mockMvc.perform(
+                        MockMvcRequestBuilders.get(Constant.USER_PREFIX.getValue() + "/notification")
+                                .header(Constant.JWT_HEADER.getValue(), jwt.getGrantType() + jwt.getAccessToken())
+                                .accept(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn();
+
+        ResponseNotificationSettingDto notiResponseAfter = objectMapper.readValue(
+                notiResultAfter.getResponse().getContentAsString(),
+                ResponseNotificationSettingDto.class
+        );
+
+        Assertions.assertThat(notiResponseBefore.primaryNofi()).isEqualTo(notiResponseAfter.primaryNofi());
+        Assertions.assertThat(notiResponseBefore.eventNofi()).isEqualTo(notiResponseAfter.eventNofi());
+        Assertions.assertThat(notiResponseBefore.uploadNofi()).isEqualTo(notiResponseAfter.uploadNofi());
+        Assertions.assertThat(notiResponseBefore.shareNofi()).isEqualTo(notiResponseAfter.shareNofi());
     }
 
     @Test

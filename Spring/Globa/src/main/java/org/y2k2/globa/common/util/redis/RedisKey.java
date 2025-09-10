@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum RedisKey {
-    REFRESH_KEY("refreshToken::"),
+    REFRESH_KEY("refreshToken:"),
     ;
 
     private final String value;

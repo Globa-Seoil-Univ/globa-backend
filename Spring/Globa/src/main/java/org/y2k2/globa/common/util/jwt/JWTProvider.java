@@ -77,7 +77,6 @@ public class JWTProvider {
      * @return UserId
      */
     public Long getUserIdByAccessToken(String accessToken) {
-        log.info("getUserIdByAccessToken : {}", accessToken);
         Claims claims = parseClaims(accessToken, true);
         return Long.valueOf(claims.getSubject());
     }
@@ -89,7 +88,6 @@ public class JWTProvider {
      * @return 만료 시간
      */
     public Long getUserIdByAccessTokenWithoutCheck(String accessToken){
-        log.info("getUserIdByAccessTokenWithoutCheck : {}", accessToken);
         Claims claims = parseClaims(accessToken, false);
         return Long.valueOf(claims.getSubject());
     }

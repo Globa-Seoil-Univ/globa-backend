@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public record ErrorInfo(
         TaskStep step,
-        TaskType type,
+        String type,
         String message,
         LocalDateTime timestamp
 ) {

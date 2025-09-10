@@ -16,13 +16,22 @@ public class UpdateUserUseCase implements VoidUseCase<UpdateUserCommand> {
     public void execute(UpdateUserCommand command) {
         UserEntity user = command.user();
 
-        user.updateName(command.name());
-        user.updateProfile(command.profileImage());
-        user.updateNotification(
-                command.uploadNofi(),
-                command.shareNofi(),
-                command.eventNofi()
-        );
+        if (command.name() != null) {
+            user.updateName(command.name());
+        }
+
+        if (command.profileImage() != null) {
+            user.updateProfile(command.profileImage());
+        }
+
+        if (command.primaryNofi() != null && command.uploadNofi() != null && command.shareNofi() != null && command.eventNofi() != null) {
+            user.updateNotification(
+                    command.primaryNofi(),
+                    command.uploadNofi(),
+                    command.shareNofi(),
+                    command.eventNofi()
+            );
+        }
 
         userRepository.save(user);
     }

@@ -182,11 +182,12 @@ public class UserRepositoryTest {
     @Test
     @DisplayName("유저 알림 수정 - 성공")
     void updateUserNotification() {
-        user.updateNotification(true, true, true);
+        user.updateNotification(true, true, true, true);
 
         UserEntity updatedUser = userRepository.save(user);
 
         Assertions.assertThat(updatedUser).isNotNull();
+        Assertions.assertThat(updatedUser.getPrimaryNofi()).isTrue();
         Assertions.assertThat(updatedUser.getUploadNofi()).isTrue();
         Assertions.assertThat(updatedUser.getShareNofi()).isTrue();
         Assertions.assertThat(updatedUser.getEventNofi()).isTrue();
@@ -196,14 +197,15 @@ public class UserRepositoryTest {
     @DisplayName("유저 알림 유지 - 성공")
     void updateUserNotificationNull() {
         // 먼저 알림 설정을 true로 변경
-        user.updateNotification(true, true, true);
+        user.updateNotification(true, true, true, true);
 
         // null 값이 들어가면 기존 값이 유지되어야 함
-        user.updateNotification(null, null, null);
+        user.updateNotification(null,null, null, null);
 
         UserEntity updatedUser = userRepository.save(user);
 
         Assertions.assertThat(updatedUser).isNotNull();
+        Assertions.assertThat(updatedUser.getPrimaryNofi()).isTrue();
         Assertions.assertThat(updatedUser.getUploadNofi()).isTrue();
         Assertions.assertThat(updatedUser.getShareNofi()).isTrue();
         Assertions.assertThat(updatedUser.getEventNofi()).isTrue();

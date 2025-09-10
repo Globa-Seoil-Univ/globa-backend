@@ -38,6 +38,7 @@ public interface UserMapper {
     @Mapping(source = "user.code", target = "code")
     ResponseUserSearchDto toResponseUserSearchDto(UserEntity user);
 
+    @Mapping(source = "user.primaryNofi", target = "primaryNofi")
     @Mapping(source = "user.uploadNofi", target = "uploadNofi")
     @Mapping(source = "user.shareNofi", target = "shareNofi")
     @Mapping(source = "user.eventNofi", target = "eventNofi")

@@ -61,7 +61,17 @@ public class RequestLoggingFilter implements Filter {
             logMessage.append(" - ReqBody: ").append(requestBody);
         }
 
+        if (shouldRequestErrorBody(response)) {
+            String responseBody = getResponseBody(response);
+            logMessage.append(" - ResBody: ").append(responseBody);
+        }
+
         log.info(logMessage.toString());
+    }
+
+    private boolean shouldRequestErrorBody(HttpServletResponse response) {
+        int status = response.getStatus();
+        return status >= 400;
     }
 
     private boolean shouldLogRequestBody(HttpServletRequest request) {
@@ -89,12 +99,29 @@ public class RequestLoggingFilter implements Filter {
         return "[empty]";
     }
 
+    private String getResponseBody(ContentCachingResponseWrapper response) {
+        try {
+            byte[] content = response.getContentAsByteArray();
+
+            if (content.length > 0) {
+                String body = new String(content, response.getCharacterEncoding());
+                return maskSensitiveData(body);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to read response body", e);
+        }
+
+        return "[empty]";
+    }
+
     private String maskSensitiveData(String body) {
         if (body == null) return "[null]";
 
         return body
                 .replaceAll("\"accessToken\"\\s*:\\s*\"[^\"]*\"", "\"accessToken\":\"***\"")
-                .replaceAll("\"refreshToken\"\\s*:\\s*\"[^\"]*\"", "\"refreshToken\":\"***\"");
+                .replaceAll("\"refreshToken\"\\s*:\\s*\"[^\"]*\"", "\"refreshToken\":\"***\"")
+                .replaceAll("\"token\"\\s*:\\s*\"[^\"]*\"", "\"token\":\"***\"")
+                .replaceAll("\"fcmToken\"\\s*:\\s*\"[^\"]*\"", "\"fcmToken\":\"***\"");
     }
 
     private String getClientIp(HttpServletRequest request) {

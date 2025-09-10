@@ -39,6 +39,7 @@ public class UpdateUserUseCaseTest {
                 .user(user)
                 .name("name")
                 .profileImage(file)
+                .primaryNofi(true)
                 .uploadNofi(true)
                 .shareNofi(false)
                 .eventNofi(true)
@@ -60,6 +61,114 @@ public class UpdateUserUseCaseTest {
 
         Mockito.verify(user, Mockito.times(1))
                 .updateNotification(
+                        command.primaryNofi(),
+                        command.uploadNofi(),
+                        command.shareNofi(),
+                        command.eventNofi()
+                );
+    }
+
+    @Test
+    @DisplayName("유저 수정 - 성공 (이름만)")
+    void updateUserOnlyNameTest() {
+        UserEntity user = Mockito.mock(UserEntity.class);
+
+        UpdateUserCommand command = UpdateUserCommand.builder()
+                .user(user)
+                .name("name")
+                .build();
+
+        Mockito.when(userRepository.save(user))
+                .thenReturn(user);
+
+        updateUserUseCase.execute(command);
+
+        Mockito.verify(userRepository, Mockito.times(1))
+                .save(user);
+
+        Mockito.verify(user, Mockito.times(1))
+                .updateName(command.name());
+
+        Mockito.verify(user, Mockito.never())
+                .updateProfile(Mockito.any());
+
+        Mockito.verify(user, Mockito.never())
+                .updateNotification(
+                        Mockito.any(),
+                        Mockito.any(),
+                        Mockito.any(),
+                        Mockito.any()
+                );
+    }
+
+    @Test
+    @DisplayName("유저 수정 - 성공 (프로필 이미지만)")
+    void updateUserOnlyProfileImageTest() {
+        UserEntity user = Mockito.mock(UserEntity.class);
+
+        FileDto file = FixtureMonkey.builder()
+                .objectIntrospector(ConstructorPropertiesArbitraryIntrospector.INSTANCE)
+                .build()
+                .giveMeOne(FileDto.class);
+
+        UpdateUserCommand command = UpdateUserCommand.builder()
+                .user(user)
+                .profileImage(file)
+                .build();
+
+        Mockito.when(userRepository.save(user))
+                .thenReturn(user);
+
+        updateUserUseCase.execute(command);
+
+        Mockito.verify(userRepository, Mockito.times(1))
+                .save(user);
+
+        Mockito.verify(user, Mockito.never())
+                .updateName(Mockito.any());
+
+        Mockito.verify(user, Mockito.times(1))
+                .updateProfile(command.profileImage());
+
+        Mockito.verify(user, Mockito.never())
+                .updateNotification(
+                        Mockito.any(),
+                        Mockito.any(),
+                        Mockito.any(),
+                        Mockito.any()
+                );
+    }
+
+    @Test
+    @DisplayName("유저 수정 - 성공 (알림 설정만)")
+    void updateUserOnlyNotificationTest() {
+        UserEntity user = Mockito.mock(UserEntity.class);
+
+        UpdateUserCommand command = UpdateUserCommand.builder()
+                .user(user)
+                .primaryNofi(true)
+                .uploadNofi(true)
+                .shareNofi(false)
+                .eventNofi(true)
+                .build();
+
+        Mockito.when(userRepository.save(user))
+                .thenReturn(user);
+
+        updateUserUseCase.execute(command);
+
+        Mockito.verify(userRepository, Mockito.times(1))
+                .save(user);
+
+        Mockito.verify(user, Mockito.never())
+                .updateName(Mockito.any());
+
+        Mockito.verify(user, Mockito.never())
+                .updateProfile(Mockito.any());
+
+        Mockito.verify(user, Mockito.times(1))
+                .updateNotification(
+                        command.primaryNofi(),
                         command.uploadNofi(),
                         command.shareNofi(),
                         command.eventNofi()

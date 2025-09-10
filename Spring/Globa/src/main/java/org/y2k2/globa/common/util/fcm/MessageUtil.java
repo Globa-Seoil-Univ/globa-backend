@@ -68,9 +68,9 @@ public class MessageUtil {
 
             Message message = Message.builder()
                     .setToken(sendMessage.getReceiver().getNotificationToken())
-                    .putData("recordId", data.recordId().toString())
-                    .putData("folderId", data.folderId().toString())
-                    .putData("inquiryId", data.inquiryId().toString())
+                    .putData("recordId", data.recordId() == null ? "0" : data.recordId().toString())
+                    .putData("folderId", data.folderId() == null ? "0" : data.folderId().toString())
+                    .putData("inquiryId", data.inquiryId() == null ? "0" : data.inquiryId().toString())
                     .putData("notificationType", sendMessage.getNotificationType().toStringType())
                     .setNotification(Notification.builder()
                             .setTitle(sendMessage.getTitle())

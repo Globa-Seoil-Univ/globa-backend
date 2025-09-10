@@ -1,9 +1,11 @@
 package org.y2k2.globa.application.record.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.y2k2.globa.application.foldershare.command.VerifyFolderCommand;
 import org.y2k2.globa.application.foldershare.usecase.VerifyFolderAccessibleUseCase;
+import org.y2k2.globa.application.notification.dto.common.SendMessage;
 import org.y2k2.globa.application.record.command.CreateRecordCommand;
 import org.y2k2.globa.application.record.dto.request.RequestPostRecordDto;
 import org.y2k2.globa.application.record.usecase.CreateRecordUseCase;
@@ -15,6 +17,7 @@ import org.y2k2.globa.common.util.crypto.AESUtil;
 import org.y2k2.globa.common.util.sqs.SQSSender;
 import org.y2k2.globa.domain.folder.repository.FolderRepository;
 import org.y2k2.globa.infrastructure.persistence.folder.entity.FolderEntity;
+import org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType;
 import org.y2k2.globa.infrastructure.persistence.user.entity.UserEntity;
 
 @Service
@@ -29,23 +32,43 @@ public class CreateRecordService {
     private final AESUtil aesUtil;
     private final SQSSender sqsSender;
 
+    private final ApplicationEventPublisher eventPublisher;
+
     public void create(Long folderId, RequestPostRecordDto dto, Long userId) {
-        UserEntity user = findUserUseCase.execute(userId);
-        FolderEntity folder = folderRepository.getFolder(folderId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));
+        UserEntity sender = null;
 
-        verifyFolderAccessibleUseCase.execute(VerifyFolderCommand.of(userId, folderId));
+        try {
+            sender = findUserUseCase.execute(userId);
+            FolderEntity folder = folderRepository.getFolder(folderId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_FOLDER));
 
-        Long createdRecordId = createRecordUseCase.execute(
-                CreateRecordCommand.of(
-                        folder,
-                        user,
-                        dto
-                )
-        );
+            verifyFolderAccessibleUseCase.execute(VerifyFolderCommand.of(userId, folderId));
 
-        String encryptedUserId = aesUtil.encrypt(user.getUserId());
-        RequestSQSDto request = new RequestSQSDto(createdRecordId, encryptedUserId, dto.lang());
-        sqsSender.sendMessage(request);
+            Long createdRecordId = createRecordUseCase.execute(
+                    CreateRecordCommand.of(
+                            folder,
+                            sender,
+                            dto
+                    )
+            );
+
+            String encryptedUserId = aesUtil.encrypt(sender.getUserId());
+            RequestSQSDto request = new RequestSQSDto(createdRecordId, encryptedUserId, dto.lang());
+            sqsSender.sendMessage(request);
+        } catch (Exception e) {
+            if (sender != null) {
+                SendMessage message = SendMessage.builder()
+                        .sender(sender)
+                        .receiver(sender)
+                        .title("업로드 실패")
+                        .body("파일 업로드에 실패했습니다.")
+                        .notificationType(NotificationType.UPLOAD_FAILED)
+                        .build();
+
+                eventPublisher.publishEvent(message);
+            }
+
+            throw e;
+        }
     }
 }
