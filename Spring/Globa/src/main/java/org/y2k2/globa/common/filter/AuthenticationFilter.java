@@ -81,6 +81,9 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                 user.getNotificationToken()
         );
 
+        // 프로덕션에서는 삭제 필요
+        log.info("Authenticated token: {}", accessToken);
+
         return new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
     }
 }
