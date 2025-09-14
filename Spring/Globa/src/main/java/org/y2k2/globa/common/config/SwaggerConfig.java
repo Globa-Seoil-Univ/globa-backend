@@ -13,6 +13,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -35,6 +36,12 @@ public class SwaggerConfig {
         addResponse(components);
 
         return new OpenAPI()
+                .servers(
+                        java.util.Arrays.asList(
+                                new Server().url("http://localhost:8080").description("Local server"),
+                                new Server().url("https://globa.duckdns.org/").description("Production server")
+                        )
+                )
                 .info(apiInfo())
                 .addSecurityItem(securityRequirement)
                 .components(components);
