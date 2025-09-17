@@ -21,7 +21,7 @@ import java.util.Date;
 @Component
 public class JWTProvider {
     private static final String grantType = "Bearer";
-    private static final long accessTokenExpirationTime = 60 * 60 * 24;
+    private static final long accessTokenExpirationTime = 60 * 30;
     private static final long refreshTokenExpirationTime = 60 * 60 * 24 * 7;
     private final Key key;
 
