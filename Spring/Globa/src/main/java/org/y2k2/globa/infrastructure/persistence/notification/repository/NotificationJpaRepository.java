@@ -56,14 +56,14 @@ public interface NotificationJpaRepository extends JpaRepository<NotificationEnt
             "c.content AS commentContent, " +
             "i.title AS inquiryTitle, " +
             "CASE " +
-                "WHEN n.type IN (" +
-                    "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.NOTICE, " +
-                    "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.UPLOAD_SUCCESS, " +
-                    "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.UPLOAD_FAILED, " +
-                    "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.INQUIRY" +
-                ") THEN NULL " +
+                "WHEN n.type = org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.INQUIRY " +
+                    "THEN NULL " +
+                "WHEN n.type = org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.NOTICE " +
+                "THEN  no.thumbnailPath " +
                 "WHEN n.type IN (" +
                     "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.SHARE_FOLDER_INVITE, " +
+                    "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.UPLOAD_SUCCESS, " +
+                    "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.UPLOAD_FAILED, " +
                     "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.SHARE_FOLDER_ADD_FILE, " +
                     "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.SHARE_FOLDER_ADD_USER, " +
                     "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.SHARE_FOLDER_ADD_COMMENT" +
@@ -72,12 +72,12 @@ public interface NotificationJpaRepository extends JpaRepository<NotificationEnt
             "CASE " +
                 "WHEN n.type IN (" +
                     "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.NOTICE, " +
-                    "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.UPLOAD_SUCCESS, " +
-                    "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.UPLOAD_FAILED, " +
                     "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.INQUIRY" +
                 ") THEN NULL " +
                 "WHEN n.type IN (" +
                     "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.SHARE_FOLDER_INVITE, " +
+                    "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.UPLOAD_SUCCESS, " +
+                    "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.UPLOAD_FAILED, " +
                     "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.SHARE_FOLDER_ADD_FILE, " +
                     "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.SHARE_FOLDER_ADD_USER, " +
                     "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.SHARE_FOLDER_ADD_COMMENT" +
