@@ -11,6 +11,7 @@ import org.y2k2.globa.application.common.mapper.MapCreatedTime;
 import org.y2k2.globa.application.notification.dto.common.*;
 import org.y2k2.globa.infrastructure.persistence.notification.entity.NotificationEntity;
 import org.y2k2.globa.infrastructure.persistence.notification.projection.NotificationProjection;
+import org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType;
 
 @Mapper(uses = CustomTimestampMapper.class)
 public interface NotificationMapper {
@@ -128,6 +129,10 @@ public interface NotificationMapper {
                         || entity.getInquiry().getTitle() == null
         ) {
             entity.setInquiry(null);
+        }
+
+        if (entity.getType() != null) {
+            entity.setType(String.valueOf(NotificationType.fromValue(entity.getType())));
         }
 
         return entity;

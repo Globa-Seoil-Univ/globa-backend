@@ -23,4 +23,13 @@ public enum NotificationType {
     public String toStringType() {
         return String.valueOf(typeId);
     }
+
+    public static char fromValue(String value) {
+        for (NotificationType type : NotificationType.values()) {
+            if (type.name().equals(value)) {
+                return type.typeId;
+            }
+        }
+        throw new IllegalArgumentException("Invalid NotificationType value: " + value);
+    }
 }
