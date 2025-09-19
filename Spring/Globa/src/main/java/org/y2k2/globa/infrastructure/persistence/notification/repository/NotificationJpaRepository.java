@@ -56,10 +56,10 @@ public interface NotificationJpaRepository extends JpaRepository<NotificationEnt
             "c.content AS commentContent, " +
             "i.title AS inquiryTitle, " +
             "CASE " +
-                "WHEN n.type = org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.INQUIRY " +
-                    "THEN NULL " +
-                "WHEN n.type = org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.NOTICE " +
-                "THEN  no.thumbnailPath " +
+                "WHEN n.type IN (" +
+                    "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.INQUIRY, " +
+                    "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.NOTICE" +
+                ") THEN NULL " +
                 "WHEN n.type IN (" +
                     "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.SHARE_FOLDER_INVITE, " +
                     "org.y2k2.globa.infrastructure.persistence.notification.type.NotificationType.UPLOAD_SUCCESS, " +
