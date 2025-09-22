@@ -14,8 +14,6 @@ import java.util.Collections;
 @Getter
 public class CustomUserDetails implements UserDetails {
     private final Long userId;
-    private final String name;
-    private final String fcmToken;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -29,7 +27,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.getName();
+        return null;
     }
 
     @Override

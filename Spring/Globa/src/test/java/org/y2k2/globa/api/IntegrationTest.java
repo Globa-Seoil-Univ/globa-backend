@@ -7,7 +7,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.y2k2.globa.application.common.dto.auth.CustomUserDetails;
@@ -22,9 +21,7 @@ public class IntegrationTest {
     public void setSecurityContext(UserEntity user) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         CustomUserDetails userDetails = new CustomUserDetails(
-                user.getUserId(),
-                user.getName(),
-                user.getNotificationToken()
+                user.getUserId()
         );
         Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 

@@ -14,9 +14,7 @@ public class WithAccountSecurityContextFactory implements WithSecurityContextFac
         SecurityContext context = SecurityContextHolder.createEmptyContext();
 
         CustomUserDetails customUser = new CustomUserDetails(
-                1L,
-                "TEST_USER_NAME",
-                "TEST_FCM_TOKEN"
+                1L
         );
 
         Authentication auth = new UsernamePasswordAuthenticationToken(
