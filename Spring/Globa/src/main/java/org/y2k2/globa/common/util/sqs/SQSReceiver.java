@@ -91,7 +91,10 @@ public class SQSReceiver {
         log.info("SQS queue URL initialized = {}, {}", receiveQueueUrl, dlqQueueUrl);
     }
 
-    @SqsListener("${spring.cloud.aws.sqs.receive-queue-name}")
+    @SqsListener(
+            value = "${spring.cloud.aws.sqs.receive-queue-name}",
+            pollTimeoutSeconds = "20"
+    )
     public void receiveMessage(
             Message message
     ) {
@@ -161,7 +164,10 @@ public class SQSReceiver {
         }
     }
 
-    @SqsListener("${spring.cloud.aws.sqs.dlq-queue-name}")
+    @SqsListener(
+            value = "${spring.cloud.aws.sqs.dlq-queue-name}",
+            pollTimeoutSeconds = "20"
+    )
     public void handleDLQ(
             Message message
     ) {

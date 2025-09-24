@@ -38,8 +38,8 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .servers(
                         java.util.Arrays.asList(
-                                new Server().url("http://localhost:8080").description("Local server"),
-                                new Server().url("https://globa.duckdns.org/").description("Production server")
+                                new Server().url("https://globa.seungyong.co.kr").description("Production server"),
+                                new Server().url("http://localhost:8080").description("Local server")
                         )
                 )
                 .info(apiInfo())
