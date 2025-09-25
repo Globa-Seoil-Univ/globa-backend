@@ -16,6 +16,7 @@ from analyze.stt import stt
 from exception.NotFoundException import NotFoundException
 from model.orm import AppUser, Record, FolderShare
 from util.database import SessionMaker
+from util.loadJSON import load_corrected_results_from_json
 from util.log import Logger
 from util.gpt import *
 
@@ -98,44 +99,47 @@ class Consumer:
 
         self.visibility_manager.start_monitoring()
 
+        last_poll_time = datetime.now()
+        poll_interval = 20
+
         try:
             while True:
-                response = self.sqs.receive_message(
-                    QueueUrl=queue_url,
-                    MaxNumberOfMessages=10, # 한 번에 받는 최대 수
-                    MessageAttributeNames=['All'], # 속성명 종류
-                    WaitTimeSeconds=20, # Long Polling 타임임
-                    AttributeNames=['All'],
+                current_time = datetime.now()
 
-                )
+                # 20초 검사하기
+                time_since_last_poll = (current_time - last_poll_time).total_seconds()
 
-                messages = response.get('Messages', [])
+                if time_since_last_poll >= poll_interval:
+                    response = self.sqs.receive_message(
+                        QueueUrl=queue_url,
+                        MaxNumberOfMessages=10,
+                        MessageAttributeNames=['All'],
+                        WaitTimeSeconds=20,  # Long Polling으로 된거 같긴 한데, WHILE문 안에 있어서 패킷 잡아먹는 듯 함.
+                        AttributeNames=['All'],
+                    )
 
-                # 메시지가 있을 때만 executor 사용
-                if messages:
-                    executor = self.get_executor()
+                    last_poll_time = datetime.now()
 
-                    for message in messages:
-                        # 메시지 처리 시작할 떄, VisibilityTimeout 모니터링 등록하기.
-                        receipt_handle = message['ReceiptHandle']
-                        self.visibility_manager.register_message(receipt_handle
-                                                                 )
-                        executor.submit(self.process_sqs_message, message)
+                    messages = response.get('Messages', [])
+
+                    if messages:
+                        self.logger.info(f"받은 메시지 수: {len(messages)}")
+                        executor = self.get_executor()
+
+                        for message in messages :
+                            receipt_handle = message['ReceiptHandle']
+                            self.visibility_manager.register_message(receipt_handle)
+                            executor.submit(self.process_sqs_message, message)
+
+                    self._cleanup_executor_if_needed()
+
                 else:
-                    current_time = time.time()
-                    with self.executor_lock:
-                        if (self.executor and
-                                current_time - self.last_activity_time > self.thread_timeout and
-                                len([f for f in self.executor._threads if f.is_alive()]) == 0):
-                            self.logger.info("장시간 작업 없음 :: 쓰레드 풀 정리")
-                            self.executor.shutdown(wait=False)
-                            self.executor = None
+                    time.sleep(1)
+                    self._cleanup_executor_if_needed()
 
-                    # CPU 사용률 감소를 위한 짧은 대기
-                    time.sleep(0.1)
         except Exception as e:
-            self.logger.error("Failed to JSON : {0}".format(e))
-            self.send_sqs_failure_message(record_id=0,user_id=0,message=str(e))
+            self.logger.error("Failed to process SQS: {0}".format(e))
+            self.send_sqs_failure_message(record_id=0, user_id=0, message=str(e))
         finally:
             # 모니터링 하는거 정리
             self.visibility_manager.stop_monitoring()
@@ -143,6 +147,16 @@ class Consumer:
             # 종료 시 쓰레드 풀이 있으면 정리
             if self.executor:
                 self.executor.shutdown(wait=True)
+
+    def _cleanup_executor_if_needed(self):
+        current_time = time.time()
+        with self.executor_lock:
+            if (self.executor and
+                    current_time - self.last_activity_time > self.thread_timeout and
+                    len([f for f in self.executor._threads if f.is_alive()]) == 0):
+                self.logger.info("장시간 작업 없음 :: 쓰레드 풀 정리")
+                self.executor.shutdown(wait=False)
+                self.executor = None
 
     def process_sqs_message(self, message):
         receipt_handle = message['ReceiptHandle']
@@ -247,7 +261,7 @@ class Consumer:
                 # STT 처리
                 processing_status["stt"] = "IN_PROGRESS"
                 stt_results = stt(record.path, lan)
-
+                # stt_results = load_corrected_results_from_json("./output/corrected_stt_20250914_145727.json")
                 processing_status["stt"] = "SUCCESS"
 
                 # 각 단계별 처리
