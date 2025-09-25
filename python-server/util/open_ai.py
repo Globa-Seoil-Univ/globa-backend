@@ -303,6 +303,8 @@ class OpenAIUtil:
 
         prev_str = ""
 
+        section_list = [] # 청크 처리 루프 밖으로 이동 0923
+
         for i, current_str in enumerate(text_chunks):
             self.logger.info(f"청크 {i + 1}/{len(text_chunks)} 처리 중 (길이: {len(current_str)}자)")
 
@@ -354,6 +356,7 @@ class OpenAIUtil:
 
             self.logger.info(f"섹션 분리 완료 - 청크 {i + 1}")
 
+
             # completion 결과 저장
             completion_data = {
                 "content": completion.choices[0].message.content,
@@ -362,101 +365,45 @@ class OpenAIUtil:
             }
             all_completions.append(completion_data)
 
-            # 모든 completion 결과를 JSON 파일로 저장
             with open(str(record_id) + ".json", "w", encoding="utf-8") as f:
                 json.dump(all_completions, f, ensure_ascii=False, indent=2)
 
-            # ✅ 수정: 모든 completion을 안전하게 처리
-            section_list = []
-            for i, completion in enumerate(all_completions):
-                try:
-                    completion_json = None
+            # 🎯 수정: 현재 completion만 처리 (completion_data 또는 completion 객체)
+            try:
+                completion_json = None
 
-                    # ✅ 딕셔너리 형태에서 function_call이 문자열인 경우 처리
-                    if isinstance(completion, dict):
-                        if 'function_call' in completion and completion['function_call']:
-                            # function_call이 문자열인 경우 JSON 파싱
-                            if isinstance(completion['function_call'], str):
-                                self.logger.info(f"문자열 function_call 발견: {completion['function_call']}")
-                                completion_json = json.loads(completion['function_call'])
-                            # function_call이 딕셔너리인 경우
-                            elif isinstance(completion['function_call'], dict):
-                                if 'arguments' in completion['function_call']:
-                                    completion_json = json.loads(completion['function_call']['arguments'])
+                # completion 객체에서 직접 처리 (더 안전함)
+                if hasattr(completion.choices[0].message, 'function_call') and completion.choices[
+                    0].message.function_call:
+                    completion_json = json.loads(completion.choices[0].message.function_call.arguments)
 
-                        # choices 구조 확인
-                        elif 'choices' in completion and completion['choices']:
-                            message = completion['choices'][0]['message']
+                # 또는 completion_data에서 처리
+                elif completion_data['function_call']:
+                    completion_json = json.loads(completion_data['function_call'])
 
-                            # tool_calls 방식
-                            if 'tool_calls' in message and message['tool_calls']:
-                                for tool_call in message['tool_calls']:
-                                    if 'function' in tool_call and 'arguments' in tool_call['function']:
-                                        completion_json = json.loads(tool_call['function']['arguments'])
-                                        break
+                # JSON 파싱 성공시 섹션 처리
+                if completion_json and 'sections' in completion_json:
+                    sections_data = completion_json['sections']
+                    self.logger.info(f"청크 {i + 1}에서 발견된 섹션 개수: {len(sections_data)}")
 
-                            # function_call 방식
-                            elif 'function_call' in message and message['function_call']:
-                                if isinstance(message['function_call'], str):
-                                    completion_json = json.loads(message['function_call'])
-                                elif 'arguments' in message['function_call']:
-                                    completion_json = json.loads(message['function_call']['arguments'])
+                    for j, section in enumerate(sections_data):
+                        if section and all(key in section for key in ['subject', 'start', 'end']):
+                            try:
+                                section_entity = Section(
+                                    record_id=record_id,
+                                    title=section['subject'],
+                                    start_time=float(section['start']),
+                                    end_time=float(section['end'])
+                                )
+                                section_list.append(section_entity)  # 여기서 추가!
+                                self.logger.info(f"✅ 섹션 추가: '{section['subject']}'")
+                            except (ValueError, TypeError) as e:
+                                self.logger.warning(f"❌ 섹션 생성 오류: {e}")
 
-                    # OpenAI SDK 객체 형태 처리
-                    elif hasattr(completion, 'choices') and completion.choices:
-                        message = completion.choices[0].message
-
-                        if hasattr(message, 'tool_calls') and message.tool_calls:
-                            for tool_call in message.tool_calls:
-                                if tool_call.function and tool_call.function.arguments:
-                                    completion_json = json.loads(tool_call.function.arguments)
-                                    break
-
-                        elif hasattr(message, 'function_call') and message.function_call:
-                            if hasattr(message.function_call, 'arguments'):
-                                completion_json = json.loads(message.function_call.arguments)
-
-                    # ✅ 파싱된 JSON 내용 확인 및 섹션 처리
-                    if completion_json:
-                        self.logger.info(f"파싱된 JSON: {completion_json}")
-
-                        if 'sections' in completion_json:
-                            sections_data = completion_json['sections']
-                            self.logger.info(f"발견된 섹션 개수: {len(sections_data)}")
-
-                            for j, section in enumerate(sections_data):
-                                self.logger.info(f"처리 중인 섹션 {j + 1}: {section}")
-
-                                if section and all(key in section for key in ['subject', 'start', 'end']):
-                                    try:
-                                        section_entity = Section(
-                                            record_id=record_id,
-                                            title=section['subject'],
-                                            start_time=float(section['start']),
-                                            end_time=float(section['end'])
-                                        )
-                                        section_list.append(section_entity)
-                                        self.logger.info(
-                                            f"✅ 섹션 생성 성공: '{section['subject']}' ({section['start']}s - {section['end']}s)")
-                                    except (ValueError, TypeError) as e:
-                                        self.logger.warning(f"❌ 섹션 생성 오류: {e}")
-                                        continue
-                                else:
-                                    self.logger.warning(f"❌ 섹션 필수 키 누락: {section}")
-                        else:
-                            self.logger.warning("❌ 'sections' 키가 completion_json에 없습니다")
-                    else:
-                        self.logger.warning(f"❌ Completion {i + 1}에서 JSON 파싱 실패")
-
-                except json.JSONDecodeError as e:
-                    self.logger.warning(f"❌ JSON 파싱 오류 (completion {i + 1}): {e}")
-                    continue
-                except Exception as e:
-                    self.logger.error(f"❌ Completion 처리 오류 (completion {i + 1}): {e}")
-                    continue
-
-            self.logger.info(f"🎉 총 {len(section_list)}개 섹션 처리 완료")
-            return section_list
+            except json.JSONDecodeError as e:
+                self.logger.warning(f"❌ 청크 {i + 1} JSON 파싱 오류: {e}")
+            except Exception as e:
+                self.logger.error(f"❌ 청크 {i + 1} 처리 오류: {e}")
 
             prev_str = current_str
 

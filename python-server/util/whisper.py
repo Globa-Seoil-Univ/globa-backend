@@ -677,7 +677,7 @@ class WhisperManager:
                 "min_silence_duration_ms": 400,
                 "threshold": 0.45,
                 "speech_pad_ms": 200
-            }
+            },compression_ratio_threshold=2.0
         )
 
         # 기준 결과를 STTResults 객체로 변환
