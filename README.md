@@ -82,3 +82,10 @@
 
 ## 아키텍쳐
 
+<img width="1214" height="750" alt="image" src="https://github.com/user-attachments/assets/d999e43c-c8ca-4bee-94f0-d4abec64fa00" />
+<br />
+
+## 프로젝트 구조 (Spring)
+
+
+
