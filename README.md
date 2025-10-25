@@ -87,5 +87,136 @@
 
 ## 프로젝트 구조 (Spring)
 
+```text
+├─api
+├─application
+│  ├─comment
+│  │  ├─command
+│  │  ├─dto
+│  │  │  ├─common
+│  │  │  ├─request
+│  │  │  └─response
+│  │  ├─mapper
+│  │  ├─service
+│  │  └─usecase
+│  ├─analysis
+│  ├─answer
+│  ├─dictionary
+│  ├─dummyimage
+│  ├─folder
+│  ├─folderrole
+│  ├─foldershare
+│  ├─hightlight
+│  ├─inquiry
+│  ├─keyword
+│  ├─notice
+│  ├─noticeimage
+│  ├─notification
+│  ├─notificationread
+│  ├─quiz
+│  ├─quizattemp
+│  ├─record
+│  ├─section
+│  ├─sqs
+│  ├─study
+│  ├─summary
+│  ├─survey
+│  ├─user
+│  └─userrole
+├─common
+│  ├─annotation
+│  ├─aspect
+│  ├─config
+│  ├─event
+│  ├─exception
+│  ├─filter
+│  ├─scheduler
+│  ├─type
+│  ├─usecase
+│  ├─util
+│  └─validation
+├─domain
+│  ├─comment
+│  │  └─repository
+│  ├─analysis
+│  ├─answer
+│  ├─dictionary
+│  ├─dlq
+│  ├─dummyimage
+│  ├─folder
+│  ├─folderrole
+│  ├─foldershare
+│  ├─highlight
+│  ├─inquiry
+│  ├─keyword
+│  ├─notice
+│  ├─noticeimage
+│  ├─notification
+│  ├─notificationread
+│  ├─quiz
+│  ├─quizattemp
+│  ├─record
+│  ├─role
+│  ├─section
+│  ├─study
+│  ├─summary
+│  ├─survey
+│  ├─user
+│  └─userrole
+├─infrastructure
+│   └─persistence
+│       ├─comment
+│       │  ├─entity
+│       │  ├─projection
+│       │  └─repository
+│       ├─analysis
+│       ├─answer
+│       ├─dictionary
+│       ├─dlq
+│       ├─dummyimage
+│       ├─folder
+│       ├─folderrole
+│       ├─foldershare
+│       ├─highlight
+│       ├─inquiry
+│       ├─keyword
+│       ├─notice
+│       ├─noticeimage
+│       ├─notification
+│       ├─notificationread
+│       ├─quiz
+│       ├─quizattemp
+│       ├─record
+│       ├─role
+│       ├─section
+│       ├─study
+│       ├─summary
+│       ├─survey
+│       ├─user
+│       └─userrole
+├─Dockerfile
+└─build.gradle
+```
+<br />
 
+## 프로젝트 구조 (Python)
 
+```text
+├─analyze
+├─downloads
+├─exception
+├─log
+├─mode
+├─util
+├─Dockerfile
+├─consumer.py
+├─keyword.json
+├─main.py
+├─producer.py
+├─requirements.txt
+└─resource.txt
+```
+
+<br />
+
+## 기능 소개
