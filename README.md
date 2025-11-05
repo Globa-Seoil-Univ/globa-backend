@@ -12,7 +12,6 @@
 - [아키텍쳐](#아키텍쳐)
 - [프로젝트 구조 (Spring)](#프로젝트-구조-spring)
 - [프로젝트 구조 (Python)](#프로젝트-구조-python)
-- [기능 소개](#기능-소개)
 - [Demo 영상](#Demo-영상)
 <br />
 
@@ -219,4 +218,9 @@
 
 <br />
 
-## 기능 소개
+## Demo 영상
+<div align=center>
+  
+[![Globa Demo Video](https://img.youtube.com/vi/NHepQN2UuM8/0.jpg)](https://youtu.be/NHepQN2UuM8)
+
+</div>
